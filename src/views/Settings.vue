@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div class="space-y-6">
     <!-- Sezioni delle impostazioni -->
@@ -53,33 +54,41 @@
                   <label class="label">
                     <span class="label-text font-medium">Nome Azienda</span>
                   </label>
-                  <input type="text" class="input input-bordered" v-model="companySettings.name">
+                  <input type="text" class="input input-bordered" v-model="companySettings.name" />
                 </div>
                 <div class="form-control">
                   <label class="label">
                     <span class="label-text font-medium">Codice Fiscale</span>
                   </label>
-                  <input type="text" class="input input-bordered" v-model="companySettings.fiscalCode">
+                  <input
+                    type="text"
+                    class="input input-bordered"
+                    v-model="companySettings.fiscalCode"
+                  />
                 </div>
               </div>
               <div class="form-control">
                 <label class="label">
                   <span class="label-text font-medium">Indirizzo</span>
                 </label>
-                <input type="text" class="input input-bordered" v-model="companySettings.address">
+                <input type="text" class="input input-bordered" v-model="companySettings.address" />
               </div>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="form-control">
                   <label class="label">
                     <span class="label-text font-medium">Email</span>
                   </label>
-                  <input type="email" class="input input-bordered" v-model="companySettings.email">
+                  <input
+                    type="email"
+                    class="input input-bordered"
+                    v-model="companySettings.email"
+                  />
                 </div>
                 <div class="form-control">
                   <label class="label">
                     <span class="label-text font-medium">Telefono</span>
                   </label>
-                  <input type="tel" class="input input-bordered" v-model="companySettings.phone">
+                  <input type="tel" class="input input-bordered" v-model="companySettings.phone" />
                 </div>
               </div>
             </div>
@@ -93,19 +102,31 @@
             <div class="space-y-4">
               <div class="form-control">
                 <label class="label cursor-pointer justify-start">
-                  <input type="checkbox" class="toggle toggle-success mr-4" v-model="systemSettings.emailNotifications" />
+                  <input
+                    type="checkbox"
+                    class="toggle toggle-success mr-4"
+                    v-model="systemSettings.emailNotifications"
+                  />
                   <div>
                     <span class="label-text font-medium">Notifiche Email</span>
-                    <p class="text-xs text-base-content/60">Ricevi notifiche via email per eventi importanti</p>
+                    <p class="text-xs text-base-content/60">
+                      Ricevi notifiche via email per eventi importanti
+                    </p>
                   </div>
                 </label>
               </div>
               <div class="form-control">
                 <label class="label cursor-pointer justify-start">
-                  <input type="checkbox" class="toggle toggle-warning mr-4" v-model="systemSettings.autoBackup" />
+                  <input
+                    type="checkbox"
+                    class="toggle toggle-warning mr-4"
+                    v-model="systemSettings.autoBackup"
+                  />
                   <div>
                     <span class="label-text font-medium">Backup Automatico</span>
-                    <p class="text-xs text-base-content/60">Esegui backup automatico dei dati ogni settimana</p>
+                    <p class="text-xs text-base-content/60">
+                      Esegui backup automatico dei dati ogni settimana
+                    </p>
                   </div>
                 </label>
               </div>
@@ -129,7 +150,9 @@
     <!-- Sezione in costruzione -->
     <div class="card bg-base-100 shadow-sm">
       <div class="card-body text-center py-12">
-        <div class="bg-base-200 rounded-full p-6 mx-auto mb-4 w-24 h-24 flex items-center justify-center">
+        <div
+          class="bg-base-200 rounded-full p-6 mx-auto mb-4 w-24 h-24 flex items-center justify-center"
+        >
           <i class="fas fa-cogs text-base-content/40 text-4xl"></i>
         </div>
         <h3 class="text-2xl font-bold text-base-content mb-2">Impostazioni Avanzate</h3>
@@ -159,20 +182,12 @@ const companySettings = ref({
   fiscalCode: '12345678901',
   address: 'Via Roma 123, Milano',
   email: 'info@hrcompany.com',
-  phone: '+39 02 1234567'
+  phone: '+39 02 1234567',
 })
 
 const systemSettings = ref({
   emailNotifications: true,
   autoBackup: false,
-  language: 'it'
+  language: 'it',
 })
-
-const saveSettings = () => {
-  console.log('Saving settings...')
-}
-
-const resetSettings = () => {
-  console.log('Resetting settings...')
-}
 </script>

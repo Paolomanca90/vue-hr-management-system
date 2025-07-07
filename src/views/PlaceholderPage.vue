@@ -20,12 +20,14 @@
     <!-- Content -->
     <div class="card bg-base-100 shadow-sm">
       <div class="card-body text-center py-12">
-        <div class="bg-base-200 rounded-full p-6 mx-auto mb-4 w-24 h-24 flex items-center justify-center">
+        <div
+          class="bg-base-200 rounded-full p-6 mx-auto mb-4 w-24 h-24 flex items-center justify-center"
+        >
           <i :class="pageIcon + ' text-base-content/40 text-4xl'"></i>
         </div>
         <h3 class="text-2xl font-bold text-base-content mb-2">{{ pageTitle }}</h3>
         <p class="text-base-content/70 mb-6">Questa sezione è in fase di sviluppo</p>
-        
+
         <div class="alert alert-info max-w-md mx-auto">
           <i class="fas fa-info-circle"></i>
           <div>
@@ -50,20 +52,24 @@
     </div>
 
     <!-- Related Actions -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" v-if="relatedActions.length > 0">
-      <div 
-        v-for="action in relatedActions" 
+    <div
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      v-if="relatedActions.length > 0"
+    >
+      <div
+        v-for="action in relatedActions"
         :key="action.title"
-        class="card bg-base-100 shadow-sm hover:shadow-lg transition-all duration-200">
+        class="card bg-base-100 shadow-sm hover:shadow-lg transition-all duration-200"
+      >
         <div class="card-body text-center">
-          <div :class="`bg-${action.color}-100 dark:bg-${action.color}-900/20 rounded-full p-4 mx-auto mb-4 w-16 h-16 flex items-center justify-center`">
+          <div
+            :class="`bg-${action.color}-100 dark:bg-${action.color}-900/20 rounded-full p-4 mx-auto mb-4 w-16 h-16 flex items-center justify-center`"
+          >
             <i :class="`${action.icon} text-${action.color}-600 text-2xl`"></i>
           </div>
           <h3 class="text-lg font-semibold text-base-content mb-2">{{ action.title }}</h3>
           <p class="text-base-content/70 text-sm mb-4">{{ action.description }}</p>
-          <RouterLink 
-            :to="action.route"
-            :class="`btn btn-outline btn-${action.color}`">
+          <RouterLink :to="action.route" :class="`btn btn-outline btn-${action.color}`">
             {{ action.buttonText }}
           </RouterLink>
         </div>
@@ -73,9 +79,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useMenuStore, type MenuItem } from '@/stores/menu'
 
 interface RelatedAction {
   title: string
@@ -89,6 +96,7 @@ interface RelatedAction {
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const menuStore = useMenuStore()
 
 const pageTitle = ref('')
 const pageDescription = ref('')
@@ -96,98 +104,103 @@ const pageIcon = ref('fas fa-cog')
 const plannedFeatures = ref<string[]>([])
 const relatedActions = ref<RelatedAction[]>([])
 
+// Funzione ricorsiva per cercare un menu item nel menu
+const findMenuItemByRoute = (menuItems: MenuItem[], targetRoute: string): MenuItem | null => {
+  for (const item of menuItems) {
+    // Controlla se la route corrisponde
+    if (item.route === targetRoute) {
+      return item
+    }
+
+    // Cerca ricorsivamente nei children
+    if (item.children && item.children.length > 0) {
+      const found = findMenuItemByRoute(item.children, targetRoute)
+      if (found) return found
+    }
+  }
+  return null
+}
+
+// Funzione per generare funzionalità automaticamente basandosi sul titolo
+const generateFeaturesFromTitle = (title: string): string[] => {
+  const lowerTitle = title.toLowerCase()
+
+  // Funzionalità specifiche basate su parole chiave
+  if (lowerTitle.includes('archiv')) {
+    return [
+      'Visualizzazione storico completo',
+      'Filtri avanzati per periodo',
+      'Esportazione dati',
+      'Statistiche e report',
+    ]
+  }
+
+  if (lowerTitle.includes('tabelle')) {
+    return [
+      'Configurazione tabelle',
+      'Gestione parametri',
+      'Import/Export dati',
+      'Validazione automatica',
+    ]
+  }
+
+  if (lowerTitle.includes('dipendenti') || lowerTitle.includes('employee')) {
+    return [
+      'Gestione anagrafica',
+      'Assegnazione ruoli',
+      'Storico modifiche',
+      'Report personalizzati',
+    ]
+  }
+
+  if (lowerTitle.includes('presenze') || lowerTitle.includes('timbrature')) {
+    return [
+      'Registrazione presenze',
+      'Calcolo ore lavorate',
+      'Gestione straordinari',
+      'Report di presenza',
+    ]
+  }
+
+  if (lowerTitle.includes('ferie') || lowerTitle.includes('assenze')) {
+    return ['Richiesta online', 'Approvazione workflow', 'Calendario ferie', 'Bilancio ore']
+  }
+
+  if (lowerTitle.includes('mensa') || lowerTitle.includes('ticket')) {
+    return ['Gestione buoni pasto', 'Menu del giorno', 'Prenotazioni', 'Report consumi']
+  }
+
+  // Funzionalità generiche
+  return [
+    `Configurazione ${title.toLowerCase()}`,
+    'Gestione dati e impostazioni',
+    'Report e statistiche',
+    'Esportazione informazioni',
+  ]
+}
+
 const setupPageContent = () => {
   const isCompanyUser = authStore.isCompanyUser
-  
-  switch (pageTitle.value) {
-    case 'Archivi Presenze':
-      pageIcon.value = 'fas fa-archive'
-      pageDescription.value = 'Gestione archivi delle presenze dipendenti'
-      plannedFeatures.value = [
-        'Visualizzazione storico presenze',
-        'Filtri avanzati per periodo e dipendente',
-        'Esportazione dati in Excel',
-        'Grafici di riepilogo'
-      ]
-      break
-      
-    case 'Tabelle Mensa':
-      pageIcon.value = 'fas fa-utensils'
-      pageDescription.value = 'Configurazione tabelle per la gestione mensa'
-      plannedFeatures.value = [
-        'Gestione menu giornalieri',
-        'Configurazione prezzi',
-        'Gestione allergeni',
-        'Prenotazioni pasti'
-      ]
-      break
-      
-    case 'Gestione Ticket':
-      pageIcon.value = 'fas fa-ticket-alt'
-      pageDescription.value = 'Sistema di gestione ticket e buoni pasto'
-      plannedFeatures.value = [
-        'Emissione buoni pasto',
-        'Tracciamento utilizzo',
-        'Report mensili',
-        'Integrazione con fornitori'
-      ]
-      break
 
-    case 'Le Mie Timbrature':
-      pageIcon.value = 'fas fa-clock'
-      pageDescription.value = 'Visualizza le tue timbrature e presenze'
-      plannedFeatures.value = [
-        'Storico timbrature',
-        'Calcolo ore lavorate',
-        'Richiesta correzioni',
-        'Export mensile'
-      ]
-      break
+  // Recupera il titolo dalla route
+  pageTitle.value = (route.meta.title as string) || 'Pagina in Sviluppo'
 
-    case 'Richiesta Ferie':
-      pageIcon.value = 'fas fa-calendar-plus'
-      pageDescription.value = 'Richiedi giorni di ferie e permessi'
-      plannedFeatures.value = [
-        'Calendario ferie disponibili',
-        'Richiesta online',
-        'Stato approvazioni',
-        'Storico ferie'
-      ]
-      break
+  // Cerca nel menu per recuperare l'icona
+  const currentRoute = route.path
+  const menuItem = findMenuItemByRoute(menuStore.menuItems, currentRoute)
 
-    case 'La Mia Busta Paga':
-      pageIcon.value = 'fas fa-file-invoice'
-      pageDescription.value = 'Visualizza e scarica le tue buste paga'
-      plannedFeatures.value = [
-        'Download PDF buste paga',
-        'Storico pagamenti',
-        'Dettaglio voci',
-        'Certificazioni'
-      ]
-      break
-
-    case 'Gestione Ticket Mensa':
-      pageIcon.value = 'fas fa-utensils'
-      pageDescription.value = 'Gestisci i tuoi ticket mensa'
-      plannedFeatures.value = [
-        'Saldo ticket disponibili',
-        'Storico utilizzi',
-        'Prenotazione pasti',
-        'Menu del giorno'
-      ]
-      break
-      
-    default:
-      pageIcon.value = 'fas fa-cog'
-      pageDescription.value = 'Funzionalità in fase di sviluppo'
-      plannedFeatures.value = [
-        'Interfaccia utente intuitiva',
-        'Funzionalità complete',
-        'Integrazione con il sistema',
-        'Report e statistiche'
-      ]
-      break
+  if (menuItem) {
+    // Usa l'icona del menu
+    pageIcon.value = menuItem.icon
+    pageDescription.value = `Gestione ${menuItem.label.toLowerCase()}`
+  } else {
+    // Fallback: genera automaticamente
+    pageIcon.value = 'fas fa-cog'
+    pageDescription.value = `Gestione ${pageTitle.value.toLowerCase()}`
   }
+
+  // Genera le funzionalità automaticamente
+  plannedFeatures.value = generateFeaturesFromTitle(pageTitle.value)
 
   setupRelatedActions(isCompanyUser)
 }
@@ -201,7 +214,7 @@ const setupRelatedActions = (isCompanyUser: boolean) => {
         icon: 'fas fa-users',
         color: 'blue',
         route: '/app/employees',
-        buttonText: 'Vai ai Dipendenti'
+        buttonText: 'Vai ai Dipendenti',
       },
       {
         title: 'Report',
@@ -209,7 +222,7 @@ const setupRelatedActions = (isCompanyUser: boolean) => {
         icon: 'fas fa-chart-bar',
         color: 'green',
         route: '/app/reports',
-        buttonText: 'Vai ai Report'
+        buttonText: 'Vai ai Report',
       },
       {
         title: 'Impostazioni',
@@ -217,8 +230,8 @@ const setupRelatedActions = (isCompanyUser: boolean) => {
         icon: 'fas fa-cog',
         color: 'yellow',
         route: '/app/settings',
-        buttonText: 'Vai alle Impostazioni'
-      }
+        buttonText: 'Vai alle Impostazioni',
+      },
     ]
   } else {
     relatedActions.value = [
@@ -228,7 +241,7 @@ const setupRelatedActions = (isCompanyUser: boolean) => {
         icon: 'fas fa-clock',
         color: 'blue',
         route: '/app/timecards',
-        buttonText: 'Vedi Timbrature'
+        buttonText: 'Vedi Timbrature',
       },
       {
         title: 'Richiesta Ferie',
@@ -236,8 +249,8 @@ const setupRelatedActions = (isCompanyUser: boolean) => {
         icon: 'fas fa-calendar-plus',
         color: 'green',
         route: '/app/leaves/request',
-        buttonText: 'Richiedi Ferie'
-      }
+        buttonText: 'Richiedi Ferie',
+      },
     ]
   }
 }
@@ -246,8 +259,17 @@ const goBack = () => {
   router.back()
 }
 
+// Watch per reagire ai cambiamenti di route
+watch(
+  () => route.path,
+  () => {
+    setupPageContent()
+  },
+  { immediate: true },
+)
+
+// Setup iniziale
 onMounted(() => {
-  pageTitle.value = (route.meta.title as string) || 'Pagina in Sviluppo'
   setupPageContent()
 })
 </script>

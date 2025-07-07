@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div class="space-y-6">
     <!-- Header -->
@@ -84,7 +85,9 @@
     <!-- Sezione in costruzione -->
     <div class="card bg-base-100 shadow-sm">
       <div class="card-body text-center py-12">
-        <div class="bg-base-200 rounded-full p-6 mx-auto mb-4 w-24 h-24 flex items-center justify-center">
+        <div
+          class="bg-base-200 rounded-full p-6 mx-auto mb-4 w-24 h-24 flex items-center justify-center"
+        >
           <i class="fas fa-money-check-alt text-base-content/40 text-4xl"></i>
         </div>
         <h3 class="text-2xl font-bold text-base-content mb-2">Sistema Payroll Avanzato</h3>
