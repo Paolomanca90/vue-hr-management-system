@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import router from '@/router'
@@ -29,7 +30,7 @@ export const useAuthStore = defineStore('auth', () => {
       domain: 'company',
       role: 'admin',
       company: 'Company Srl',
-      permissions: ['all']
+      permissions: ['all'],
     },
     'manager.azienda': {
       id: '2',
@@ -37,7 +38,7 @@ export const useAuthStore = defineStore('auth', () => {
       domain: 'azienda',
       role: 'company',
       company: 'Azienda SpA',
-      permissions: ['company_management', 'employee_management', 'reports']
+      permissions: ['company_management', 'employee_management', 'reports'],
     },
     'employee.worker': {
       id: '3',
@@ -45,8 +46,8 @@ export const useAuthStore = defineStore('auth', () => {
       domain: 'worker',
       role: 'employee',
       company: 'Worker Corp',
-      permissions: ['basic_access']
-    }
+      permissions: ['basic_access'],
+    },
   }
 
   // Computed
@@ -58,9 +59,11 @@ export const useAuthStore = defineStore('auth', () => {
   const isRegularUser = computed(() => currentUser.value?.role === 'employee')
 
   // Actions
-  const login = async (credentials: LoginCredentials): Promise<{ success: boolean; user?: User; error?: string }> => {
+  const login = async (
+    credentials: LoginCredentials,
+  ): Promise<{ success: boolean; user?: User; error?: string }> => {
     loading.value = true
-    
+
     return new Promise((resolve) => {
       setTimeout(() => {
         const userKey = `${credentials.username}.${credentials.domain}`
@@ -73,9 +76,9 @@ export const useAuthStore = defineStore('auth', () => {
           resolve({ success: true, user })
         } else {
           loading.value = false
-          resolve({ 
-            success: false, 
-            error: 'Credenziali non valide. Prova: admin/company, manager/azienda, employee/worker'
+          resolve({
+            success: false,
+            error: 'Credenziali non valide. Prova: admin/company, manager/azienda, employee/worker',
           })
         }
       }, 1000)
@@ -101,8 +104,10 @@ export const useAuthStore = defineStore('auth', () => {
 
   const hasPermission = (permission: string): boolean => {
     if (!currentUser.value?.permissions) return false
-    return currentUser.value.permissions.includes('all') || 
-           currentUser.value.permissions.includes(permission)
+    return (
+      currentUser.value.permissions.includes('all') ||
+      currentUser.value.permissions.includes(permission)
+    )
   }
 
   // Initialize on store creation
@@ -116,6 +121,6 @@ export const useAuthStore = defineStore('auth', () => {
     isRegularUser,
     login,
     logout,
-    hasPermission
+    hasPermission,
   }
 })
