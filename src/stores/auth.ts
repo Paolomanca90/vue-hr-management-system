@@ -6,13 +6,16 @@ import router from '@/router'
 export interface LoginCredentials {
   username: string
   password: string
+}
+
+export interface DomainCredentials {
+  username: string
   domain: string
 }
 
 export interface User {
   id: string
   username: string
-  domain: string
   role: 'admin' | 'company' | 'employee'
   company: string
   permissions?: string[]
@@ -24,26 +27,23 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Demo users for testing
   const demoUsers: { [key: string]: User } = {
-    'admin.company': {
+    admin: {
       id: '1',
       username: 'admin',
-      domain: 'company',
       role: 'admin',
       company: 'Company Srl',
       permissions: ['all'],
     },
-    'manager.azienda': {
+    manager: {
       id: '2',
       username: 'manager',
-      domain: 'azienda',
       role: 'company',
       company: 'Azienda SpA',
       permissions: ['company_management', 'employee_management', 'reports'],
     },
-    'employee.worker': {
+    employee: {
       id: '3',
       username: 'employee',
-      domain: 'worker',
       role: 'employee',
       company: 'Worker Corp',
       permissions: ['basic_access'],
@@ -66,7 +66,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     return new Promise((resolve) => {
       setTimeout(() => {
-        const userKey = `${credentials.username}.${credentials.domain}`
+        const userKey = `${credentials.username}`
         const user = demoUsers[userKey]
 
         if (user && credentials.password) {
@@ -74,6 +74,28 @@ export const useAuthStore = defineStore('auth', () => {
           localStorage.setItem('currentUser', JSON.stringify(user))
           loading.value = false
           resolve({ success: true, user })
+        } else {
+          loading.value = false
+          resolve({
+            success: false,
+            error: 'Credenziali non valide. Prova: admin/company, manager/azienda, employee/worker',
+          })
+        }
+      }, 1000)
+    })
+  }
+
+  const domain = async (
+    credentials: DomainCredentials,
+  ): Promise<{ success: boolean; user?: User; error?: string }> => {
+    loading.value = true
+
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        if (credentials.domain) {
+          localStorage.setItem('domain', JSON.stringify(credentials.domain))
+          loading.value = false
+          resolve({ success: true })
         } else {
           loading.value = false
           resolve({
@@ -122,5 +144,6 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     hasPermission,
+    domain,
   }
 })

@@ -32,37 +32,39 @@
                   placeholder="Inserisci username"
                   class="input input-bordered w-full pr-12"
                   :class="{ 'input-error': submitted && !credentials.username }"
-                  required
+                  disabled
                 />
                 <i
                   class="fas fa-user absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/40"
                 ></i>
               </div>
-              <div v-if="submitted && !credentials.username" class="label">
-                <span class="label-text-alt text-error">Username richiesto</span>
-              </div>
             </div>
 
-            <!-- Password -->
+            <!-- Domain -->
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">Password</span>
+                <span class="label-text font-medium">Dominio</span>
               </label>
               <div class="relative">
-                <input
-                  type="password"
-                  v-model="credentials.password"
-                  placeholder="Inserisci password"
-                  class="input input-bordered w-full pr-12"
-                  :class="{ 'input-error': submitted && !credentials.password }"
+                <select
+                  name=""
+                  id=""
                   required
-                />
+                  v-model="credentials.domain"
+                  class="input input-bordered w-full pr-12"
+                  :class="{ 'input-error': submitted && !credentials.domain }"
+                >
+                  <option value="" disabled selected>Seleziona dominio</option>
+                  <option v-for="domain in response.domains" :key="domain" :value="domain">
+                    {{ domain }}
+                  </option>
+                </select>
                 <i
-                  class="fas fa-lock absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/40"
+                  class="fas fa-globe absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/40"
                 ></i>
               </div>
-              <div v-if="submitted && !credentials.password" class="label">
-                <span class="label-text-alt text-error">Password richiesta</span>
+              <div v-if="submitted && !credentials.domain" class="label">
+                <span class="label-text-alt text-error">Dominio richiesto</span>
               </div>
             </div>
 
@@ -85,53 +87,6 @@
             </button>
           </form>
 
-          <div class="divider"></div>
-
-          <!-- Demo Users -->
-          <div class="space-y-3">
-            <div class="text-center">
-              <p class="text-sm font-medium text-base-content mb-3">Account Demo Disponibili:</p>
-            </div>
-
-            <div class="grid grid-cols-1 gap-2">
-              <button
-                type="button"
-                class="btn btn-outline btn-sm text-left justify-start"
-                @click="fillDemoCredentials('admin')"
-              >
-                <i class="fas fa-crown mr-2 text-yellow-500"></i>
-                <div class="text-left">
-                  <div class="font-medium">Admin Aziendale</div>
-                  <div class="text-xs opacity-60">admin / company</div>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                class="btn btn-outline btn-sm text-left justify-start"
-                @click="fillDemoCredentials('manager')"
-              >
-                <i class="fas fa-briefcase mr-2 text-blue-500"></i>
-                <div class="text-left">
-                  <div class="font-medium">Manager Aziendale</div>
-                  <div class="text-xs opacity-60">manager / azienda</div>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                class="btn btn-outline btn-sm text-left justify-start"
-                @click="fillDemoCredentials('employee')"
-              >
-                <i class="fas fa-hard-hat mr-2 text-purple-500"></i>
-                <div class="text-left">
-                  <div class="font-medium">Operaio</div>
-                  <div class="text-xs opacity-60">employee / worker</div>
-                </div>
-              </button>
-            </div>
-          </div>
-
           <div class="text-center text-sm text-base-content/60 mt-4">
             <p>Sistema di gestione delle risorse umane</p>
           </div>
@@ -145,7 +100,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import type { LoginCredentials } from '@/stores/auth'
+import type { DomainCredentials } from '@/stores/auth'
 import { ApiService } from '@/services/api'
 import type { DomainsResponse } from '@/services/api'
 
@@ -153,9 +108,11 @@ const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 
-const credentials = ref<LoginCredentials>({
+let response!: DomainsResponse
+
+const credentials = ref<DomainCredentials>({
   username: '',
-  password: '',
+  domain: '',
 })
 
 const submitted = ref(false)
@@ -164,6 +121,10 @@ const error = ref('')
 onMounted(() => {
   if (authStore.isAuthenticated) {
     router.push('/app/dashboard')
+  } else {
+    ApiService.getDomainsByUsername(credentials.value.username).then(
+      (data: DomainsResponse) => (response = data),
+    )
   }
 })
 
@@ -171,40 +132,18 @@ const handleLogin = async () => {
   submitted.value = true
   error.value = ''
 
-  if (!credentials.value.username || !credentials.value.password) {
+  if (!credentials.value.username || !credentials.value.domain) {
     return
   }
 
-  const result = await authStore.login(credentials.value)
+  const result = await authStore.domain(credentials.value)
 
   if (result.success) {
-    ApiService.getDomainsByUsername(credentials.value.username)
-      .then((data: DomainsResponse) => {
-        if (data.domains.length > 1) {
-          const returnUrl = '/app/domain'
-          router.push(returnUrl)
-        } else if (data.domains.length === 1) {
-          ApiService.setDomain(data.domains[0])
-          const returnUrl = (route.query.returnUrl as string) || '/app/dashboard'
-          router.push(returnUrl)
-        } else {
-          error.value = 'Nessun dominio disponibile'
-        }
-      })
-      .catch(() => {
-        error.value = 'Impossibile recuperare i domini disponibili'
-      })
+    const returnUrl = (route.query.returnUrl as string) || '/app/dashboard'
+    router.push(returnUrl)
   } else {
     error.value = result.error || 'Errore durante il login'
   }
-}
-
-const fillDemoCredentials = (username: string) => {
-  credentials.value = {
-    username,
-    password: 'demo123',
-  }
-  error.value = ''
 }
 </script>
 
