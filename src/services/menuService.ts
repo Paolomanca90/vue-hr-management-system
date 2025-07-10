@@ -1,13 +1,13 @@
 export interface ApiMenuItem {
   id: number
   nome: string
-  icona: string
+  icona?: string
   path?: string
   parametri?: string
   ordine: number
-  soloApi: boolean
+  soloApi: string
   parent_Id?: number
-  figli: ApiMenuItem[] | []
+  figli: ApiMenuItem[]
 }
 
 export interface MenuResponse {
@@ -47,44 +47,81 @@ class MenuService {
     }
   }
 
+  // Funzione per ottenere un'icona di default basata sul nome
+  private getDefaultIcon(nome: string): string {
+    const lowerName = nome.toLowerCase()
+
+    // Mappatura delle icone basata sul nome
+    if (lowerName.includes('anagrafic') || lowerName.includes('azienda')) {
+      return 'fas fa-building'
+    } else if (lowerName.includes('dipendenti')) {
+      return 'fas fa-users'
+    } else if (lowerName.includes('tabelle')) {
+      return 'fas fa-table'
+    } else if (lowerName.includes('processi')) {
+      return 'fas fa-cogs'
+    } else if (lowerName.includes('assunzione')) {
+      return 'fas fa-user-plus'
+    } else if (lowerName.includes('cessazione')) {
+      return 'fas fa-user-minus'
+    } else if (lowerName.includes('personalizzazion')) {
+      return 'fas fa-palette'
+    } else if (lowerName.includes('funzion')) {
+      return 'fas fa-tools'
+    } else if (lowerName.includes('configurazion')) {
+      return 'fas fa-cog'
+    } else if (lowerName.includes('calcolo')) {
+      return 'fas fa-calculator'
+    } else if (lowerName.includes('orari')) {
+      return 'fas fa-clock'
+    } else if (lowerName.includes('parametr')) {
+      return 'fas fa-sliders-h'
+    } else if (lowerName.includes('trasferimento') || lowerName.includes('paghe')) {
+      return 'fas fa-money-bill-wave'
+    } else {
+      return 'fas fa-folder' // Icona di default
+    }
+  }
+
   // Converte gli item API nel formato interno del menu store
   convertApiMenuToMenuItem(apiItems: ApiMenuItem[]): MenuItem[] {
-    // Raggruppa gli item per parent_id
-    const itemsMap = new Map<number, ApiMenuItem>()
-    const rootItems: ApiMenuItem[] = []
-    const childrenMap = new Map<number, ApiMenuItem[]>()
-
-    // Primo giro: organizza gli items
-    apiItems
-      .sort((a, b) => a.ordine - b.ordine)
-      .forEach((item) => {
-        itemsMap.set(item.id, item)
-
-        if (!item.parent_Id) {
-          rootItems.push(item)
-        } else {
-          if (!childrenMap.has(item.parent_Id)) {
-            childrenMap.set(item.parent_Id, [])
-          }
-          childrenMap.get(item.parent_Id)!.push(item)
-        }
-      })
-
-    // Secondo giro: costruisce la struttura ad albero
-    const buildMenuItem = (apiItem: ApiMenuItem): MenuItem => {
-      const children = childrenMap.get(apiItem.id)
-
-      return {
-        id: apiItem.id,
-        icon: apiItem.icona,
-        label: apiItem.nome,
-        route: apiItem.path,
-        expanded: false,
-        children: children?.length ? children.map(buildMenuItem) : [],
-      }
+    if (!apiItems || apiItems.length === 0) {
+      return []
     }
 
-    return rootItems.map(buildMenuItem)
+    // Funzione ricorsiva per convertire un singolo item API
+    const buildMenuItem = (apiItem: ApiMenuItem): MenuItem => {
+      // Converte ricorsivamente i figli (se presenti)
+      const children: MenuItem[] = []
+      if (apiItem.figli && apiItem.figli.length > 0) {
+        // Ordina i figli per ordine
+        const sortedChildren = apiItem.figli.sort((a, b) => a.ordine - b.ordine)
+
+        // Converte ricorsivamente ogni figlio
+        for (const child of sortedChildren) {
+          children.push(buildMenuItem(child))
+        }
+      }
+
+      const menuItem: MenuItem = {
+        id: apiItem.id,
+        icon: apiItem.icona || this.getDefaultIcon(apiItem.nome),
+        label: apiItem.nome,
+        route: apiItem.path && apiItem.path.trim() !== '' ? apiItem.path : undefined,
+        expanded: false,
+        children: children,
+      }
+
+      return menuItem
+    }
+
+    // Ordina gli item di primo livello per ordine
+    const sortedItems = apiItems.sort((a, b) => a.ordine - b.ordine)
+
+    // Converte ogni item di primo livello
+    const result = sortedItems.map(buildMenuItem)
+
+    return result
   }
 }
 
@@ -96,6 +133,6 @@ export interface MenuItem {
   icon: string
   label: string
   route?: string
-  children: MenuItem[] | []
+  children: MenuItem[]
   expanded?: boolean
 }

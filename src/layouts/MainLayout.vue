@@ -17,7 +17,7 @@
         <div class="p-4 border-b border-base-300">
           <div class="flex items-center mb-4">
             <div class="mr-3">
-              <img src="@/assets/Inaz-icona.png" alt="icona-inaz" class="w-8 h-8 mx-2" />
+              <img src="@/assets/logo.svg" alt="logo" class="w-8 h-8 mx-2" />
             </div>
             <div v-if="sidenavOpened" class="text-base-content">
               <h2 class="text-lg font-bold">HR System</h2>
@@ -54,45 +54,97 @@
             <p class="text-xs mt-2">Caricamento menu...</p>
           </div>
 
-          <!-- Errore menu con opzione fallback -->
+          <!-- Errore menu -->
           <div v-else-if="menuStore.error" class="p-2">
             <div class="alert alert-warning alert-sm">
               <i class="fas fa-exclamation-triangle text-xs"></i>
               <div class="text-xs">
-                <div>Errore menu</div>
-                <button class="btn btn-xs btn-ghost mt-1" @click="toggleMenuMode">
-                  {{ menuStore.useStaticFallback ? 'Riprova API' : 'Usa menu base' }}
+                <div>Errore menu: {{ menuStore.error }}</div>
+                <button class="btn btn-xs btn-ghost mt-1" @click="refreshMenu">
+                  Ricarica Menu
                 </button>
               </div>
             </div>
           </div>
 
           <!-- Menu esteso quando la sidebar è aperta -->
-          <ul class="menu p-2 space-y-1" v-if="sidenavOpened">
-            <li v-for="item in menuStore.menuItems" :key="item.id">
-              <!-- ... Struttura menu esistente ma usando menuStore.menuItems ... -->
+          <div class="p-2 space-y-1" v-if="sidenavOpened && menuStore.menuItems.length > 0">
+            <div v-for="item in menuStore.menuItems" :key="item.id" class="w-full">
               <!-- Menu item con figli (espandibile) -->
-              <div v-if="menuStore.hasChildren(item)" class="w-full p-0">
-                <details :open="item.expanded">
-                  <summary
-                    class="flex items-center cursor-pointer hover:bg-base-200 p-2 rounded-lg transition-all duration-200 w-full"
-                    @click.prevent="menuStore.toggleMenuItem(item.id)"
-                    :class="{ 'text-primary': isMenuItemActive(item) }"
-                  >
-                    <i :class="item.icon + ' text-sm mr-3'"></i>
-                    <span class="font-medium flex-1">{{ item.label }}</span>
-                  </summary>
+              <template v-if="menuStore.hasChildren(item)">
+                <!-- Header del menu espandibile -->
+                <div
+                  class="flex items-center cursor-pointer hover:bg-base-200 p-2 rounded-lg transition-all duration-200 w-full"
+                  @click="menuStore.toggleMenuItem(item.id)"
+                  :class="{ 'text-primary bg-base-200': item.expanded }"
+                >
+                  <i :class="item.icon + ' text-sm mr-3'"></i>
+                  <span class="font-medium">{{ item.label }}</span>
+                </div>
 
-                  <!-- Sottomenu ricorsivo -->
-                  <MenuItemComponent
-                    v-for="child in item.children"
-                    :key="child.id"
-                    :item="child"
-                    :level="1"
-                    @navigate="handleNavigation"
-                  />
-                </details>
-              </div>
+                <!-- Sottomenu (visibile solo quando expanded è true) -->
+                <div v-if="item.expanded" class="ml-6 mt-1 space-y-1">
+                  <div v-for="child in item.children" :key="child.id" class="w-full">
+                    <!-- Sottomenu con ulteriori figli -->
+                    <template v-if="menuStore.hasChildren(child)">
+                      <div
+                        class="flex items-center cursor-pointer hover:bg-base-200 p-2 rounded-lg transition-all duration-200 w-full"
+                        @click="menuStore.toggleMenuItem(child.id)"
+                        :class="{ 'text-primary bg-base-200': child.expanded }"
+                      >
+                        <i :class="child.icon + ' text-sm mr-3'"></i>
+                        <span class="font-medium">{{ child.label }}</span>
+                      </div>
+
+                      <!-- Sottomenu di terzo livello -->
+                      <div v-if="child.expanded" class="ml-6 mt-1 space-y-1">
+                        <div
+                          v-for="grandchild in child.children"
+                          :key="grandchild.id"
+                          class="w-full"
+                        >
+                          <RouterLink
+                            v-if="grandchild.route"
+                            :to="grandchild.route"
+                            class="flex items-center p-2 rounded-lg hover:bg-base-200 transition-all duration-200 w-full"
+                            :class="{ 'text-primary bg-blue-100': isActive(grandchild.route) }"
+                          >
+                            <i :class="grandchild.icon + ' text-sm mr-3'"></i>
+                            <span class="font-medium">{{ grandchild.label }}</span>
+                          </RouterLink>
+                          <div
+                            v-else
+                            class="flex items-center p-2 rounded-lg cursor-pointer hover:bg-base-200 transition-all duration-200 w-full text-base-content/70"
+                            @click="menuStore.toggleMenuItem(grandchild.id)"
+                          >
+                            <i :class="grandchild.icon + ' text-sm mr-3'"></i>
+                            <span class="font-medium">{{ grandchild.label }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+
+                    <!-- Sottomenu semplice (secondo livello) -->
+                    <RouterLink
+                      v-else-if="child.route"
+                      :to="child.route"
+                      class="flex items-center p-2 rounded-lg hover:bg-base-200 transition-all duration-200 w-full"
+                      :class="{ 'text-primary bg-blue-100': isActive(child.route) }"
+                    >
+                      <i :class="child.icon + ' text-sm mr-3'"></i>
+                      <span class="font-medium">{{ child.label }}</span>
+                    </RouterLink>
+                    <div
+                      v-else
+                      class="flex items-center p-2 rounded-lg cursor-pointer hover:bg-base-200 transition-all duration-200 w-full text-base-content/70"
+                      @click="menuStore.toggleMenuItem(child.id)"
+                    >
+                      <i :class="child.icon + ' text-sm mr-3'"></i>
+                      <span class="font-medium">{{ child.label }}</span>
+                    </div>
+                  </div>
+                </div>
+              </template>
 
               <!-- Menu item semplice (senza figli) -->
               <RouterLink
@@ -104,8 +156,8 @@
                 <i :class="item.icon + ' text-sm mr-3'"></i>
                 <span class="font-medium">{{ item.label }}</span>
               </RouterLink>
-            </li>
-          </ul>
+            </div>
+          </div>
 
           <!-- Menu compatto quando la sidebar è chiusa -->
           <div class="flex flex-col items-center space-y-2 p-2" v-if="!sidenavOpened">
@@ -122,6 +174,22 @@
               >
                 <i :class="item.icon + ' text-lg'"></i>
               </RouterLink>
+            </div>
+          </div>
+
+          <!-- Messaggio quando non ci sono menu -->
+          <div
+            v-if="!menuStore.loading && !menuStore.error && menuStore.menuItems.length === 0"
+            class="p-4 text-center"
+          >
+            <div class="alert alert-info alert-sm">
+              <i class="fas fa-info-circle text-xs"></i>
+              <div class="text-xs">
+                <div>Nessun menu disponibile</div>
+                <button class="btn btn-xs btn-ghost mt-1" @click="refreshMenu">
+                  Ricarica Menu
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -272,7 +340,7 @@ import { RouterView, RouterLink, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 import { useMenuStore } from '@/stores/menu'
-import router, { refreshDynamicRoutes } from '@/router'
+import { refreshDynamicRoutes } from '@/router'
 
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
@@ -290,21 +358,6 @@ const refreshMenu = async () => {
   }
 }
 
-const toggleMenuMode = () => {
-  if (menuStore.useStaticFallback) {
-    // Riprova a caricare da API
-    refreshMenu()
-  } else {
-    // Passa al menu statico
-    menuStore.toggleStaticFallback()
-  }
-}
-
-const handleNavigation = (route: string) => {
-  // Gestisce navigazione da menu dinamico
-  router.push(route)
-}
-
 const toggleSidenav = () => {
   sidenavOpened.value = !sidenavOpened.value
 }
@@ -314,25 +367,21 @@ const toggleTheme = () => {
   themeStore.toggleTheme()
 }
 
-const isActive = (routePath?: string): boolean => {
+const isActive = (routePath: string) => {
   if (!routePath) return false
   return route.path === routePath
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isMenuItemActive = (item: any): boolean => {
-  if (item.route && isActive(item.route)) {
-    return true
+onMounted(async () => {
+  // Assicurati che il menu sia caricato
+  if (menuStore.menuItems.length === 0) {
+    console.log('Caricamento menu...')
+    try {
+      await menuStore.initialize()
+    } catch (error) {
+      console.error('Errore caricamento menu:', error)
+    }
   }
-  if (item.children) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return item.children.some((child: any) => isMenuItemActive(child))
-  }
-  return false
-}
-
-onMounted(() => {
-  // Initialize any layout-specific logic
 })
 </script>
 
@@ -341,18 +390,8 @@ onMounted(() => {
   transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.menu :where(li:not(.menu-title) > :not(ul, details, .menu-title, .btn)),
-.menu :where(li:not(.menu-title) > details > summary:not(.menu-title)) {
-  display: block !important;
-}
-
-/* Miglioramenti per details/summary */
-details > summary {
-  list-style: none;
-}
-
-details > summary::-webkit-details-marker {
-  display: none;
+.rotate-180 {
+  transform: rotate(180deg);
 }
 
 /* Animazioni */
@@ -380,28 +419,5 @@ details > summary::-webkit-details-marker {
 
 .drawer-side aside {
   animation: slideInLeft 0.3s ease-out;
-}
-
-.menu li {
-  animation: fadeInUp 0.4s ease-out;
-}
-
-.menu li:nth-child(1) {
-  animation-delay: 0.1s;
-}
-.menu li:nth-child(2) {
-  animation-delay: 0.2s;
-}
-.menu li:nth-child(3) {
-  animation-delay: 0.3s;
-}
-.menu li:nth-child(4) {
-  animation-delay: 0.4s;
-}
-.menu li:nth-child(5) {
-  animation-delay: 0.5s;
-}
-.menu li:nth-child(6) {
-  animation-delay: 0.6s;
 }
 </style>
