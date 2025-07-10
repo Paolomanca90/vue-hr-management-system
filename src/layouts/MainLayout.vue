@@ -48,9 +48,29 @@
 
         <!-- Menu di navigazione -->
         <div class="flex-1 overflow-y-auto overflow-x-hidden">
+          <!-- Indicatore di caricamento menu -->
+          <div v-if="menuStore.loading" class="p-4 text-center">
+            <span class="loading loading-spinner loading-sm"></span>
+            <p class="text-xs mt-2">Caricamento menu...</p>
+          </div>
+
+          <!-- Errore menu con opzione fallback -->
+          <div v-else-if="menuStore.error" class="p-2">
+            <div class="alert alert-warning alert-sm">
+              <i class="fas fa-exclamation-triangle text-xs"></i>
+              <div class="text-xs">
+                <div>Errore menu</div>
+                <button class="btn btn-xs btn-ghost mt-1" @click="toggleMenuMode">
+                  {{ menuStore.useStaticFallback ? 'Riprova API' : 'Usa menu base' }}
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- Menu esteso quando la sidebar è aperta -->
           <ul class="menu p-2 space-y-1" v-if="sidenavOpened">
             <li v-for="item in menuStore.menuItems" :key="item.id">
+              <!-- ... Struttura menu esistente ma usando menuStore.menuItems ... -->
               <!-- Menu item con figli (espandibile) -->
               <div v-if="menuStore.hasChildren(item)" class="w-full p-0">
                 <details :open="item.expanded">
@@ -61,108 +81,16 @@
                   >
                     <i :class="item.icon + ' text-sm mr-3'"></i>
                     <span class="font-medium flex-1">{{ item.label }}</span>
-                    <span v-if="item.badge" class="badge badge-primary badge-sm">{{
-                      item.badge
-                    }}</span>
                   </summary>
 
-                  <ul class="ml-6 mt-2 space-y-1">
-                    <li v-for="child in item.children" :key="child.id">
-                      <!-- Menu child con figli (espandibile) -->
-                      <div v-if="menuStore.hasChildren(child)" class="w-full p-0">
-                        <details :open="child.expanded">
-                          <summary
-                            class="flex items-center cursor-pointer hover:bg-base-200 p-2 rounded-lg transition-all duration-200 text-sm w-full"
-                            @click.prevent="menuStore.toggleMenuItem(child.id)"
-                            :class="{ 'text-primary': isMenuItemActive(child) }"
-                          >
-                            <i :class="child.icon + ' text-sm mr-3'"></i>
-                            <span class="font-medium flex-1">{{ child.label }}</span>
-                            <span v-if="child.badge" class="badge badge-primary badge-sm">{{
-                              child.badge
-                            }}</span>
-                          </summary>
-
-                          <ul class="ml-6 mt-2 space-y-1">
-                            <li v-for="subchild in child.children" :key="subchild.id">
-                              <!-- Menu subchild con figli (espandibile) -->
-                              <div v-if="menuStore.hasChildren(subchild)" class="w-full p-0">
-                                <details :open="subchild.expanded">
-                                  <summary
-                                    class="flex items-center cursor-pointer hover:bg-base-200 p-2 rounded-lg transition-all duration-200 text-sm w-full"
-                                    @click.prevent="menuStore.toggleMenuItem(subchild.id)"
-                                    :class="{ 'text-primary': isMenuItemActive(subchild) }"
-                                  >
-                                    <i :class="subchild.icon + ' text-sm mr-3'"></i>
-                                    <span class="font-medium flex-1">{{ subchild.label }}</span>
-                                    <span
-                                      v-if="subchild.badge"
-                                      class="badge badge-primary badge-sm"
-                                      >{{ subchild.badge }}</span
-                                    >
-                                  </summary>
-
-                                  <ul class="ml-6 mt-2 space-y-1">
-                                    <li
-                                      v-for="subsubchild in subchild.children"
-                                      :key="subsubchild.id"
-                                    >
-                                      <RouterLink
-                                        v-if="subsubchild.route"
-                                        :to="subsubchild.route"
-                                        class="flex items-center p-2 rounded-lg hover:bg-base-200 transition-all duration-200 text-sm w-full"
-                                        :class="{
-                                          'text-primary bg-blue-100': isActive(subsubchild.route),
-                                        }"
-                                      >
-                                        <i :class="subsubchild.icon + ' text-sm mr-3 w-4'"></i>
-                                        <span>{{ subsubchild.label }}</span>
-                                        <span
-                                          v-if="subsubchild.badge"
-                                          class="badge badge-primary badge-xs ml-auto"
-                                          >{{ subsubchild.badge }}</span
-                                        >
-                                      </RouterLink>
-                                    </li>
-                                  </ul>
-                                </details>
-                              </div>
-
-                              <!-- Menu subchild semplice (senza figli) -->
-                              <RouterLink
-                                v-else-if="subchild.route"
-                                :to="subchild.route"
-                                class="flex items-center p-2 rounded-lg hover:bg-base-200 transition-all duration-200 text-sm w-full"
-                                :class="{ 'text-primary bg-blue-100': isActive(subchild.route) }"
-                              >
-                                <i :class="subchild.icon + ' text-sm mr-3 w-4'"></i>
-                                <span>{{ subchild.label }}</span>
-                                <span
-                                  v-if="subchild.badge"
-                                  class="badge badge-primary badge-xs ml-auto"
-                                  >{{ subchild.badge }}</span
-                                >
-                              </RouterLink>
-                            </li>
-                          </ul>
-                        </details>
-                      </div>
-
-                      <!-- Menu child semplice (senza figli) -->
-                      <RouterLink
-                        v-else-if="child.route"
-                        :to="child.route"
-                        class="flex items-center p-2 rounded-lg hover:bg-base-200 transition-all duration-200 text-sm"
-                        :class="{ 'text-primary bg-blue-100': isActive(child.route) }"
-                      >
-                        <i :class="child.icon + ' text-sm mr-3 w-4'"></i>
-                        <span>{{ child.label }}</span>
-                        <span v-if="child.badge" class="badge badge-primary badge-xs ml-auto">{{
-                          child.badge
-                        }}</span>
-                      </RouterLink>
-                    </li>
-                  </ul>
+                  <!-- Sottomenu ricorsivo -->
+                  <MenuItemComponent
+                    v-for="child in item.children"
+                    :key="child.id"
+                    :item="child"
+                    :level="1"
+                    @navigate="handleNavigation"
+                  />
                 </details>
               </div>
 
@@ -175,9 +103,6 @@
               >
                 <i :class="item.icon + ' text-sm mr-3'"></i>
                 <span class="font-medium">{{ item.label }}</span>
-                <span v-if="item.badge" class="badge badge-primary badge-sm ml-auto">{{
-                  item.badge
-                }}</span>
               </RouterLink>
             </li>
           </ul>
@@ -347,6 +272,7 @@ import { RouterView, RouterLink, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 import { useMenuStore } from '@/stores/menu'
+import router, { refreshDynamicRoutes } from '@/router'
 
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
@@ -354,6 +280,30 @@ const menuStore = useMenuStore()
 const route = useRoute()
 
 const sidenavOpened = ref(true)
+
+const refreshMenu = async () => {
+  try {
+    await menuStore.refreshMenu()
+    await refreshDynamicRoutes()
+  } catch (error) {
+    console.error('Errore refresh menu:', error)
+  }
+}
+
+const toggleMenuMode = () => {
+  if (menuStore.useStaticFallback) {
+    // Riprova a caricare da API
+    refreshMenu()
+  } else {
+    // Passa al menu statico
+    menuStore.toggleStaticFallback()
+  }
+}
+
+const handleNavigation = (route: string) => {
+  // Gestisce navigazione da menu dinamico
+  router.push(route)
+}
 
 const toggleSidenav = () => {
   sidenavOpened.value = !sidenavOpened.value

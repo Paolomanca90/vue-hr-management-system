@@ -15,12 +15,21 @@
                 />
               </div>
             </div>
-            <h1 class="text-2xl font-bold text-base-content mb-2">HR Management System</h1>
-            <p class="text-base-content/70">Accedi al tuo account aziendale</p>
+            <h1 class="text-2xl font-bold text-base-content mb-2">Selezione Dominio</h1>
+            <p class="text-base-content/70">Seleziona il dominio per accedere</p>
           </div>
 
-          <form @submit.prevent="handleLogin" class="space-y-3">
-            <!-- Username -->
+          <!-- Redirect message se non ci sono domini -->
+          <div v-if="shouldRedirectToLogin" class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+              <div class="font-bold">Sessione non valida</div>
+              <div class="text-sm">Reindirizzamento al login in corso...</div>
+            </div>
+          </div>
+
+          <form v-else @submit.prevent="handleDomainSelection" class="space-y-3">
+            <!-- Username (readonly) -->
             <div class="form-control">
               <label class="label">
                 <span class="label-text font-medium">Username</span>
@@ -28,11 +37,9 @@
               <div class="relative">
                 <input
                   type="text"
-                  v-model="credentials.username"
-                  placeholder="Inserisci username"
-                  class="input input-bordered w-full pr-12"
-                  :class="{ 'input-error': submitted && !credentials.username }"
-                  disabled
+                  :value="authStore.tempUsername"
+                  readonly
+                  class="input input-bordered w-full pr-12 bg-base-200"
                 />
                 <i
                   class="fas fa-user absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/40"
@@ -40,31 +47,44 @@
               </div>
             </div>
 
-            <!-- Domain -->
+            <!-- Domain Selection -->
             <div class="form-control">
               <label class="label">
                 <span class="label-text font-medium">Dominio</span>
               </label>
               <div class="relative">
                 <select
-                  name=""
-                  id=""
                   required
-                  v-model="credentials.domain"
-                  class="input input-bordered w-full pr-12"
-                  :class="{ 'input-error': submitted && !credentials.domain }"
+                  v-model="selectedDomain"
+                  class="select select-bordered w-full pr-12"
+                  :class="{ 'select-error': submitted && !selectedDomain }"
                 >
-                  <option value="" disabled selected>Seleziona dominio</option>
-                  <option v-for="domain in response.domains" :key="domain" :value="domain">
+                  <option value="" disabled>Seleziona dominio</option>
+                  <option
+                    v-for="domain in authStore.availableDomains"
+                    :key="domain"
+                    :value="domain"
+                  >
                     {{ domain }}
                   </option>
                 </select>
                 <i
-                  class="fas fa-globe absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/40"
+                  class="fas fa-globe absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/40 pointer-events-none"
                 ></i>
               </div>
-              <div v-if="submitted && !credentials.domain" class="label">
+              <div v-if="submitted && !selectedDomain" class="label">
                 <span class="label-text-alt text-error">Dominio richiesto</span>
+              </div>
+            </div>
+
+            <!-- Domain Info -->
+            <div v-if="authStore.availableDomains.length > 0" class="alert alert-info">
+              <i class="fas fa-info-circle"></i>
+              <div>
+                <div class="font-bold">Domini Disponibili</div>
+                <div class="text-sm">
+                  Trovati {{ authStore.availableDomains.length }} domini per questo utente
+                </div>
               </div>
             </div>
 
@@ -85,6 +105,17 @@
               <span v-if="authStore.loading">Accesso in corso...</span>
               <span v-if="!authStore.loading">Accedi</span>
             </button>
+
+            <!-- Back to Login -->
+            <button
+              type="button"
+              class="btn btn-ghost w-full"
+              @click="backToLogin"
+              :disabled="authStore.loading"
+            >
+              <i class="fas fa-arrow-left mr-2"></i>
+              Torna al Login
+            </button>
           </form>
 
           <div class="text-center text-sm text-base-content/60 mt-4">
@@ -97,53 +128,59 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import type { DomainCredentials } from '@/stores/auth'
-import { ApiService } from '@/services/api'
-import type { DomainsResponse } from '@/services/api'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 
-let response!: DomainsResponse
-
-const credentials = ref<DomainCredentials>({
-  username: '',
-  domain: '',
-})
-
+const selectedDomain = ref('')
 const submitted = ref(false)
 const error = ref('')
 
-onMounted(() => {
-  if (authStore.isAuthenticated) {
-    router.push('/app/dashboard')
-  } else {
-    ApiService.getDomainsByUsername(credentials.value.username).then(
-      (data: DomainsResponse) => (response = data),
-    )
-  }
+// Computed per verificare se dobbiamo reindirizzare al login
+const shouldRedirectToLogin = computed(() => {
+  return !authStore.tempUsername || authStore.availableDomains.length === 0
 })
 
-const handleLogin = async () => {
-  submitted.value = true
-  error.value = ''
-
-  if (!credentials.value.username || !credentials.value.domain) {
+onMounted(() => {
+  // Se l'utente è già autenticato, va alla dashboard
+  if (authStore.isAuthenticated) {
+    router.push('/app/dashboard')
     return
   }
 
-  const result = await authStore.domain(credentials.value)
+  // Se non abbiamo username temporaneo o domini, torna al login
+  if (shouldRedirectToLogin.value) {
+    setTimeout(() => {
+      router.push('/login')
+    }, 2000)
+  }
+})
+
+const handleDomainSelection = async () => {
+  submitted.value = true
+  error.value = ''
+
+  if (!selectedDomain.value) {
+    return
+  }
+
+  const result = await authStore.selectDomain(selectedDomain.value)
 
   if (result.success) {
     const returnUrl = (route.query.returnUrl as string) || '/app/dashboard'
     router.push(returnUrl)
   } else {
-    error.value = result.error || 'Errore durante il login'
+    error.value = result.error || 'Errore durante la selezione del dominio'
   }
+}
+
+const backToLogin = () => {
+  authStore.logout() // Pulisce i dati temporanei
+  router.push('/login')
 }
 </script>
 
@@ -161,5 +198,10 @@ const handleLogin = async () => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.select {
+  appearance: none;
+  background-image: none;
 }
 </style>

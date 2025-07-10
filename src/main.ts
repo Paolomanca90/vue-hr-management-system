@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import './assets/main.css'
 
 import { createApp } from 'vue'
@@ -15,9 +16,16 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 
+// Inizializza gli store
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
 const menuStore = useMenuStore()
 
-app.mount('#app')
+// Inizializza il menu se l'utente è autenticato
+if (authStore.isAuthenticated) {
+  menuStore.initialize().catch((error) => {
+    console.warn('Errore inizializzazione menu:', error)
+  })
+}
 
+app.mount('#app')

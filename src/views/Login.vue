@@ -102,7 +102,7 @@
                 <i class="fas fa-crown mr-2 text-yellow-500"></i>
                 <div class="text-left">
                   <div class="font-medium">Admin Aziendale</div>
-                  <div class="text-xs opacity-60">admin / company</div>
+                  <div class="text-xs opacity-60">admin / demo123 (3 domini)</div>
                 </div>
               </button>
 
@@ -114,7 +114,7 @@
                 <i class="fas fa-briefcase mr-2 text-blue-500"></i>
                 <div class="text-left">
                   <div class="font-medium">Manager Aziendale</div>
-                  <div class="text-xs opacity-60">manager / azienda</div>
+                  <div class="text-xs opacity-60">manager / demo123 (1 dominio)</div>
                 </div>
               </button>
 
@@ -126,7 +126,7 @@
                 <i class="fas fa-hard-hat mr-2 text-purple-500"></i>
                 <div class="text-left">
                   <div class="font-medium">Operaio</div>
-                  <div class="text-xs opacity-60">employee / worker</div>
+                  <div class="text-xs opacity-60">employee / demo123 (2 domini)</div>
                 </div>
               </button>
             </div>
@@ -146,8 +146,6 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import type { LoginCredentials } from '@/stores/auth'
-import { ApiService } from '@/services/api'
-import type { DomainsResponse } from '@/services/api'
 
 const router = useRouter()
 const route = useRoute()
@@ -178,22 +176,14 @@ const handleLogin = async () => {
   const result = await authStore.login(credentials.value)
 
   if (result.success) {
-    ApiService.getDomainsByUsername(credentials.value.username)
-      .then((data: DomainsResponse) => {
-        if (data.domains.length > 1) {
-          const returnUrl = '/app/domain'
-          router.push(returnUrl)
-        } else if (data.domains.length === 1) {
-          ApiService.setDomain(data.domains[0])
-          const returnUrl = (route.query.returnUrl as string) || '/app/dashboard'
-          router.push(returnUrl)
-        } else {
-          error.value = 'Nessun dominio disponibile'
-        }
-      })
-      .catch(() => {
-        error.value = 'Impossibile recuperare i domini disponibili'
-      })
+    if (result.needsDomainSelection) {
+      // Reindirizza alla pagina di selezione dominio
+      router.push('/domain')
+    } else {
+      // Login completato, vai alla dashboard
+      const returnUrl = (route.query.returnUrl as string) || '/app/dashboard'
+      router.push(returnUrl)
+    }
   } else {
     error.value = result.error || 'Errore durante il login'
   }
