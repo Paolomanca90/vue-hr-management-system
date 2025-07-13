@@ -1,3 +1,5 @@
+import { getApiConfig } from '@/config/api'
+
 export interface ApiMenuItem {
   id: number
   nome: string
@@ -17,16 +19,15 @@ export interface MenuResponse {
 }
 
 class MenuService {
-  private baseUrl = 'https://localhost:7255'
+  private config = getApiConfig() // Ottiene la configurazione corretta
 
   async getMenuVisibili(): Promise<ApiMenuItem[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/Menu/visibili`, {
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.menuVisibili}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
-          // 'Authorization': `Bearer ${token}`
         },
       })
 

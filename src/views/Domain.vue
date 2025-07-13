@@ -47,7 +47,7 @@
               </div>
             </div>
 
-            <!-- Domain Selection -->
+            <!-- Selezione Dominio -->
             <div class="form-control">
               <label class="label">
                 <span class="label-text font-medium">Dominio</span>
@@ -62,10 +62,10 @@
                   <option value="" disabled>Seleziona dominio</option>
                   <option
                     v-for="domain in authStore.availableDomains"
-                    :key="domain"
-                    :value="domain"
+                    :key="domain.id"
+                    :value="domain.dominio"
                   >
-                    {{ domain }}
+                    {{ domain.dominio }} (ID: {{ domain.id }})
                   </option>
                 </select>
                 <i
@@ -77,13 +77,38 @@
               </div>
             </div>
 
-            <!-- Domain Info -->
+            <!-- Info Dominio-->
             <div v-if="authStore.availableDomains.length > 0" class="alert alert-info">
               <i class="fas fa-info-circle"></i>
               <div>
                 <div class="font-bold">Domini Disponibili</div>
                 <div class="text-sm">
                   Trovati {{ authStore.availableDomains.length }} domini per questo utente
+                </div>
+              </div>
+            </div>
+
+            <!-- Dettagli Dominio Selezionato -->
+            <div v-if="selectedDomainDetails" class="card bg-base-200 border border-primary/20">
+              <div class="card-body p-3">
+                <h4 class="text-sm font-semibold text-base-content mb-2">
+                  Dettagli Dominio Selezionato
+                </h4>
+                <div class="text-xs space-y-1">
+                  <div class="flex justify-between">
+                    <span class="text-base-content/70">ID:</span>
+                    <span class="font-medium">{{ selectedDomainDetails.id }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-base-content/70">Nome:</span>
+                    <span class="font-medium">{{ selectedDomainDetails.dominio }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-base-content/70">Connessione:</span>
+                    <span class="font-medium font-mono text-xs truncate">{{
+                      selectedDomainDetails.dbconn || 'Non specificata'
+                    }}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -145,6 +170,12 @@ const shouldRedirectToLogin = computed(() => {
   return !authStore.tempUsername || authStore.availableDomains.length === 0
 })
 
+// Computed per mostrare i dettagli del dominio selezionato
+const selectedDomainDetails = computed(() => {
+  if (!selectedDomain.value) return null
+  return authStore.availableDomains.find((d) => d.dominio === selectedDomain.value)
+})
+
 onMounted(() => {
   // Se l'utente è già autenticato, va alla dashboard
   if (authStore.isAuthenticated) {
@@ -168,13 +199,18 @@ const handleDomainSelection = async () => {
     return
   }
 
-  const result = await authStore.selectDomain(selectedDomain.value)
+  try {
+    const result = await authStore.selectDomain(selectedDomain.value)
 
-  if (result.success) {
-    const returnUrl = (route.query.returnUrl as string) || '/app/dashboard'
-    router.push(returnUrl)
-  } else {
-    error.value = result.error || 'Errore durante la selezione del dominio'
+    if (result.success) {
+      const returnUrl = (route.query.returnUrl as string) || '/app/dashboard'
+      router.push(returnUrl)
+    } else {
+      error.value = result.error || 'Errore durante la selezione del dominio'
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    error.value = err.message || 'Errore imprevisto durante la selezione del dominio'
   }
 }
 

@@ -1,8 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import router from '@/router'
+import {
+  authService,
+  type LoginRequest,
+  type GetDominiRequest,
+  type SetDominioRequest,
+  type DominioItem,
+} from '@/services/authService'
 
 export interface LoginCredentials {
   username: string
@@ -20,10 +27,11 @@ export interface User {
   role: 'admin' | 'company' | 'employee'
   company: string
   permissions?: string[]
+  token?: string
 }
 
 export interface DomainsResponse {
-  domains: string[]
+  domains: DominioItem[]
   total: number
 }
 
@@ -31,39 +39,8 @@ export const useAuthStore = defineStore('auth', () => {
   const currentUser = ref<User | null>(null)
   const loading = ref(false)
   const tempUsername = ref<string>('') // Temporary storage per il flusso di login
-  const availableDomains = ref<string[]>([])
-
-  // Demo users for testing
-  const demoUsers: { [key: string]: User } = {
-    admin: {
-      id: '1',
-      username: 'admin',
-      role: 'admin',
-      company: 'Company Srl',
-      permissions: ['all'],
-    },
-    manager: {
-      id: '2',
-      username: 'manager',
-      role: 'company',
-      company: 'Azienda SpA',
-      permissions: ['company_management', 'employee_management', 'reports'],
-    },
-    employee: {
-      id: '3',
-      username: 'employee',
-      role: 'employee',
-      company: 'Worker Corp',
-      permissions: ['basic_access'],
-    },
-  }
-
-  // Demo domains per testing
-  const demoDomains: { [key: string]: string[] } = {
-    admin: ['company.local', 'test.local', 'prod.local'],
-    manager: ['azienda.local'],
-    employee: ['worker.local', 'factory.local'],
-  }
+  const availableDomains = ref<DominioItem[]>([])
+  const tempToken = ref<string>('') // Token temporaneo prima della selezione dominio
 
   // Computed
   const isAuthenticated = computed(() => currentUser.value !== null)
@@ -73,45 +50,102 @@ export const useAuthStore = defineStore('auth', () => {
   })
   const isRegularUser = computed(() => currentUser.value?.role === 'employee')
 
-  // API Methods
+  // Helper per determinare il ruolo dall'username
+  const determineUserRole = (username: string): User['role'] => {
+    const lowerUsername = username.toLowerCase()
+
+    // Logica per determinare il ruolo basata sull'username
+    if (lowerUsername.includes('admin') || lowerUsername.includes('amministratore')) {
+      return 'admin'
+    } else if (
+      lowerUsername.includes('manager') ||
+      lowerUsername.includes('responsabile') ||
+      lowerUsername.includes('capo')
+    ) {
+      return 'company'
+    } else {
+      return 'employee'
+    }
+  }
+
+  // Helper per determinare i permessi dal ruolo
+  const getPermissionsByRole = (role: User['role']): string[] => {
+    switch (role) {
+      case 'admin':
+        return ['all']
+      case 'company':
+        return ['company_management', 'employee_management', 'reports', 'payroll_management']
+      case 'employee':
+        return ['basic_access']
+      default:
+        return ['basic_access']
+    }
+  }
+
   const getDomainsByUsername = async (username: string): Promise<DomainsResponse> => {
     loading.value = true
 
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        loading.value = false
+    try {
+      const request: GetDominiRequest = { username }
+      const response = await authService.getDomini(request)
 
-        // Simula chiamata API
-        const domains = demoDomains[username] || []
+      loading.value = false
 
-        if (domains.length > 0) {
-          resolve({
-            domains,
-            total: domains.length,
-          })
-        } else {
-          reject(new Error('Nessun dominio trovato per questo utente'))
-        }
-      }, 800)
-    })
+      // Controlla se ci sono errori nella response
+      if (response.messaggioDiErrore) {
+        throw new Error(response.messaggioDiErrore)
+      }
+
+      // Controlla se ci sono domini
+      if (!response.listaDomini || response.listaDomini.length === 0) {
+        throw new Error('Nessun dominio trovato per questo utente')
+      }
+
+      return {
+        domains: response.listaDomini,
+        total: response.listaDomini.length,
+      }
+    } catch (error) {
+      loading.value = false
+      throw error
+    }
   }
 
-  const setDomain = async (domain: string): Promise<{ success: boolean }> => {
+  const setDomain = async (
+    domainName: string,
+    username: string,
+  ): Promise<{ success: boolean; token?: string }> => {
     loading.value = true
 
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        loading.value = false
+    try {
+      const request: SetDominioRequest = {
+        nomeDominio: domainName,
+        username: username,
+      }
+      const response = await authService.setDominio(request)
 
-        // Simula chiamata API per settare il dominio
-        localStorage.setItem('selectedDomain', domain)
+      loading.value = false
 
-        resolve({ success: true })
-      }, 500)
-    })
+      // Controlla se ci sono errori nella response
+      if (response.messaggioDiErrore) {
+        throw new Error(response.messaggioDiErrore)
+      }
+
+      // Controlla se abbiamo ricevuto un token
+      if (!response.token) {
+        throw new Error('Token non ricevuto dal server')
+      }
+
+      return {
+        success: true,
+        token: response.token,
+      }
+    } catch (error) {
+      loading.value = false
+      throw error
+    }
   }
 
-  // Auth Actions
   const login = async (
     credentials: LoginCredentials,
   ): Promise<{
@@ -119,43 +153,84 @@ export const useAuthStore = defineStore('auth', () => {
     user?: User
     error?: string
     needsDomainSelection?: boolean
-    domains?: string[]
+    domains?: DominioItem[]
   }> => {
     loading.value = true
 
     try {
-      // Verifica credenziali
-      const user = demoUsers[credentials.username]
+      // Effettua il login
+      const loginRequest: LoginRequest = {
+        username: credentials.username,
+        password: credentials.password,
+      }
 
-      if (!user || !credentials.password) {
+      const loginResponse = await authService.login(loginRequest)
+
+      // Controlla se ci sono errori nel login
+      if (loginResponse.messaggioDiErrore) {
         loading.value = false
         return {
           success: false,
-          error: 'Credenziali non valide. Prova: admin/demo123, manager/demo123, employee/demo123',
+          error: loginResponse.messaggioDiErrore,
         }
       }
 
-      // Salva temporaneamente lo username
+      // Controlla se abbiamo ricevuto un token
+      if (!loginResponse.token) {
+        loading.value = false
+        return {
+          success: false,
+          error: 'Token non ricevuto dal server',
+        }
+      }
+
+      // Salva temporaneamente username e token
       tempUsername.value = credentials.username
+      tempToken.value = loginResponse.token
+
+      // Salva il token temporaneo per le chiamate successive
+      sessionStorage.setItem('temp_token', loginResponse.token)
 
       // Recupera domini disponibili
       const domainsResponse = await getDomainsByUsername(credentials.username)
       availableDomains.value = domainsResponse.domains
 
-      // Se c'è un solo dominio, settalo automaticamente
+      // Se c'è un solo dominio, lo setta automaticamente
       if (domainsResponse.domains.length === 1) {
-        await setDomain(domainsResponse.domains[0])
-        currentUser.value = user
-        localStorage.setItem('currentUser', JSON.stringify(user))
+        const domain = domainsResponse.domains[0]
+        const setDomainResult = await setDomain(domain.dominio, credentials.username)
 
-        return {
-          success: true,
-          user,
-          needsDomainSelection: false,
+        if (setDomainResult.success && setDomainResult.token) {
+          // Crea l'oggetto user
+          const user: User = {
+            id: credentials.username,
+            username: credentials.username,
+            role: determineUserRole(credentials.username),
+            company: domain.dominio,
+            token: setDomainResult.token,
+            permissions: getPermissionsByRole(determineUserRole(credentials.username)),
+          }
+
+          currentUser.value = user
+          localStorage.setItem('currentUser', JSON.stringify(user))
+          localStorage.setItem('auth_token', setDomainResult.token)
+
+          // Pulisce i dati temporanei
+          tempUsername.value = ''
+          tempToken.value = ''
+          availableDomains.value = []
+          sessionStorage.removeItem('temp_token')
+
+          return {
+            success: true,
+            user,
+            needsDomainSelection: false,
+          }
         }
       }
-      // Se ci sono più domini, richiedi selezione
+      // Se ci sono più domini, richiede selezione
       else if (domainsResponse.domains.length > 1) {
+        loading.value = false
         return {
           success: true,
           needsDomainSelection: true,
@@ -164,6 +239,7 @@ export const useAuthStore = defineStore('auth', () => {
       }
       // Nessun dominio disponibile
       else {
+        loading.value = false
         return {
           success: false,
           error: 'Nessun dominio disponibile per questo utente',
@@ -171,15 +247,22 @@ export const useAuthStore = defineStore('auth', () => {
       }
     } catch (error: any) {
       loading.value = false
+      console.error('Errore durante il login:', error)
       return {
         success: false,
-        error: error.message || 'Errore durante il recupero dei domini',
+        error: error.message || 'Errore durante il login',
       }
+    }
+
+    loading.value = false
+    return {
+      success: false,
+      error: 'Errore imprevisto durante il login',
     }
   }
 
   const selectDomain = async (
-    domain: string,
+    domainName: string,
   ): Promise<{ success: boolean; user?: User; error?: string }> => {
     loading.value = true
 
@@ -193,7 +276,8 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       // Verifica che il dominio sia nella lista disponibile
-      if (!availableDomains.value.includes(domain)) {
+      const domain = availableDomains.value.find((d) => d.dominio === domainName)
+      if (!domain) {
         return {
           success: false,
           error: 'Dominio non valido',
@@ -201,19 +285,38 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       // Setta il dominio
-      await setDomain(domain)
+      const setDomainResult = await setDomain(domainName, tempUsername.value)
 
-      // Recupera l'utente e completa il login
-      const user = demoUsers[tempUsername.value]
-      currentUser.value = user
-      localStorage.setItem('currentUser', JSON.stringify(user))
+      if (setDomainResult.success && setDomainResult.token) {
+        // Crea l'oggetto user
+        const user: User = {
+          id: tempUsername.value,
+          username: tempUsername.value,
+          role: determineUserRole(tempUsername.value),
+          company: domainName,
+          token: setDomainResult.token,
+          permissions: getPermissionsByRole(determineUserRole(tempUsername.value)),
+        }
 
-      // Pulisci i dati temporanei
-      tempUsername.value = ''
-      availableDomains.value = []
+        currentUser.value = user
+        localStorage.setItem('currentUser', JSON.stringify(user))
+        localStorage.setItem('auth_token', setDomainResult.token)
 
-      loading.value = false
-      return { success: true, user }
+        // Pulisce i dati temporanei
+        tempUsername.value = ''
+        tempToken.value = ''
+        availableDomains.value = []
+        sessionStorage.removeItem('temp_token')
+
+        loading.value = false
+        return { success: true, user }
+      } else {
+        loading.value = false
+        return {
+          success: false,
+          error: 'Errore durante la selezione del dominio',
+        }
+      }
     } catch (error: any) {
       loading.value = false
       return {
@@ -223,23 +326,40 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const logout = () => {
-    currentUser.value = null
-    tempUsername.value = ''
-    availableDomains.value = []
-    localStorage.removeItem('currentUser')
-    localStorage.removeItem('selectedDomain')
-    router.push('/login')
+  const logout = async () => {
+    try {
+      // Chiama l'API di logout
+      await authService.logout()
+    } catch (error) {
+      console.error('Errore durante il logout:', error)
+    } finally {
+      // Pulisce sempre lo stato locale
+      currentUser.value = null
+      tempUsername.value = ''
+      tempToken.value = ''
+      availableDomains.value = []
+      localStorage.removeItem('currentUser')
+      localStorage.removeItem('auth_token')
+      sessionStorage.removeItem('temp_token')
+      sessionStorage.removeItem('openiddict_token')
+      router.push('/login')
+    }
   }
 
   const initializeAuth = () => {
     const storedUser = localStorage.getItem('currentUser')
-    if (storedUser) {
+    const authToken = localStorage.getItem('auth_token')
+
+    if (storedUser && authToken) {
       try {
-        currentUser.value = JSON.parse(storedUser)
+        const user = JSON.parse(storedUser)
+        // Verifica che il token sia ancora valido
+        user.token = authToken
+        currentUser.value = user
       } catch (error) {
+        console.error('Errore nel parsing dello user salvato:', error)
         localStorage.removeItem('currentUser')
-        localStorage.removeItem('selectedDomain')
+        localStorage.removeItem('auth_token')
       }
     }
   }
@@ -252,7 +372,6 @@ export const useAuthStore = defineStore('auth', () => {
     )
   }
 
-  // Initialize on store creation
   initializeAuth()
 
   return {

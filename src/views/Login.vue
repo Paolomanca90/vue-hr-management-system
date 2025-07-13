@@ -6,7 +6,7 @@
     <div class="w-full max-w-md">
       <div class="card bg-base-100 shadow-2xl">
         <div class="card-body">
-          <div class="text-center mb-3">
+          <div class="text-center mb-6">
             <div class="flex justify-center mb-4">
               <div class="w-3/4 mx-auto">
                 <img
@@ -19,7 +19,7 @@
             <p class="text-base-content/70">Accedi al tuo account aziendale</p>
           </div>
 
-          <form @submit.prevent="handleLogin" class="space-y-3">
+          <form @submit.prevent="handleLogin" class="space-y-4">
             <!-- Username -->
             <div class="form-control">
               <label class="label">
@@ -33,6 +33,7 @@
                   class="input input-bordered w-full pr-12"
                   :class="{ 'input-error': submitted && !credentials.username }"
                   required
+                  autocomplete="username"
                 />
                 <i
                   class="fas fa-user absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/40"
@@ -50,20 +51,37 @@
               </label>
               <div class="relative">
                 <input
-                  type="password"
+                  :type="showPassword ? 'text' : 'password'"
                   v-model="credentials.password"
                   placeholder="Inserisci password"
                   class="input input-bordered w-full pr-12"
                   :class="{ 'input-error': submitted && !credentials.password }"
                   required
+                  autocomplete="current-password"
                 />
-                <i
-                  class="fas fa-lock absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/40"
-                ></i>
+                <button
+                  type="button"
+                  class="absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/40 hover:text-base-content/60"
+                  @click="togglePasswordVisibility"
+                >
+                  <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                </button>
               </div>
               <div v-if="submitted && !credentials.password" class="label">
                 <span class="label-text-alt text-error">Password richiesta</span>
               </div>
+            </div>
+
+            <!-- Remember Me -->
+            <div class="form-control">
+              <label class="label cursor-pointer justify-start">
+                <input
+                  type="checkbox"
+                  class="checkbox checkbox-primary mr-3"
+                  v-model="rememberMe"
+                />
+                <span class="label-text">Ricordami</span>
+              </label>
             </div>
 
             <!-- Error -->
@@ -75,7 +93,7 @@
             <!-- Submit -->
             <button
               type="submit"
-              :disabled="authStore.loading"
+              :disabled="authStore.loading || !credentials.username || !credentials.password"
               class="btn btn-primary w-full"
               :class="{ loading: authStore.loading }"
             >
@@ -85,55 +103,26 @@
             </button>
           </form>
 
-          <div class="divider"></div>
+          <div class="divider text-base-content/50">Sistema HR</div>
 
-          <!-- Demo Users -->
-          <div class="space-y-3">
+          <div class="text-center space-y-2">
+            <p class="text-sm text-base-content/60">Sistema di gestione delle risorse umane</p>
+
+            <!-- Link Password Dimenticata -->
             <div class="text-center">
-              <p class="text-sm font-medium text-base-content mb-3">Account Demo Disponibili:</p>
+              <a href="#" class="link link-primary text-sm" @click.prevent="handleForgotPassword">
+                Password dimenticata?
+              </a>
             </div>
 
-            <div class="grid grid-cols-1 gap-2">
-              <button
-                type="button"
-                class="btn btn-outline btn-sm text-left justify-start"
-                @click="fillDemoCredentials('admin')"
-              >
-                <i class="fas fa-crown mr-2 text-yellow-500"></i>
-                <div class="text-left">
-                  <div class="font-medium">Admin Aziendale</div>
-                  <div class="text-xs opacity-60">admin / demo123 (3 domini)</div>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                class="btn btn-outline btn-sm text-left justify-start"
-                @click="fillDemoCredentials('manager')"
-              >
-                <i class="fas fa-briefcase mr-2 text-blue-500"></i>
-                <div class="text-left">
-                  <div class="font-medium">Manager Aziendale</div>
-                  <div class="text-xs opacity-60">manager / demo123 (1 dominio)</div>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                class="btn btn-outline btn-sm text-left justify-start"
-                @click="fillDemoCredentials('employee')"
-              >
-                <i class="fas fa-hard-hat mr-2 text-purple-500"></i>
-                <div class="text-left">
-                  <div class="font-medium">Operaio</div>
-                  <div class="text-xs opacity-60">employee / demo123 (2 domini)</div>
-                </div>
-              </button>
+            <!-- Info Supporto Tecnico -->
+            <div class="text-xs text-base-content/50 mt-4">
+              <p>Per supporto tecnico contattare:</p>
+              <p>
+                <i class="fas fa-envelope mr-1"></i>
+                <a href="mailto:support@inaz.it" class="link">support@inaz.it</a>
+              </p>
             </div>
-          </div>
-
-          <div class="text-center text-sm text-base-content/60 mt-4">
-            <p>Sistema di gestione delle risorse umane</p>
           </div>
         </div>
       </div>
@@ -158,12 +147,33 @@ const credentials = ref<LoginCredentials>({
 
 const submitted = ref(false)
 const error = ref('')
+const showPassword = ref(false)
+const rememberMe = ref(false)
 
 onMounted(() => {
+  // Se l'utente è già autenticato, va alla dashboard
   if (authStore.isAuthenticated) {
     router.push('/app/dashboard')
+    return
+  }
+
+  // Carica credenziali salvate se "Ricordami" era attivo
+  const savedUsername = localStorage.getItem('rememberedUsername')
+  if (savedUsername) {
+    credentials.value.username = savedUsername
+    rememberMe.value = true
   }
 })
+
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value
+}
+
+const handleForgotPassword = () => {
+  alert(
+    "Funzionalità di reset password non ancora implementata. Contattare l'amministratore di sistema.",
+  )
+}
 
 const handleLogin = async () => {
   submitted.value = true
@@ -173,28 +183,36 @@ const handleLogin = async () => {
     return
   }
 
-  const result = await authStore.login(credentials.value)
+  try {
+    const result = await authStore.login(credentials.value)
 
-  if (result.success) {
-    if (result.needsDomainSelection) {
-      // Reindirizza alla pagina di selezione dominio
-      router.push('/domain')
+    if (result.success) {
+      // Salva username se "Ricordami" è attivo
+      if (rememberMe.value) {
+        localStorage.setItem('rememberedUsername', credentials.value.username)
+      } else {
+        localStorage.removeItem('rememberedUsername')
+      }
+
+      if (result.needsDomainSelection) {
+        // Reindirizza alla pagina di selezione dominio
+        router.push('/domain')
+      } else {
+        // Login completato, va alla dashboard
+        const returnUrl = (route.query.returnUrl as string) || '/app/dashboard'
+        router.push(returnUrl)
+      }
     } else {
-      // Login completato, vai alla dashboard
-      const returnUrl = (route.query.returnUrl as string) || '/app/dashboard'
-      router.push(returnUrl)
-    }
-  } else {
-    error.value = result.error || 'Errore durante il login'
-  }
-}
+      error.value = result.error || 'Errore durante il login'
 
-const fillDemoCredentials = (username: string) => {
-  credentials.value = {
-    username,
-    password: 'demo123',
+      // Reset password in caso di errore
+      credentials.value.password = ''
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    error.value = err.message || 'Errore di connessione al server'
+    credentials.value.password = ''
   }
-  error.value = ''
 }
 </script>
 
@@ -212,5 +230,19 @@ const fillDemoCredentials = (username: string) => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+button[type='button']:focus {
+  outline: none;
+}
+
+.form-control input:focus {
+  outline: 2px solid theme('colors.primary.500');
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>
