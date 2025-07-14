@@ -65,7 +65,7 @@
                     :key="domain.id"
                     :value="domain.dominio"
                   >
-                    {{ domain.dominio }} (ID: {{ domain.id }})
+                    {{ domain.dominio }}
                   </option>
                 </select>
                 <i
@@ -102,12 +102,6 @@
                   <div class="flex justify-between">
                     <span class="text-base-content/70">Nome:</span>
                     <span class="font-medium">{{ selectedDomainDetails.dominio }}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-base-content/70">Connessione:</span>
-                    <span class="font-medium font-mono text-xs truncate">{{
-                      selectedDomainDetails.dbconn || 'Non specificata'
-                    }}</span>
                   </div>
                 </div>
               </div>
