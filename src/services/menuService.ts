@@ -28,6 +28,7 @@ class MenuService {
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
+          Authorization: 'Bearer ' + localStorage.getItem('auth_token'),
         },
       })
 

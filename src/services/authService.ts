@@ -6,8 +6,8 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  token: string
-  messaggioDiErrore: string
+  token?: string
+  messaggioDiErrore?: string
 }
 
 export interface GetDominiRequest {
@@ -15,28 +15,29 @@ export interface GetDominiRequest {
 }
 
 export interface DominioItem {
-  id: number
+  id?: number
   dominio: string
-  dbconn: string
+  dbconn?: string
 }
 
 export interface GetDominiResponse {
-  listaDomini: DominioItem[]
-  messaggioDiErrore: string
+  listaDomini?: DominioItem[]
+  domains?: string[]
+  messaggioDiErrore?: string
 }
 
 export interface SetDominioRequest {
-  nomeDominio: string
   username: string
+  dominio: string
 }
 
 export interface SetDominioResponse {
-  token: string
-  messaggioDiErrore: string
+  token?: string
+  messaggioDiErrore?: string
 }
 
 class AuthService {
-  private config = getApiConfig() // Ottiene la configurazione corretta
+  private config = getApiConfig()
 
   async login(request: LoginRequest): Promise<LoginResponse> {
     try {
@@ -50,20 +51,30 @@ class AuthService {
       })
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        // Se la risposta non è ok, prova a leggere il messaggio di errore
+        const errorText = await response.text()
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
       }
 
-      const result: LoginResponse = await response.json()
-      return result
+      const token = await response.text()
+
+      if (!token || token.trim() === '') {
+        throw new Error('Token non ricevuto dal server')
+      }
+
+      return {
+        token: token,
+        messaggioDiErrore: undefined,
+      }
     } catch (error) {
-      throw new Error('Errore di connessione al server:' + error)
+      throw new Error('Errore di connessione al server: ' + error)
     }
   }
 
   async getDomini(request: GetDominiRequest): Promise<GetDominiResponse> {
     try {
-      // Recupera il token dalla sessione o dallo storage
-      const token = sessionStorage.getItem('temp_token') || localStorage.getItem('auth_token')
+      // Recupera il token dalla sessione
+      const token = sessionStorage.getItem('temp_token')
 
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -75,27 +86,46 @@ class AuthService {
         headers['Authorization'] = token
       }
 
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.getDomini}`, {
-        method: 'POST',
+      const url = new URL(`${this.config.baseUrl}${this.config.endpoints.getDomini}`)
+      url.searchParams.append('username', request.username)
+
+      const response = await fetch(url.toString(), {
+        method: 'GET',
         headers,
-        body: JSON.stringify(request),
       })
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        const errorText = await response.text()
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
       }
 
-      const result: GetDominiResponse = await response.json()
-      return result
+      const domains = (await response.json()) as string[]
+
+      if (!domains || domains.length === 0) {
+        throw new Error('Nessun dominio trovato per questo utente')
+      }
+
+      // Converte il nuovo formato in quello atteso dal frontend
+      const domainItems: DominioItem[] = domains.map((domain, index) => ({
+        id: index + 1, // Genera un ID fittizio
+        dominio: domain,
+        dbconn: undefined,
+      }))
+
+      return {
+        listaDomini: domainItems,
+        domains: domains,
+        messaggioDiErrore: undefined,
+      }
     } catch (error) {
-      throw new Error('Errore di connessione al server:' + error)
+      throw new Error('Errore di connessione al server: ' + error)
     }
   }
 
   async setDominio(request: SetDominioRequest): Promise<SetDominioResponse> {
     try {
       // Recupera il token dalla sessione
-      const token = sessionStorage.getItem('temp_token') || localStorage.getItem('auth_token')
+      const token = sessionStorage.getItem('temp_token')
 
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -114,14 +144,23 @@ class AuthService {
       })
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        const errorText = await response.text()
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
       }
 
-      const result: SetDominioResponse = await response.json()
-      return result
+      const jwtToken = await response.text()
+      localStorage.setItem('auth_token', jwtToken)
+
+      if (!jwtToken || jwtToken.trim() === '') {
+        throw new Error('Token non ricevuto dal server')
+      }
+
+      return {
+        token: jwtToken,
+        messaggioDiErrore: undefined,
+      }
     } catch (error) {
-      console.error('Errore nel set dominio:', error)
-      throw new Error('Errore di connessione al server')
+      throw new Error('Errore di connessione al server: ' + error)
     }
   }
 
@@ -169,8 +208,7 @@ class AuthService {
       const result = await response.text()
       return result
     } catch (error) {
-      console.error('Errore nella crittografia:', error)
-      throw new Error('Errore di connessione al server')
+      throw new Error('Errore di connessione al server: ' + error)
     }
   }
 }

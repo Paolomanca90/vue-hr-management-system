@@ -91,19 +91,15 @@ export const useAuthStore = defineStore('auth', () => {
 
       loading.value = false
 
-      // Controlla se ci sono errori nella response
-      if (response.messaggioDiErrore) {
-        throw new Error(response.messaggioDiErrore)
-      }
+      const domains = response.listaDomini || []
 
-      // Controlla se ci sono domini
-      if (!response.listaDomini || response.listaDomini.length === 0) {
+      if (domains.length === 0) {
         throw new Error('Nessun dominio trovato per questo utente')
       }
 
       return {
-        domains: response.listaDomini,
-        total: response.listaDomini.length,
+        domains: domains,
+        total: domains.length,
       }
     } catch (error) {
       loading.value = false
@@ -119,17 +115,12 @@ export const useAuthStore = defineStore('auth', () => {
 
     try {
       const request: SetDominioRequest = {
-        nomeDominio: domainName,
+        dominio: domainName,
         username: username,
       }
       const response = await authService.setDominio(request)
 
       loading.value = false
-
-      // Controlla se ci sono errori nella response
-      if (response.messaggioDiErrore) {
-        throw new Error(response.messaggioDiErrore)
-      }
 
       // Controlla se abbiamo ricevuto un token
       if (!response.token) {
@@ -158,7 +149,6 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
 
     try {
-      // Effettua il login
       const loginRequest: LoginRequest = {
         username: credentials.username,
         password: credentials.password,
@@ -166,16 +156,6 @@ export const useAuthStore = defineStore('auth', () => {
 
       const loginResponse = await authService.login(loginRequest)
 
-      // Controlla se ci sono errori nel login
-      if (loginResponse.messaggioDiErrore) {
-        loading.value = false
-        return {
-          success: false,
-          error: loginResponse.messaggioDiErrore,
-        }
-      }
-
-      // Controlla se abbiamo ricevuto un token
       if (!loginResponse.token) {
         loading.value = false
         return {
@@ -328,7 +308,6 @@ export const useAuthStore = defineStore('auth', () => {
 
   const logout = async () => {
     try {
-      // Chiama l'API di logout
       await authService.logout()
     } catch (error) {
       console.error('Errore durante il logout:', error)
