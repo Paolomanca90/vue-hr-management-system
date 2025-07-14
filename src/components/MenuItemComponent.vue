@@ -13,11 +13,6 @@
       >
         <i :class="item.icon + ' text-sm mr-3'"></i>
         <span class="font-medium flex-1" v-html="highlightSearchTerm(item.label)"></span>
-
-        <!-- Badge per numero di risultati nei children -->
-        <span v-if="isSearchMode && searchMatchCount > 0" class="badge badge-primary badge-xs ml-2">
-          {{ searchMatchCount }}
-        </span>
       </div>
 
       <!-- Sottomenu (visibile solo quando expanded è true) -->
@@ -108,25 +103,6 @@ const isActive = computed(() => {
 const isHighlighted = computed(() => {
   if (!props.searchQuery) return false
   return props.item.label.toLowerCase().includes(props.searchQuery.toLowerCase())
-})
-
-const searchMatchCount = computed(() => {
-  if (!props.isSearchMode || !props.searchQuery || !hasChildren.value) return 0
-
-  const countMatches = (items: MenuItem[]): number => {
-    let count = 0
-    for (const child of items) {
-      if (child.label.toLowerCase().includes(props.searchQuery.toLowerCase())) {
-        count++
-      }
-      if (child.children && child.children.length > 0) {
-        count += countMatches(child.children)
-      }
-    }
-    return count
-  }
-
-  return countMatches(props.item.children || [])
 })
 
 // Methods

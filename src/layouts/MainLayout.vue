@@ -102,7 +102,7 @@
                 Risultati ricerca: "{{ searchQuery }}"
               </div>
               <div class="text-xs text-base-content/60">
-                Mostrando {{ searchResults.length }} elementi trovati
+                Mostrando {{ totalSearchMatches }} elementi trovati
               </div>
             </div>
 
@@ -343,7 +343,7 @@ const displayedMenuItems = computed(() => {
   return menuStore.menuItems
 })
 
-// Funzioni di ricerca
+// Funzione di ricerca
 const searchInMenuItem = (item: MenuItem, query: string): MenuItem | null => {
   const lowerQuery = query.toLowerCase()
   const itemMatches = item.label.toLowerCase().includes(lowerQuery)
@@ -359,7 +359,7 @@ const searchInMenuItem = (item: MenuItem, query: string): MenuItem | null => {
     }
   }
 
-  // Se l'item corrente o almeno un figlio match, restituisce l'item
+  // Se l'item corrente o almeno un figlio matcha, restituisce l'item
   if (itemMatches || matchingChildren.length > 0) {
     return {
       ...item,
@@ -369,6 +369,26 @@ const searchInMenuItem = (item: MenuItem, query: string): MenuItem | null => {
   }
 
   return null
+}
+
+// Funzione per contare i match totali
+const countTotalMatches = (items: MenuItem[], query: string): number => {
+  let count = 0
+  const lowerQuery = query.toLowerCase()
+
+  for (const item of items) {
+    // Conta l'item corrente se matcha
+    if (item.label.toLowerCase().includes(lowerQuery)) {
+      count++
+    }
+
+    // Conta ricorsivamente nei children
+    if (item.children && item.children.length > 0) {
+      count += countTotalMatches(item.children, query)
+    }
+  }
+
+  return count
 }
 
 const performSearch = (query: string) => {
@@ -388,6 +408,11 @@ const performSearch = (query: string) => {
 
   searchResults.value = results
 }
+
+const totalSearchMatches = computed(() => {
+  if (!isSearchActive.value || !searchQuery.value) return 0
+  return countTotalMatches(searchResults.value, searchQuery.value)
+})
 
 const handleSearch = () => {
   performSearch(searchQuery.value)
@@ -455,7 +480,7 @@ const isActive = (routePath: string) => {
 }
 
 onMounted(async () => {
-  // Assicurati che il menu sia caricato
+  // Assicura che il menu sia caricato
   if (menuStore.menuItems.length === 0) {
     console.log('Caricamento menu...')
     try {
