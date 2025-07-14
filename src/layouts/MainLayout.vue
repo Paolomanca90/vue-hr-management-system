@@ -48,6 +48,32 @@
 
         <!-- Menu di navigazione -->
         <div class="flex-1 overflow-y-auto overflow-x-hidden">
+          <!-- Search Bar (solo quando sidebar è aperta) -->
+          <div v-if="sidenavOpened" class="p-2 pt-4">
+            <div class="relative">
+              <input
+                type="text"
+                v-model="searchQuery"
+                @input="handleSearch"
+                @focus="isSearchFocused = true"
+                @blur="handleSearchBlur"
+                placeholder="Cerca nel menu..."
+                class="input input-bordered input-sm w-full pr-8 text-sm"
+                :class="{ 'input-primary': isSearchActive }"
+              />
+              <div class="absolute right-2 top-1/2 transform -translate-y-1/2">
+                <i v-if="!searchQuery" class="fas fa-search text-base-content/40 text-xs"></i>
+                <button
+                  v-else
+                  @click="clearSearch"
+                  class="btn btn-ghost btn-xs btn-circle hover:bg-base-200"
+                >
+                  <i class="fas fa-times text-xs"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- Indicatore di caricamento menu -->
           <div v-if="menuStore.loading" class="p-4 text-center">
             <span class="loading loading-spinner loading-sm"></span>
@@ -68,94 +94,26 @@
           </div>
 
           <!-- Menu esteso quando la sidebar è aperta -->
-          <div class="p-2 space-y-1" v-if="sidenavOpened && menuStore.menuItems.length > 0">
-            <div v-for="item in menuStore.menuItems" :key="item.id" class="w-full">
-              <!-- Menu item con figli (espandibile) -->
-              <template v-if="menuStore.hasChildren(item)">
-                <!-- Header del menu espandibile -->
-                <div
-                  class="flex items-center cursor-pointer hover:bg-base-200 p-2 rounded-lg transition-all duration-200 w-full"
-                  @click="menuStore.toggleMenuItem(item.id)"
-                  :class="{ 'text-primary bg-base-200': item.expanded }"
-                >
-                  <i :class="item.icon + ' text-sm mr-3'"></i>
-                  <span class="font-medium">{{ item.label }}</span>
-                </div>
+          <div class="p-2 space-y-1" v-if="sidenavOpened && displayedMenuItems.length > 0">
+            <!-- Breadcrumb per la ricerca -->
+            <div v-if="isSearchActive && searchQuery" class="mb-3 p-2 bg-primary/10 rounded-lg">
+              <div class="text-xs text-primary font-medium mb-1">
+                <i class="fas fa-search mr-1"></i>
+                Risultati ricerca: "{{ searchQuery }}"
+              </div>
+              <div class="text-xs text-base-content/60">
+                Mostrando {{ searchResults.length }} elementi trovati
+              </div>
+            </div>
 
-                <!-- Sottomenu (visibile solo quando expanded è true) -->
-                <div v-if="item.expanded" class="ml-6 mt-1 space-y-1">
-                  <div v-for="child in item.children" :key="child.id" class="w-full">
-                    <!-- Sottomenu con ulteriori figli -->
-                    <template v-if="menuStore.hasChildren(child)">
-                      <div
-                        class="flex items-center cursor-pointer hover:bg-base-200 p-2 rounded-lg transition-all duration-200 w-full"
-                        @click="menuStore.toggleMenuItem(child.id)"
-                        :class="{ 'text-primary bg-base-200': child.expanded }"
-                      >
-                        <i :class="child.icon + ' text-sm mr-3'"></i>
-                        <span class="font-medium">{{ child.label }}</span>
-                      </div>
-
-                      <!-- Sottomenu di terzo livello -->
-                      <div v-if="child.expanded" class="ml-6 mt-1 space-y-1">
-                        <div
-                          v-for="grandchild in child.children"
-                          :key="grandchild.id"
-                          class="w-full"
-                        >
-                          <RouterLink
-                            v-if="grandchild.route"
-                            :to="grandchild.route"
-                            class="flex items-center p-2 rounded-lg hover:bg-base-200 transition-all duration-200 w-full"
-                            :class="{ 'text-primary bg-blue-100': isActive(grandchild.route) }"
-                          >
-                            <i :class="grandchild.icon + ' text-sm mr-3'"></i>
-                            <span class="font-medium">{{ grandchild.label }}</span>
-                          </RouterLink>
-                          <div
-                            v-else
-                            class="flex items-center p-2 rounded-lg cursor-pointer hover:bg-base-200 transition-all duration-200 w-full text-base-content/70"
-                            @click="menuStore.toggleMenuItem(grandchild.id)"
-                          >
-                            <i :class="grandchild.icon + ' text-sm mr-3'"></i>
-                            <span class="font-medium">{{ grandchild.label }}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </template>
-
-                    <!-- Sottomenu semplice (secondo livello) -->
-                    <RouterLink
-                      v-else-if="child.route"
-                      :to="child.route"
-                      class="flex items-center p-2 rounded-lg hover:bg-base-200 transition-all duration-200 w-full"
-                      :class="{ 'text-primary bg-blue-100': isActive(child.route) }"
-                    >
-                      <i :class="child.icon + ' text-sm mr-3'"></i>
-                      <span class="font-medium">{{ child.label }}</span>
-                    </RouterLink>
-                    <div
-                      v-else
-                      class="flex items-center p-2 rounded-lg cursor-pointer hover:bg-base-200 transition-all duration-200 w-full text-base-content/70"
-                      @click="menuStore.toggleMenuItem(child.id)"
-                    >
-                      <i :class="child.icon + ' text-sm mr-3'"></i>
-                      <span class="font-medium">{{ child.label }}</span>
-                    </div>
-                  </div>
-                </div>
-              </template>
-
-              <!-- Menu item semplice (senza figli) -->
-              <RouterLink
-                v-else-if="item.route"
-                :to="item.route"
-                class="flex items-center p-2 rounded-lg hover:bg-base-200 transition-all duration-200 w-full"
-                :class="{ 'text-primary bg-blue-100': isActive(item.route) }"
-              >
-                <i :class="item.icon + ' text-sm mr-3'"></i>
-                <span class="font-medium">{{ item.label }}</span>
-              </RouterLink>
+            <!-- Rendering del menu -->
+            <div v-for="item in displayedMenuItems" :key="item.id" class="w-full">
+              <MenuItemComponent
+                :item="item"
+                :search-query="searchQuery"
+                :is-search-mode="isSearchActive"
+                @navigate="handleMenuNavigation"
+              />
             </div>
           </div>
 
@@ -169,8 +127,9 @@
               <RouterLink
                 v-if="item.route"
                 :to="item.route"
-                class="flex items-center justify-center w-12 h-12 rounded-lg hover:bg-base-200 transition-all duration-200"
+                class="flex items-center justify-center w-12 h-12 rounded-lg hover:bg-base-200 transition-all duration-200 tooltip tooltip-right"
                 :class="{ 'text-primary bg-blue-100': isActive(item.route) }"
+                :data-tip="item.label"
               >
                 <i :class="item.icon + ' text-lg'"></i>
               </RouterLink>
@@ -179,7 +138,12 @@
 
           <!-- Messaggio quando non ci sono menu -->
           <div
-            v-if="!menuStore.loading && !menuStore.error && menuStore.menuItems.length === 0"
+            v-if="
+              !menuStore.loading &&
+              !menuStore.error &&
+              displayedMenuItems.length === 0 &&
+              !isSearchActive
+            "
             class="p-4 text-center"
           >
             <div class="alert alert-info alert-sm">
@@ -188,6 +152,22 @@
                 <div>Nessun menu disponibile</div>
                 <button class="btn btn-xs btn-ghost mt-1" @click="refreshMenu">
                   Ricarica Menu
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Messaggio quando la ricerca non ha risultati -->
+          <div
+            v-if="isSearchActive && searchQuery && searchResults.length === 0"
+            class="p-4 text-center"
+          >
+            <div class="alert alert-warning alert-sm">
+              <i class="fas fa-search text-xs"></i>
+              <div class="text-xs">
+                <div>Nessun risultato per "{{ searchQuery }}"</div>
+                <button class="btn btn-xs btn-ghost mt-1" @click="clearSearch">
+                  Pulisci Ricerca
                 </button>
               </div>
             </div>
@@ -335,12 +315,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { RouterView, RouterLink, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
-import { useMenuStore } from '@/stores/menu'
+import { useMenuStore, type MenuItem } from '@/stores/menu'
 import { refreshDynamicRoutes } from '@/router'
+import MenuItemComponent from '@/components/MenuItemComponent.vue'
 
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
@@ -348,11 +329,112 @@ const menuStore = useMenuStore()
 const route = useRoute()
 
 const sidenavOpened = ref(true)
+const searchQuery = ref('')
+const isSearchFocused = ref(false)
+const searchResults = ref<MenuItem[]>([])
+
+// Computed
+const isSearchActive = computed(() => searchQuery.value.trim().length > 0)
+
+const displayedMenuItems = computed(() => {
+  if (isSearchActive.value) {
+    return searchResults.value
+  }
+  return menuStore.menuItems
+})
+
+// Funzioni di ricerca
+const searchInMenuItem = (item: MenuItem, query: string): MenuItem | null => {
+  const lowerQuery = query.toLowerCase()
+  const itemMatches = item.label.toLowerCase().includes(lowerQuery)
+
+  // Cerca nei children
+  const matchingChildren: MenuItem[] = []
+  if (item.children) {
+    for (const child of item.children) {
+      const childResult = searchInMenuItem(child, query)
+      if (childResult) {
+        matchingChildren.push(childResult)
+      }
+    }
+  }
+
+  // Se l'item corrente o almeno un figlio match, restituisce l'item
+  if (itemMatches || matchingChildren.length > 0) {
+    return {
+      ...item,
+      children: matchingChildren.length > 0 ? matchingChildren : item.children,
+      expanded: true, // Espande automaticamente gli item che matchano
+    }
+  }
+
+  return null
+}
+
+const performSearch = (query: string) => {
+  if (!query || query.trim().length === 0) {
+    searchResults.value = []
+    return
+  }
+
+  const results: MenuItem[] = []
+
+  for (const item of menuStore.menuItems) {
+    const result = searchInMenuItem(item, query)
+    if (result) {
+      results.push(result)
+    }
+  }
+
+  searchResults.value = results
+}
+
+const handleSearch = () => {
+  performSearch(searchQuery.value)
+}
+
+const clearSearch = () => {
+  searchQuery.value = ''
+  searchResults.value = []
+  isSearchFocused.value = false
+}
+
+const handleSearchBlur = () => {
+  // Delay per permettere il click sui risultati
+  setTimeout(() => {
+    isSearchFocused.value = false
+  }, 150)
+}
+
+const handleMenuNavigation = () => {
+  // Se è in modalità ricerca, pulisce la ricerca dopo la navigazione
+  if (isSearchActive.value) {
+    setTimeout(() => {
+      clearSearch()
+    }, 100)
+  }
+}
+
+// Watch per reagire ai cambiamenti del menu
+watch(
+  () => menuStore.menuItems,
+  () => {
+    if (isSearchActive.value) {
+      performSearch(searchQuery.value)
+    }
+  },
+  { deep: true },
+)
 
 const refreshMenu = async () => {
   try {
     await menuStore.refreshMenu()
     await refreshDynamicRoutes()
+
+    // Riapplica la ricerca se attiva
+    if (isSearchActive.value) {
+      performSearch(searchQuery.value)
+    }
   } catch (error) {
     console.error('Errore refresh menu:', error)
   }
@@ -394,6 +476,13 @@ onMounted(async () => {
   transform: rotate(180deg);
 }
 
+/* Smooth search transitions */
+.search-highlight {
+  background-color: rgba(var(--primary), 0.1);
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+}
+
 /* Animazioni */
 @keyframes fadeInUp {
   from {
@@ -419,5 +508,23 @@ onMounted(async () => {
 
 .drawer-side aside {
   animation: slideInLeft 0.3s ease-out;
+}
+
+/* Scroll personalizzato per i risultati della ricerca */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }
 </style>
