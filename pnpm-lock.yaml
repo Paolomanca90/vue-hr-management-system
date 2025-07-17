@@ -39,12 +39,21 @@ importers:
       '@vitejs/plugin-vue':
         specifier: ^6.0.0
         version: 6.0.0(vite@7.0.5(@types/node@22.16.4)(jiti@2.4.2))(vue@3.5.17(typescript@5.8.3))
+      '@vue/tsconfig':
+        specifier: ^0.7.0
+        version: 0.7.0(typescript@5.8.3)(vue@3.5.17(typescript@5.8.3))
+      typescript:
+        specifier: ~5.8.0
+        version: 5.8.3
       vite:
         specifier: ^7.0.5
         version: 7.0.5(@types/node@22.16.4)(jiti@2.4.2)
       vue:
         specifier: ^3.5.17
         version: 3.5.17(typescript@5.8.3)
+      vue-tsc:
+        specifier: ^2.2.10
+        version: 2.2.12(typescript@5.8.3)
 
   packages/main-app:
     dependencies:
@@ -54,6 +63,9 @@ importers:
       '@heroicons/vue':
         specifier: ^2.2.0
         version: 2.2.0(vue@3.5.17(typescript@5.8.3))
+      '@primevue/themes':
+        specifier: ^4.3.6
+        version: 4.3.6
       '@vue-hr-management-system/core-lib':
         specifier: workspace:*
         version: link:../core-lib
@@ -72,6 +84,12 @@ importers:
       pinia:
         specifier: ^3.0.3
         version: 3.0.3(typescript@5.8.3)(vue@3.5.17(typescript@5.8.3))
+      primeicons:
+        specifier: ^7.0.0
+        version: 7.0.0
+      primevue:
+        specifier: ^4.3.6
+        version: 4.3.6(vue@3.5.17(typescript@5.8.3))
       vue:
         specifier: ^3.5.17
         version: 3.5.17(typescript@5.8.3)

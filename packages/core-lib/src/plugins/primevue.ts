@@ -1,3 +1,4 @@
+import type { App } from 'vue'
 import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
 import { definePreset } from '@primevue/themes'
@@ -85,7 +86,7 @@ import Ripple from 'primevue/ripple'
 import StyleClass from 'primevue/styleclass'
 import FocusTrap from 'primevue/focustrap'
 
-export const installPrimeVue = (app) => {
+export const installPrimeVue = (app: App) => {
   // Configura PrimeVue con il nuovo tema
   app.use(PrimeVue, {
     theme: {
