@@ -10,4 +10,4 @@ if (!client) {
 execSync('pnpm run build:core', { stdio: 'inherit' })
 
 // Build del cliente specifico 
-execSync(`pnpm --filter @vue-hr-management-system/${client}-features build`, { stdio: 'inherit' })
+execSync(`pnpm --filter @presenze-in-web-frontend/${client}-features build`, { stdio: 'inherit' })

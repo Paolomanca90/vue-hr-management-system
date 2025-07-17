@@ -12,7 +12,7 @@ import { useThemeStore } from './stores/theme'
 import { useMenuStore } from './stores/menu'
 
 // Import PrimeVue dalla core-lib
-import { installPrimeVue } from '@vue-hr-management-system/core-lib'
+import { installPrimeVue } from '@presenze-in-web-frontend/core-lib'
 
 // Import CSS di PrimeVue - nuova versione non richiede CSS esplicito
 import 'primeicons/primeicons.css'

@@ -13,7 +13,7 @@
     "composite": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@vue-hr-management-system/core-lib": ["../core-lib/src"]
+      "@presenze-in-web-frontend/core-lib": ["../core-lib/src"]
     }
   }
 }

@@ -141,6 +141,7 @@ import { ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useMenuStore, type MenuItem } from '@/stores/menu'
+import { PrimeDataTable } from '@presenze-in-web-frontend/core-lib'
 
 interface RelatedAction {
   title: string

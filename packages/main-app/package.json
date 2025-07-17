@@ -1,5 +1,5 @@
 {
-  "name": "@vue-hr-management-system/main-app",
+  "name": "@presenze-in-web-frontend/main-app",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,7 +13,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "@vue-hr-management-system/core-lib": "workspace:*",
+    "@presenze-in-web-frontend/core-lib": "workspace:*",
     "@headlessui/vue": "^1.7.23",
     "@heroicons/vue": "^2.2.0",
     "@vueuse/core": "^10.11.1",
