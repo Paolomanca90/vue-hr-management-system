@@ -9,6 +9,19 @@
     "dev:client-a": "pnpm --filter @vue-hr-management-system/client-a-features dev",
     "build:client-a": "pnpm --filter @vue-hr-management-system/client-a-features build",
     "build:client": "node build-client.js",
-    "deploy:client-a": "pnpm run build:client client-a && rsync -av packages/client-a-features/dist/ server:/var/www/client-a/"
+    "deploy:client-a": "pnpm run build:client client-a && rsync -av packages/client-a-features/dist/ server:/var/www/client-a/",
+    "clean": "pnpm -r exec rm -rf node_modules dist .turbo && rm -rf node_modules",
+    "clean:install": "pnpm run clean && pnpm install",
+    "dev:all": "pnpm -r --parallel dev",
+    "build:all": "pnpm run build:core && pnpm -r --filter='!@vue-hr-management-system/core-lib' build",
+    "lint": "pnpm -r lint",
+    "type-check": "pnpm -r type-check"
+  },
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.2",
+    "@types/node": "^22.15.32",
+    "typescript": "~5.8.0",
+    "vite": "^7.0.0",
+    "vue": "^3.5.17"
   }
 }
