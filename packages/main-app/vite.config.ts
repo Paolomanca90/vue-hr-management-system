@@ -15,6 +15,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@vue-hr-management-system/core-lib': fileURLToPath(new URL('../core-lib/src', import.meta.url)),
     },
   },
   server: {
