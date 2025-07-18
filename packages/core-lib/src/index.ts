@@ -21,6 +21,17 @@ export * from './plugins/primevue'
 export { installFontAwesome, FontAwesomeIcon, library } from './plugins/fontawesome'
 export type { IconDefinition } from './plugins/fontawesome'
 
+// Esporta i18n plugin e utilities
+export { 
+  installI18n, 
+  createHRI18n, 
+  availableLocales, 
+  setLocale, 
+  getStoredLocale,
+  useI18n 
+} from './plugins/i18n'
+export type { I18nOptions, Messages, LocaleMessages } from './plugins/i18n'
+
 // Plugin per installazione globale
 const plugin = {
   install(app: App) {
