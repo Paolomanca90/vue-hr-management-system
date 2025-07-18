@@ -237,7 +237,7 @@ button[type='button']:focus {
 }
 
 .form-control input:focus {
-  outline: 2px solid theme('colors.primary.500');
+  outline: 2px solid #3b82f6; /* Tailwind blue-500 */
   outline-offset: 2px;
 }
 

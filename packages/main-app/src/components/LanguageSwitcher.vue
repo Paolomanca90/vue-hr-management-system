@@ -17,7 +17,7 @@
         <li
           v-for="locale in availableLocales"
           :key="locale.code"
-          @click="changeLanguage(locale.code)"
+          @click="changeLanguage(locale.code as 'it' | 'en')"
         >
           <a :class="{ active: currentLocale === locale.code }">
             <span class="text-lg">{{ locale.flag }}</span>
@@ -57,7 +57,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useI18nStore } from '@/stores/i18n'
+import { useI18nApp } from '@/composables/useI18nApp'
 
 interface Props {
   compact?: boolean
@@ -71,27 +71,20 @@ const props = withDefaults(defineProps<Props>(), {
   showLabel: true
 })
 
-const i18nStore = useI18nStore()
-
-// Computed
-const currentLocale = computed(() => i18nStore.currentLocale)
-const currentLanguage = computed(() => i18nStore.currentLanguage)
-const availableLocales = computed(() => i18nStore.availableLocales)
-const t = computed(() => i18nStore.t)
+// Usa il composable personalizzato che funziona nei componenti
+const {
+  t,
+  currentLocale,
+  currentLanguage,
+  availableLocales,
+  changeLanguage,
+  toggleLanguage
+} = useI18nApp()
 
 const nextLanguage = computed(() => {
   const current = currentLocale.value
-  return availableLocales.value.find(lang => lang.code !== current)
+  return availableLocales.find(lang => lang.code !== current)
 })
-
-// Methods
-const changeLanguage = (locale: string) => {
-  i18nStore.changeLocale(locale as 'it' | 'en')
-}
-
-const toggleLanguage = () => {
-  i18nStore.toggleLanguage()
-}
 </script>
 
 <style scoped>

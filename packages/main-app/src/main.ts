@@ -153,7 +153,7 @@ const themeStore = useThemeStore()
 const menuStore = useMenuStore()
 const i18nStore = useI18nStore()
 
-// Inizializza la lingua
+// Inizializza la lingua dopo aver creato l'app
 i18nStore.initializeLocale()
 
 // Inizializza il menu se l'utente è autenticato

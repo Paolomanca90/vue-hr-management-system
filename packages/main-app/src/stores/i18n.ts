@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { availableLocales, setLocale, getStoredLocale } from '@presenze-in-web-frontend/core-lib'
 
 export type Locale = 'it' | 'en'
@@ -10,9 +9,6 @@ export const useI18nStore = defineStore('i18n', () => {
 
   // State
   const currentLocale = ref<Locale>('it')
-
-  // Composable i18n
-  const { locale, t } = useI18n()
 
   // Computed
   const currentLanguage = computed(() => {
@@ -25,10 +21,8 @@ export const useI18nStore = defineStore('i18n', () => {
   // Actions
   const changeLocale = (newLocale: Locale) => {
     currentLocale.value = newLocale
-    locale.value = newLocale
     setLocale(newLocale)
 
-    // Aggiorna anche il documento HTML
     if (typeof document !== 'undefined') {
       document.documentElement.lang = newLocale
     }
@@ -51,9 +45,11 @@ export const useI18nStore = defineStore('i18n', () => {
     }
   }
 
-  // Utility per traduzioni
+  // Utility per traduzioni - questa funzione dovrebbe essere usata nei componenti
+  // dove c'è accesso a useI18n di vue-i18n
   const translate = (key: string, values?: any) => {
-    return t(key, values)
+    // Questa è solo una funzione di fallback
+    return key
   }
 
   return {
