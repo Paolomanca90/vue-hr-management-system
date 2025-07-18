@@ -69,7 +69,7 @@
       
       <template #empty v-else>
         <div class="text-center py-4">
-          <i class="pi pi-inbox text-4xl text-gray-400 mb-2"></i>
+          <FaIcon icon="inbox" class="text-4xl text-gray-400 mb-2"/>
           <p class="text-gray-500">Nessun dato disponibile</p>
         </div>
       </template>
@@ -79,6 +79,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { FaIcon } from '..'
 
 const props = defineProps({
   data: {

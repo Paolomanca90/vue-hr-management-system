@@ -12,7 +12,7 @@ import { useThemeStore } from './stores/theme'
 import { useMenuStore } from './stores/menu'
 
 // Import PrimeVue dalla core-lib
-import { installPrimeVue } from '@presenze-in-web-frontend/core-lib'
+import { installFontAwesome, installPrimeVue } from '@presenze-in-web-frontend/core-lib'
 
 // Import CSS di PrimeVue - nuova versione non richiede CSS esplicito
 import 'primeicons/primeicons.css'
@@ -24,6 +24,9 @@ app.use(router)
 
 // Installa PrimeVue
 installPrimeVue(app)
+
+// Installa FontAwesome
+installFontAwesome(app)
 
 // Inizializza gli store
 const authStore = useAuthStore()

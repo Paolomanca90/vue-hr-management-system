@@ -11,7 +11,11 @@
           'bg-primary/5': isHighlighted,
         }"
       >
-        <i :class="item.icon + ' text-sm mr-3'"></i>
+        <!-- FaIcon wrapper -->
+        <FaIcon
+          :icon="getIconName(item.icon)"
+          class="text-sm mr-3"
+        />
         <span class="font-medium flex-1" v-html="highlightSearchTerm(item.label)"></span>
       </div>
 
@@ -40,13 +44,18 @@
       }"
       @click="$emit('navigate', item)"
     >
-      <i :class="item.icon + ' text-sm mr-3'"></i>
+      <!-- FaIcon wrapper -->
+      <FaIcon
+        :icon="getIconName(item.icon)"
+        class="text-sm mr-3"
+      />
       <span class="font-medium flex-1" v-html="highlightSearchTerm(item.label)"></span>
 
       <!-- Indicatore che è un link diretto -->
-      <i
-        class="fas fa-external-link-alt text-xs opacity-0 group-hover:opacity-60 transition-opacity"
-      ></i>
+      <FaIcon
+        icon="external-link-alt"
+        class="text-xs opacity-0 group-hover:opacity-60 transition-opacity"
+      />
     </RouterLink>
 
     <!-- Menu item senza route (placeholder) -->
@@ -56,7 +65,11 @@
       :class="{ 'bg-primary/5': isHighlighted }"
       @click="toggleExpansion"
     >
-      <i :class="item.icon + ' text-sm mr-3'"></i>
+      <!-- FaIcon wrapper -->
+      <FaIcon
+        :icon="getIconName(item.icon)"
+        class="text-sm mr-3"
+      />
       <span class="font-medium flex-1" v-html="highlightSearchTerm(item.label)"></span>
     </div>
   </div>
@@ -66,6 +79,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMenuStore, type MenuItem } from '@/stores/menu'
+import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 
 interface Props {
   item: MenuItem
@@ -119,6 +133,21 @@ const toggleExpansion = () => {
   if (hasChildren.value) {
     menuStore.toggleMenuItem(props.item.id)
   }
+}
+
+// Converte le icone dalla notazione CSS a Font Awesome
+const getIconName = (iconClass: string): string => {
+  if (!iconClass) return 'folder'
+
+  // Rimuove i prefissi CSS e estrae solo il nome dell'icona
+  // Es: "fas fa-user" -> "user"
+  // Es: "fa fa-building" -> "building"
+  const iconName = iconClass
+    .replace(/^(fas|far|fab|fa)\s+fa-/, '') // Rimuove prefissi
+    .replace(/^fa-/, '') // Rimuove fa- se rimasto
+    .trim()
+
+  return iconName || 'folder'
 }
 </script>
 

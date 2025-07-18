@@ -32,7 +32,7 @@
             <div class="flex items-center">
               <div class="avatar placeholder mr-3">
                 <div class="bg-primary text-primary-content rounded-full w-8">
-                  <i class="fas fa-user"></i>
+                  <FaIcon icon="user" class="text-lg" />
                 </div>
               </div>
               <div class="text-base-content flex-1 min-w-0">
@@ -62,13 +62,13 @@
                 :class="{ 'input-primary': isSearchActive }"
               />
               <div class="absolute right-2 top-1/2 transform -translate-y-1/2">
-                <i v-if="!searchQuery" class="fas fa-search text-base-content/40 text-xs"></i>
+                <FaIcon v-if="!searchQuery" icon="search" class="text-base-content/40 text-xs" />
                 <button
                   v-else
                   @click="clearSearch"
                   class="btn btn-ghost btn-xs btn-circle hover:bg-base-200"
                 >
-                  <i class="fas fa-times text-xs"></i>
+                  <FaIcon icon="times" class="text-xs" />
                 </button>
               </div>
             </div>
@@ -83,7 +83,7 @@
           <!-- Errore menu -->
           <div v-else-if="menuStore.error" class="p-2">
             <div class="alert alert-warning alert-sm">
-              <i class="fas fa-exclamation-triangle text-xs"></i>
+              <FaIcon icon="exclamation-triangle" class="text-xs" />
               <div class="text-xs">
                 <div>Errore menu: {{ menuStore.error }}</div>
                 <button class="btn btn-xs btn-ghost mt-1" @click="refreshMenu">
@@ -98,7 +98,7 @@
             <!-- Breadcrumb per la ricerca -->
             <div v-if="isSearchActive && searchQuery" class="mb-3 p-2 bg-primary/10 rounded-lg">
               <div class="text-xs text-primary font-medium mb-1">
-                <i class="fas fa-search mr-1"></i>
+                <FaIcon icon="search" class="mr-1" />
                 Risultati ricerca: "{{ searchQuery }}"
               </div>
               <div class="text-xs text-base-content/60">
@@ -131,7 +131,7 @@
                 :class="{ 'text-primary bg-blue-100': isActive(item.route) }"
                 :data-tip="item.label"
               >
-                <i :class="item.icon + ' text-lg'"></i>
+                <FaIcon :icon="item.icon" class="text-lg" />
               </RouterLink>
             </div>
           </div>
@@ -147,7 +147,7 @@
             class="p-4 text-center"
           >
             <div class="alert alert-info alert-sm">
-              <i class="fas fa-info-circle text-xs"></i>
+              <FaIcon icon="info-circle" class="text-xs" />
               <div class="text-xs">
                 <div>Nessun menu disponibile</div>
                 <button class="btn btn-xs btn-ghost mt-1" @click="refreshMenu">
@@ -163,7 +163,7 @@
             class="p-4 text-center"
           >
             <div class="alert alert-warning alert-sm">
-              <i class="fas fa-search text-xs"></i>
+              <FaIcon icon="search" class="text-xs" />
               <div class="text-xs">
                 <div>Nessun risultato per "{{ searchQuery }}"</div>
                 <button class="btn btn-xs btn-ghost mt-1" @click="clearSearch">
@@ -183,14 +183,14 @@
           >
             <label class="swap swap-rotate">
               <input type="checkbox" :checked="themeStore.isDarkMode" />
-              <i :class="themeStore.themeIcon + ' swap-on text-lg'"></i>
-              <i :class="themeStore.themeIcon + ' swap-off text-lg'"></i>
+              <FaIcon :icon="themeStore.isDarkMode ? 'moon' : 'sun'" class="swap-on text-lg" />
+              <FaIcon :icon="themeStore.isDarkMode ? 'sun' : 'moon'" class="swap-off text-lg" />
             </label>
             <span class="ml-2">{{ themeStore.themeLabel }}</span>
           </div>
 
           <button class="btn btn-error btn-sm w-full text-white" @click="authStore.logout">
-            <i class="fas fa-sign-out-alt mr-2"></i>
+            <FaIcon icon="sign-out-alt" class="mr-2" />
             <span>Logout</span>
           </button>
         </div>
@@ -203,8 +203,8 @@
           <div>
             <label class="swap swap-rotate btn btn-ghost btn-sm w-12 h-12 btn-circle">
               <input type="checkbox" :checked="themeStore.isDarkMode" @change="toggleTheme" />
-              <i :class="themeStore.themeIcon + ' swap-on text-lg'"></i>
-              <i :class="themeStore.themeIcon + ' swap-off text-lg'"></i>
+              <FaIcon :icon="themeStore.isDarkMode ? 'moon' : 'sun'" class="swap-on text-lg" />
+              <FaIcon :icon="themeStore.isDarkMode ? 'sun' : 'moon'" class="swap-off text-lg" />
             </label>
           </div>
 
@@ -213,7 +213,7 @@
               class="btn btn-error btn-sm w-12 h-12 btn-circle text-white"
               @click="authStore.logout"
             >
-              <i class="fas fa-sign-out-alt text-lg"></i>
+              <FaIcon icon="sign-out-alt" class="text-lg" />
             </button>
           </div>
         </div>
@@ -226,13 +226,13 @@
       <div class="navbar bg-base-100 shadow-sm border-b border-base-300">
         <div class="flex-none lg:hidden">
           <label for="drawer-toggle" class="btn btn-square btn-ghost">
-            <i class="fas fa-bars text-lg"></i>
+            <FaIcon icon="bars" class="text-lg" />
           </label>
         </div>
 
         <div class="flex-none hidden lg:block">
           <button class="btn btn-square btn-ghost" @click="toggleSidenav">
-            <i class="fas fa-bars text-lg"></i>
+            <FaIcon icon="bars" class="text-lg" />
           </button>
         </div>
 
@@ -250,7 +250,7 @@
           <div class="dropdown dropdown-end">
             <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
               <div class="indicator">
-                <i class="fas fa-bell text-lg"></i>
+                <FaIcon icon="bell" class="text-lg" />
                 <span class="badge badge-sm badge-primary indicator-item">3</span>
               </div>
             </div>
@@ -274,7 +274,7 @@
             <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
               <div class="avatar placeholder">
                 <div class="bg-primary text-primary-content rounded-full w-10">
-                  <i class="fas fa-user"></i>
+                  <FaIcon icon="user" />
                 </div>
               </div>
             </div>
@@ -290,15 +290,15 @@
                 }}</span>
               </li>
               <li>
-                <a><i class="fas fa-user mr-2"></i> Profilo</a>
+                <a><FaIcon icon="user" class="mr-2"/> Profilo</a>
               </li>
               <li>
-                <a><i class="fas fa-cog mr-2"></i> Impostazioni</a>
+                <a><FaIcon icon="cog" class="mr-2"/> Impostazioni</a>
               </li>
               <li class="divider"></li>
               <li>
                 <a @click="authStore.logout" class="text-error"
-                  ><i class="fas fa-sign-out-alt mr-2"></i> Logout</a
+                  ><FaIcon icon="sign-out-alt" class="mr-2"/> Logout</a
                 >
               </li>
             </ul>
@@ -322,6 +322,7 @@ import { useThemeStore } from '@/stores/theme'
 import { useMenuStore, type MenuItem } from '@/stores/menu'
 import { refreshDynamicRoutes } from '@/router'
 import MenuItemComponent from '@/components/MenuItemComponent.vue'
+import FaIcon from '@presenze-in-web-frontend/core-lib'
 
 const authStore = useAuthStore()
 const themeStore = useThemeStore()

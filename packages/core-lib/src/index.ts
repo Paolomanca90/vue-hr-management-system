@@ -4,6 +4,7 @@ import type { App } from 'vue'
 export { default as PrimeButton } from './components/PrimeButton.vue'
 export { default as PrimeModal } from './components/PrimeModal.vue'
 export { default as PrimeDataTable } from './components/PrimeDataTable.vue'
+export { default as FaIcon } from './components/FaIcon.vue'
 
 // Esporta composables
 /* export { useApi } from './composables/useApi'
@@ -15,6 +16,10 @@ export { useAuth } from './composables/useAuth' */
 // Esporta PrimeVue plugin e componenti
 export { installPrimeVue } from './plugins/primevue'
 export * from './plugins/primevue'
+
+// Esporta FontAwesome plugin e componenti
+export { installFontAwesome, FontAwesomeIcon, library } from './plugins/fontawesome'
+export type { IconDefinition } from './plugins/fontawesome'
 
 // Plugin per installazione globale
 const plugin = {
