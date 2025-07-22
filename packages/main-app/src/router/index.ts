@@ -6,11 +6,11 @@ import Login from '@/views/Login.vue'
 import Domain from '@/views/Domain.vue'
 import MainLayout from '@/layouts/MainLayout.vue'
 import Dashboard from '@/views/Dashboard.vue'
-import Employees from '@/views/Employees.vue'
 import Payroll from '@/views/Payroll.vue'
 import Reports from '@/views/Reports.vue'
 import Settings from '@/views/Settings.vue'
 import PlaceholderPage from '@/views/PlaceholderPage.vue'
+import Users from '@/views/Users.vue'
 
 // Route statiche di base (sempre presenti)
 const staticRoutes: RouteRecordRaw[] = [
@@ -38,9 +38,9 @@ const appRoutes: RouteRecordRaw[] = [
     component: Dashboard,
   },
   {
-    path: 'employees',
-    name: 'Employees',
-    component: Employees,
+    path: 'users',
+    name: 'Users',
+    component: Users,
   },
   {
     path: 'payroll',
