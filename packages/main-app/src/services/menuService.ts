@@ -8,13 +8,33 @@ export interface ApiMenuItem {
   parametri?: string
   ordine: number
   soloApi: string
+  modificabile: string
   parent_Id?: number
   figli: ApiMenuItem[]
+}
+
+export interface ApiMenuUtenteItem {
+  id: number,
+  nome: string,
+  ordine: number,
+  parenT_ID?: number,
+  modificabile?: string,
+  icona?: string,
+  path?: string,
+  visualizza: string,
+  modifica: string,
+  figli: ApiMenuUtenteItem[]
 }
 
 export interface MenuResponse {
   success: boolean
   data: ApiMenuItem[]
+  message?: string
+}
+
+export interface MenuUtenteResponse {
+  success: boolean
+  data: ApiMenuUtenteItem[]
   message?: string
 }
 
@@ -24,6 +44,33 @@ class MenuService {
   async getMenuVisibili(): Promise<ApiMenuItem[]> {
     try {
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.menuVisibili}`, {
+        method: 'GET',
+        headers: {
+          ...this.config.defaultHeaders,
+          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const result = await response.json()
+
+      if (!result) {
+        throw new Error('Errore nel caricamento del menu')
+      }
+
+      return result
+    } catch (error) {
+      console.error('Errore nel caricamento dei menu:', error)
+      throw error
+    }
+  }
+
+  async getMenuUtente(): Promise<ApiMenuUtenteItem[]> {
+    try {
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.menuUtente}`, {
         method: 'GET',
         headers: {
           ...this.config.defaultHeaders,

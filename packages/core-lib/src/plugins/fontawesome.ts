@@ -51,6 +51,8 @@ import {
   faMoon,
   faSun,
   faAdjust,
+  faCopy,
+  faColumns,
   // Dashboard e HR
   faTachometerAlt,
   faChartBar,
@@ -60,6 +62,7 @@ import {
   faFileAlt,
   faFilePdf,
   faFileExcel,
+  faFileCsv,
   faFolder,
   faFolderOpen,
   // Utenti e gestione
@@ -189,6 +192,7 @@ library.add(
   faFileAlt,
   faFilePdf,
   faFileExcel,
+  faFileCsv,
   faFolder,
   faFolderOpen,
   faUserPlus,
@@ -237,6 +241,8 @@ library.add(
   faMoon,
   faSun,
   faAdjust,
+  faCopy,
+  faColumns,
   
   // Regular icons
   farUser,
