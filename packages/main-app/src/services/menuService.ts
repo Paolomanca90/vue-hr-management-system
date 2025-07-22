@@ -26,10 +26,9 @@ class MenuService {
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.menuVisibili}`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          Authorization: 'Bearer ' + localStorage.getItem('auth_token'),
-        },
+          ...this.config.defaultHeaders,
+          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
+        }
       })
 
       if (!response.ok) {

@@ -4,12 +4,27 @@ export const API_CONFIG = {
 
   // Endpoints
   endpoints: {
-    login: '/api/Login/login',
+    // Login
+    login: '/api/Login/login', //POST
     getDomini: '/api/Login/getdomini',
-    setDominio: '/api/Login/setdominio',
+    setDominio: '/api/Login/setdominio', //POST
     logout: '/api/Login/logout',
-    getEncryptString: '/api/Login/getencryptstring',
+
+    // Menu
     menuVisibili: '/api/Menu/visibili',
+    menuUtente: '/api/Menu/menuUtente',
+    apiDisponibili: 'api/Menu/ApiDisponibili',
+    updateMenuAbilitazioni: '/api/Menu/UpdateMenuAbilitazioni', //POST
+
+    //Profile
+    users: '/api/users', //GET,POST,PUT
+    deleteUser: 'api/users/by-key', //DELETE
+
+    // Gruppi Utente
+    menuGruppiUtente: '/api/gruppiutente/menuXGruppiUtente',
+    aggiornaAbilitazioniGruppiUtente: '/api/gruppiutente/aggiornaAbilitazioniGruppiUtente', //POST
+    gruppiUtente: '/api/gruppiutente', //GET,POST,PUT
+    deleteGruppiUtente: 'api/gruppiutente/by-key' //DELETE
   },
 
   // Headers di default

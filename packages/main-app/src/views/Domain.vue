@@ -41,9 +41,9 @@
                   readonly
                   class="input input-bordered w-full pr-12 bg-base-200"
                 />
-                <i
-                  class="fas fa-user absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/40"
-                ></i>
+                <FaIcon icon="user"
+                  class="absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/40"
+                />
               </div>
             </div>
 
@@ -68,9 +68,9 @@
                     {{ domain.dominio }}
                   </option>
                 </select>
-                <i
-                  class="fas fa-globe absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/40 pointer-events-none"
-                ></i>
+                <FaIcon icon="globe"
+                  class="absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/40 pointer-events-none"
+                />
               </div>
               <div v-if="submitted && !selectedDomain" class="label">
                 <span class="label-text-alt text-error">Dominio richiesto</span>
@@ -79,7 +79,7 @@
 
             <!-- Info Dominio-->
             <div v-if="authStore.availableDomains.length > 0" class="alert alert-info">
-              <i class="fas fa-info-circle"></i>
+              <FaIcon icon="info-circle"/>
               <div>
                 <div class="font-bold">Domini Disponibili</div>
                 <div class="text-sm">
@@ -109,7 +109,7 @@
 
             <!-- Error -->
             <div v-if="error" class="alert alert-error">
-              <i class="fas fa-exclamation-triangle"></i>
+              <FaIcon icon="exclamation-triangle"/>
               <span>{{ error }}</span>
             </div>
 
@@ -132,7 +132,7 @@
               @click="backToLogin"
               :disabled="authStore.loading"
             >
-              <i class="fas fa-arrow-left mr-2"></i>
+              <FaIcon icon="arrow-left" class="mr-2"/>
               Torna al Login
             </button>
           </form>
@@ -150,6 +150,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 
 const router = useRouter()
 const route = useRoute()

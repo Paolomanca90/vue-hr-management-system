@@ -15,7 +15,7 @@ export const useThemeStore = defineStore('theme', () => {
         return false
       case 'auto':
       default:
-        return typeof window !== 'undefined' 
+        return typeof window !== 'undefined'
           ? window.matchMedia('(prefers-color-scheme: dark)').matches
           : false
     }
@@ -24,12 +24,12 @@ export const useThemeStore = defineStore('theme', () => {
   const themeIcon = computed(() => {
     switch (currentTheme.value) {
       case 'light':
-        return 'fas fa-sun'
+        return 'sun'
       case 'dark':
-        return 'fas fa-moon'
+        return 'moon'
       case 'auto':
       default:
-        return 'fas fa-adjust'
+        return 'adjust'
     }
   })
 
@@ -72,14 +72,14 @@ export const useThemeStore = defineStore('theme', () => {
     if (typeof document === 'undefined') return
 
     const isDark = isDarkMode.value
-    
+
     // Apply DaisyUI theme
     const daisyTheme = isDark ? 'dark' : 'light'
     document.documentElement.setAttribute('data-theme', daisyTheme)
-    
+
     // Apply dark class for Tailwind CSS
     document.documentElement.classList.toggle('dark', isDark)
-    
+
     // Update color-scheme for better accessibility
     document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'
   }
@@ -103,9 +103,9 @@ export const useThemeStore = defineStore('theme', () => {
 
   const animateThemeChange = () => {
     if (typeof document === 'undefined') return
-    
+
     document.documentElement.style.transition = 'color-scheme 0.3s ease, background-color 0.3s ease'
-    
+
     setTimeout(() => {
       document.documentElement.style.transition = ''
     }, 300)

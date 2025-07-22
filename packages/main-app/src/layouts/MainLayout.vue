@@ -183,8 +183,7 @@
           >
             <label class="swap swap-rotate">
               <input type="checkbox" :checked="themeStore.isDarkMode" />
-              <FaIcon :icon="themeStore.isDarkMode ? 'moon' : 'sun'" class="swap-on text-lg" />
-              <FaIcon :icon="themeStore.isDarkMode ? 'sun' : 'moon'" class="swap-off text-lg" />
+              <FaIcon :icon="themeStore.themeIcon" class="text-lg" />
             </label>
             <span class="ml-2">{{ themeStore.themeLabel }}</span>
           </div>
@@ -203,8 +202,7 @@
           <div>
             <label class="swap swap-rotate btn btn-ghost btn-sm w-12 h-12 btn-circle">
               <input type="checkbox" :checked="themeStore.isDarkMode" @change="toggleTheme" />
-              <FaIcon :icon="themeStore.isDarkMode ? 'moon' : 'sun'" class="swap-on text-lg" />
-              <FaIcon :icon="themeStore.isDarkMode ? 'sun' : 'moon'" class="swap-off text-lg" />
+              <FaIcon :icon="themeStore.themeIcon" class="text-lg" />
             </label>
           </div>
 
@@ -322,7 +320,7 @@ import { useThemeStore } from '@/stores/theme'
 import { useMenuStore, type MenuItem } from '@/stores/menu'
 import { refreshDynamicRoutes } from '@/router'
 import MenuItemComponent from '@/components/MenuItemComponent.vue'
-import FaIcon from '@presenze-in-web-frontend/core-lib'
+import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 
 const authStore = useAuthStore()
 const themeStore = useThemeStore()

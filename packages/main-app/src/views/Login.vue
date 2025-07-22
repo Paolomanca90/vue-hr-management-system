@@ -15,7 +15,7 @@
                 />
               </div>
             </div>
-            <h1 class="text-2xl font-bold text-base-content mb-2">HR Management System</h1>
+            <h1 class="text-2xl font-bold text-base-content mb-2">Presenze In Web</h1>
             <p class="text-base-content/70">Accedi al tuo account aziendale</p>
           </div>
 
@@ -35,9 +35,9 @@
                   required
                   autocomplete="username"
                 />
-                <i
-                  class="fas fa-user absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/40"
-                ></i>
+                <FaIcon icon="user"
+                  class="absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/40"
+                />
               </div>
               <div v-if="submitted && !credentials.username" class="label">
                 <span class="label-text-alt text-error">Username richiesto</span>
@@ -64,7 +64,7 @@
                   class="absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/40 hover:text-base-content/60"
                   @click="togglePasswordVisibility"
                 >
-                  <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                  <FaIcon :icon="showPassword ? 'eye-slash' : 'eye'"/>
                 </button>
               </div>
               <div v-if="submitted && !credentials.password" class="label">
@@ -86,7 +86,7 @@
 
             <!-- Error -->
             <div v-if="error" class="alert alert-error">
-              <i class="fas fa-exclamation-triangle"></i>
+              <FaIcon icon="exclamation-triangle"/>
               <span>{{ error }}</span>
             </div>
 
@@ -119,7 +119,7 @@
             <div class="text-xs text-base-content/50 mt-4">
               <p>Per supporto tecnico contattare:</p>
               <p>
-                <i class="fas fa-envelope mr-1"></i>
+                <FaIcon icon="envelope" class="mr-1"/>
                 <a href="mailto:support@inaz.it" class="link">support@inaz.it</a>
               </p>
             </div>
@@ -135,6 +135,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import type { LoginCredentials } from '@/stores/auth'
+import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 
 const router = useRouter()
 const route = useRoute()

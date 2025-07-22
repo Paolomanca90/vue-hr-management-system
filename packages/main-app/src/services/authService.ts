@@ -43,10 +43,7 @@ class AuthService {
     try {
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.login}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
+        headers: this.config.defaultHeaders,
         body: JSON.stringify(request),
       })
 
@@ -76,10 +73,7 @@ class AuthService {
       // Recupera il token dalla sessione
       const token = sessionStorage.getItem('temp_token')
 
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      }
+      const headers: Record<string, string> = this.config.defaultHeaders
 
       // Aggiunge il token se disponibile
       if (token) {
@@ -127,10 +121,7 @@ class AuthService {
       // Recupera il token dalla sessione
       const token = sessionStorage.getItem('temp_token')
 
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      }
+      const headers: Record<string, string> = this.config.defaultHeaders
 
       // Aggiunge il token se disponibile
       if (token) {
@@ -168,10 +159,7 @@ class AuthService {
     try {
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.logout}`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
+        headers: this.config.defaultHeaders,
       })
 
       if (!response.ok) {
@@ -184,31 +172,6 @@ class AuthService {
       sessionStorage.removeItem('temp_token')
       localStorage.removeItem('auth_token')
       sessionStorage.removeItem('openiddict_token')
-    }
-  }
-
-  async getEncryptString(input: string): Promise<string> {
-    try {
-      const response = await fetch(
-        `${this.config.baseUrl}${this.config.endpoints.getEncryptString}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-          },
-          body: JSON.stringify(input),
-        },
-      )
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const result = await response.text()
-      return result
-    } catch (error) {
-      throw new Error('Errore di connessione al server: ' + error)
     }
   }
 }

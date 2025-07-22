@@ -48,6 +48,9 @@ import {
   faRefresh,
   faSpinner,
   faCircleNotch,
+  faMoon,
+  faSun,
+  faAdjust,
   // Dashboard e HR
   faTachometerAlt,
   faChartBar,
@@ -231,6 +234,9 @@ library.add(
   faSort,
   faFilter,
   faSliders,
+  faMoon,
+  faSun,
+  faAdjust,
   
   // Regular icons
   farUser,
