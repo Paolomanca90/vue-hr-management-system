@@ -305,8 +305,8 @@
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount, useSlots } from 'vue'
 import { FaIcon } from '..'
 import * as XLSX from 'xlsx'
-import jsPDF from 'jspdf'
-import 'jspdf-autotable'
+import { jsPDF } from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 const props = defineProps({
   data: {
@@ -383,7 +383,6 @@ const props = defineProps({
     default: 'expand',
     validator: (value) => ['fit', 'expand'].includes(value)
   },
-  // Enhanced features props
   showToolbar: {
     type: Boolean,
     default: false
@@ -430,7 +429,6 @@ const props = defineProps({
     type: String,
     default: 'dt-state-demo'
   },
-  // Auto column sizing props
   autoColumnSizing: {
     type: Boolean,
     default: true
@@ -463,12 +461,10 @@ const dataTable = ref()
 const globalSearchValue = ref('')
 const slots = useSlots()
 
-// Initialize filters with global filter
 const internalFilters = ref({
   global: { value: null, matchMode: 'contains' }
 })
 
-// Initialize toggleable columns with visibility
 const toggleableColumns = ref(
   props.columns.map(col => ({
     ...col,
@@ -476,7 +472,6 @@ const toggleableColumns = ref(
   }))
 )
 
-// Watch for columns prop changes
 watch(() => props.columns, (newColumns) => {
   toggleableColumns.value = newColumns.map(col => ({
     ...col,
@@ -489,17 +484,14 @@ watch(() => props.columns, (newColumns) => {
   })
 }, { deep: true })
 
-// Watch for external filters changes
 watch(() => props.filters, (newFilters) => {
   internalFilters.value = { ...internalFilters.value, ...newFilters }
 }, { deep: true, immediate: true })
 
-// Watch global search
 watch(globalSearchValue, (newValue) => {
   internalFilters.value.global.value = newValue
 })
 
-// Watch for data changes to recalculate widths
 watch(() => props.data, () => {
   nextTick(() => {
     if (props.autoColumnSizing) {
@@ -508,12 +500,10 @@ watch(() => props.data, () => {
   })
 }, { deep: true })
 
-// Computed
 const visibleColumns = computed(() => {
   return toggleableColumns.value.filter(col => col.visible)
 })
 
-// Watch visible columns changes
 watch(visibleColumns, () => {
   nextTick(() => {
     if (props.autoColumnSizing) {
@@ -534,7 +524,6 @@ const computedTableStyle = computed(() => {
   return `min-width: ${props.minTableWidth}; table-layout: fixed; width: 100%;`
 })
 
-// Auto Column Sizing Logic
 const calculateColumnWidths = () => {
   if (!props.autoColumnSizing) return
   
@@ -545,20 +534,18 @@ const calculateColumnWidths = () => {
     const visibleCols = visibleColumns.value
     const hasActions = !!slots.actions
     
-    // Get container width - usa il wrapper della tabella
+    // Width - usa il wrapper della tabella
     const wrapper = tableElement.closest('.data-table-wrapper') || tableElement.closest('.p-datatable-wrapper')
     const containerWidth = wrapper?.clientWidth || 1200
     
     // Calcola la larghezza disponibile per le colonne di contenuto
     const actionWidth = hasActions ? parseInt(props.actionColumnWidth) : 0
-    const scrollbarWidth = 17 // Larghezza approssimativa scrollbar
-    const paddingAndBorders = 20 // Padding e bordi vari
+    const scrollbarWidth = 17 
+    const paddingAndBorders = 20
     const availableWidth = containerWidth - actionWidth - scrollbarWidth - paddingAndBorders
     
-    // Calculate optimal widths based on content and priorities
     const columnWidths = calculateOptimalWidths(visibleCols, availableWidth)
     
-    // Apply widths
     applyColumnWidths(columnWidths, hasActions)
   })
 }
@@ -571,12 +558,12 @@ const calculateOptimalWidths = (columns, availableWidth) => {
     xlarge: 250   // Per descrizioni lunghe
   }
 
-  // Prima passa: calcola le percentuali ideali per ogni colonna
+  // Calcola le percentuali ideali per ogni colonna
   const columnConfigs = columns.map((col, index) => {
     const field = col.field || col.key
     let percentage, minWidth
     
-    // Se la colonna ha una larghezza specificata, convertila in percentuale
+    // Se la colonna ha una larghezza specificata, converte in percentuale
     if (col.width) {
       if (col.width.includes('%')) {
         percentage = parseFloat(col.width) / 100
@@ -612,14 +599,14 @@ const calculateOptimalWidths = (columns, availableWidth) => {
     return { index, percentage, minWidth, field }
   })
 
-  // Seconda passa: normalizza le percentuali per occupare il 100%
+  // Normalizza le percentuali per occupare il 100%
   const totalPercentage = columnConfigs.reduce((sum, config) => sum + config.percentage, 0)
   const normalizedConfigs = columnConfigs.map(config => ({
     ...config,
     percentage: config.percentage / totalPercentage
   }))
 
-  // Terza passa: calcola le larghezze finali assicurandosi che rispettino i minimi
+  // Calcola le larghezze finali assicurandosi che rispettino i minimi
   const finalWidths = normalizedConfigs.map(config => {
     const calculatedWidth = availableWidth * config.percentage
     const finalWidth = Math.max(calculatedWidth, config.minWidth)
@@ -650,11 +637,11 @@ const applyColumnWidths = (columnWidths, hasActions) => {
     if (headerElement) {
       headerElement.style.width = width
       headerElement.style.minWidth = minWidth
-      headerElement.style.maxWidth = 'none' // Rimuovi max-width per permettere l'espansione
+      headerElement.style.maxWidth = 'none'
     }
   })
 
-  // Gestisci colonna azioni se presente (sempre con larghezza fissa)
+  // Gestisce colonna azioni se presente (sempre con larghezza fissa)
   if (hasActions) {
     const actionColIndex = columnWidths.length + 1
     const actionWidth = props.actionColumnWidth
@@ -716,9 +703,9 @@ const getActionColumnStyle = () => {
 }
 
 const onColumnResize = (event) => {
-  // Gestisci resize manuale delle colonne
+  // Gestisce resize manuale delle colonne
   if (props.autoColumnSizing) {
-    // Potresti voler disabilitare temporaneamente auto-sizing
+    // Per disabilitare temporaneamente auto-sizing
     // o aggiornare le larghezze calcolate
   }
 }
@@ -734,7 +721,6 @@ const clearAllFilters = () => {
   }
 }
 
-// Initialize filters for all columns
 const initializeFilters = () => {
   const filters = {
     global: { value: null, matchMode: 'contains' }
@@ -766,28 +752,90 @@ const exportToExcel = () => {
 }
 
 const exportToPDF = () => {
-  const doc = new jsPDF()
-  const exportData = getExportData()
-  
-  const headers = visibleColumns.value
-    .filter(col => col.exportable !== false)
-    .map(col => col.header || col.label)
-  
-  const rows = exportData.map(row => 
-    visibleColumns.value
+  try {
+    console.log('Inizio esportazione PDF...')
+    
+    const exportData = getExportData()
+    
+    if (!exportData || exportData.length === 0) {
+      console.warn('Nessun dato da esportare')
+      alert('Nessun dato disponibile per l\'esportazione')
+      return
+    }
+
+    console.log('Dati da esportare:', exportData.length, 'righe')
+
+    const doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4'
+    })
+
+    console.log('jsPDF istanziato')
+
+    // Headers della tabella
+    const headers = visibleColumns.value
       .filter(col => col.exportable !== false)
-      .map(col => getColumnValue(row, col.field || col.key))
-  )
+      .map(col => col.header || col.label)
+    
+    console.log('Headers preparati:', headers)
 
-  doc.autoTable({
-    head: [headers],
-    body: rows,
-    startY: 20,
-    styles: { fontSize: 8 },
-    headStyles: { fillColor: [41, 128, 185] }
-  })
+    // Dati della tabella
+    const rows = exportData.map(row => 
+      visibleColumns.value
+        .filter(col => col.exportable !== false)
+        .map(col => {
+          const value = getColumnValue(row, col.field || col.key)
+          return value !== null && value !== undefined ? String(value) : ''
+        })
+    )
 
-  doc.save(`${props.exportFilename}.pdf`)
+    console.log('Righe preparate:', rows.length)
+
+    // Titolo del documento
+    doc.setFontSize(16)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Report Dati', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' })
+    
+    // Data di generazione
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'normal')
+    const currentDate = new Date().toLocaleDateString('it-IT')
+    doc.text(`Generato il: ${currentDate}`, doc.internal.pageSize.getWidth() / 2, 30, { align: 'center' })
+
+    // Usa autoTable come funzione standalone (per le versioni recenti)
+    autoTable(doc, {
+      head: [headers],
+      body: rows,
+      startY: 40,
+      styles: { 
+        fontSize: 8,
+        cellPadding: 2,
+        overflow: 'linebreak'
+      },
+      headStyles: { 
+        fillColor: [66, 139, 202],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 9
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245]
+      },
+      margin: { top: 40, right: 14, bottom: 20, left: 14 }
+    })
+
+    // Salva il file
+    const filename = `${props.exportFilename || 'export'}_${new Date().toISOString().split('T')[0]}.pdf`
+    doc.save(filename)
+    
+    console.log('PDF esportato con successo:', filename)
+    
+  } catch (error) {
+    console.error('Errore durante l\'esportazione PDF:', error)
+    console.error('Stack trace:', error.stack)
+    alert(`Errore durante l'esportazione PDF: ${error.message}`)
+  }
 }
 
 const getExportData = () => {
