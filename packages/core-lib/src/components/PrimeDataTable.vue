@@ -99,6 +99,7 @@
       :dataKey="dataKey"
       :scrollable="scrollable"
       :scrollHeight="scrollHeight"
+      :virtualScrollerOptions = "virtualScrollerOptions"
       :resizableColumns="resizableColumns"
       :reorderableColumns="reorderableColumns"
       :exportFilename="exportFilename"
@@ -441,7 +442,11 @@ const props = defineProps({
   actionColumnWidth: {
     type: String,
     default: '120px'
-  }
+  },
+  virtualScrollerOptions: {
+    type: Object,
+    default: () => ({})
+  },
 })
 
 const emit = defineEmits([

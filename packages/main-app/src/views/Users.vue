@@ -38,9 +38,6 @@
           :data="users"
           :columns="enhancedTableColumns"
           :loading="tableLoading"
-          :paginator="true"
-          :rows="10"
-          :rowsPerPageOptions="[5, 10, 20, 50, 100]"
           selectionMode="single"
           v-model:selection="selectedUser"
           v-model:filters="filters"
@@ -55,6 +52,7 @@
           exportFilename="utenti-sistema"
           :scrollable="true"
           scrollHeight="600px"
+          :virtualScrollerOptions="{ itemSize: 40 }"
           :resizableColumns="true"
           dataKey="username"
           filterDisplay="menu"
@@ -108,7 +106,7 @@
           <!-- Slot personalizzato per le azioni -->
           <template #actions="{ data }">
             <div class="flex items-center space-x-1">
-              <div class="tooltip tooltip-top" data-tip="Modifica utente">
+              <div class="tooltip tooltip-left" data-tip="Modifica utente">
                 <button
                   class="btn btn-sm btn-primary"
                   @click="editUser(data)"
@@ -116,7 +114,7 @@
                   <FaIcon icon="edit" />
                 </button>
               </div>
-              <div class="tooltip tooltip-top" data-tip="Elimina utente">
+              <div class="tooltip tooltip-left" data-tip="Elimina utente">
                 <button
                   class="btn btn-sm btn-error"
                   @click="deleteUser(data)"
@@ -124,7 +122,7 @@
                   <FaIcon icon="trash" />
                 </button>
               </div>
-              <div class="tooltip tooltip-top" data-tip="Duplica utente">
+              <div class="tooltip tooltip-left" data-tip="Duplica utente">
                 <button
                   class="btn btn-sm btn-warning"
                   @click="duplicateUser(data)"
