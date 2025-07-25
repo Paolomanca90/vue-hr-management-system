@@ -21,7 +21,7 @@
       :resizableColumns="resizableColumns"
       :reorderableColumns="reorderableColumns"
       :exportFilename="exportFilename"
-      :filterDisplay="filterDisplay"
+      filterDisplay="row"
       :stateStorage="stateStorage"
       :stateKey="stateKey"
       columnResizeMode="fit"
@@ -53,6 +53,7 @@
               Pulisci Filtri
             </button>
             
+            <!-- Search -->
             <div v-if="showGlobalSearch" class="relative flex-1 max-w-md">
               <input
                 type="text"
@@ -145,39 +146,58 @@
         :frozen="column.frozen"
         :alignFrozen="column.alignFrozen"
         :exportable="column.exportable !== false"
-        :showFilterMenu="column.showFilterMenu !== false && showColumnFilters"
-        :showFilterOperator="column.showFilterOperator !== false"
-        :showClearButton="column.showClearButton !== false"
-        :showApplyButton="column.showApplyButton !== false"
-        :showFilterMatchModes="column.showFilterMatchModes !== false"
+        :showFilterMenu="true"
+        :showFilterOperator="true"
+        :showClearButton="true"
+        :showApplyButton="false"
+        :showFilterMatchModes="true"
         :filterField="column.filterField || column.field || column.key"
         :filterMatchMode="column.filterMatchMode || 'contains'"
-        :filterMenuStyle="column.filterMenuStyle"
+        :dataType="column.dataType || 'text'"
       >
-        <!-- Custom filter template -->
-        <template #filter="{ filterModel }" v-if="getFilterType(column) === 'text'">
-          <input 
+        <template #filter="{ filterModel, filterCallback }" v-if="getFilterType(column) === 'text'">
+          <PInputText 
             v-model="filterModel.value" 
             type="text" 
             :placeholder="`Cerca per ${(column.header || column.label).toLowerCase()}`"
-            class="input input-xs input-bordered w-full"
+            @input="filterCallback()"
+            style="width: 100%"
           />
         </template>
 
-        <template #filter="{ filterModel }" v-else-if="getFilterType(column) === 'select'">
-          <select 
+        <template #filter="{ filterModel, filterCallback }" v-else-if="getFilterType(column) === 'select'">
+          <PSelect 
             v-model="filterModel.value" 
-            class="select select-xs select-bordered w-full"
-          >
-            <option value="">Tutti</option>
-            <option
-              v-for="option in column.filterOptions || []"
-              :key="option.value"
-              :value="option.value"
-            >
-              {{ option.label }}
-            </option>
-          </select>
+            :options="column.filterOptions || []"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Seleziona"
+            :showClear="true"
+            @change="filterCallback()"
+            style="width: 100%"
+          />
+        </template>
+
+        <template #filter="{ filterModel, filterCallback }" v-else-if="getFilterType(column) === 'multiselect'">
+          <PMultiSelect 
+            v-model="filterModel.value" 
+            :options="column.filterOptions || []"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Seleziona"
+            :maxSelectedLabels="1"
+            @change="filterCallback()"
+            style="width: 100%"
+          />
+        </template>
+
+        <template #filter="{ filterModel, filterCallback }" v-else-if="getFilterType(column) === 'boolean'">
+          <PCheckbox 
+            v-model="filterModel.value" 
+            :indeterminate="filterModel.value === null"
+            binary
+            @change="filterCallback()"
+          />
         </template>
 
         <!-- Custom column -->
@@ -333,7 +353,7 @@ const props = defineProps({
   },
   filterDisplay: {
     type: String,
-    default: 'menu',
+    default: 'row',
     validator: (value) => ['row', 'menu'].includes(value)
   },
   stateStorage: {
@@ -435,6 +455,7 @@ const getColumnValue = (data, field) => {
 
 const getFilterType = (column) => {
   if (column.filterType) return column.filterType
+  if (column.dataType === 'boolean') return 'boolean'
   if (column.filterOptions) return 'select'
   if (column.multiSelectFilter) return 'multiselect'
   return 'text'
@@ -627,6 +648,22 @@ watch(() => toggleableColumns.value, () => {
   position: relative;
 }
 
+:deep(.p-datatable .p-datatable-thead > tr:first-child > th) {
+  border-bottom: 1px solid var(--surface-300);
+  padding-bottom: 0.5rem;
+}
+
+:deep(.p-datatable .p-datatable-thead > tr:nth-child(2) > th) {
+  padding-top: 0.5rem;
+  padding-bottom: 0.75rem;
+  background-color: var(--surface-50);
+  border-top: 1px solid var(--surface-300);
+}
+
+:deep(.p-datatable .p-datatable-thead > tr:nth-child(2) .p-column-filter) {
+  width: 100%;
+}
+
 :deep(.p-datatable .p-datatable-tbody > tr > td) {
   padding: 0.75rem;
   white-space: nowrap;
@@ -651,6 +688,20 @@ watch(() => toggleableColumns.value, () => {
   overflow: visible !important;
   position: relative !important;
   z-index: 10 !important;
+}
+
+:deep(.p-column-filter-row .p-column-filter-element) {
+  width: 100%;
+}
+
+:deep(.p-column-filter-row .input) {
+  width: 100%;
+  min-width: 100px;
+}
+
+:deep(.p-column-filter-row .select) {
+  width: 100%;
+  min-width: 120px;
 }
 
 .tooltip:before,
@@ -696,14 +747,6 @@ watch(() => toggleableColumns.value, () => {
 
 :deep(.p-datatable .p-resizable-column .p-column-resizer:hover) {
   border-color: var(--primary-color);
-}
-
-:deep(.p-column-filter-menu) {
-  min-width: 12rem;
-}
-
-:deep(.p-column-filter-menu .p-column-filter-menu-button) {
-  margin-left: 0.5rem;
 }
 
 :deep(.p-inputtext) {

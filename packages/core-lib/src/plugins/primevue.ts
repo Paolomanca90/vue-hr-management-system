@@ -3,7 +3,136 @@ import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
 import { definePreset } from '@primevue/themes'
 
-// Definisce un preset personalizzato basato su Aura
+// Import della localizzazione italiana
+const italianLocale = {
+  startsWith: 'Inizia con',
+  contains: 'Contiene',
+  notContains: 'Non contiene',
+  endsWith: 'Finisce con',
+  equals: 'Uguale',
+  notEquals: 'Non uguale',
+  noFilter: 'Nessun filtro',
+  filter: 'Filtro',
+  lt: 'Minore di',
+  lte: 'Minore o uguale a',
+  gt: 'Maggiore di',
+  gte: 'Maggiore o uguale a',
+  dateIs: 'Data è',
+  dateIsNot: 'Data non è',
+  dateBefore: 'Data prima di',
+  dateAfter: 'Data dopo di',
+  custom: 'Personalizzato',
+  clear: 'Pulisci',
+  apply: 'Applica',
+  matchAll: 'Corrisponde a tutti',
+  matchAny: 'Corrisponde a qualsiasi',
+  addRule: 'Aggiungi regola',
+  removeRule: 'Rimuovi regola',
+  accept: 'Sì',
+  reject: 'No',
+  choose: 'Scegli',
+  upload: 'Carica',
+  cancel: 'Annulla',
+  completed: 'Completato',
+  pending: 'In attesa',
+  dayNames: ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'],
+  dayNamesShort: ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'],
+  dayNamesMin: ['Do', 'Lu', 'Ma', 'Me', 'Gi', 'Ve', 'Sa'],
+  monthNames: [
+    'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
+    'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
+  ],
+  monthNamesShort: [
+    'Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu',
+    'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'
+  ],
+  chooseYear: 'Scegli anno',
+  chooseMonth: 'Scegli mese',
+  chooseDate: 'Scegli data',
+  prevDecade: 'Decennio precedente',
+  nextDecade: 'Prossimo decennio',
+  prevYear: 'Anno precedente',
+  nextYear: 'Prossimo anno',
+  prevMonth: 'Mese precedente',
+  nextMonth: 'Prossimo mese',
+  prevHour: 'Ora precedente',
+  nextHour: 'Prossima ora',
+  prevMinute: 'Minuto precedente',
+  nextMinute: 'Prossimo minuto',
+  prevSecond: 'Secondo precedente',
+  nextSecond: 'Prossimo secondo',
+  am: 'am',
+  pm: 'pm',
+  today: 'Oggi',
+  weekHeader: 'Sm',
+  firstDayOfWeek: 1,
+  showMonthAfterYear: false,
+  dateFormat: 'dd/mm/yy',
+  weak: 'Debole',
+  medium: 'Medio',
+  strong: 'Forte',
+  passwordPrompt: 'Inserisci una password',
+  emptyFilterMessage: 'Nessun risultato trovato',
+  searchMessage: '{0} risultati disponibili',
+  selectionMessage: '{0} elementi selezionati',
+  emptySelectionMessage: 'Nessun elemento selezionato',
+  emptySearchMessage: 'Nessun risultato trovato',
+  emptyMessage: 'Nessuna opzione disponibile',
+  aria: {
+    trueLabel: 'Vero',
+    falseLabel: 'Falso',
+    nullLabel: 'Non selezionato',
+    star: '1 stella',
+    stars: '{star} stelle',
+    selectAll: 'Tutti gli elementi selezionati',
+    unselectAll: 'Tutti gli elementi deselezionati',
+    close: 'Chiudi',
+    previous: 'Precedente',
+    next: 'Successivo',
+    navigation: 'Navigazione',
+    scrollTop: 'Scorri in alto',
+    moveTop: 'Sposta in alto',
+    moveUp: 'Sposta su',
+    moveDown: 'Sposta giù',
+    moveBottom: 'Sposta in basso',
+    moveToTarget: 'Sposta al target',
+    moveToSource: 'Sposta alla sorgente',
+    moveAllToTarget: 'Sposta tutto al target',
+    moveAllToSource: 'Sposta tutto alla sorgente',
+    pageLabel: 'Pagina {page}',
+    firstPageLabel: 'Prima pagina',
+    lastPageLabel: 'Ultima pagina',
+    nextPageLabel: 'Pagina successiva',
+    prevPageLabel: 'Pagina precedente',
+    rowsPerPageLabel: 'Righe per pagina',
+    previousPageLabel: 'Pagina precedente',
+    jumpToPageDropdownLabel: 'Vai al menu a tendina della pagina',
+    jumpToPageInputLabel: 'Vai all\'input della pagina',
+    selectRow: 'Riga selezionata',
+    unselectRow: 'Riga deselezionata',
+    expandRow: 'Riga espansa',
+    collapseRow: 'Riga compressa',
+    showFilterMenu: 'Mostra menu filtro',
+    hideFilterMenu: 'Nascondi menu filtro',
+    filterOperator: 'Operatore di filtro',
+    filterConstraint: 'Vincolo di filtro',
+    editRow: 'Modifica riga',
+    saveEdit: 'Salva modifica',
+    cancelEdit: 'Annulla modifica',
+    listView: 'Vista elenco',
+    gridView: 'Vista griglia',
+    slide: 'Diapositiva',
+    slideNumber: '{slideNumber}',
+    zoomImage: 'Ingrandisci immagine',
+    zoomIn: 'Ingrandisci',
+    zoomOut: 'Riduci',
+    rotateRight: 'Ruota a destra',
+    rotateLeft: 'Ruota a sinistra',
+    listLabel: 'Lista opzioni'
+  }
+}
+
+// Preset personalizzato basato su Aura
 const HRPreset = definePreset(Aura, {
   semantic: {
     primary: {
@@ -27,6 +156,7 @@ import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import Select from 'primevue/select'
+import MultiSelect from 'primevue/multiselect'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Dialog from 'primevue/dialog'
@@ -87,7 +217,7 @@ import StyleClass from 'primevue/styleclass'
 import FocusTrap from 'primevue/focustrap'
 
 export const installPrimeVue = (app: App) => {
-  // Configura PrimeVue con il nuovo tema
+  // Configura PrimeVue con il nuovo tema e localizzazione italiana
   app.use(PrimeVue, {
     theme: {
       preset: HRPreset,
@@ -96,7 +226,8 @@ export const installPrimeVue = (app: App) => {
         darkModeSelector: 'system',
         cssLayer: false
       }
-    }
+    },
+    locale: italianLocale // Configurazione locale italiana
   })
 
   // Installa servizi
@@ -115,6 +246,7 @@ export const installPrimeVue = (app: App) => {
   app.component('PInputText', InputText)
   app.component('PPassword', Password)
   app.component('PSelect', Select)
+  app.component('PMultiSelect', MultiSelect)
   app.component('PDataTable', DataTable)
   app.component('PColumn', Column)
   app.component('PDialog', Dialog)
@@ -170,6 +302,7 @@ export {
   InputText,
   Password,
   Select,
+  MultiSelect,
   DataTable,
   Column,
   Dialog,
@@ -220,5 +353,6 @@ export {
   ToastService,
   ConfirmationService,
   DialogService,
-  HRPreset
+  HRPreset,
+  italianLocale
 }
