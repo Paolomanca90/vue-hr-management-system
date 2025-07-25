@@ -11,11 +11,11 @@
             </p>
           </div>
           <div class="flex items-center space-x-3">
-            <button class="btn btn-primary" @click="addNewUser">
+            <button class="btn btn-primary btn-sm text-white" @click="addNewUser">
               <FaIcon icon="user-plus" class="mr-2"/>
               Nuovo Utente
             </button>
-            <button class="btn btn-success" @click="refreshUsers">
+            <button class="btn btn-primary btn-outline btn-sm" @click="refreshUsers">
               <FaIcon icon="refresh" class="mr-2"/>
               Aggiorna
             </button>
@@ -24,7 +24,6 @@
       </div>
     </div>
 
-    <!-- Enhanced DataTable with all features -->
     <div class="card bg-base-100 shadow-sm">
       <div class="card-body">
         <!-- Messaggio di errore -->
@@ -33,7 +32,6 @@
           <span>{{ errorMessage }}</span>
         </div>
 
-        <!-- Enhanced DataTable -->
         <PrimeDataTable
           :data="users"
           :columns="enhancedTableColumns"
@@ -62,7 +60,7 @@
           minTableWidth="50rem"
           actionColumnWidth="140px"
         >
-          <!-- Custom toolbar content -->
+          <!-- Custom toolbar -->
           <template #toolbar>
             <div class="flex items-center gap-2">
               <div class="dropdown dropdown-end">
@@ -91,14 +89,14 @@
 
           <!-- Slot personalizzato per la colonna codgruppo -->
           <template #column-codgruppo="{ value }">
-            <span class="badge badge-outline" :class="getGroupBadgeClass(value)">
+            <span class="text-sm">
               {{ value }}
             </span>
           </template>
 
           <!-- Slot personalizzato per la colonna codaccesso -->
           <template #column-codaccesso="{ value }">
-            <span class="badge badge-primary">
+            <span class="text-sm">
               {{ value }}
             </span>
           </template>
@@ -106,28 +104,28 @@
           <!-- Slot personalizzato per le azioni -->
           <template #actions="{ data }">
             <div class="flex items-center space-x-1">
-              <div class="tooltip tooltip-left" data-tip="Modifica utente">
+              <div class="tooltip tooltip-right relative z-[10000]" data-tip="Modifica utente">
                 <button
-                  class="btn btn-sm btn-primary"
+                  class="btn btn-sm btn-primary btn-outline relative z-[100]"
                   @click="editUser(data)"
                 >
                   <FaIcon icon="edit" />
                 </button>
               </div>
-              <div class="tooltip tooltip-left" data-tip="Elimina utente">
+              <div class="tooltip tooltip-right relative z-[10000]" data-tip="Duplica utente">
                 <button
-                  class="btn btn-sm btn-error"
-                  @click="deleteUser(data)"
-                >
-                  <FaIcon icon="trash" />
-                </button>
-              </div>
-              <div class="tooltip tooltip-left" data-tip="Duplica utente">
-                <button
-                  class="btn btn-sm btn-warning"
+                  class="btn btn-sm btn-primary btn-outline relative z-[100]"
                   @click="duplicateUser(data)"
                 >
                   <FaIcon icon="copy" />
+                </button>
+              </div>
+              <div class="tooltip tooltip-right relative z-[10000]" data-tip="Elimina utente">
+                <button
+                  class="btn btn-sm btn-error btn-outline relative z-[100]"
+                  @click="deleteUser(data)"
+                >
+                  <FaIcon icon="trash" />
                 </button>
               </div>
             </div>
@@ -163,12 +161,10 @@ import { ref, computed, onMounted } from 'vue'
 import { PrimeDataTable, FaIcon } from '@presenze-in-web-frontend/core-lib'
 import { userService, type User, type GetUsersResponse } from '@/services/userService'
 
-// Dati reattivi
 const users = ref<User[]>([])
 const tableLoading = ref(false)
 const selectedUser = ref<User | null>(null)
 const errorMessage = ref<string>('')
-const showUserModal = ref(false)
 
 // Interfaccia per i filtri
 interface FilterValue {
@@ -182,10 +178,10 @@ interface FiltersType {
   nomecompleto: FilterValue
   codgruppo: FilterValue
   codaccesso: FilterValue
-  [key: string]: FilterValue // Index signature per accesso dinamico
+  [key: string]: FilterValue
 }
 
-// Filtri per DataTable - Semplificati per il nuovo componente
+// Filtri per DataTable
 const filters = ref<FiltersType>({
   global: { value: null, matchMode: 'contains' },
   username: { value: null, matchMode: 'contains' },
@@ -200,7 +196,7 @@ interface FilterOption {
   value: string
 }
 
-// Interfaccia per le colonne - Aggiornata per il nuovo componente
+// Interfaccia per le colonne
 interface EnhancedColumn {
   field: string
   header: string
@@ -211,11 +207,10 @@ interface EnhancedColumn {
   frozen?: boolean
   visible?: boolean
   filterMatchMode?: string
-  width?: string // Aggiunta proprietà per larghezza personalizzata
-  minWidth?: string // Aggiunta proprietà per larghezza minima
+  width?: string
+  minWidth?: string
 }
 
-// Configurazione colonne tabella - Semplificata e ottimizzata
 const enhancedTableColumns = ref<EnhancedColumn[]>([
   {
     field: 'username',
@@ -224,7 +219,6 @@ const enhancedTableColumns = ref<EnhancedColumn[]>([
     filterType: 'text',
     exportable: true,
     filterMatchMode: 'contains',
-    // Il componente calcolerà automaticamente width e minWidth
   },
   {
     field: 'nomecompleto',
@@ -239,7 +233,7 @@ const enhancedTableColumns = ref<EnhancedColumn[]>([
     header: 'Gruppo',
     sortable: true,
     filterType: 'select',
-    filterOptions: [], // Sarà popolato dinamicamente
+    filterOptions: [],
     exportable: true,
     filterMatchMode: 'equals',
   },
@@ -248,13 +242,12 @@ const enhancedTableColumns = ref<EnhancedColumn[]>([
     header: 'Codice Accesso',
     sortable: true,
     filterType: 'select',
-    filterOptions: [], // Sarà popolato dinamicamente
+    filterOptions: [],
     exportable: true,
     filterMatchMode: 'equals',
   }
 ])
 
-// Computed per statistiche
 const totalUsers = computed(() => users.value.length)
 const activeUsers = computed(() => users.value.filter(user => user.codaccesso !== 'DISABILITATO').length)
 const adminUsers = computed(() => users.value.filter(user => user.codgruppo?.includes('ADMIN')).length)
@@ -267,7 +260,6 @@ const hasFilters = computed(() => {
   })
 })
 
-// Funzioni per la gestione degli utenti
 const loadUsers = async (): Promise<void> => {
   try {
     tableLoading.value = true
@@ -295,11 +287,9 @@ const loadUsers = async (): Promise<void> => {
 }
 
 const updateFilterOptions = (): void => {
-  // Aggiorna le opzioni per i filtri select
   const gruppi = [...new Set(users.value.map(user => user.codgruppo).filter(Boolean))]
   const codiciAccesso = [...new Set(users.value.map(user => user.codaccesso).filter(Boolean))]
 
-  // Trova e aggiorna le colonne con le opzioni
   const gruppoColumn = enhancedTableColumns.value.find(col => col.field === 'codgruppo')
   if (gruppoColumn) {
     gruppoColumn.filterOptions = gruppi.map(gruppo => ({ label: gruppo, value: gruppo }))
@@ -319,39 +309,14 @@ const onRowSelect = (event: any): void => {
   console.log('Utente selezionato:', event.data)
 }
 
-// Utility functions
-const getInitials = (name: string): string => {
-  if (!name) return 'U'
-  return name.split(' ')
-    .map(word => word.charAt(0))
-    .join('')
-    .substring(0, 2)
-    .toUpperCase()
-}
-
-const getGroupBadgeClass = (gruppo: string): string => {
-  if (!gruppo) return 'badge-neutral'
-  if (gruppo.includes('ADMIN')) return 'badge-error'
-  if (gruppo.includes('MANAGER')) return 'badge-warning'
-  return 'badge-info'
-}
-
-// Action functions
 const addNewUser = (): void => {
   console.log('Aggiungi nuovo utente')
   // Implementare logica per aggiungere nuovo utente
-  // Es: router.push('/app/users/new')
 }
 
 const editUser = (user: User): void => {
   console.log('Modifica utente:', user)
   // Implementare logica di modifica
-  // Es: router.push(`/app/users/edit/${user.username}`)
-}
-
-const viewUserDetails = (user: User): void => {
-  selectedUser.value = user
-  showUserModal.value = true
 }
 
 const deleteUser = async (user: User): Promise<void> => {
@@ -361,21 +326,6 @@ const deleteUser = async (user: User): Promise<void> => {
     // await userService.deleteUser(user.username)
     // refreshUsers()
   }
-}
-
-const resetPassword = (user: User): void => {
-  console.log('Reset password per:', user.username)
-  // Implementare logica reset password
-}
-
-const toggleUserStatus = (user: User): void => {
-  console.log('Cambia stato per:', user.username)
-  // Implementare logica cambio stato
-}
-
-const viewUserActivity = (user: User): void => {
-  console.log('Visualizza attività per:', user.username)
-  // Implementare logica visualizzazione attività
 }
 
 const duplicateUser = (user: User): void => {
@@ -398,7 +348,6 @@ const importUsers = (): void => {
   // Implementare importazione utenti
 }
 
-// Lifecycle
 onMounted(() => {
   loadUsers()
 })
@@ -418,7 +367,6 @@ onMounted(() => {
   border-radius: 0.5rem;
 }
 
-/* Fix per i tooltip */
 .tooltip {
   position: relative;
   z-index: 10;
@@ -429,7 +377,6 @@ onMounted(() => {
   z-index: 50;
 }
 
-/* Fix per i dropdown */
 .dropdown-content {
   z-index: 200 !important;
   position: absolute;
@@ -437,14 +384,12 @@ onMounted(() => {
   border: 1px solid oklch(var(--bc) / 0.2);
 }
 
-/* Fix per dropdown che si aprono sopra */
 .dropdown-top .dropdown-content {
   bottom: 100%;
   top: auto;
   margin-bottom: 0.5rem;
 }
 
-/* Animazioni per le statistiche */
 @keyframes countUp {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -454,7 +399,6 @@ onMounted(() => {
   animation: countUp 0.6s ease-out;
 }
 
-/* Responsive improvements */
 @media (max-width: 768px) {
   .flex.space-x-1 {
     flex-direction: column;
@@ -464,5 +408,9 @@ onMounted(() => {
   .grid.grid-cols-2 {
     grid-template-columns: 1fr;
   }
+}
+
+.btn-outline:hover {
+  color: white !important;
 }
 </style>

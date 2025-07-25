@@ -1,87 +1,5 @@
 <template>
   <div class="data-table-wrapper">
-    <!-- Toolbar -->
-    <div v-if="showToolbar" class="data-table-toolbar mb-4 p-4 bg-base-100 rounded-lg shadow-sm border">
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <!-- Left side - Search and filters -->
-        <div class="flex flex-col sm:flex-row gap-3 flex-1">
-          <!-- Global Search -->
-          <div v-if="showGlobalSearch" class="relative flex-1 max-w-md">
-            <div class="relative">
-              <input
-                type="text"
-                v-model="globalSearchValue"
-                :placeholder="searchPlaceholder"
-                class="input input-bordered input-sm w-full pl-10"
-              />
-              <FaIcon 
-                icon="search" 
-                class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" 
-              />
-            </div>
-          </div>
-
-          <!-- Clear Filters Button -->
-          <button
-            v-if="showClearFilters"
-            @click="clearAllFilters"
-            class="btn btn-ghost btn-sm"
-            :disabled="!hasActiveFilters"
-          >
-            <FaIcon icon="times" class="mr-1" />
-            Pulisci Filtri
-          </button>
-        </div>
-
-        <!-- Right side - Actions -->
-        <div class="flex gap-2">
-          <!-- Column Toggle -->
-          <div v-if="showColumnToggle" class="dropdown dropdown-end">
-            <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
-              <FaIcon icon="columns" class="mr-1" />
-              Colonne
-            </div>
-            <div tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-10">
-              <div class="menu-title">
-                <span>Mostra/Nascondi Colonne</span>
-              </div>
-              <div class="max-h-64 overflow-y-auto">
-                <div
-                  v-for="col in toggleableColumns"
-                  :key="col.field || col.key"
-                  class="form-control"
-                >
-                  <label class="label cursor-pointer justify-start py-1">
-                    <input
-                      type="checkbox"
-                      class="checkbox checkbox-sm mr-2"
-                      v-model="col.visible"
-                    />
-                    <span class="label-text text-sm">{{ col.header || col.label }}</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Export Dropdown -->
-          <div v-if="showExport" class="dropdown dropdown-end">
-            <div tabindex="0" role="button" class="btn btn-primary btn-sm">
-              <FaIcon icon="download" class="mr-1" />
-              Esporta
-            </div>
-            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-10">
-              <li><a @click="exportToCSV"><FaIcon icon="file-csv" class="mr-2" />CSV</a></li>
-              <li><a @click="exportToExcel"><FaIcon icon="file-excel" class="mr-2" />Excel</a></li>
-              <li><a @click="exportToPDF"><FaIcon icon="file-pdf" class="mr-2" />PDF</a></li>
-            </ul>
-          </div>
-
-          <!-- Custom toolbar slot -->
-          <slot name="toolbar"></slot>
-        </div>
-      </div>
-    </div>
 
     <!-- Data Table -->
     <PDataTable 
@@ -106,6 +24,9 @@
       :filterDisplay="filterDisplay"
       :stateStorage="stateStorage"
       :stateKey="stateKey"
+      columnResizeMode="fit"
+      stripedRows
+      showGridlines
       :tableStyle="computedTableStyle"
       :autoLayout="false"
       :columnResizeMode="columnResizeMode"
@@ -116,15 +37,12 @@
       @sort="$emit('sort', $event)"
       @page="$emit('page', $event)"
       @filter="$emit('filter', $event)"
-      @column-resize-end="onColumnResize"
       ref="dataTable"
     >
-      <!-- Header with Global Search and Toolbar Integration -->
       <template #header>
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 p-4">
-          <!-- Left side - Search -->
           <div class="flex items-center gap-3 flex-1">
-            <!-- Clear Filters Button -->
+            <!-- Clear -->
             <button
               v-if="showClearFilters"
               @click="clearAllFilters"
@@ -149,7 +67,6 @@
             </div>
           </div>
 
-          <!-- Right side - Actions -->
           <div class="flex items-center gap-2">
             <!-- Column Toggle -->
             <div v-if="showColumnToggle" class="dropdown dropdown-end">
@@ -182,7 +99,7 @@
 
             <!-- Export Dropdown -->
             <div v-if="showExport" class="dropdown dropdown-end">
-              <div tabindex="0" role="button" class="btn btn-primary btn-sm">
+              <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
                 <FaIcon icon="download" class="mr-1" />
                 Esporta
               </div>
@@ -198,6 +115,23 @@
           </div>
         </div>
       </template>
+
+      <!-- Actions Column - SEMPRE PRIMA e SEMPRE FROZEN -->
+      <PColumn 
+        v-if="slots.actions" 
+        header="Azioni" 
+        :exportable="false" 
+        frozen 
+        :style="getActionColumnStyle()"
+      >
+        <template #body="slotProps">
+          <slot 
+            name="actions" 
+            :data="slotProps.data"
+            :index="slotProps.index"
+          ></slot>
+        </template>
+      </PColumn>
 
       <!-- Dynamic Columns -->
       <PColumn 
@@ -246,7 +180,7 @@
           </select>
         </template>
 
-        <!-- Custom column slot -->
+        <!-- Custom column -->
         <template #body="slotProps" v-if="slots[`column-${column.field || column.key}`]">
           <slot 
             :name="`column-${column.field || column.key}`" 
@@ -256,27 +190,9 @@
           ></slot>
         </template>
         
-        <!-- Default column content -->
+        <!-- Default column -->
         <template #body="slotProps" v-else>
           {{ getColumnValue(slotProps.data, column.field || column.key) }}
-        </template>
-      </PColumn>
-
-      <!-- Actions Column -->
-      <PColumn 
-        v-if="slots.actions" 
-        header="Azioni" 
-        :exportable="false" 
-        frozen 
-        alignFrozen="right"
-        :style="getActionColumnStyle()"
-      >
-        <template #body="slotProps">
-          <slot 
-            name="actions" 
-            :data="slotProps.data"
-            :index="slotProps.index"
-          ></slot>
         </template>
       </PColumn>
 
@@ -456,7 +372,6 @@ const emit = defineEmits([
   'filter'
 ])
 
-// Refs
 const dataTable = ref()
 const globalSearchValue = ref('')
 const slots = useSlots()
@@ -477,11 +392,6 @@ watch(() => props.columns, (newColumns) => {
     ...col,
     visible: col.visible !== false
   }))
-  nextTick(() => {
-    if (props.autoColumnSizing) {
-      calculateColumnWidths()
-    }
-  })
 }, { deep: true })
 
 watch(() => props.filters, (newFilters) => {
@@ -493,11 +403,6 @@ watch(globalSearchValue, (newValue) => {
 })
 
 watch(() => props.data, () => {
-  nextTick(() => {
-    if (props.autoColumnSizing) {
-      calculateColumnWidths()
-    }
-  })
 }, { deep: true })
 
 const visibleColumns = computed(() => {
@@ -505,11 +410,6 @@ const visibleColumns = computed(() => {
 })
 
 watch(visibleColumns, () => {
-  nextTick(() => {
-    if (props.autoColumnSizing) {
-      calculateColumnWidths()
-    }
-  })
 }, { deep: true })
 
 const hasActiveFilters = computed(() => {
@@ -521,153 +421,8 @@ const hasActiveFilters = computed(() => {
 })
 
 const computedTableStyle = computed(() => {
-  return `min-width: ${props.minTableWidth}; table-layout: fixed; width: 100%;`
+  return `min-width: 100%; width: 100%;`
 })
-
-const calculateColumnWidths = () => {
-  if (!props.autoColumnSizing) return
-  
-  nextTick(() => {
-    const tableElement = dataTable.value?.$el?.querySelector('.p-datatable-table')
-    if (!tableElement) return
-
-    const visibleCols = visibleColumns.value
-    const hasActions = !!slots.actions
-    
-    // Width - usa il wrapper della tabella
-    const wrapper = tableElement.closest('.data-table-wrapper') || tableElement.closest('.p-datatable-wrapper')
-    const containerWidth = wrapper?.clientWidth || 1200
-    
-    // Calcola la larghezza disponibile per le colonne di contenuto
-    const actionWidth = hasActions ? parseInt(props.actionColumnWidth) : 0
-    const scrollbarWidth = 17 
-    const paddingAndBorders = 20
-    const availableWidth = containerWidth - actionWidth - scrollbarWidth - paddingAndBorders
-    
-    const columnWidths = calculateOptimalWidths(visibleCols, availableWidth)
-    
-    applyColumnWidths(columnWidths, hasActions)
-  })
-}
-
-const calculateOptimalWidths = (columns, availableWidth) => {
-  const minWidths = {
-    short: 80,    // Per badge, codici, etc.
-    medium: 120,  // Per username, ID
-    long: 180,    // Per nomi, descrizioni brevi
-    xlarge: 250   // Per descrizioni lunghe
-  }
-
-  // Calcola le percentuali ideali per ogni colonna
-  const columnConfigs = columns.map((col, index) => {
-    const field = col.field || col.key
-    let percentage, minWidth
-    
-    // Se la colonna ha una larghezza specificata, converte in percentuale
-    if (col.width) {
-      if (col.width.includes('%')) {
-        percentage = parseFloat(col.width) / 100
-      } else {
-        percentage = parseFloat(col.width) / availableWidth
-      }
-      minWidth = col.minWidth ? parseFloat(col.minWidth) : minWidths.medium
-      return { index, percentage, minWidth, field }
-    }
-
-    // Determina percentuale in base al tipo di campo
-    if (field?.includes('id') || field?.includes('code') || field?.includes('cod')) {
-      percentage = 0.10 // 10%
-      minWidth = minWidths.short
-    } else if (field?.includes('username') || field?.includes('email')) {
-      percentage = 0.20 // 20%
-      minWidth = minWidths.medium
-    } else if (field?.includes('name') || field?.includes('nome') || field?.includes('title') || field?.includes('titolo')) {
-      percentage = 0.30 // 30%
-      minWidth = minWidths.long
-    } else if (field?.includes('description') || field?.includes('descrizione') || field?.includes('note')) {
-      percentage = 0.35 // 35%
-      minWidth = minWidths.xlarge
-    } else if (col.filterType === 'select' && col.filterOptions?.length <= 5) {
-      percentage = 0.12 // 12%
-      minWidth = minWidths.short
-    } else {
-      // Default: distribuzione equa
-      percentage = 1 / columns.length
-      minWidth = minWidths.medium
-    }
-
-    return { index, percentage, minWidth, field }
-  })
-
-  // Normalizza le percentuali per occupare il 100%
-  const totalPercentage = columnConfigs.reduce((sum, config) => sum + config.percentage, 0)
-  const normalizedConfigs = columnConfigs.map(config => ({
-    ...config,
-    percentage: config.percentage / totalPercentage
-  }))
-
-  // Calcola le larghezze finali assicurandosi che rispettino i minimi
-  const finalWidths = normalizedConfigs.map(config => {
-    const calculatedWidth = availableWidth * config.percentage
-    const finalWidth = Math.max(calculatedWidth, config.minWidth)
-    
-    return {
-      index: config.index,
-      width: `${(finalWidth / availableWidth * 100).toFixed(2)}%`,
-      minWidth: `${config.minWidth}px`,
-      field: config.field
-    }
-  })
-
-  return finalWidths
-}
-
-const applyColumnWidths = (columnWidths, hasActions) => {
-  // Applica le larghezze percentuali alle colonne
-  columnWidths.forEach(({ index, width, minWidth }) => {
-    // Applica agli elementi col per la struttura della tabella
-    const colElement = dataTable.value?.$el?.querySelector(`.p-datatable-table col:nth-child(${index + 1})`)
-    if (colElement) {
-      colElement.style.width = width
-      colElement.style.minWidth = minWidth
-    }
-
-    // Applica agli header per controllo aggiuntivo
-    const headerElement = dataTable.value?.$el?.querySelector(`.p-datatable-thead > tr > th:nth-child(${index + 1})`)
-    if (headerElement) {
-      headerElement.style.width = width
-      headerElement.style.minWidth = minWidth
-      headerElement.style.maxWidth = 'none'
-    }
-  })
-
-  // Gestisce colonna azioni se presente (sempre con larghezza fissa)
-  if (hasActions) {
-    const actionColIndex = columnWidths.length + 1
-    const actionWidth = props.actionColumnWidth
-    
-    const actionColElement = dataTable.value?.$el?.querySelector(`.p-datatable-table col:nth-child(${actionColIndex})`)
-    if (actionColElement) {
-      actionColElement.style.width = actionWidth
-      actionColElement.style.minWidth = actionWidth
-      actionColElement.style.maxWidth = actionWidth
-    }
-
-    const actionHeaderElement = dataTable.value?.$el?.querySelector(`.p-datatable-thead > tr > th:nth-child(${actionColIndex})`)
-    if (actionHeaderElement) {
-      actionHeaderElement.style.width = actionWidth
-      actionHeaderElement.style.minWidth = actionWidth
-      actionHeaderElement.style.maxWidth = actionWidth
-    }
-  }
-
-  // Forza la tabella a utilizzare tutto lo spazio disponibile
-  const tableElement = dataTable.value?.$el?.querySelector('.p-datatable-table')
-  if (tableElement) {
-    tableElement.style.width = '100%'
-    tableElement.style.tableLayout = 'fixed'
-  }
-}
 
 // Methods
 const getColumnValue = (data, field) => {
@@ -686,28 +441,11 @@ const getFilterType = (column) => {
 }
 
 const getColumnStyle = (column) => {
-  if (!props.autoColumnSizing) {
-    return column.style || ''
-  }
-  
-  // Gli stili verranno applicati dinamicamente
   return column.style || ''
 }
 
 const getActionColumnStyle = () => {
-  if (!props.autoColumnSizing) {
-    return `width: ${props.actionColumnWidth}; min-width: ${props.actionColumnWidth};`
-  }
-  
-  return `width: ${props.actionColumnWidth}; min-width: ${props.actionColumnWidth}; max-width: ${props.actionColumnWidth};`
-}
-
-const onColumnResize = (event) => {
-  // Gestisce resize manuale delle colonne
-  if (props.autoColumnSizing) {
-    // Per disabilitare temporaneamente auto-sizing
-    // o aggiornare le larghezze calcolate
-  }
+  return `min-width: ${props.actionColumnWidth}; width: ${props.actionColumnWidth};`
 }
 
 const clearAllFilters = () => {
@@ -736,7 +474,7 @@ const initializeFilters = () => {
   internalFilters.value = filters
 }
 
-// Export functions
+// Export
 const exportToCSV = () => {
   if (dataTable.value) {
     dataTable.value.exportCSV()
@@ -752,9 +490,7 @@ const exportToExcel = () => {
 }
 
 const exportToPDF = () => {
-  try {
-    console.log('Inizio esportazione PDF...')
-    
+  try {    
     const exportData = getExportData()
     
     if (!exportData || exportData.length === 0) {
@@ -763,23 +499,17 @@ const exportToPDF = () => {
       return
     }
 
-    console.log('Dati da esportare:', exportData.length, 'righe')
-
     const doc = new jsPDF({
       orientation: 'landscape',
       unit: 'mm',
       format: 'a4'
     })
 
-    console.log('jsPDF istanziato')
-
     // Headers della tabella
     const headers = visibleColumns.value
       .filter(col => col.exportable !== false)
       .map(col => col.header || col.label)
     
-    console.log('Headers preparati:', headers)
-
     // Dati della tabella
     const rows = exportData.map(row => 
       visibleColumns.value
@@ -789,8 +519,6 @@ const exportToPDF = () => {
           return value !== null && value !== undefined ? String(value) : ''
         })
     )
-
-    console.log('Righe preparate:', rows.length)
 
     // Titolo del documento
     doc.setFontSize(16)
@@ -803,7 +531,6 @@ const exportToPDF = () => {
     const currentDate = new Date().toLocaleDateString('it-IT')
     doc.text(`Generato il: ${currentDate}`, doc.internal.pageSize.getWidth() / 2, 30, { align: 'center' })
 
-    // Usa autoTable come funzione standalone (per le versioni recenti)
     autoTable(doc, {
       head: [headers],
       body: rows,
@@ -827,13 +554,9 @@ const exportToPDF = () => {
 
     // Salva il file
     const filename = `${props.exportFilename || 'export'}_${new Date().toISOString().split('T')[0]}.pdf`
-    doc.save(filename)
-    
-    console.log('PDF esportato con successo:', filename)
-    
+    doc.save(filename)    
   } catch (error) {
     console.error('Errore durante l\'esportazione PDF:', error)
-    console.error('Stack trace:', error.stack)
     alert(`Errore durante l'esportazione PDF: ${error.message}`)
   }
 }
@@ -845,46 +568,18 @@ const getExportData = () => {
   return props.data
 }
 
-// Resize observer per responsive design
-let resizeObserver
-const setupResizeObserver = () => {
-  if (typeof ResizeObserver !== 'undefined' && props.autoColumnSizing) {
-    resizeObserver = new ResizeObserver(() => {
-      calculateColumnWidths()
-    })
-    
-    const container = dataTable.value?.$el?.closest('.data-table-wrapper')
-    if (container) {
-      resizeObserver.observe(container)
-    }
-  }
-}
-
-// Lifecycle
 onMounted(() => {
   nextTick(() => {
     initializeFilters()
-    if (props.autoColumnSizing) {
-      calculateColumnWidths()
-      setupResizeObserver()
-    }
   })
 })
 
-onBeforeUnmount(() => {
-  if (resizeObserver) {
-    resizeObserver.disconnect()
-  }
-})
-
-// Initialize filters on data changes
 watch(() => props.data, () => {
   nextTick(() => {
     initializeFilters()
   })
 }, { immediate: true })
 
-// Initialize columns filters
 watch(() => toggleableColumns.value, () => {
   nextTick(() => {
     initializeFilters()
@@ -895,27 +590,25 @@ watch(() => toggleableColumns.value, () => {
 <style scoped>
 .data-table-wrapper {
   width: 100%;
-  position: relative; /* Importante per il posizionamento dei tooltip */
-  overflow: visible; /* Permette ai tooltip di essere visibili fuori dal container */
+  position: relative;
+  overflow: visible; 
 }
 
-/* Enhanced PrimeVue override styles for auto column sizing */
 :deep(.p-datatable) {
   font-size: 0.875rem;
   border-radius: 0.5rem;
-  overflow: hidden;
+  overflow: visible;
   width: 100%;
 }
 
 :deep(.p-datatable .p-datatable-table) {
-  table-layout: fixed;
   width: 100% !important;
-  min-width: 100%;
 }
 
 :deep(.p-datatable .p-datatable-wrapper) {
   width: 100%;
   overflow-x: auto;
+  overflow-y: visible;
 }
 
 :deep(.p-datatable .p-datatable-header) {
@@ -928,35 +621,66 @@ watch(() => toggleableColumns.value, () => {
   background-color: var(--surface-100);
   font-weight: 600;
   padding: 0.75rem;
-  border-bottom: 1px solid var(--surface-200);
   white-space: nowrap;
-  overflow: visible; /* Cambiato da hidden a visible per i tooltip */
+  overflow: visible;
   text-overflow: ellipsis;
   position: relative;
 }
 
 :deep(.p-datatable .p-datatable-tbody > tr > td) {
   padding: 0.75rem;
-  border-bottom: 1px solid var(--surface-200);
   white-space: nowrap;
-  overflow: visible; /* Cambiato da hidden a visible per i tooltip */
+  overflow: visible;
   text-overflow: ellipsis;
-  position: relative; /* Necessario per il posizionamento dei tooltip */
+  position: relative;
 }
 
 :deep(.p-datatable .p-datatable-tbody > tr) {
-  position: static; /* Cambiato da relative per permettere ai tooltip di uscire */
+  position: relative;
 }
 
 :deep(.p-datatable .p-datatable-tbody) {
-  overflow: visible; /* Permette ai tooltip di essere visibili */
+  overflow: visible;
 }
 
 :deep(.p-datatable .p-datatable-tbody > tr:hover) {
   background-color: var(--surface-50);
 }
 
-/* Resizable columns styling */
+:deep(.p-datatable .p-datatable-tbody > tr > td:first-child) {
+  overflow: visible !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+.tooltip:before,
+.tooltip:after {
+  z-index: 9999 !important;
+}
+
+.tooltip:hover:before,
+.tooltip:hover:after {
+  z-index: 10000 !important;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr > td:first-child .tooltip) {
+  position: relative;
+  z-index: 1000;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr > td:first-child .tooltip:hover) {
+  z-index: 10001 !important;
+}
+
+.tooltip:hover {
+  z-index: 10002 !important;
+}
+
+.tooltip[data-tip]:hover:before,
+.tooltip[data-tip]:hover:after {
+  z-index: 10003 !important;
+}
+
 :deep(.p-datatable .p-resizable-column .p-column-resizer) {
   display: block;
   position: absolute;
@@ -974,7 +698,6 @@ watch(() => toggleableColumns.value, () => {
   border-color: var(--primary-color);
 }
 
-/* Column filter styling */
 :deep(.p-column-filter-menu) {
   min-width: 12rem;
 }
@@ -983,7 +706,6 @@ watch(() => toggleableColumns.value, () => {
   margin-left: 0.5rem;
 }
 
-/* Input styling */
 :deep(.p-inputtext) {
   border-radius: 0.375rem;
   border: 1px solid var(--surface-300);
@@ -1008,23 +730,21 @@ watch(() => toggleableColumns.value, () => {
   min-height: 2.5rem;
 }
 
-/* Auto column sizing specific styles */
 :deep(.p-datatable-wrapper) {
   overflow-x: auto;
-  overflow-y: visible; /* Cambiato per permettere ai tooltip di essere visibili verticalmente */
+  overflow-y: visible;
   position: relative;
 }
 
 :deep(.p-datatable) {
   position: relative;
-  overflow: visible; /* Permette ai tooltip di essere visibili */
+  overflow: visible;
 }
 
 :deep(.p-datatable .p-datatable-table colgroup col) {
   transition: width 0.2s ease;
 }
 
-/* Frozen columns styling */
 :deep(.p-datatable .p-frozen-column) {
   position: sticky;
   background: inherit;
@@ -1039,12 +759,10 @@ watch(() => toggleableColumns.value, () => {
   right: 0;
 }
 
-/* Toolbar styling */
 .data-table-toolbar {
   border: 1px solid oklch(var(--bc) / 0.2);
 }
 
-/* Responsive improvements */
 @media (max-width: 1200px) {
   :deep(.p-datatable .p-datatable-thead > tr > th),
   :deep(.p-datatable .p-datatable-tbody > tr > td) {
@@ -1062,7 +780,6 @@ watch(() => toggleableColumns.value, () => {
     gap: 0.75rem;
   }
   
-  /* Stack columns vertically on very small screens */
   :deep(.p-datatable .p-datatable-thead > tr > th),
   :deep(.p-datatable .p-datatable-tbody > tr > td) {
     white-space: normal;
@@ -1072,7 +789,6 @@ watch(() => toggleableColumns.value, () => {
 }
 
 @media (max-width: 640px) {
-  /* On mobile, make text wrap and reduce padding further */
   :deep(.p-datatable .p-datatable-thead > tr > th),
   :deep(.p-datatable .p-datatable-tbody > tr > td) {
     padding: 0.375rem;
@@ -1080,7 +796,6 @@ watch(() => toggleableColumns.value, () => {
   }
 }
 
-/* Dropdown improvements */
 .dropdown-content {
   border: 1px solid oklch(var(--bc) / 0.2);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
@@ -1095,12 +810,10 @@ watch(() => toggleableColumns.value, () => {
   margin-bottom: 0.5em;
 }
 
-/* Loading state */
 :deep(.p-datatable .p-datatable-loading-overlay) {
   background-color: rgba(255, 255, 255, 0.9);
 }
 
-/* Selection styling */
 :deep(.p-datatable .p-datatable-tbody > tr.p-highlight) {
   background-color: var(--primary-50);
   color: var(--primary-700);
@@ -1110,13 +823,11 @@ watch(() => toggleableColumns.value, () => {
   background-color: var(--primary-100);
 }
 
-/* Empty state styling */
 :deep(.p-datatable .p-datatable-emptymessage) {
   padding: 2rem;
   text-align: center;
 }
 
-/* Scrollbar styling for better UX */
 :deep(.p-datatable-wrapper)::-webkit-scrollbar {
   height: 8px;
 }
@@ -1135,7 +846,6 @@ watch(() => toggleableColumns.value, () => {
   background: var(--surface-400);
 }
 
-/* Animation for column width changes */
 @keyframes columnResize {
   from {
     opacity: 0.8;
@@ -1149,7 +859,6 @@ watch(() => toggleableColumns.value, () => {
   animation: columnResize 0.2s ease;
 }
 
-/* Utility classes for column content types */
 :deep(.column-numeric) {
   text-align: right;
 }
@@ -1167,7 +876,6 @@ watch(() => toggleableColumns.value, () => {
   white-space: nowrap;
 }
 
-/* Print styles */
 @media print {
   .data-table-toolbar {
     display: none;
