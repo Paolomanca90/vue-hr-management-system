@@ -158,9 +158,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { PrimeDataTable, FaIcon } from '@presenze-in-web-frontend/core-lib'
 import { userService, type User, type GetUsersResponse } from '@/services/userService'
 
+const router = useRouter()
 const users = ref<User[]>([])
 const tableLoading = ref(false)
 const selectedUser = ref<User | null>(null)
@@ -248,10 +250,6 @@ const enhancedTableColumns = ref<EnhancedColumn[]>([
   }
 ])
 
-const totalUsers = computed(() => users.value.length)
-const activeUsers = computed(() => users.value.filter(user => user.codaccesso !== 'DISABILITATO').length)
-const adminUsers = computed(() => users.value.filter(user => user.codgruppo?.includes('ADMIN')).length)
-const uniqueGroups = computed(() => [...new Set(users.value.map(user => user.codgruppo).filter(Boolean))])
 const hasFilters = computed(() => {
   return Object.keys(filters.value).some(key => {
     const filter = filters.value[key]
@@ -310,13 +308,11 @@ const onRowSelect = (event: any): void => {
 }
 
 const addNewUser = (): void => {
-  console.log('Aggiungi nuovo utente')
-  // Implementare logica per aggiungere nuovo utente
+  router.push('/app/users/new')
 }
 
 const editUser = (user: User): void => {
-  console.log('Modifica utente:', user)
-  // Implementare logica di modifica
+  router.push(`/app/users/${user.username}/edit`)
 }
 
 const deleteUser = async (user: User): Promise<void> => {

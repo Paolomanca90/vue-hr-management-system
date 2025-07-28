@@ -11,6 +11,7 @@ import Reports from '@/views/Reports.vue'
 import Settings from '@/views/Settings.vue'
 import PlaceholderPage from '@/views/PlaceholderPage.vue'
 import Users from '@/views/Users.vue'
+import UserEdit from '@/views/UserEdit.vue'
 
 // Route statiche di base (sempre presenti)
 const staticRoutes: RouteRecordRaw[] = [
@@ -41,6 +42,24 @@ const appRoutes: RouteRecordRaw[] = [
     path: 'users',
     name: 'Users',
     component: Users,
+  },
+  {
+    path: 'users/new',
+    name: 'UserNew',
+    component: UserEdit,
+    meta: {
+      title: 'Nuovo Utente',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'users/:id/edit',
+    name: 'UserEdit',
+    component: UserEdit,
+    meta: {
+      title: 'Modifica Utente',
+      requiresAuth: true,
+    },
   },
   {
     path: 'payroll',
