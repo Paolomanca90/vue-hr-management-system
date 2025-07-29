@@ -311,8 +311,21 @@ const addNewUser = (): void => {
   router.push('/app/users/new')
 }
 
-const editUser = (user: User): void => {
-  router.push(`/app/users/${user.username}/edit`)
+const editUser = (user: User) => {
+  router.push({
+    name: 'UserEdit',
+    params: { id: user.username },
+    state: {
+      userData: {
+        username: user.username,
+        nomecompleto: user.nomecompleto,
+        codgruppo: user.codgruppo,
+        codaccesso: user.codaccesso,
+        iD_LINGUA: user.iD_INTER,
+        iD_INTER: user.iD_LINGUA
+      }
+    }
+  })
 }
 
 const deleteUser = async (user: User): Promise<void> => {
@@ -325,8 +338,17 @@ const deleteUser = async (user: User): Promise<void> => {
 }
 
 const duplicateUser = (user: User): void => {
-  console.log('Duplica utente:', user.username)
-  // Implementare logica duplicazione
+  router.push({
+    name: 'UserNew',
+    query: {
+      duplicate: user.username,
+      sourceNome: user.nomecompleto,
+      sourceGruppo: user.codgruppo,
+      sourceAccesso: user.codaccesso,
+      sourceId_Inter: user.iD_INTER,
+      sourceId_Lingua: user.iD_LINGUA
+    }
+  })
 }
 
 const bulkActions = (): void => {

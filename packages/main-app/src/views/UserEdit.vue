@@ -6,28 +6,12 @@
       <div class="card-body">
         <div class="flex items-center justify-between">
           <div>
-            <!-- Breadcrumb -->
-            <div class="breadcrumbs text-sm mb-2">
-              <ul>
-                <li>
-                  <RouterLink to="/app/users" class="link link-hover">
-                    <FaIcon icon="users" class="mr-1" />
-                    Gestione Utenti
-                  </RouterLink>
-                </li>
-                <li>
-                  <span class="text-base-content/70">
-                    {{ isEditMode ? 'Modifica Utente' : 'Nuovo Utente' }}
-                  </span>
-                </li>
-              </ul>
-            </div>
 
             <h1 class="text-3xl font-bold text-base-content">
               {{ isEditMode ? 'Modifica Utente' : 'Nuovo Utente' }}
             </h1>
             <p class="text-base-content/70 mt-1">
-              {{ isEditMode ? `Modifica i dati dell'utente: ${userForm.nome}` : 'Inserisci i dati del nuovo utente' }}
+              {{ isEditMode ? `Modifica i dati dell'utente: ${userForm.username}` : 'Inserisci i dati del nuovo utente' }}
             </p>
           </div>
 
@@ -81,8 +65,8 @@
             </div>
 
             <!-- Pulsanti azioni rapide (se in modalità modifica) -->
-            <div v-if="isEditMode" class="flex items-center space-x-2">
-              <!-- <button
+            <!-- <div v-if="isEditMode" class="flex items-center space-x-2">
+              <button
                 type="button"
                 class="btn btn-info btn-sm"
                 @click="showUserPreview"
@@ -90,14 +74,14 @@
               >
                 <FaIcon icon="eye" class="mr-1"/>
                 Visualizza
-              </button> -->
-              <!-- <button
+              </button>
+              <button
                 type="button"
                 class="btn btn-warning btn-sm"
                 @click="togglePasswordSection"
               >
                 <FaIcon icon="key" class="mr-1"/>
-                Cambio
+                Cambio Password
               </button>
               <button
                 type="button"
@@ -115,33 +99,31 @@
               >
                 <FaIcon icon="sticky-note" class="mr-1"/>
                 Note Accesso
-              </button> -->
-            </div>
+              </button>
+            </div> -->
           </div>
 
-          <div class="grid grid-cols-1 gap-1">
-            <!-- Prima colonna -->
+          <div class="grid grid-cols-1 gap-2">
+            <!-- Prima riga -->
             <div class="grid grid-cols-2 gap-4">
-              <!-- Nome -->
+              <!-- Username -->
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-medium">Nome *</span>
+                  <span class="label-text font-medium">Username *</span>
                 </label>
                 <input
                   type="text"
-                  v-model="userForm.nome"
-                  :readonly="isEditMode"
+                  v-model="userForm.username"
                   :class="{
-                    'input-error': submitted && !userForm.nome,
-                    'input-disabled bg-base-200': isEditMode
+                    'input-error': submitted && !userForm.username
                   }"
                   class="input input-bordered w-full"
-                  placeholder="Inserisci nome utente"
+                  placeholder="Inserisci username"
                   required
                   autocomplete="username"
                 />
-                <div v-if="submitted && !userForm.nome" class="label">
-                  <span class="label-text-alt text-error">Nome richiesto</span>
+                <div v-if="submitted && !userForm.username" class="label">
+                  <span class="label-text-alt text-error">Username richiesto</span>
                 </div>
               </div>
 
@@ -152,13 +134,13 @@
                 </label>
                 <input
                   type="text"
-                  v-model="userForm.nomeCompleto"
-                  :class="{ 'input-error': submitted && !userForm.nomeCompleto }"
+                  v-model="userForm.nomecompleto"
+                  :class="{ 'input-error': submitted && !userForm.nomecompleto }"
                   class="input input-bordered w-full"
                   placeholder="Inserisci nome completo"
                   required
                 />
-                <div v-if="submitted && !userForm.nomeCompleto" class="label">
+                <div v-if="submitted && !userForm.nomecompleto" class="label">
                   <span class="label-text-alt text-error">Nome completo richiesto</span>
                 </div>
               </div>
@@ -214,30 +196,55 @@
               </div> -->
             </div>
 
-            <!-- Seconda colonna -->
+            <!-- Seconda riga -->
             <div class="grid grid-cols-2 gap-4">
-              <!-- Accesso -->
+              <!-- Gruppo Utenti -->
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-medium">Accesso *</span>
+                  <span class="label-text font-medium">Gruppo Utenti *</span>
                 </label>
                 <select
-                  v-model="userForm.accesso"
-                  :class="{ 'select-error': submitted && !userForm.accesso }"
+                  v-model="userForm.codgruppo"
+                  :class="{ 'select-error': submitted && !userForm.codgruppo }"
                   class="select select-bordered w-full"
                   required
                 >
-                  <option value="">Nessuno</option>
+                  <option value="">Seleziona gruppo</option>
                   <option
-                    v-for="accesso in accessoOptions"
+                    v-for="gruppo in availableGroups"
+                    :key="gruppo.value"
+                    :value="gruppo.value"
+                  >
+                    {{ gruppo.label }}
+                  </option>
+                </select>
+                <div v-if="submitted && !userForm.codgruppo" class="label">
+                  <span class="label-text-alt text-error">Gruppo richiesto</span>
+                </div>
+              </div>
+
+              <!-- Codice Accesso -->
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-medium">Codice Accesso *</span>
+                </label>
+                <select
+                  v-model="userForm.codaccesso"
+                  :class="{ 'select-error': submitted && !userForm.codaccesso }"
+                  class="select select-bordered w-full"
+                  required
+                >
+                  <option value="">Seleziona codice accesso</option>
+                  <option
+                    v-for="accesso in availableAccessCodes"
                     :key="accesso.value"
                     :value="accesso.value"
                   >
                     {{ accesso.label }}
                   </option>
                 </select>
-                <div v-if="submitted && !userForm.accesso" class="label">
-                  <span class="label-text-alt text-error">Accesso richiesto</span>
+                <div v-if="submitted && !userForm.codaccesso" class="label">
+                  <span class="label-text-alt text-error">Codice accesso richiesto</span>
                 </div>
               </div>
 
@@ -260,26 +267,6 @@
                   </option>
                 </select>
               </div> -->
-
-              <!-- Gruppo Utenti -->
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text font-medium">Gruppo Utenti</span>
-                </label>
-                <select
-                  v-model="userForm.codgruppo"
-                  class="select select-bordered w-full"
-                >
-                  <option value="">Nessuno</option>
-                  <option
-                    v-for="gruppo in availableGroups"
-                    :key="gruppo.value"
-                    :value="gruppo.value"
-                  >
-                    {{ gruppo.label }}
-                  </option>
-                </select>
-              </div>
 
               <!-- Controllo Periodi -->
               <!-- <div class="form-control">
@@ -316,7 +303,7 @@
               </div> -->
             </div>
 
-            <!-- Terza colonna -->
+            <!-- Terza riga -->
             <div class="grid grid-cols-2 gap-4">
               <!-- Lingua -->
               <div class="form-control">
@@ -324,7 +311,7 @@
                   <span class="label-text font-medium">Lingua</span>
                 </label>
                 <select
-                  v-model="userForm.lingua"
+                  v-model="userForm.iD_LINGUA"
                   class="select select-bordered w-full"
                 >
                   <option value="">Nessuno</option>
@@ -342,7 +329,7 @@
                   <span class="label-text font-medium">Impost. Internaz.</span>
                 </label>
                 <select
-                  v-model="userForm.impostazioniInternazionali"
+                  v-model="userForm.iD_INTER"
                   class="select select-bordered w-full"
                 >
                   <option value="">Nessuno</option>
@@ -407,97 +394,7 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">
-                  {{ isEditMode ? 'Nuova Password' : 'Password' }} *
-                </span>
-              </label>
-              <div class="relative">
-                <input
-                  :type="showPassword ? 'text' : 'password'"
-                  v-model="userForm.password"
-                  :class="{ 'input-error': submitted && showPasswordSection && !userForm.password }"
-                  class="input input-bordered w-full pr-12"
-                  placeholder="Inserisci password"
-                  :required="!isEditMode || showPasswordSection"
-                  autocomplete="new-password"
-                />
-                <button
-                  type="button"
-                  class="absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/40 hover:text-base-content/60"
-                  @click="togglePasswordVisibility"
-                >
-                  <FaIcon :icon="showPassword ? 'eye-slash' : 'eye'"/>
-                </button>
-              </div>
-              <div v-if="submitted && showPasswordSection && !userForm.password" class="label">
-                <span class="label-text-alt text-error">Password richiesta</span>
-              </div>
-            </div>
-
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">Conferma Password *</span>
-              </label>
-              <div class="relative">
-                <input
-                  :type="showConfirmPassword ? 'text' : 'password'"
-                  v-model="userForm.confirmPassword"
-                  :class="{
-                    'input-error': submitted && showPasswordSection && (!userForm.confirmPassword || userForm.password !== userForm.confirmPassword)
-                  }"
-                  class="input input-bordered w-full pr-12"
-                  placeholder="Conferma password"
-                  :required="!isEditMode || showPasswordSection"
-                  autocomplete="new-password"
-                />
-                <button
-                  type="button"
-                  class="absolute right-4 top-1/2 transform -translate-y-1/2 text-base-content/40 hover:text-base-content/60"
-                  @click="toggleConfirmPasswordVisibility"
-                >
-                  <FaIcon :icon="showConfirmPassword ? 'eye-slash' : 'eye'"/>
-                </button>
-              </div>
-              <div v-if="submitted && showPasswordSection && !userForm.confirmPassword" class="label">
-                <span class="label-text-alt text-error">Conferma password richiesta</span>
-              </div>
-              <div v-if="submitted && showPasswordSection && userForm.confirmPassword && userForm.password !== userForm.confirmPassword" class="label">
-                <span class="label-text-alt text-error">Le password non corrispondono</span>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="userForm.password && (!isEditMode || showPasswordSection)" class="mt-4">
-            <div class="text-sm font-medium text-base-content mb-2">Sicurezza Password:</div>
-            <div class="flex items-center space-x-2">
-              <div
-                class="h-2 flex-1 rounded-full"
-                :class="getPasswordStrengthColor()"
-              ></div>
-              <span class="text-xs" :class="getPasswordStrengthTextColor()">
-                {{ getPasswordStrengthText() }}
-              </span>
-            </div>
-            <div class="text-xs text-base-content/60 mt-2">
-              <ul class="list-disc list-inside space-y-1">
-                <li :class="userForm.password.length >= 8 ? 'text-success' : 'text-error'">
-                  Almeno 8 caratteri
-                </li>
-                <li :class="/[A-Z]/.test(userForm.password) ? 'text-success' : 'text-error'">
-                  Almeno una lettera maiuscola
-                </li>
-                <li :class="/[0-9]/.test(userForm.password) ? 'text-success' : 'text-error'">
-                  Almeno un numero
-                </li>
-                <li :class="/[^A-Za-z0-9]/.test(userForm.password) ? 'text-success' : 'text-error'">
-                  Almeno un carattere speciale
-                </li>
-              </ul>
-            </div>
-          </div>
+          Password form sections would go here...
         </div>
       </div> -->
 
@@ -514,65 +411,7 @@
             </div>
           </div>
 
-          <div class="space-y-6">
-            <div class="form-control">
-              <label class="label cursor-pointer justify-start">
-                <input
-                  type="checkbox"
-                  v-model="userForm.utenteAbilitatoAnalytics"
-                  class="checkbox checkbox-success mr-4"
-                />
-                <div>
-                  <span class="label-text font-medium">Utente abilitato all'uso di Analytics</span>
-                  <p class="text-xs text-base-content/60">
-                    Consenti a questo utente di accedere alle funzionalità di Analytics
-                  </p>
-                </div>
-              </label>
-            </div>
-
-            <div class="form-control">
-              <label class="label cursor-pointer justify-start">
-                <input
-                  type="checkbox"
-                  v-model="userForm.abilitaAutenticazioneIntegrata"
-                  class="checkbox checkbox-warning mr-4"
-                />
-                <div>
-                  <span class="label-text font-medium">Abilita autenticazione integrata</span>
-                  <p class="text-xs text-base-content/60">
-                    Utilizza l'autenticazione integrata di Windows/Active Directory
-                  </p>
-                </div>
-              </label>
-            </div>
-
-            <div v-if="userForm.abilitaAutenticazioneIntegrata" class="grid grid-cols-1 md:grid-cols-2 gap-4 ml-6">
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text font-medium">Login autenticazione integrata</span>
-                </label>
-                <input
-                  type="text"
-                  v-model="userForm.loginAutenticazioneIntegrata"
-                  class="input input-bordered w-full"
-                  placeholder="username@domain"
-                />
-              </div>
-
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text font-medium">Dominio autenticazione integrata</span>
-                </label>
-                <input
-                  type="text"
-                  v-model="userForm.dominioAutenticazioneIntegrata"
-                  class="input input-bordered w-full"
-                  placeholder="DOMAIN"
-                />
-              </div>
-            </div>
-          </div>
+          Analytics controls would go here...
         </div>
       </div> -->
 
@@ -608,6 +447,15 @@
                 <FaIcon icon="times-circle" class="mr-1"/>
                 Deseleziona Tutto
               </button>
+              <button
+                type="button"
+                class="btn btn-sm btn-info btn-outline"
+                @click="refreshPermissions"
+                :disabled="loadingPermissions"
+              >
+                <FaIcon icon="refresh" class="mr-1"/>
+                Ricarica
+              </button>
             </div>
           </div>
 
@@ -629,110 +477,152 @@
             </div>
           </div>
 
-          <!-- Tabella permessi -->
-          <div class="overflow-x-auto">
-            <table class="table table-sm">
-              <thead>
-                <tr class="bg-base-200">
-                  <th class="w-2/3">
-                    <div class="flex items-center">
-                      <FaIcon icon="list" class="mr-2 text-sm"/>
-                      Tabella / Funzionalità
-                    </div>
-                  </th>
-                  <th class="text-center w-20">
-                    <div class="flex items-center justify-center">
-                      <FaIcon icon="eye" class="mr-1 text-sm"/>
-                      Accesso
-                      <input
-                        type="checkbox"
-                        class="checkbox checkbox-sm ml-2"
-                        :checked="isAllAccessSelected"
-                        @change="toggleAllAccess"
-                        title="Seleziona/Deseleziona tutti gli accessi"
-                      />
-                    </div>
-                  </th>
-                  <th class="text-center w-20">
-                    <div class="flex items-center justify-center">
-                      <FaIcon icon="edit" class="mr-1 text-sm"/>
-                      Modifica
-                      <input
-                        type="checkbox"
-                        class="checkbox checkbox-sm ml-2"
-                        :checked="isAllModifySelected"
-                        @change="toggleAllModify"
-                        title="Seleziona/Deseleziona tutte le modifiche"
-                      />
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <template v-for="category in filteredPermissionCategories" :key="category.name">
-                  <!-- Categoria principale -->
-                  <tr class="bg-base-100 border-b-2">
-                    <td colspan="3" class="font-semibold text-primary py-3">
-                      <div class="flex items-center">
-                        <button
-                          type="button"
-                          @click="toggleCategory(category.name)"
-                          class="btn btn-ghost btn-xs mr-2"
-                        >
-                          <FaIcon
-                            :icon="category.expanded ? 'chevron-down' : 'chevron-right'"
-                            class="text-xs"
-                          />
-                        </button>
-                        <FaIcon :icon="category.icon" class="mr-2"/>
-                        {{ category.label }}
-                        <span class="badge badge-sm badge-primary ml-2">
-                          {{ category.items.length }}
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
+          <!-- Loading permessi -->
+          <div v-if="loadingPermissions" class="flex justify-center items-center py-8">
+            <span class="loading loading-spinner loading-md"></span>
+            <span class="ml-3 text-sm">Caricamento permessi...</span>
+          </div>
 
-                  <!-- Items della categoria (visibili solo se espansa) -->
-                  <template v-if="category.expanded">
-                    <tr
-                      v-for="item in category.items"
-                      :key="item.id"
-                      class="hover:bg-base-50"
-                    >
-                      <td class="pl-8">
-                        <div class="flex items-center">
-                          <FaIcon :icon="item.icon" class="mr-2 text-sm text-base-content/60"/>
-                          <div>
-                            <div class="font-medium">{{ item.name }}</div>
-                            <div v-if="item.description" class="text-xs text-base-content/60">
-                              {{ item.description }}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="text-center">
-                        <input
-                          type="checkbox"
-                          v-model="userPermissions[item.id].access"
-                          class="checkbox checkbox-success"
-                          @change="onPermissionChange(item.id, 'access')"
-                        />
-                      </td>
-                      <td class="text-center">
-                        <input
-                          type="checkbox"
-                          v-model="userPermissions[item.id].modify"
-                          :disabled="!userPermissions[item.id].access"
-                          class="checkbox checkbox-warning"
-                          @change="onPermissionChange(item.id, 'modify')"
-                        />
-                      </td>
-                    </tr>
-                  </template>
-                </template>
-              </tbody>
-            </table>
+          <!-- Errore permessi -->
+          <div v-else-if="permissionsError" class="alert alert-warning">
+            <FaIcon icon="exclamation-triangle" />
+            <div>
+              <div class="font-bold">Errore nel caricamento dei permessi</div>
+              <div class="text-sm">{{ permissionsError }}</div>
+              <button class="btn btn-xs btn-ghost mt-1" @click="refreshPermissions">
+                Riprova
+              </button>
+            </div>
+          </div>
+
+          <!-- Struttura ad albero orizzontale -->
+          <div v-else class="grid grid-cols-12 gap-4 h-96">
+
+            <!-- Colonna 1: Categorie principali -->
+            <div class="col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto">
+              <div class="text-sm font-semibold mb-2 text-base-content/70">Categorie</div>
+              <div class="space-y-1">
+                <div
+                  v-for="category in filteredPermissionCategories"
+                  :key="category.id"
+                  class="p-2 rounded cursor-pointer transition-colors hover:bg-base-200"
+                  :class="{ 'bg-primary/10 text-primary': selectedCategoryId === category.id }"
+                  @click="selectCategory(category)"
+                >
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                      <FaIcon :icon="category.icona || 'folder'" class="mr-2 text-sm" />
+                      <span class="text-sm font-medium truncate">{{ category.nome }}</span>
+                    </div>
+                    <span class="badge badge-xs">{{ category.figli?.length || 0 }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Colonna 2: Sottocategorie (se presenti) -->
+            <div
+              v-if="selectedCategory && selectedCategory.figli?.length > 0"
+              class="col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto"
+            >
+              <div class="text-sm font-semibold mb-2 text-base-content/70">
+                Sottocategorie di {{ selectedCategory.nome }}
+              </div>
+              <div class="space-y-1">
+                <div
+                  v-for="subcategory in selectedCategory.figli"
+                  :key="subcategory.id"
+                  class="p-2 rounded cursor-pointer transition-colors hover:bg-base-200"
+                  :class="{ 'bg-primary/10 text-primary': selectedSubcategoryId === subcategory.id }"
+                  @click="selectSubcategory(subcategory)"
+                >
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                      <FaIcon :icon="subcategory.icona || 'folder'" class="mr-2 text-sm" />
+                      <span class="text-sm font-medium truncate">{{ subcategory.nome }}</span>
+                    </div>
+                    <span class="badge badge-xs">{{ subcategory.figli?.length || 0 }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Colonna 3: Terzo livello (se presenti) -->
+            <div
+              v-if="selectedSubcategory && selectedSubcategory.figli?.length > 0"
+              class="col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto"
+            >
+              <div class="text-sm font-semibold mb-2 text-base-content/70">
+                Sottosezioni di {{ selectedSubcategory.nome }}
+              </div>
+              <div class="space-y-1">
+                <div
+                  v-for="subsubcategory in selectedSubcategory.figli"
+                  :key="subsubcategory.id"
+                  class="p-2 rounded cursor-pointer transition-colors hover:bg-base-200"
+                  :class="{ 'bg-primary/10 text-primary': selectedSubSubcategoryId === subsubcategory.id }"
+                  @click="selectSubSubcategory(subsubcategory)"
+                >
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                      <FaIcon :icon="subsubcategory.icona || 'folder'" class="mr-2 text-sm" />
+                      <span class="text-sm font-medium truncate">{{ subsubcategory.nome }}</span>
+                    </div>
+                    <span class="badge badge-xs">{{ subsubcategory.figli?.length || 0 }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Colonna 4: Permessi finali -->
+            <div class="col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto">
+              <div class="text-sm font-semibold mb-2 text-base-content/70 flex items-center justify-between">
+                <span>Permessi</span>
+                <div class="flex items-center space-x-1">
+                  <span class="text-xs">Vis.</span>
+                  <span class="text-xs">Mod.</span>
+                </div>
+              </div>
+
+              <div v-if="currentPermissionItems.length === 0" class="text-center py-8 text-base-content/60">
+                <FaIcon icon="info-circle" class="text-2xl mb-2" />
+                <div class="text-sm">Seleziona una categoria per vedere i permessi</div>
+              </div>
+
+              <div v-else class="space-y-2">
+                <div
+                  v-for="item in currentPermissionItems"
+                  :key="item.id"
+                  class="p-2 border border-base-200 rounded text-sm"
+                >
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center flex-1 min-w-0">
+                      <FaIcon :icon="item.icona || 'file'" class="mr-2 text-xs flex-shrink-0" />
+                      <span class="font-medium truncate">{{ item.nome }}</span>
+                    </div>
+                    <div class="flex items-center space-x-2 ml-2">
+                      <!-- Visualizza -->
+                      <input
+                        type="checkbox"
+                        v-model="userPermissions[item.id].visualizza"
+                        class="checkbox checkbox-success checkbox-xs"
+                        @change="onPermissionChange(item.id, 'visualizza')"
+                        :title="'Visualizza ' + item.nome"
+                      />
+                      <!-- Modifica -->
+                      <input
+                        type="checkbox"
+                        v-model="userPermissions[item.id].modifica"
+                        :disabled="!userPermissions[item.id].visualizza"
+                        class="checkbox checkbox-warning checkbox-xs"
+                        @change="onPermissionChange(item.id, 'modifica')"
+                        :title="'Modifica ' + item.nome"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Riepilogo permessi -->
@@ -741,7 +631,7 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
               <div class="flex items-center">
                 <span class="w-3 h-3 bg-success rounded-full mr-2"></span>
-                Accessi: {{ totalAccessPermissions }}
+                Visualizzazioni: {{ totalViewPermissions }}
               </div>
               <div class="flex items-center">
                 <span class="w-3 h-3 bg-warning rounded-full mr-2"></span>
@@ -753,7 +643,7 @@
               </div>
               <div class="flex items-center">
                 <span class="w-3 h-3 bg-primary rounded-full mr-2"></span>
-                Categorie: {{ permissionCategories.length }}
+                Categorie: {{ menuUtenteData.length }}
               </div>
             </div>
           </div>
@@ -773,57 +663,7 @@
             </div>
           </div>
 
-          <div class="space-y-4">
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">Email</span>
-              </label>
-              <input
-                type="email"
-                v-model="userForm.email"
-                class="input input-bordered w-full"
-                placeholder="email@example.com"
-                autocomplete="email"
-              />
-            </div>
-
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">Note</span>
-              </label>
-              <textarea
-                v-model="userForm.note"
-                class="textarea textarea-bordered h-24"
-                placeholder="Note aggiuntive sull'utente..."
-              ></textarea>
-            </div>
-
-            <div v-if="isEditMode" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text font-medium">Data Creazione</span>
-                </label>
-                <input
-                  type="text"
-                  :value="formatDate(userForm.createdAt)"
-                  readonly
-                  class="input input-bordered bg-base-200"
-                />
-              </div>
-
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text font-medium">Ultima Modifica</span>
-                </label>
-                <input
-                  type="text"
-                  :value="formatDate(userForm.updatedAt)"
-                  readonly
-                  class="input input-bordered bg-base-200"
-                />
-              </div>
-            </div>
-          </div>
+          Additional information fields would go here...
         </div>
       </div> -->
 
@@ -883,68 +723,30 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { menuService, type ApiMenuUtenteItem } from '@/services/menuService'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
-import type { User } from '@/services/userService'
+import { userService, type GruppiUtenti } from '@/services/userService'
 
-// Interfaccia per il form dell'utente (aggiornata con i nuovi campi)
+// Interfaccia per il form dell'utente
 interface UserForm {
-  nome: string
-  nomeCompleto: string
-  disabilitaDopo: number
-  noteAccesso: string
-  cambioPasswordOgni: number
-  monitorarePassword: boolean
-  accesso: string
-  lingua: string
-  famigliaUtenti: string
-  impostazioniInternazionali: string
+  username: string
+  nomecompleto: string
   codgruppo: string
   codaccesso: string
-  tipoUtente: string
-  controlloPeriodi: boolean
-  mesiPrecedenti: number
-  dalGiorno: string
-  utenteAbilitatoAnalytics: boolean
-  abilitaAutenticazioneIntegrata: boolean
-  loginAutenticazioneIntegrata: string
-  dominioAutenticazioneIntegrata: string
-  password: string
-  confirmPassword: string
-  email: string
-  note: string
-  accountEnabled: boolean
-  forcePasswordChange: boolean
-  adminAccess: boolean
-  createdAt: Date | null
-  updatedAt: Date | null
+  iD_LINGUA: number,
+  iD_INTER: number
 }
 
-// Interfaccia per i permessi (invariata)
-interface PermissionItem {
-  id: string
-  name: string
-  description?: string
-  icon: string
-}
-
-interface PermissionCategory {
-  name: string
-  label: string
-  icon: string
-  expanded: boolean
-  items: PermissionItem[]
-}
-
+// Interfaccia per i permessi
 interface UserPermission {
-  access: boolean
-  modify: boolean
+  visualizza: boolean
+  modifica: boolean
 }
 
 interface UserPermissions {
   [key: string]: UserPermission
 }
 
-// Interfaccia per le opzioni dei dropdown
 interface SelectOption {
   label: string
   value: string
@@ -954,37 +756,14 @@ const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 
-// State reattivo (aggiornato con i nuovi campi)
+// Form reattivo
 const userForm = ref<UserForm>({
-  nome: '',
-  nomeCompleto: '',
-  disabilitaDopo: 0,
-  noteAccesso: '',
-  cambioPasswordOgni: 0,
-  monitorarePassword: false,
-  accesso: '',
-  lingua: '',
-  famigliaUtenti: '',
-  impostazioniInternazionali: '',
+  username: '',
+  nomecompleto: '',
   codgruppo: '',
   codaccesso: '',
-  tipoUtente: '',
-  controlloPeriodi: false,
-  mesiPrecedenti: 0,
-  dalGiorno: '',
-  utenteAbilitatoAnalytics: false,
-  abilitaAutenticazioneIntegrata: false,
-  loginAutenticazioneIntegrata: '',
-  dominioAutenticazioneIntegrata: '',
-  password: '',
-  confirmPassword: '',
-  email: '',
-  note: '',
-  accountEnabled: true,
-  forcePasswordChange: false,
-  adminAccess: false,
-  createdAt: null,
-  updatedAt: null
+  iD_LINGUA: 0,
+  iD_INTER: 0
 })
 
 const loading = ref(false)
@@ -992,100 +771,22 @@ const saving = ref(false)
 const submitted = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
-const showPassword = ref(false)
-const showConfirmPassword = ref(false)
-const showPasswordSection = ref(false)
 
 // Gestione permessi
+const loadingPermissions = ref(false)
+const permissionsError = ref('')
 const permissionSearchQuery = ref('')
 const userPermissions = ref<UserPermissions>({})
+const menuUtenteData = ref<ApiMenuUtenteItem[]>([])
 
-// Definizione delle categorie di permessi (basate sull'immagine)
-const permissionCategories = ref<PermissionCategory[]>([
-  {
-    name: 'anagrafiche',
-    label: 'Anagrafiche',
-    icon: 'users',
-    expanded: true,
-    items: [
-      { id: 'causali', name: 'Causali', icon: 'list' },
-      { id: 'profili_orari', name: 'Profili Orari', icon: 'clock' },
-      { id: 'tolleranze', name: 'Tolleranze', icon: 'balance-scale' },
-      { id: 'festivita', name: 'Festività', icon: 'calendar' },
-      { id: 'rotazione_turno', name: 'Rotazione Turno', icon: 'sync' },
-      { id: 'cambio_turno', name: 'Cambio Turno', icon: 'exchange-alt' },
-      { id: 'correlazione_voci', name: 'Correlazione Voci', icon: 'link' },
-      { id: 'terminali_timbratura', name: 'Terminali di timbratura', icon: 'desktop' },
-      { id: 'zone_timbratura', name: 'Zone di timbratura', icon: 'map-marker-alt' },
-      { id: 'causali_terminale', name: 'Causali da terminale', icon: 'terminal' },
-      { id: 'raggruppamento_causali', name: 'Raggruppamento Causali', icon: 'layer-group' },
-      { id: 'raggruppamento_orari', name: 'Raggruppamento Orari', icon: 'layer-group' }
-    ]
-  },
-  {
-    name: 'importazioni_esportazioni',
-    label: 'Importazioni / Esportazioni',
-    icon: 'exchange-alt',
-    expanded: false,
-    items: [
-      { id: 'import_dati', name: 'Importazioni Dati', icon: 'upload' },
-      { id: 'export_dati', name: 'Esportazioni Dati', icon: 'download' },
-      { id: 'elaborazioni', name: 'Elaborazioni', icon: 'cogs' }
-    ]
-  },
-  {
-    name: 'statistiche',
-    label: 'Statistiche',
-    icon: 'chart-bar',
-    expanded: false,
-    items: [
-      { id: 'statistiche_presenze', name: 'Statistiche Presenze', icon: 'chart-line' },
-      { id: 'eventi', name: 'Eventi', icon: 'calendar-alt' },
-      { id: 'tipo_evento', name: 'Tipo Evento', icon: 'tags' },
-      { id: 'configurazione_terminali', name: 'Configurazione Terminali', icon: 'cog' },
-      { id: 'configurazione_banca_ore', name: 'Configurazione Banca Ore', icon: 'bank' },
-      { id: 'badge_jolly', name: 'Badge Jolly', icon: 'id-card' },
-      { id: 'festivita_dipendente', name: 'Festività Dipendente', icon: 'user-calendar' },
-      { id: 'processi_elaborazione', name: 'Processi di Elaborazione', icon: 'process' },
-      { id: 'aggregazione_eventi', name: 'Aggregazione Eventi', icon: 'compress' },
-      { id: 'tipo_giustifica_parentale', name: 'Tipo Giustifica Parentale', icon: 'baby' }
-    ]
-  },
-  {
-    name: 'utilita',
-    label: 'Utilità',
-    icon: 'tools',
-    expanded: false,
-    items: [
-      { id: 'gestione_personalizzazioni', name: 'Gestione Personalizzazioni', icon: 'palette' },
-      { id: 'mensa', name: 'Mensa', icon: 'utensils' },
-      { id: 'commesse', name: 'Commesse', icon: 'briefcase' },
-      { id: 'gestione_ticket', name: 'Gestione Ticket', icon: 'ticket-alt' }
-    ]
-  }
-])
+// Navigazione ad albero
+const selectedCategoryId = ref<number | null>(null)
+const selectedSubcategoryId = ref<number | null>(null)
+const selectedSubSubcategoryId = ref<number | null>(null)
 
-// Opzioni per i dropdown (aggiornate)
-const availableGroups = ref<SelectOption[]>([
-  { label: 'Amministratori', value: 'ADMIN' },
-  { label: 'Responsabili HR', value: 'HR_MANAGER' },
-  { label: 'Dipendenti', value: 'EMPLOYEE' },
-  { label: 'Consulenti', value: 'CONSULTANT' },
-  { label: 'Visitatori', value: 'GUEST' }
-])
-
-const accessoOptions = ref<SelectOption[]>([
-  { label: 'Accesso Completo', value: 'FULL' },
-  { label: 'Accesso Limitato', value: 'LIMITED' },
-  { label: 'Solo Lettura', value: 'READ_ONLY' },
-  { label: 'Nessun Accesso', value: 'NONE' }
-])
-
-const famigliaUtentiOptions = ref<SelectOption[]>([
-  { label: 'Famiglia Standard', value: 'STANDARD' },
-  { label: 'Famiglia Avanzata', value: 'ADVANCED' },
-  { label: 'Famiglia Premium', value: 'PREMIUM' }
-])
+// Opzioni per i dropdown
+const availableGroups = ref<SelectOption[]>([])
+const loadingGroups = ref(false)
 
 const availableAccessCodes = ref<SelectOption[]>([
   { label: 'Attivo', value: 'ACTIVE' },
@@ -1095,244 +796,128 @@ const availableAccessCodes = ref<SelectOption[]>([
 ])
 
 // Computed
-const isEditMode = computed(() => route.params.id !== 'new')
+const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
 const userId = computed(() => route.params.id as string)
 
-// Computed per i permessi (invariati)
+// Computed per la navigazione ad albero
 const filteredPermissionCategories = computed(() => {
   if (!permissionSearchQuery.value) {
-    return permissionCategories.value
+    return menuUtenteData.value
   }
 
   const query = permissionSearchQuery.value.toLowerCase()
-  return permissionCategories.value.map(category => ({
-    ...category,
-    items: category.items.filter(item =>
-      item.name.toLowerCase().includes(query) ||
-      (item.description && item.description.toLowerCase().includes(query))
-    )
-  })).filter(category => category.items.length > 0)
+  return menuUtenteData.value.filter(category =>
+    category.nome.toLowerCase().includes(query) ||
+    hasMatchingChildren(category, query)
+  )
 })
 
+const selectedCategory = computed(() => {
+  return menuUtenteData.value.find(cat => cat.id === selectedCategoryId.value)
+})
+
+const selectedSubcategory = computed(() => {
+  return selectedCategory.value?.figli?.find(sub => sub.id === selectedSubcategoryId.value)
+})
+
+const selectedSubSubcategory = computed(() => {
+  return selectedSubcategory.value?.figli?.find(sub => sub.id === selectedSubSubcategoryId.value)
+})
+
+const currentPermissionItems = computed(() => {
+  // Se abbiamo selezionato fino al terzo livello
+  if (selectedSubSubcategory.value) {
+    return selectedSubSubcategory.value.figli || []
+  }
+  // Se abbiamo selezionato fino al secondo livello e non ha figli con figli
+  if (selectedSubcategory.value) {
+    const hasDeepChildren = selectedSubcategory.value.figli?.some(child => child.figli?.length > 0)
+    if (!hasDeepChildren) {
+      return selectedSubcategory.value.figli || []
+    }
+    return []
+  }
+  // Se abbiamo selezionato solo la categoria principale e non ha sottocategorie
+  if (selectedCategory.value) {
+    const hasSubcategories = selectedCategory.value.figli?.some(child => child.figli?.length > 0)
+    if (!hasSubcategories) {
+      return selectedCategory.value.figli || []
+    }
+    return []
+  }
+
+  return []
+})
+
+// Computed per i conteggi
 const totalPermissionItems = computed(() => {
-  return permissionCategories.value.reduce((total, category) => total + category.items.length, 0)
+  let count = 0
+  const countItems = (items: ApiMenuUtenteItem[]) => {
+    items.forEach(item => {
+      if (item.figli && item.figli.length > 0) {
+        if (!item.figli.some(child => child.figli?.length > 0)) {
+          count += item.figli.length
+        } else {
+          countItems(item.figli)
+        }
+      }
+    })
+  }
+  countItems(menuUtenteData.value)
+  return count
 })
 
-const totalAccessPermissions = computed(() => {
-  return Object.values(userPermissions.value).filter(perm => perm.access).length
+const totalViewPermissions = computed(() => {
+  return Object.values(userPermissions.value).filter(perm => perm.visualizza).length
 })
 
 const totalModifyPermissions = computed(() => {
-  return Object.values(userPermissions.value).filter(perm => perm.modify).length
+  return Object.values(userPermissions.value).filter(perm => perm.modifica).length
 })
 
-const isAllAccessSelected = computed(() => {
-  const allItems = permissionCategories.value.flatMap(cat => cat.items)
-  return allItems.length > 0 && allItems.every(item => userPermissions.value[item.id]?.access)
-})
-
-const isAllModifySelected = computed(() => {
-  const allItems = permissionCategories.value.flatMap(cat => cat.items)
-  return allItems.length > 0 && allItems.every(item => userPermissions.value[item.id]?.modify)
-})
-
-// Metodi per gestione password (invariati)
-const togglePasswordVisibility = () => {
-  showPassword.value = !showPassword.value
+// Metodi helper
+const hasMatchingChildren = (item: ApiMenuUtenteItem, query: string): boolean => {
+  if (item.figli) {
+    return item.figli.some(child =>
+      child.nome.toLowerCase().includes(query) ||
+      hasMatchingChildren(child, query)
+    )
+  }
+  return false
 }
 
-const toggleConfirmPasswordVisibility = () => {
-  showConfirmPassword.value = !showConfirmPassword.value
+// Metodi per la navigazione ad albero
+const selectCategory = (category: ApiMenuUtenteItem) => {
+  selectedCategoryId.value = category.id
+  selectedSubcategoryId.value = null
+  selectedSubSubcategoryId.value = null
 }
 
-const togglePasswordSection = () => {
-  showPasswordSection.value = !showPasswordSection.value
-  if (!showPasswordSection.value) {
-    userForm.value.password = ''
-    userForm.value.confirmPassword = ''
+const selectSubcategory = (subcategory: ApiMenuUtenteItem) => {
+  selectedSubcategoryId.value = subcategory.id
+  selectedSubSubcategoryId.value = null
+}
+
+const selectSubSubcategory = (subsubcategory: ApiMenuUtenteItem) => {
+  selectedSubSubcategoryId.value = subsubcategory.id
+}
+
+const loadGruppiUtente = async () => {
+  loadingGroups.value = true
+  try {
+    const gruppi = await userService.getGruppiUtente()
+    availableGroups.value = gruppi.map(gruppo => ({
+      label: gruppo.descrizione,
+      value: gruppo.codice
+    }))
+  } catch (error) {
+    errorMessage.value = 'Errore nel caricamento dei gruppi utente'
+  } finally {
+    loadingGroups.value = false
   }
 }
 
-// Validazione sicurezza password (invariata)
-const getPasswordStrength = () => {
-  const password = userForm.value.password
-  let score = 0
-
-  if (password.length >= 8) score += 1
-  if (/[A-Z]/.test(password)) score += 1
-  if (/[a-z]/.test(password)) score += 1
-  if (/[0-9]/.test(password)) score += 1
-  if (/[^A-Za-z0-9]/.test(password)) score += 1
-
-  return score
-}
-
-const getPasswordStrengthColor = () => {
-  const strength = getPasswordStrength()
-  if (strength <= 2) return 'bg-error'
-  if (strength <= 3) return 'bg-warning'
-  return 'bg-success'
-}
-
-const getPasswordStrengthTextColor = () => {
-  const strength = getPasswordStrength()
-  if (strength <= 2) return 'text-error'
-  if (strength <= 3) return 'text-warning'
-  return 'text-success'
-}
-
-const getPasswordStrengthText = () => {
-  const strength = getPasswordStrength()
-  if (strength <= 2) return 'Debole'
-  if (strength <= 3) return 'Media'
-  return 'Forte'
-}
-
-// Metodi utilità
-const formatDate = (date: Date | null) => {
-  if (!date) return 'N/A'
-  return new Intl.DateTimeFormat('it-IT', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date)
-}
-
-const goBack = () => {
-  router.push('/app/users')
-}
-
-// Nuovi metodi per i pulsanti della sezione informazioni base
-const showUserPreview = () => {
-  console.log('Visualizza anteprima utente:', userForm.value.nome)
-  // Implementa la logica per mostrare l'anteprima utente
-}
-
-const disableUser = () => {
-  if (confirm('Sei sicuro di voler disabilitare questo utente?')) {
-    userForm.value.accountEnabled = false
-    userForm.value.accesso = 'NONE'
-    successMessage.value = 'Utente disabilitato con successo'
-  }
-}
-
-const showNotesAccess = () => {
-  console.log('Mostra note accesso per utente:', userForm.value.nome)
-  // Implementa la logica per mostrare le note di accesso
-}
-
-const resetForm = () => {
-  if (isEditMode.value) {
-    loadUserData()
-  } else {
-    userForm.value = {
-      nome: '',
-      nomeCompleto: '',
-      disabilitaDopo: 0,
-      noteAccesso: '',
-      cambioPasswordOgni: 0,
-      monitorarePassword: false,
-      accesso: '',
-      lingua: 'it',
-      famigliaUtenti: '',
-      impostazioniInternazionali: 'it_IT',
-      codgruppo: '',
-      codaccesso: '',
-      tipoUtente: '',
-      controlloPeriodi: false,
-      mesiPrecedenti: 0,
-      dalGiorno: '',
-      utenteAbilitatoAnalytics: false,
-      abilitaAutenticazioneIntegrata: false,
-      loginAutenticazioneIntegrata: '',
-      dominioAutenticazioneIntegrata: '',
-      password: '',
-      confirmPassword: '',
-      email: '',
-      note: '',
-      accountEnabled: true,
-      forcePasswordChange: false,
-      adminAccess: false,
-      createdAt: null,
-      updatedAt: null
-    }
-    // Reset permessi
-    initializePermissions()
-  }
-  submitted.value = false
-  errorMessage.value = ''
-  successMessage.value = ''
-}
-
-// Metodi per gestione permessi (invariati)
-const initializePermissions = () => {
-  const permissions: UserPermissions = {}
-  permissionCategories.value.forEach(category => {
-    category.items.forEach(item => {
-      permissions[item.id] = {
-        access: false,
-        modify: false
-      }
-    })
-  })
-  userPermissions.value = permissions
-}
-
-const toggleCategory = (categoryName: string) => {
-  const category = permissionCategories.value.find(cat => cat.name === categoryName)
-  if (category) {
-    category.expanded = !category.expanded
-  }
-}
-
-const selectAllPermissions = () => {
-  Object.keys(userPermissions.value).forEach(key => {
-    userPermissions.value[key].access = true
-    userPermissions.value[key].modify = true
-  })
-}
-
-const deselectAllPermissions = () => {
-  Object.keys(userPermissions.value).forEach(key => {
-    userPermissions.value[key].access = false
-    userPermissions.value[key].modify = false
-  })
-}
-
-const toggleAllAccess = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const checked = target.checked
-
-  Object.keys(userPermissions.value).forEach(key => {
-    userPermissions.value[key].access = checked
-    if (!checked) {
-      userPermissions.value[key].modify = false
-    }
-  })
-}
-
-const toggleAllModify = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const checked = target.checked
-
-  Object.keys(userPermissions.value).forEach(key => {
-    if (userPermissions.value[key].access) {
-      userPermissions.value[key].modify = checked
-    }
-  })
-}
-
-const onPermissionChange = (itemId: string, type: 'access' | 'modify') => {
-  if (type === 'access' && !userPermissions.value[itemId].access) {
-    userPermissions.value[itemId].modify = false
-  } else if (type === 'modify' && userPermissions.value[itemId].modify) {
-    userPermissions.value[itemId].access = true
-  }
-}
-
-// Caricamento dati utente (aggiornato con i nuovi campi)
+// Caricamento dati utente
 const loadUserData = async () => {
   if (!isEditMode.value) return
 
@@ -1340,123 +925,174 @@ const loadUserData = async () => {
   errorMessage.value = ''
 
   try {
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const routerState = history.state?.userData
 
-    const mockUser = {
-      nome: userId.value,
-      nomeCompleto: `${userId.value} - Utente Test`,
-      disabilitaDopo: 6,
-      noteAccesso: 'Note di accesso per utente test',
-      cambioPasswordOgni: 3,
-      monitorarePassword: true,
-      accesso: 'FULL',
-      lingua: 'it',
-      famigliaUtenti: 'STANDARD',
-      impostazioniInternazionali: 'it_IT',
-      codgruppo: 'ADMIN',
-      codaccesso: 'ACTIVE',
-      tipoUtente: 'EMPLOYEE',
-      controlloPeriodi: true,
-      mesiPrecedenti: 12,
-      dalGiorno: '2024-01-01',
-      utenteAbilitatoAnalytics: true,
-      abilitaAutenticazioneIntegrata: true,
-      loginAutenticazioneIntegrata: `${userId.value}@company.local`,
-      dominioAutenticazioneIntegrata: 'COMPANY',
-      password: '',
-      confirmPassword: '',
-      email: `${userId.value}@company.com`,
-      note: 'Utente di esempio caricato dal sistema',
-      accountEnabled: true,
-      forcePasswordChange: false,
-      adminAccess: false,
-      createdAt: new Date('2023-01-15T10:30:00'),
-      updatedAt: new Date('2024-12-15T14:20:00')
+    if (routerState) {
+      console.log('Caricamento dati da router state:', routerState)
+
+      userForm.value = {
+        username: routerState.username || userId.value,
+        nomecompleto: routerState.nomecompleto || userId.value,
+        codgruppo: routerState.codgruppo || 'GRP1',
+        codaccesso: routerState.codaccesso || '12345',
+        iD_INTER: routerState.iD_INTER || 0,
+        iD_LINGUA: routerState.iD_LINGUA || 0
+      }
+    } else {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      const mockUser = {
+        username: userId.value,
+        nomecompleto: userId.value,
+        codgruppo: 'GRP1',
+        codaccesso: '12345',
+        iD_LINGUA: 0,
+        iD_INTER: 0
+      }
+
+      userForm.value = { ...mockUser }
     }
 
-    userForm.value = { ...mockUser }
-    loadUserPermissions()
+    await loadUserPermissions()
   } catch (error) {
     errorMessage.value = 'Errore nel caricamento dei dati utente'
-    console.error('Errore caricamento utente:', error)
   } finally {
     loading.value = false
   }
 }
 
-// Caricamento permessi utente (invariato)
-const loadUserPermissions = () => {
-  const mockPermissions: UserPermissions = {}
+const loadUserPermissions = async () => {
+  if (!userForm.value.username) return
 
-  permissionCategories.value.forEach(category => {
-    category.items.forEach(item => {
-      mockPermissions[item.id] = {
-        access: Math.random() > 0.5,
-        modify: Math.random() > 0.7
-      }
-    })
-  })
+  loadingPermissions.value = true
+  permissionsError.value = ''
 
-  if (mockPermissions['causali']) {
-    mockPermissions['causali'] = { access: true, modify: true }
+  try {
+    const menuData = await menuService.getMenuUtente(userForm.value.username)
+    menuUtenteData.value = menuData
+
+    initializePermissions(menuData)
+
+  } catch (error) {
+    permissionsError.value = 'Errore nel caricamento dei permessi: ' + error
+  } finally {
+    loadingPermissions.value = false
   }
-  if (mockPermissions['profili_orari']) {
-    mockPermissions['profili_orari'] = { access: true, modify: false }
-  }
-
-  userPermissions.value = mockPermissions
 }
 
-// Validazione form (aggiornata con i nuovi campi)
+const initializePermissions = (menuData: ApiMenuUtenteItem[]) => {
+  const permissions: UserPermissions = {}
+
+  const processItems = (items: ApiMenuUtenteItem[]) => {
+    items.forEach(item => {
+      // Aggiunge il permesso per questo item
+      permissions[item.id] = {
+        visualizza: item.visualizza === 'S',
+        modifica: item.modifica === 'S'
+      }
+
+      // Processa ricorsivamente i figli
+      if (item.figli && item.figli.length > 0) {
+        processItems(item.figli)
+      }
+    })
+  }
+
+  processItems(menuData)
+  userPermissions.value = permissions
+}
+
+// Metodi per gestione permessi
+const refreshPermissions = async () => {
+  if (userForm.value.username) {
+    await loadUserPermissions()
+  }
+}
+
+const selectAllPermissions = () => {
+  Object.keys(userPermissions.value).forEach(key => {
+    userPermissions.value[key].visualizza = true
+    userPermissions.value[key].modifica = true
+  })
+}
+
+const deselectAllPermissions = () => {
+  Object.keys(userPermissions.value).forEach(key => {
+    userPermissions.value[key].visualizza = false
+    userPermissions.value[key].modifica = false
+  })
+}
+
+const onPermissionChange = (itemId: number, type: 'visualizza' | 'modifica') => {
+  if (type === 'visualizza' && !userPermissions.value[itemId].visualizza) {
+    userPermissions.value[itemId].modifica = false
+  } else if (type === 'modifica' && userPermissions.value[itemId].modifica) {
+    userPermissions.value[itemId].visualizza = true
+  }
+}
+
+// Metodi utilità
+const goBack = () => {
+  router.push('/app/users')
+}
+
+const resetForm = () => {
+  if (isEditMode.value) {
+    loadUserData()
+  } else {
+    userForm.value = {
+      username: '',
+      nomecompleto: '',
+      codgruppo: '',
+      codaccesso: '',
+      iD_INTER: 0,
+      iD_LINGUA: 0
+    }
+    userPermissions.value = {}
+    menuUtenteData.value = []
+  }
+  submitted.value = false
+  errorMessage.value = ''
+  successMessage.value = ''
+
+  // Reset selezioni albero
+  selectedCategoryId.value = null
+  selectedSubcategoryId.value = null
+  selectedSubSubcategoryId.value = null
+}
+
+// Validazione form
 const validateForm = () => {
   const errors = []
 
-  if (!userForm.value.nome.trim()) {
-    errors.push('Nome richiesto')
+  if (!userForm.value.username.trim()) {
+    errors.push('Username richiesto')
   }
 
-  if (!userForm.value.nomeCompleto.trim()) {
+  if (!userForm.value.nomecompleto.trim()) {
     errors.push('Nome completo richiesto')
   }
 
-  if (!userForm.value.accesso) {
-    errors.push('Accesso richiesto')
+  if (!userForm.value.codgruppo) {
+    errors.push('Gruppo richiesto')
   }
 
-  if (!isEditMode.value || showPasswordSection.value) {
-    if (!userForm.value.password) {
-      errors.push('Password richiesta')
-    } else {
-      if (userForm.value.password.length < 8) {
-        errors.push('Password deve essere di almeno 8 caratteri')
-      }
-
-      if (userForm.value.password !== userForm.value.confirmPassword) {
-        errors.push('Le password non corrispondono')
-      }
-    }
+  if (!userForm.value.codaccesso) {
+    errors.push('Codice accesso richiesto')
   }
 
-  if (userForm.value.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userForm.value.email)) {
-    errors.push('Email non valida')
+  if (!userForm.value.iD_INTER) {
+    errors.push('Impostazione internazionale richiesta')
   }
 
-  if (userForm.value.disabilitaDopo < 0) {
-    errors.push('I mesi per disabilitazione non possono essere negativi')
-  }
-
-  if (userForm.value.cambioPasswordOgni < 0) {
-    errors.push('I mesi per cambio password non possono essere negativi')
-  }
-
-  if (userForm.value.mesiPrecedenti < 0) {
-    errors.push('I mesi precedenti non possono essere negativi')
+  if (!userForm.value.iD_LINGUA) {
+    errors.push('Lingua richiesta')
   }
 
   return errors
 }
 
-// Gestione submit (invariata)
+// Gestione submit
 const handleSubmit = async () => {
   submitted.value = true
   errorMessage.value = ''
@@ -1479,18 +1115,10 @@ const handleSubmit = async () => {
     }
 
     if (isEditMode.value) {
-      console.log('Aggiornamento utente:', userData)
       successMessage.value = 'Utente aggiornato con successo'
     } else {
-      console.log('Creazione nuovo utente:', userData)
       successMessage.value = 'Nuovo utente creato con successo'
     }
-
-    console.log('Permessi utente:', {
-      totalAccess: totalAccessPermissions.value,
-      totalModify: totalModifyPermissions.value,
-      permissions: userPermissions.value
-    })
 
     setTimeout(() => {
       router.push('/app/users')
@@ -1504,55 +1132,36 @@ const handleSubmit = async () => {
   }
 }
 
-// Gestione duplicazione utente (aggiornata con i nuovi campi)
+// Gestione duplicazione utente
 const handleDuplicateMode = () => {
   const duplicateUsername = route.query.duplicate as string
+  const sourceNome = route.query.sourceNome as string
+  const sourceGruppo = route.query.sourceGruppo as string
+  const sourceAccesso = route.query.sourceAccesso as string
+  const sourceId_Inter = Number(route.query.sourceId_Inter)
+  const sourceId_Lingua = Number(route.query.sourceId_Lingua)
+
   if (duplicateUsername && !isEditMode.value) {
     userForm.value = {
-      nome: '',
-      nomeCompleto: `Copia di ${duplicateUsername}`,
-      codgruppo: 'EMPLOYEE',
-      codaccesso: 'ACTIVE',
-      abilitaAutenticazioneIntegrata: false,
-      accesso: '',
-      cambioPasswordOgni: 6,
-      controlloPeriodi: false,
-      disabilitaDopo: 1,
-      dalGiorno: '',
-      dominioAutenticazioneIntegrata: '',
-      famigliaUtenti: '',
-      lingua: 'it',
-      mesiPrecedenti: 1,
-      monitorarePassword: false,
-      noteAccesso: '',
-      tipoUtente: 'EMPLOYEE',
-      utenteAbilitatoAnalytics: false,
-      impostazioniInternazionali: 'it_IT',
-      loginAutenticazioneIntegrata: '',
-      password: '',
-      confirmPassword: '',
-      email: '',
-      note: `Duplicato da utente: ${duplicateUsername}`,
-      accountEnabled: true,
-      forcePasswordChange: true,
-      adminAccess: false,
-      createdAt: null,
-      updatedAt: null
+      username: '',
+      nomecompleto: sourceNome ? `Copia di ${sourceNome}` : `Copia di ${duplicateUsername}`,
+      codgruppo: sourceGruppo || 'GRP1',
+      codaccesso: sourceAccesso || '12345',
+      iD_INTER: sourceId_Inter || 0,
+      iD_LINGUA: sourceId_Lingua || 0
     }
   }
 }
 
-// Inizializzazione (aggiornata)
-onMounted(() => {
-  initializePermissions()
+// Inizializzazione
+onMounted(async() => {
+  await loadGruppiUtente()
 
   if (isEditMode.value) {
     loadUserData()
   } else {
-    userForm.value.lingua = 'it'
-    userForm.value.impostazioniInternazionali = 'it_IT'
-    userForm.value.accountEnabled = true
-    userForm.value.tipoUtente = 'EMPLOYEE'
+    // Valore di default per nuovo utente
+    userForm.value.codaccesso = '12345'
 
     handleDuplicateMode()
   }
@@ -1569,6 +1178,13 @@ watch(() => route.params.id, () => {
     }
   }
 }, { immediate: true })
+
+// Watch per caricare permessi quando viene inserito username
+watch(() => userForm.value.username, (newUsername) => {
+  if (newUsername && isEditMode.value) {
+    loadUserPermissions()
+  }
+})
 </script>
 
 <style scoped>
@@ -1578,8 +1194,7 @@ watch(() => route.params.id, () => {
 }
 
 .form-control input:focus,
-.form-control select:focus,
-.form-control textarea:focus {
+.form-control select:focus {
   outline: 2px solid rgb(var(--primary));
   outline-offset: 2px;
 }
@@ -1604,60 +1219,28 @@ watch(() => route.params.id, () => {
 .card:nth-child(2) { animation-delay: 0.2s; }
 .card:nth-child(3) { animation-delay: 0.3s; }
 .card:nth-child(4) { animation-delay: 0.4s; }
-.card:nth-child(5) { animation-delay: 0.5s; }
-.card:nth-child(6) { animation-delay: 0.6s; }
-.card:nth-child(7) { animation-delay: 0.7s; }
 
-/* Stili per migliorare l'accessibilità */
-.form-control input[type="password"]:focus + button,
-.form-control input[type="text"]:focus + button {
+.grid.grid-cols-12 .border {
+  border-color: oklch(var(--bc) / 0.2);
+}
+
+.hover\:bg-base-200:hover {
+  background-color: oklch(var(--b2));
+}
+
+.bg-primary\/10 {
+  background-color: rgb(var(--primary) / 0.1);
+}
+
+.text-primary {
   color: rgb(var(--primary));
 }
 
-@media (max-width: 768px) {
-  .card-body {
-    padding: 1rem;
-  }
-
-  .flex.space-x-3 {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  /* Nascondi alcuni pulsanti su mobile per risparmiare spazio */
-  .btn-sm {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-  }
+.checkbox-xs {
+  width: 1rem;
+  height: 1rem;
 }
 
-/* Loading states */
-.btn.loading {
-  pointer-events: none;
-}
-
-/* Permission table styles */
-.table th {
-  background-color: oklch(var(--b2));
-  font-weight: 600;
-  font-size: 0.875rem;
-}
-
-.table td {
-  vertical-align: middle;
-}
-
-.table tr.hover:hover {
-  background-color: oklch(var(--b2) / 0.5);
-}
-
-/* Category row styling */
-.table tr.bg-base-100 {
-  background-color: oklch(var(--b1)) !important;
-  border-bottom: 2px solid oklch(var(--bc) / 0.1);
-}
-
-/* Checkbox states */
 .checkbox:disabled {
   opacity: 0.4;
   cursor: not-allowed;
@@ -1673,135 +1256,75 @@ watch(() => route.params.id, () => {
   100% { transform: scale(1); }
 }
 
-/* Search input in permissions */
-.form-control .relative input:focus {
-  border-color: rgb(var(--primary));
-  box-shadow: 0 0 0 1px rgb(var(--primary) / 0.2);
+.overflow-y-auto::-webkit-scrollbar {
+  width: 4px;
 }
 
-.grid > div {
-  padding: 0.5rem;
-  background-color: oklch(var(--b1));
-  border-radius: 0.375rem;
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-/* Responsive table on mobile */
-@media (max-width: 768px) {
-  .table {
-    font-size: 0.75rem;
-  }
-
-  .table th,
-  .table td {
-    padding: 0.5rem 0.25rem;
-  }
-
-  .form-control input.input-sm {
-    font-size: 0.75rem;
-  }
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
 }
 
-/* Category toggle animation */
-.btn-ghost {
-  transition: transform 0.2s ease;
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }
 
-.btn-ghost:hover {
-  transform: scale(1.05);
-}
-
-/* Stili specifici per la sezione Analytics */
-.bg-blue-100 {
-  background-color: #dbeafe;
-}
-
-.text-blue-600 {
-  color: #2563eb;
-}
-
-.dark .bg-blue-900\/20 {
-  background-color: rgba(30, 58, 138, 0.2);
-}
-
-/* Stili per la sezione Note */
-.bg-orange-100 {
-  background-color: #fed7aa;
-}
-
-.text-orange-600 {
-  color: #ea580c;
-}
-
-.dark .bg-orange-900\/20 {
-  background-color: rgba(154, 52, 18, 0.2);
-}
-
-/* Form animations */
-.form-control {
-  position: relative;
-}
-
-.form-control input,
-.form-control select,
-.form-control textarea {
-  transition: all 0.2s ease;
-}
-
-.form-control input:hover,
-.form-control select:hover,
-.form-control textarea:hover {
-  border-color: rgb(var(--primary) / 0.3);
-}
-
-/* Password strength indicator */
-.h-2 {
-  transition: all 0.3s ease;
-}
-
-/* Alert animations */
 .alert {
   animation: slideInUp 0.4s ease-out;
 }
 
-/* Breadcrumb styling */
-.breadcrumbs a:hover {
-  color: rgb(var(--primary));
+.btn.loading {
+  pointer-events: none;
 }
 
-/* Stili per migliorare l'aspetto dei campi numerici piccoli */
-.w-20 {
-  width: 5rem;
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1rem;
+  }
+
+  .flex.space-x-3 {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
 
-/* Stili per i controlli dipendenti */
-.ml-6 {
-  margin-left: 1.5rem;
-  border-left: 2px solid oklch(var(--bc) / 0.1);
-  padding-left: 1rem;
+.badge-xs {
+  font-size: 0.625rem;
+  line-height: 1rem;
+  padding: 0.125rem 0.25rem;
 }
 
-/* Miglioramenti per l'accessibilità dei pulsanti azione */
-.btn-sm {
-  transition: all 0.2s ease;
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.btn-sm:hover {
+.cursor-pointer:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Stili per i campi readonly */
-.input-disabled {
-  background-color: oklch(var(--b2));
-  cursor: not-allowed;
+.transition-colors {
+  transition-property: color, background-color, border-color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
 }
 
-/* Animazioni per i toggle delle sezioni */
-.checkbox {
-  transition: all 0.2s ease;
+.input-error {
+  border-color: rgb(var(--error));
 }
 
-.checkbox:hover {
-  transform: scale(1.05);
+.select-error {
+  border-color: rgb(var(--error));
+}
+
+.input-error:focus,
+.select-error:focus {
+  outline-color: rgb(var(--error));
+  border-color: rgb(var(--error));
 }
 </style>

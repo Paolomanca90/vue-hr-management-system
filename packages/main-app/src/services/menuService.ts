@@ -68,9 +68,9 @@ class MenuService {
     }
   }
 
-  async getMenuUtente(username: string): Promise<ApiMenuUtenteItem[]> {
+  async getMenuUtente(username:string): Promise<ApiMenuUtenteItem[]> {
     try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.menuUtente}/${username}`, {
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.menuUtente}${username}`, {
         method: 'GET',
         headers: {
           ...this.config.defaultHeaders,
@@ -242,7 +242,7 @@ export const menuService = new MenuService()
 // Interfaccia per compatibilità con il menu store esistente
 export interface MenuItem {
   id: number
-  icon: string // Ora contiene solo il nome dell'icona Font Awesome (es: "user", "building")
+  icon: string
   label: string
   route?: string
   children: MenuItem[]

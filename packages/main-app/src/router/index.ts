@@ -36,7 +36,7 @@ const appRoutes: RouteRecordRaw[] = [
   {
     path: 'dashboard',
     name: 'Dashboard',
-    component: Dashboard,
+    component: Users,
   },
   {
     path: 'users',
@@ -60,6 +60,14 @@ const appRoutes: RouteRecordRaw[] = [
       title: 'Modifica Utente',
       requiresAuth: true,
     },
+    beforeEnter: (to, from, next) => {
+      // Verifica che l'ID sia valido
+      if (to.params.id === 'new') {
+        next('/app/users/new')
+      } else {
+        next()
+      }
+    }
   },
   {
     path: 'payroll',

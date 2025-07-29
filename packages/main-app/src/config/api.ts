@@ -12,7 +12,7 @@ export const API_CONFIG = {
 
     // Menu
     menuVisibili: '/api/Menu/visibili',
-    menuUtente: '/api/Menu/menuUtente',
+    menuUtente: '/api/Menu/menuUtente?usernameUtente=',
     apiDisponibili: 'api/Menu/ApiDisponibili',
     updateMenuAbilitazioni: '/api/Menu/UpdateMenuAbilitazioni', //POST
 

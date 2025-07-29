@@ -5,6 +5,14 @@ export interface User {
   nomecompleto: string;
   codgruppo: string;
   codaccesso: string;
+  iD_LINGUA: number;
+  iD_INTER: number
+}
+
+export interface GruppiUtenti
+{
+  codice: string,
+  descrizione: string
 }
 
 export interface GetUsersResponse {
@@ -35,6 +43,29 @@ class UserService {
         listaUtenti: await response.json(),
         messaggioDiErrore: undefined,
       }
+
+    } catch (error) {
+      throw new Error('Errore di connessione al server: ' + error)
+    }
+  }
+
+  async getGruppiUtente(): Promise<GruppiUtenti[]> {
+    try {
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.gruppiUtente}`, {
+        method: 'GET',
+        headers: {
+          ...this.config.defaultHeaders,
+          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
+        }
+      })
+
+      if (!response.ok) {
+        // Se la risposta non è ok, prova a leggere il messaggio di errore
+        const errorText = await response.text()
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
+      }
+
+      return await response.json()
 
     } catch (error) {
       throw new Error('Errore di connessione al server: ' + error)
