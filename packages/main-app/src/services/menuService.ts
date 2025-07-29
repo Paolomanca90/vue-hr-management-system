@@ -68,9 +68,9 @@ class MenuService {
     }
   }
 
-  async getMenuUtente(): Promise<ApiMenuUtenteItem[]> {
+  async getMenuUtente(username: string): Promise<ApiMenuUtenteItem[]> {
     try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.menuUtente}`, {
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.menuUtente}/${username}`, {
         method: 'GET',
         headers: {
           ...this.config.defaultHeaders,
