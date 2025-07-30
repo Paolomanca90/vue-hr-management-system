@@ -552,8 +552,21 @@
 
             <!-- Colonna 1: Categorie principali -->
             <div class="col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto">
-              <div class="text-sm font-semibold mb-2 text-base-content/70">Categorie</div>
-              <div class="space-y-1">
+              <div class="text-sm font-semibold mb-2 text-base-content/70 flex items-center justify-between">
+                <span>Categorie</span>
+                <span v-if="permissionSearchQuery" class="badge badge-primary badge-xs">
+                  {{ filteredPermissionCategories.length }}
+                </span>
+              </div>
+
+              <!-- Messaggio quando la ricerca non trova risultati -->
+              <div v-if="permissionSearchQuery && filteredPermissionCategories.length === 0"
+                  class="text-center py-4 text-base-content/60">
+                <FaIcon icon="search" class="text-lg mb-2" />
+                <div class="text-xs">Nessun risultato trovato</div>
+              </div>
+
+              <div v-else class="space-y-1">
                 <div
                   v-for="category in filteredPermissionCategories"
                   :key="category.id"
@@ -562,11 +575,22 @@
                   @click="selectCategory(category)"
                 >
                   <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                      <FaIcon :icon="category.icona || 'folder'" class="mr-2 text-sm" />
-                      <span class="text-sm font-medium truncate">{{ category.nome }}</span>
+                    <div class="flex items-center flex-1 min-w-0">
+                      <FaIcon :icon="category.icona || 'folder'" class="mr-2 text-sm flex-shrink-0" />
+                      <span
+                        class="text-sm font-medium truncate"
+                        v-html="highlightSearchTerm(category.nome, permissionSearchQuery)"
+                      ></span>
                     </div>
-                    <span class="badge badge-xs">{{ category.figli?.length || 0 }}</span>
+                    <div class="flex items-center space-x-1 ml-2">
+                      <span class="badge badge-xs">{{ category.figli?.length || 0 }}</span>
+                      <FaIcon
+                        v-if="permissionSearchQuery && hasMatchingChildren(category, permissionSearchQuery)"
+                        icon="search"
+                        class="text-primary text-xs"
+                        title="Contiene risultati di ricerca"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -574,26 +598,47 @@
 
             <!-- Colonna 2: Sottocategorie (se presenti) -->
             <div
-              v-if="selectedCategory && selectedCategory.figli?.length > 0"
+              v-if="selectedCategory && (selectedCategory.figli?.length > 0 || permissionSearchQuery)"
               class="col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto"
             >
-              <div class="text-sm font-semibold mb-2 text-base-content/70">
-                Sottocategorie di {{ selectedCategory.nome }}
+              <div class="text-sm font-semibold mb-2 text-base-content/70 flex items-center justify-between">
+                <span>Sottocategorie di {{ selectedCategory.nome }}</span>
+                <span v-if="permissionSearchQuery" class="badge badge-primary badge-xs">
+                  {{ filteredSubcategories.length }}
+                </span>
               </div>
-              <div class="space-y-1">
+
+              <!-- Messaggio per sottocategorie filtrate -->
+              <div v-if="permissionSearchQuery && filteredSubcategories.length === 0"
+                  class="text-center py-4 text-base-content/60">
+                <div class="text-xs">Nessun risultato in questa sezione</div>
+              </div>
+
+              <div v-else class="space-y-1">
                 <div
-                  v-for="subcategory in selectedCategory.figli"
+                  v-for="subcategory in filteredSubcategories"
                   :key="subcategory.id"
                   class="p-2 rounded cursor-pointer transition-colors hover:bg-base-200"
                   :class="{ 'bg-primary/10 text-primary': selectedSubcategoryId === subcategory.id }"
                   @click="selectSubcategory(subcategory)"
                 >
                   <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                      <FaIcon :icon="subcategory.icona || 'folder'" class="mr-2 text-sm" />
-                      <span class="text-sm font-medium truncate">{{ subcategory.nome }}</span>
+                    <div class="flex items-center flex-1 min-w-0">
+                      <FaIcon :icon="subcategory.icona || 'folder'" class="mr-2 text-sm flex-shrink-0" />
+                      <span
+                        class="text-sm font-medium truncate"
+                        v-html="highlightSearchTerm(subcategory.nome, permissionSearchQuery)"
+                      ></span>
                     </div>
-                    <span class="badge badge-xs">{{ subcategory.figli?.length || 0 }}</span>
+                    <div class="flex items-center space-x-1 ml-2">
+                      <span class="badge badge-xs">{{ subcategory.figli?.length || 0 }}</span>
+                      <FaIcon
+                        v-if="permissionSearchQuery && hasMatchingChildren(subcategory, permissionSearchQuery)"
+                        icon="search"
+                        class="text-primary text-xs"
+                        title="Contiene risultati di ricerca"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -601,26 +646,47 @@
 
             <!-- Colonna 3: Terzo livello (se presenti) -->
             <div
-              v-if="selectedSubcategory && selectedSubcategory.figli?.length > 0"
+              v-if="selectedSubcategory && (selectedSubcategory.figli?.length > 0 || permissionSearchQuery)"
               class="col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto"
             >
-              <div class="text-sm font-semibold mb-2 text-base-content/70">
-                Sottosezioni di {{ selectedSubcategory.nome }}
+              <div class="text-sm font-semibold mb-2 text-base-content/70 flex items-center justify-between">
+                <span>Sottosezioni di {{ selectedSubcategory.nome }}</span>
+                <span v-if="permissionSearchQuery" class="badge badge-primary badge-xs">
+                  {{ filteredSubSubcategories.length }}
+                </span>
               </div>
-              <div class="space-y-1">
+
+              <!-- Messaggio per sotto-sottocategorie filtrate -->
+              <div v-if="permissionSearchQuery && filteredSubSubcategories.length === 0"
+                  class="text-center py-4 text-base-content/60">
+                <div class="text-xs">Nessun risultato in questa sezione</div>
+              </div>
+
+              <div v-else class="space-y-1">
                 <div
-                  v-for="subsubcategory in selectedSubcategory.figli"
+                  v-for="subsubcategory in filteredSubSubcategories"
                   :key="subsubcategory.id"
                   class="p-2 rounded cursor-pointer transition-colors hover:bg-base-200"
                   :class="{ 'bg-primary/10 text-primary': selectedSubSubcategoryId === subsubcategory.id }"
                   @click="selectSubSubcategory(subsubcategory)"
                 >
                   <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                      <FaIcon :icon="subsubcategory.icona || 'folder'" class="mr-2 text-sm" />
-                      <span class="text-sm font-medium truncate">{{ subsubcategory.nome }}</span>
+                    <div class="flex items-center flex-1 min-w-0">
+                      <FaIcon :icon="subsubcategory.icona || 'folder'" class="mr-2 text-sm flex-shrink-0" />
+                      <span
+                        class="text-sm font-medium truncate"
+                        v-html="highlightSearchTerm(subsubcategory.nome, permissionSearchQuery)"
+                      ></span>
                     </div>
-                    <span class="badge badge-xs">{{ subsubcategory.figli?.length || 0 }}</span>
+                    <div class="flex items-center space-x-1 ml-2">
+                      <span class="badge badge-xs">{{ subsubcategory.figli?.length || 0 }}</span>
+                      <FaIcon
+                        v-if="permissionSearchQuery && hasMatchingChildren(subsubcategory, permissionSearchQuery)"
+                        icon="search"
+                        class="text-primary text-xs"
+                        title="Contiene risultati di ricerca"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -630,27 +696,38 @@
             <div class="col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto">
               <div class="text-sm font-semibold mb-2 text-base-content/70 flex items-center justify-between">
                 <span>Permessi</span>
-                <div class="flex items-center space-x-1">
-                  <span class="text-xs">Vis.</span>
-                  <span class="text-xs">Mod.</span>
+                <div class="flex items-center space-x-2">
+                  <span v-if="permissionSearchQuery" class="badge badge-primary badge-xs">
+                    {{ currentPermissionItems.length }}
+                  </span>
+                  <div class="flex items-center space-x-1 text-xs">
+                    <span>Vis.</span>
+                    <span>Mod.</span>
+                  </div>
                 </div>
               </div>
 
               <div v-if="currentPermissionItems.length === 0" class="text-center py-8 text-base-content/60">
                 <FaIcon icon="info-circle" class="text-2xl mb-2" />
-                <div class="text-sm">Seleziona una categoria per vedere i permessi</div>
+                <div class="text-sm">
+                  {{ permissionSearchQuery ? 'Nessun permesso trovato' : 'Seleziona una categoria per vedere i permessi' }}
+                </div>
               </div>
 
               <div v-else class="space-y-2">
                 <div
                   v-for="item in currentPermissionItems"
                   :key="item.id"
-                  class="p-2 border border-base-200 rounded text-sm"
+                  class="p-2 border border-base-200 rounded text-sm transition-colors hover:bg-base-50"
+                  :class="{ 'ring-2 ring-primary/20': permissionSearchQuery && item.nome.toLowerCase().includes(permissionSearchQuery.toLowerCase()) }"
                 >
                   <div class="flex items-center justify-between">
                     <div class="flex items-center flex-1 min-w-0">
                       <FaIcon :icon="item.icona || 'file'" class="mr-2 text-xs flex-shrink-0" />
-                      <span class="font-medium truncate">{{ item.nome }}</span>
+                      <span
+                        class="font-medium truncate"
+                        v-html="highlightSearchTerm(item.nome, permissionSearchQuery)"
+                      ></span>
                     </div>
                     <div class="flex items-center space-x-2 ml-2">
                       <!-- Visualizza -->
@@ -723,7 +800,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { menuService, type ApiMenuUtenteItem } from '@/services/menuService'
@@ -808,15 +885,58 @@ const userId = computed(() => route.params.id as string)
 
 // Computed per la navigazione ad albero
 const filteredPermissionCategories = computed(() => {
-  if (!permissionSearchQuery.value) {
+  if (!permissionSearchQuery.value || permissionSearchQuery.value.trim() === '') {
     return menuUtenteData.value
   }
 
-  const query = permissionSearchQuery.value.toLowerCase()
-  return menuUtenteData.value.filter(category =>
-    category.nome.toLowerCase().includes(query) ||
-    hasMatchingChildren(category, query)
-  )
+  const query = permissionSearchQuery.value.trim()
+  const { matchingItems, pathsToMatches } = findMatchingItemsWithPaths(menuUtenteData.value, query)
+
+  // Se non ci sono match, ritorna array vuoto
+  if (matchingItems.length === 0) {
+    return []
+  }
+
+  // Filtra l'albero mantenendo solo i percorsi che portano ai match
+  return filterItemsByPaths(menuUtenteData.value, pathsToMatches)
+})
+
+const filteredSubcategories = computed(() => {
+  if (!selectedCategory.value) return []
+
+  // Se non c'è ricerca, mostra tutti i figli normalmente
+  if (!permissionSearchQuery.value || permissionSearchQuery.value.trim() === '') {
+    return selectedCategory.value.figli || []
+  }
+
+  // Se c'è una ricerca attiva, filtra i figli mostrando solo quelli nel percorso di ricerca
+  const query = permissionSearchQuery.value.trim()
+  const { pathsToMatches } = findMatchingItemsWithPaths([selectedCategory.value], query)
+
+  if (selectedCategory.value.figli) {
+    return selectedCategory.value.figli.filter(child => pathsToMatches.has(child.id))
+  }
+
+  return []
+})
+
+const filteredSubSubcategories = computed(() => {
+  if (!selectedSubcategory.value) return []
+
+  // Se non c'è ricerca, mostra tutti i figli normalmente
+  if (!permissionSearchQuery.value || permissionSearchQuery.value.trim() === '') {
+    return selectedSubcategory.value.figli || []
+  }
+
+  // Se c'è una ricerca attiva, filtra i figli mostrando solo quelli nel percorso di ricerca
+  const query = permissionSearchQuery.value.trim()
+  const { pathsToMatches } = findMatchingItemsWithPaths([selectedSubcategory.value], query)
+
+  if (selectedSubcategory.value.figli) {
+    return selectedSubcategory.value.figli.filter(child => pathsToMatches.has(child.id))
+  }
+
+  return []
 })
 
 const selectedCategory = computed(() => {
@@ -832,28 +952,24 @@ const selectedSubSubcategory = computed(() => {
 })
 
 const currentPermissionItems = computed(() => {
-  // Se abbiamo selezionato fino al terzo livello
-  if (selectedSubSubcategory.value) {
-    return selectedSubSubcategory.value.figli || []
-  }
-  // Se abbiamo selezionato fino al secondo livello e non ha figli con figli
-  if (selectedSubcategory.value) {
+  let items: ApiMenuUtenteItem[] = []
+
+  // Determina quali items mostrare basandosi sulla selezione corrente
+  if (selectedSubSubcategoryId.value && selectedSubSubcategory.value) {
+    items = selectedSubSubcategory.value.figli || []
+  } else if (selectedSubcategoryId.value && selectedSubcategory.value) {
     const hasDeepChildren = selectedSubcategory.value.figli?.some(child => child.figli?.length > 0)
     if (!hasDeepChildren) {
-      return selectedSubcategory.value.figli || []
+      items = selectedSubcategory.value.figli || []
     }
-    return []
-  }
-  // Se abbiamo selezionato solo la categoria principale e non ha sottocategorie
-  if (selectedCategory.value) {
+  } else if (selectedCategoryId.value && selectedCategory.value) {
     const hasSubcategories = selectedCategory.value.figli?.some(child => child.figli?.length > 0)
     if (!hasSubcategories) {
-      return selectedCategory.value.figli || []
+      items = selectedCategory.value.figli || []
     }
-    return []
   }
 
-  return []
+  return items
 })
 
 // Computed per i conteggi
@@ -884,13 +1000,181 @@ const totalModifyPermissions = computed(() => {
 
 // Metodi helper
 const hasMatchingChildren = (item: ApiMenuUtenteItem, query: string): boolean => {
-  if (item.figli) {
-    return item.figli.some(child =>
-      child.nome.toLowerCase().includes(query) ||
-      hasMatchingChildren(child, query)
-    )
+  if (!query || !item.figli) return false
+
+  const lowerQuery = query.toLowerCase()
+
+  const checkRecursively = (children: ApiMenuUtenteItem[]): boolean => {
+    return children.some(child => {
+      // Controlla se questo figlio matcha
+      if (child.nome.toLowerCase().includes(lowerQuery)) {
+        return true
+      }
+      // Controlla ricorsivamente nei suoi figli
+      if (child.figli && child.figli.length > 0) {
+        return checkRecursively(child.figli)
+      }
+      return false
+    })
   }
-  return false
+
+  return checkRecursively(item.figli)
+}
+
+// Funzione per trovare tutti i match e i loro percorsi nella gerarchia
+const findMatchingItemsWithPaths = (items: ApiMenuUtenteItem[], query: string): {
+  matchingItems: ApiMenuUtenteItem[],
+  pathsToMatches: Set<number>
+} => {
+  const lowerQuery = query.toLowerCase()
+  const matchingItems: ApiMenuUtenteItem[] = []
+  const pathsToMatches = new Set<number>()
+
+  const searchRecursively = (item: ApiMenuUtenteItem, currentPath: number[]): boolean => {
+    let hasMatchInSubtree = false
+    const newPath = [...currentPath, item.id]
+
+    // Controlla se questo item matcha direttamente
+    const directMatch = item.nome.toLowerCase().includes(lowerQuery)
+
+    if (directMatch) {
+      matchingItems.push(item)
+      // Aggiungi tutto il percorso fino a questo item
+      newPath.forEach(id => pathsToMatches.add(id))
+      hasMatchInSubtree = true
+    }
+
+    // Cerca ricorsivamente nei figli
+    if (item.figli && item.figli.length > 0) {
+      for (const child of item.figli) {
+        const childHasMatch = searchRecursively(child, newPath)
+        if (childHasMatch) {
+          hasMatchInSubtree = true
+        }
+      }
+    }
+
+    // Se qualche figlio ha un match, aggiungi questo item al percorso
+    if (hasMatchInSubtree && !directMatch) {
+      pathsToMatches.add(item.id)
+    }
+
+    return hasMatchInSubtree
+  }
+
+  // Avvia la ricerca per ogni item di primo livello
+  items.forEach(item => {
+    searchRecursively(item, [])
+  })
+
+  return { matchingItems, pathsToMatches }
+}
+
+// Funzione per filtrare gli items mantenendo solo quelli nei percorsi validi
+const filterItemsByPaths = (items: ApiMenuUtenteItem[], pathsToMatches: Set<number>): ApiMenuUtenteItem[] => {
+  return items.filter(item => {
+    if (pathsToMatches.has(item.id)) {
+      // Se questo item è nel percorso, filtra anche i suoi figli
+      if (item.figli && item.figli.length > 0) {
+        const filteredChildren = filterItemsByPaths(item.figli, pathsToMatches)
+        return {
+          ...item,
+          figli: filteredChildren
+        } as ApiMenuUtenteItem
+      }
+      return true
+    }
+    return false
+  }).map(item => {
+    if (item.figli && item.figli.length > 0) {
+      const filteredChildren = filterItemsByPaths(item.figli, pathsToMatches)
+      return {
+        ...item,
+        figli: filteredChildren
+      }
+    }
+    return item
+  })
+}
+
+// Funzione per cercare e espandere immediatamente
+const performSearchAndExpand = (query: string) => {
+  if (!query || query.trim() === '') {
+    return
+  }
+
+  const { matchingItems, pathsToMatches } = findMatchingItemsWithPaths(menuUtenteData.value, query)
+
+  if (matchingItems.length > 0) {
+    // Trova il percorso del primo match più profondo
+    let deepestMatch = matchingItems[0]
+    let maxDepth = 0
+
+    // Funzione per calcolare la profondità di un item nell'albero
+    const findDepth = (item: ApiMenuUtenteItem, currentDepth = 0): number => {
+      const searchInLevel = (items: ApiMenuUtenteItem[], depth: number): number => {
+        for (const currentItem of items) {
+          if (currentItem.id === item.id) {
+            return depth
+          }
+          if (currentItem.figli && currentItem.figli.length > 0) {
+            const foundDepth = searchInLevel(currentItem.figli, depth + 1)
+            if (foundDepth > -1) return foundDepth
+          }
+        }
+        return -1
+      }
+      return searchInLevel(menuUtenteData.value, 0)
+    }
+
+    // Trova il match più profondo
+    for (const match of matchingItems) {
+      const depth = findDepth(match)
+      if (depth > maxDepth) {
+        maxDepth = depth
+        deepestMatch = match
+      }
+    }
+
+    // Costruisce il percorso verso questo match
+    const buildPathToItem = (targetItem: ApiMenuUtenteItem): number[] => {
+      const findPath = (items: ApiMenuUtenteItem[], path: number[] = []): number[] | null => {
+        for (const item of items) {
+          const currentPath = [...path, item.id]
+
+          if (item.id === targetItem.id) {
+            return currentPath
+          }
+
+          if (item.figli && item.figli.length > 0) {
+            const foundPath = findPath(item.figli, currentPath)
+            if (foundPath) return foundPath
+          }
+        }
+        return null
+      }
+      return findPath(menuUtenteData.value) || []
+    }
+
+    const pathToMatch = buildPathToItem(deepestMatch)
+
+    // Espande il percorso
+    if (pathToMatch.length > 0) {
+      selectedCategoryId.value = pathToMatch[0] || null
+      selectedSubcategoryId.value = pathToMatch[1] || null
+      selectedSubSubcategoryId.value = pathToMatch[2] || null
+    }
+  }
+}
+
+// Funzione per evidenziare i termini cercati nel testo
+const highlightSearchTerm = (text: string, searchTerm: string): string => {
+  if (!searchTerm || searchTerm.trim() === '') {
+    return text
+  }
+
+  const regex = new RegExp(`(${searchTerm.trim()})`, 'gi')
+  return text.replace(regex, '<mark class="bg-primary/20 text-primary rounded px-1 font-semibold">$1</mark>')
 }
 
 // Metodi per la navigazione ad albero
@@ -1205,9 +1489,6 @@ onMounted(async() => {
   if (isEditMode.value) {
     loadUserData()
   } else {
-    // Valore di default per nuovo utente
-    userForm.value.codaccesso = '12345'
-
     handleDuplicateMode()
   }
 })
@@ -1228,6 +1509,21 @@ watch(() => route.params.id, () => {
 watch(() => userForm.value.username, (newUsername) => {
   if (newUsername && isEditMode.value) {
     loadUserPermissions()
+  }
+})
+
+// Watcher per espandere automaticamente quando si cerca
+watch(permissionSearchQuery, (newQuery, oldQuery) => {
+  if (newQuery && newQuery.trim() !== '') {
+    // Usa la nuova funzione per cercare e espandere
+    nextTick(() => {
+      performSearchAndExpand(newQuery.trim())
+    })
+  } else if (oldQuery && oldQuery.trim() !== '' && (!newQuery || newQuery.trim() === '')) {
+    // Reset selezioni solo quando si pulisce completamente la ricerca
+    selectedCategoryId.value = null
+    selectedSubcategoryId.value = null
+    selectedSubSubcategoryId.value = null
   }
 })
 </script>
@@ -1371,5 +1667,138 @@ watch(() => userForm.value.username, (newUsername) => {
 .select-error:focus {
   outline-color: rgb(var(--error));
   border-color: rgb(var(--error));
+}
+
+:deep(mark) {
+  background-color: rgba(var(--primary), 0.2);
+  color: rgb(var(--primary));
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  font-weight: 600;
+  font-size: inherit;
+}
+
+.search-highlight {
+  animation: searchPulse 1s ease-in-out;
+}
+
+@keyframes searchPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--primary), 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 4px rgba(var(--primary), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--primary), 0);
+  }
+}
+
+.hover\:bg-base-50:hover {
+  background-color: oklch(var(--b1) / 0.5);
+}
+
+.ring-2 {
+  box-shadow: 0 0 0 2px var(--tw-ring-color);
+}
+
+.ring-primary\/20 {
+  --tw-ring-color: rgb(var(--primary) / 0.2);
+}
+
+.badge-primary.badge-xs {
+  background-color: rgb(var(--primary));
+  color: rgb(var(--primary-content));
+  font-size: 0.625rem;
+  line-height: 1rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+}
+
+.tooltip[data-tip]:before {
+  z-index: 10000;
+  background-color: oklch(var(--n));
+  color: oklch(var(--nc));
+  border-radius: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  max-width: 200px;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.grid.grid-cols-12 > div {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: oklch(var(--b2));
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: oklch(var(--bc) / 0.3);
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: oklch(var(--bc) / 0.5);
+}
+
+input[type="text"]:focus {
+  outline: 2px solid rgb(var(--primary));
+  outline-offset: 2px;
+}
+
+@keyframes fadeInResults {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.space-y-1 > div {
+  animation: fadeInResults 0.3s ease-out;
+}
+
+.bg-primary\/5 {
+  background-color: rgb(var(--primary) / 0.05);
+}
+
+.border-primary\/20 {
+  border-color: rgb(var(--primary) / 0.2);
+}
+
+.checkbox-xs:checked {
+  background-color: currentColor;
+  border-color: currentColor;
+}
+
+.checkbox-success:checked {
+  background-color: rgb(var(--success));
+  border-color: rgb(var(--success));
+}
+
+.checkbox-warning:checked {
+  background-color: rgb(var(--warning));
+  border-color: rgb(var(--warning));
+}
+
+@media (prefers-color-scheme: dark) {
+  :deep(mark) {
+    background-color: rgba(var(--primary), 0.3);
+    color: rgb(var(--primary-content));
+  }
 }
 </style>
