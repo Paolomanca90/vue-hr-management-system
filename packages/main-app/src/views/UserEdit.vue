@@ -53,43 +53,80 @@
       <!-- Azioni -->
       <div class="card bg-base-100 shadow-sm">
         <div class="card-body">
-          <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 sm:space-x-4">
-
+          <div class="flex items-center justify-between">
             <div class="flex items-center space-x-3">
-              <button
-                type="button"
-                class="btn btn-ghost"
-                @click="resetForm"
-                :disabled="saving"
-              >
-                <FaIcon icon="undo" class="mr-2"/>
-                Reset
-              </button>
+              <!-- Navigazione utenti (solo in modalità modifica) -->
+              <div v-if="isEditMode" class="flex items-center space-x-2">
+                <button
+                  type="button"
+                  class="btn btn-outline btn-sm"
+                  @click="navigateToPreviousUser"
+                  :disabled="saving || !hasPreviousUser"
+                  title="Utente precedente"
+                >
+                  <FaIcon icon="chevron-left" />
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline btn-sm"
+                  @click="navigateToNextUser"
+                  :disabled="saving || !hasNextUser"
+                  title="Utente successivo"
+                >
+                  <FaIcon icon="chevron-right" />
+                </button>
+                <div class="divider divider-horizontal"></div>
+              </div>
 
-              <button
-                type="button"
-                class="btn btn-outline"
-                @click="goBack"
-                :disabled="saving"
-              >
-                <FaIcon icon="times" class="mr-2"/>
-                Annulla
-              </button>
-
+              <!-- Azioni principali -->
               <button
                 type="submit"
-                class="btn btn-primary"
+                class="btn btn-primary btn-sm text-white"
                 :class="{ 'loading': saving }"
                 :disabled="saving"
               >
                 <span v-if="saving" class="loading loading-spinner loading-sm"></span>
                 <FaIcon v-if="!saving" icon="save" class="mr-2"/>
                 <span v-if="saving">
-                  {{ isEditMode ? 'Aggiornamento...' : 'Creazione...' }}
+                  {{ isEditMode ? 'Salvataggio...' : 'Creazione...' }}
                 </span>
                 <span v-if="!saving">
-                  {{ isEditMode ? 'Aggiorna Utente' : 'Crea Utente' }}
+                  {{ isEditMode ? 'Salva' : 'Crea Utente' }}
                 </span>
+              </button>
+
+              <button
+                v-if="isEditMode"
+                type="button"
+                class="btn btn-primary btn-outline btn-sm"
+                @click="duplicateCurrentUser"
+                :disabled="saving"
+              >
+                <FaIcon icon="copy" class="mr-2"/>
+                Duplica
+              </button>
+
+              <button
+                v-if="isEditMode"
+                type="button"
+                class="btn btn-error btn-outline btn-sm"
+                @click="deleteCurrentUser"
+                :disabled="saving"
+              >
+                <FaIcon icon="trash" class="mr-2"/>
+                Elimina
+              </button>
+            </div>
+
+            <div>
+              <button
+                type="button"
+                class="btn btn-ghost btn-sm"
+                @click="resetForm"
+                :disabled="saving"
+              >
+                <FaIcon icon="undo" class="mr-2"/>
+                Reset
               </button>
             </div>
           </div>
@@ -879,9 +916,15 @@ const loadingImpostazioniInternazionali = ref(false)
 const availableLingue = ref<SelectOption[]>([])
 const loadingLingue = ref(false)
 
+// Navigazione utenti
+const previousUser = ref<{ username: string } | null>(null)
+const nextUser = ref<{ username: string } | null>(null)
+
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
 const userId = computed(() => route.params.id as string)
+const hasPreviousUser = computed(() => previousUser.value !== null)
+const hasNextUser = computed(() => nextUser.value !== null)
 
 // Computed per la navigazione ad albero
 const filteredPermissionCategories = computed(() => {
@@ -1175,6 +1218,99 @@ const highlightSearchTerm = (text: string, searchTerm: string): string => {
 
   const regex = new RegExp(`(${searchTerm.trim()})`, 'gi')
   return text.replace(regex, '<mark class="bg-primary/20 text-primary rounded px-1 font-semibold">$1</mark>')
+}
+
+// Navigazione tra utenti
+const navigateToPreviousUser = () => {
+  if (previousUser.value) {
+    router.push(`/app/users/${previousUser.value.username}/edit`)
+  }
+}
+
+const navigateToNextUser = () => {
+  if (nextUser.value) {
+    router.push(`/app/users/${nextUser.value.username}/edit`)
+  }
+}
+
+// Duplica utente corrente
+const duplicateCurrentUser = () => {
+  router.push({
+    name: 'UserNew',
+    query: {
+      duplicate: userForm.value.username,
+      sourceNome: userForm.value.nomecompleto,
+      sourceGruppo: userForm.value.codgruppo,
+      sourceAccesso: userForm.value.codaccesso,
+      sourceId_Inter: userForm.value.iD_INTER,
+      sourceId_Lingua: userForm.value.iD_LINGUA
+    }
+  })
+}
+
+// Elimina utente corrente
+const deleteCurrentUser = async () => {
+  if (confirm(`Sei sicuro di voler eliminare l'utente ${userForm.value.username}?`)) {
+    try {
+      saving.value = true
+
+      // Simula chiamata API per eliminazione
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      // Implementare chiamata reale all'API
+      // await userService.deleteUser(userForm.value.username)
+
+      successMessage.value = 'Utente eliminato con successo'
+
+      setTimeout(() => {
+        router.push('/app/users')
+      }, 1500)
+
+    } catch (error) {
+      errorMessage.value = 'Errore nell\'eliminazione dell\'utente'
+      console.error('Errore eliminazione:', error)
+    } finally {
+      saving.value = false
+    }
+  }
+}
+
+// Caricamento utenti adiacenti per navigazione
+const loadAdjacentUsers = async () => {
+  if (!isEditMode.value) return
+
+  try {
+    // L'API dovrebbe implementare un endpoint tipo:
+    // GET /api/users/adjacent?current=username&orderBy=username
+
+    // Usa direttamente userId.value che deriva da route.params.id
+    const currentUsername = userId.value
+
+    if (!currentUsername) return
+
+    // Simula la logica che dovrebbe essere implementata lato server
+    previousUser.value = getMockPreviousUser(currentUsername)
+    nextUser.value = getMockNextUser(currentUsername)
+
+  } catch (error) {
+    previousUser.value = null
+    nextUser.value = null
+  }
+}
+
+// Mock functions - da sostituire con vere chiamate API
+const getMockPreviousUser = (currentUsername: string): { username: string } | null => {
+  // Logica mock per dimostrare il funzionamento
+  const mockUsers = ['admin', 'manager', 'user01', 'user02', 'user03']
+  const currentIndex = mockUsers.findIndex(u => u === currentUsername)
+  return currentIndex > 0 ? { username: mockUsers[currentIndex - 1] } : null
+}
+
+const getMockNextUser = (currentUsername: string): { username: string } | null => {
+  // Logica mock per dimostrare il funzionamento
+  const mockUsers = ['admin', 'manager', 'user01', 'user02', 'user03']
+  const currentIndex = mockUsers.findIndex(u => u === currentUsername)
+  return currentIndex >= 0 && currentIndex < mockUsers.length - 1 ? { username: mockUsers[currentIndex + 1] } : null
 }
 
 // Metodi per la navigazione ad albero
@@ -1488,6 +1624,7 @@ onMounted(async() => {
 
   if (isEditMode.value) {
     loadUserData()
+    await loadAdjacentUsers()
   } else {
     handleDuplicateMode()
   }
@@ -1515,7 +1652,6 @@ watch(() => userForm.value.username, (newUsername) => {
 // Watcher per espandere automaticamente quando si cerca
 watch(permissionSearchQuery, (newQuery, oldQuery) => {
   if (newQuery && newQuery.trim() !== '') {
-    // Usa la nuova funzione per cercare e espandere
     nextTick(() => {
       performSearchAndExpand(newQuery.trim())
     })
