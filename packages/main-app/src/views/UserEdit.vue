@@ -50,6 +50,52 @@
     <!-- Form principale -->
     <form v-if="!loading" @submit.prevent="handleSubmit" class="space-y-6">
 
+      <!-- Azioni -->
+      <div class="card bg-base-100 shadow-sm">
+        <div class="card-body">
+          <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+
+            <div class="flex items-center space-x-3">
+              <button
+                type="button"
+                class="btn btn-ghost"
+                @click="resetForm"
+                :disabled="saving"
+              >
+                <FaIcon icon="undo" class="mr-2"/>
+                Reset
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-outline"
+                @click="goBack"
+                :disabled="saving"
+              >
+                <FaIcon icon="times" class="mr-2"/>
+                Annulla
+              </button>
+
+              <button
+                type="submit"
+                class="btn btn-primary"
+                :class="{ 'loading': saving }"
+                :disabled="saving"
+              >
+                <span v-if="saving" class="loading loading-spinner loading-sm"></span>
+                <FaIcon v-if="!saving" icon="save" class="mr-2"/>
+                <span v-if="saving">
+                  {{ isEditMode ? 'Aggiornamento...' : 'Creazione...' }}
+                </span>
+                <span v-if="!saving">
+                  {{ isEditMode ? 'Aggiorna Utente' : 'Crea Utente' }}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Sezione Informazioni Base -->
       <div class="card bg-base-100 shadow-sm">
         <div class="card-body">
@@ -201,13 +247,11 @@
               <!-- Gruppo Utenti -->
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-medium">Gruppo Utenti *</span>
+                  <span class="label-text font-medium">Gruppo Utenti</span>
                 </label>
                 <select
                   v-model="userForm.codgruppo"
-                  :class="{ 'select-error': submitted && !userForm.codgruppo }"
                   class="select select-bordered w-full"
-                  required
                 >
                   <option value="">Seleziona gruppo</option>
                   <option
@@ -218,21 +262,16 @@
                     {{ gruppo.label }}
                   </option>
                 </select>
-                <div v-if="submitted && !userForm.codgruppo" class="label">
-                  <span class="label-text-alt text-error">Gruppo richiesto</span>
-                </div>
               </div>
 
               <!-- Codice Accesso -->
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-medium">Codice Accesso *</span>
+                  <span class="label-text font-medium">Codice Accesso</span>
                 </label>
                 <select
                   v-model="userForm.codaccesso"
-                  :class="{ 'select-error': submitted && !userForm.codaccesso }"
                   class="select select-bordered w-full"
-                  required
                 >
                   <option value="">Seleziona codice accesso</option>
                   <option
@@ -243,9 +282,6 @@
                     {{ accesso.label }}
                   </option>
                 </select>
-                <div v-if="submitted && !userForm.codaccesso" class="label">
-                  <span class="label-text-alt text-error">Codice accesso richiesto</span>
-                </div>
               </div>
 
               <!-- Famiglia Utenti -->
@@ -308,38 +344,51 @@
               <!-- Lingua -->
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-medium">Lingua</span>
+                  <span class="label-text font-medium">Lingua *</span>
                 </label>
                 <select
                   v-model="userForm.iD_LINGUA"
                   class="select select-bordered w-full"
+                  :class="{ 'input-error': submitted && !userForm.iD_LINGUA }"
+                  required
                 >
-                  <option value="">Nessuno</option>
-                  <option value="it">Italiano</option>
-                  <option value="en">English</option>
-                  <option value="de">Deutsch</option>
-                  <option value="fr">Français</option>
-                  <option value="es">Español</option>
+                  <option value="">Seleziona lingua</option>
+                  <option
+                    v-for="gruppo in availableLingue"
+                    :key="gruppo.value"
+                    :value="gruppo.value"
+                  >
+                    {{ gruppo.label }}
+                  </option>
                 </select>
+                <div v-if="submitted && !userForm.iD_LINGUA" class="label">
+                  <span class="label-text-alt text-error">Lingua richiesta</span>
+                </div>
               </div>
 
               <!-- Impostazioni Internazionali -->
               <div class="form-control">
                 <label class="label">
-                  <span class="label-text font-medium">Impost. Internaz.</span>
+                  <span class="label-text font-medium">Impost. Internazionale *</span>
                 </label>
                 <select
                   v-model="userForm.iD_INTER"
                   class="select select-bordered w-full"
+                  :class="{ 'input-error': submitted && !userForm.iD_INTER }"
+                  required
                 >
-                  <option value="">Nessuno</option>
-                  <option value="it_IT">Italia (it_IT)</option>
-                  <option value="en_US">United States (en_US)</option>
-                  <option value="en_GB">United Kingdom (en_GB)</option>
-                  <option value="de_DE">Deutschland (de_DE)</option>
-                  <option value="fr_FR">France (fr_FR)</option>
-                  <option value="es_ES">España (es_ES)</option>
+                  <option value="">Seleziona impost. internazionale</option>
+                  <option
+                    v-for="gruppo in availableImpostazioniInternazionali"
+                    :key="gruppo.value"
+                    :value="gruppo.value"
+                  >
+                    {{ gruppo.label }}
+                  </option>
                 </select>
+                <div v-if="submitted && !userForm.iD_INTER" class="label">
+                  <span class="label-text-alt text-error">Impost. Internazionale richiesta</span>
+                </div>
               </div>
 
               <!-- Tipo Utente -->
@@ -360,6 +409,9 @@
                 </select>
               </div> -->
             </div>
+          </div>
+          <div class="text-sm text-base-content/60 mt-4">
+            * Campi obbligatori
           </div>
         </div>
       </div>
@@ -666,55 +718,6 @@
           Additional information fields would go here...
         </div>
       </div> -->
-
-      <!-- Azioni -->
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 sm:space-x-4">
-            <div class="text-sm text-base-content/60">
-              * Campi obbligatori
-            </div>
-
-            <div class="flex items-center space-x-3">
-              <button
-                type="button"
-                class="btn btn-ghost"
-                @click="resetForm"
-                :disabled="saving"
-              >
-                <FaIcon icon="undo" class="mr-2"/>
-                Reset
-              </button>
-
-              <button
-                type="button"
-                class="btn btn-outline"
-                @click="goBack"
-                :disabled="saving"
-              >
-                <FaIcon icon="times" class="mr-2"/>
-                Annulla
-              </button>
-
-              <button
-                type="submit"
-                class="btn btn-primary"
-                :class="{ 'loading': saving }"
-                :disabled="saving"
-              >
-                <span v-if="saving" class="loading loading-spinner loading-sm"></span>
-                <FaIcon v-if="!saving" icon="save" class="mr-2"/>
-                <span v-if="saving">
-                  {{ isEditMode ? 'Aggiornamento...' : 'Creazione...' }}
-                </span>
-                <span v-if="!saving">
-                  {{ isEditMode ? 'Aggiorna Utente' : 'Crea Utente' }}
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
     </form>
   </div>
 </template>
@@ -725,7 +728,9 @@ import { useRouter, useRoute, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { menuService, type ApiMenuUtenteItem } from '@/services/menuService'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
-import { userService, type GruppiUtenti } from '@/services/userService'
+import { userService } from '@/services/userService'
+import { settingsService } from '@/services/settingsService'
+import { accessiService } from '@/services/accessiService'
 
 // Interfaccia per il form dell'utente
 interface UserForm {
@@ -749,7 +754,7 @@ interface UserPermissions {
 
 interface SelectOption {
   label: string
-  value: string
+  value: string | number
 }
 
 const router = useRouter()
@@ -788,12 +793,14 @@ const selectedSubSubcategoryId = ref<number | null>(null)
 const availableGroups = ref<SelectOption[]>([])
 const loadingGroups = ref(false)
 
-const availableAccessCodes = ref<SelectOption[]>([
-  { label: 'Attivo', value: 'ACTIVE' },
-  { label: 'Disabilitato', value: 'DISABLED' },
-  { label: 'Sospeso', value: 'SUSPENDED' },
-  { label: 'Scaduto', value: 'EXPIRED' }
-])
+const availableAccessCodes = ref<SelectOption[]>([])
+const loadingAccessCodes = ref(false)
+
+const availableImpostazioniInternazionali = ref<SelectOption[]>([])
+const loadingImpostazioniInternazionali = ref(false)
+
+const availableLingue = ref<SelectOption[]>([])
+const loadingLingue = ref(false)
 
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
@@ -907,13 +914,58 @@ const loadGruppiUtente = async () => {
   try {
     const gruppi = await userService.getGruppiUtente()
     availableGroups.value = gruppi.map(gruppo => ({
-      label: gruppo.descrizione,
+      label: gruppo.codice + ' - ' + gruppo.descrizione,
       value: gruppo.codice
     }))
   } catch (error) {
     errorMessage.value = 'Errore nel caricamento dei gruppi utente'
   } finally {
     loadingGroups.value = false
+  }
+}
+
+const loadLingue = async () => {
+  loadingLingue.value = true
+  try {
+    const gruppi = await settingsService.getLingue()
+    availableLingue.value = gruppi.map(gruppo => ({
+      label: gruppo.iD_LINGUA + ' - ' + gruppo.descrizione,
+      value: gruppo.iD_LINGUA
+    }))
+  } catch (error) {
+    errorMessage.value = 'Errore nel caricamento delle lingue'
+  } finally {
+    loadingLingue.value = false
+  }
+}
+
+const loadImpostazioniInternazionali = async () => {
+  loadingImpostazioniInternazionali.value = true
+  try {
+    const gruppi = await settingsService.getImpostazioniInternazionali()
+    availableImpostazioniInternazionali.value = gruppi.map(gruppo => ({
+      label: gruppo.iD_INTER + ' - ' + gruppo.formatO_DATA,
+      value: gruppo.iD_INTER
+    }))
+  } catch (error) {
+    errorMessage.value = 'Errore nel caricamento delle impostazioni internazionali'
+  } finally {
+    loadingImpostazioniInternazionali.value = false
+  }
+}
+
+const loadTabAccessi = async () => {
+  loadingAccessCodes.value = true
+  try {
+    const gruppi = await accessiService.getTabAccessi()
+    availableAccessCodes.value = gruppi.map(gruppo => ({
+      label: gruppo.codice + ' - ' + gruppo.descrizione,
+      value: gruppo.codice
+    }))
+  } catch (error) {
+    errorMessage.value = 'Errore nel caricamento delle impostazioni internazionali'
+  } finally {
+    loadingAccessCodes.value = false
   }
 }
 
@@ -928,8 +980,6 @@ const loadUserData = async () => {
     const routerState = history.state?.userData
 
     if (routerState) {
-      console.log('Caricamento dati da router state:', routerState)
-
       userForm.value = {
         username: routerState.username || userId.value,
         nomecompleto: routerState.nomecompleto || userId.value,
@@ -1073,20 +1123,12 @@ const validateForm = () => {
     errors.push('Nome completo richiesto')
   }
 
-  if (!userForm.value.codgruppo) {
-    errors.push('Gruppo richiesto')
-  }
-
-  if (!userForm.value.codaccesso) {
-    errors.push('Codice accesso richiesto')
+  if (!userForm.value.iD_LINGUA) {
+    errors.push('Lingua richiesta')
   }
 
   if (!userForm.value.iD_INTER) {
-    errors.push('Impostazione internazionale richiesta')
-  }
-
-  if (!userForm.value.iD_LINGUA) {
-    errors.push('Lingua richiesta')
+    errors.push('Impost. Internazionale richiesta')
   }
 
   return errors
@@ -1156,6 +1198,9 @@ const handleDuplicateMode = () => {
 // Inizializzazione
 onMounted(async() => {
   await loadGruppiUtente()
+  await loadLingue()
+  await loadImpostazioniInternazionali()
+  await loadTabAccessi()
 
   if (isEditMode.value) {
     loadUserData()

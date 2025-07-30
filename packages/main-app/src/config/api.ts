@@ -24,7 +24,16 @@ export const API_CONFIG = {
     menuGruppiUtente: '/api/gruppiutente/menuXGruppiUtente',
     aggiornaAbilitazioniGruppiUtente: '/api/gruppiutente/aggiornaAbilitazioniGruppiUtente', //POST
     gruppiUtente: '/api/gruppiutente', //GET,POST,PUT
-    deleteGruppiUtente: 'api/gruppiutente/by-key' //DELETE
+    deleteGruppiUtente: 'api/gruppiutente/by-key', //DELETE
+
+    // Setting
+    lingue: '/api/settings/lingue',
+    impostazioniInternazionali: '/api/settings/impostazioniInternazionali',
+
+    // Accessi
+    accessi: '/api/accessi', //GET,POST,PUT
+    accessiSelect: '/api/accessi/select',
+    deleteAccessi: '/api/accessi/by-key' //DELETE
   },
 
   // Headers di default
