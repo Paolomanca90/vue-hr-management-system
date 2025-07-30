@@ -59,7 +59,7 @@
               <div v-if="isEditMode" class="flex items-center space-x-2">
                 <button
                   type="button"
-                  class="btn btn-outline btn-sm"
+                  class="btn btn-primary btn-outline btn-sm"
                   @click="navigateToPreviousUser"
                   :disabled="saving || !hasPreviousUser"
                   title="Utente precedente"
@@ -68,7 +68,7 @@
                 </button>
                 <button
                   type="button"
-                  class="btn btn-outline btn-sm"
+                  class="btn btn-primary btn-outline btn-sm"
                   @click="navigateToNextUser"
                   :disabled="saving || !hasNextUser"
                   title="Utente successivo"
@@ -793,8 +793,8 @@
 
           <!-- Riepilogo permessi -->
           <div class="mt-4 p-3 bg-base-200 rounded-lg">
-            <div class="text-sm font-medium mb-2">Riepilogo Permessi:</div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+            <div class="grid grid-cols-3 gap-4 text-xs">
+              <div class="text-sm font-medium mb-2">Riepilogo Permessi:</div>
               <div class="flex items-center">
                 <span class="w-3 h-3 bg-success rounded-full mr-2"></span>
                 Visualizzazioni: {{ totalViewPermissions }}
@@ -802,14 +802,6 @@
               <div class="flex items-center">
                 <span class="w-3 h-3 bg-warning rounded-full mr-2"></span>
                 Modifiche: {{ totalModifyPermissions }}
-              </div>
-              <div class="flex items-center">
-                <span class="w-3 h-3 bg-info rounded-full mr-2"></span>
-                Totale Voci: {{ totalPermissionItems }}
-              </div>
-              <div class="flex items-center">
-                <span class="w-3 h-3 bg-primary rounded-full mr-2"></span>
-                Categorie: {{ menuUtenteData.length }}
               </div>
             </div>
           </div>
@@ -919,6 +911,7 @@ const loadingLingue = ref(false)
 // Navigazione utenti
 const previousUser = ref<{ username: string } | null>(null)
 const nextUser = ref<{ username: string } | null>(null)
+const allUsers = ref<{ username: string }[]>([])
 
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
@@ -1013,24 +1006,6 @@ const currentPermissionItems = computed(() => {
   }
 
   return items
-})
-
-// Computed per i conteggi
-const totalPermissionItems = computed(() => {
-  let count = 0
-  const countItems = (items: ApiMenuUtenteItem[]) => {
-    items.forEach(item => {
-      if (item.figli && item.figli.length > 0) {
-        if (!item.figli.some(child => child.figli?.length > 0)) {
-          count += item.figli.length
-        } else {
-          countItems(item.figli)
-        }
-      }
-    })
-  }
-  countItems(menuUtenteData.value)
-  return count
 })
 
 const totalViewPermissions = computed(() => {
@@ -1280,37 +1255,44 @@ const loadAdjacentUsers = async () => {
   if (!isEditMode.value) return
 
   try {
-    // L'API dovrebbe implementare un endpoint tipo:
-    // GET /api/users/adjacent?current=username&orderBy=username
+    // Carica l'intera lista utenti se non è già stata caricata o se è vuota
+    if (allUsers.value.length === 0) {
+      const response = await userService.getUsers()
+      if (response.listaUtenti) {
+        // Ordina gli utenti alfabeticamente per username
+        allUsers.value = response.listaUtenti
+          .map(user => ({ username: user.username }))
+          .sort((a, b) => a.username.localeCompare(b.username))
+      }
+    }
 
-    // Usa direttamente userId.value che deriva da route.params.id
+    // Trova l'utente corrente e determina quello precedente e successivo
     const currentUsername = userId.value
+    if (!currentUsername || allUsers.value.length === 0) {
+      previousUser.value = null
+      nextUser.value = null
+      return
+    }
 
-    if (!currentUsername) return
+    const currentIndex = allUsers.value.findIndex(user => user.username === currentUsername)
 
-    // Simula la logica che dovrebbe essere implementata lato server
-    previousUser.value = getMockPreviousUser(currentUsername)
-    nextUser.value = getMockNextUser(currentUsername)
+    if (currentIndex === -1) {
+      // Utente corrente non trovato nella lista
+      previousUser.value = null
+      nextUser.value = null
+      return
+    }
+
+    // Imposta utente precedente
+    previousUser.value = currentIndex > 0 ? allUsers.value[currentIndex - 1] : null
+
+    // Imposta utente successivo
+    nextUser.value = currentIndex < allUsers.value.length - 1 ? allUsers.value[currentIndex + 1] : null
 
   } catch (error) {
     previousUser.value = null
     nextUser.value = null
   }
-}
-
-// Mock functions - da sostituire con vere chiamate API
-const getMockPreviousUser = (currentUsername: string): { username: string } | null => {
-  // Logica mock per dimostrare il funzionamento
-  const mockUsers = ['admin', 'manager', 'user01', 'user02', 'user03']
-  const currentIndex = mockUsers.findIndex(u => u === currentUsername)
-  return currentIndex > 0 ? { username: mockUsers[currentIndex - 1] } : null
-}
-
-const getMockNextUser = (currentUsername: string): { username: string } | null => {
-  // Logica mock per dimostrare il funzionamento
-  const mockUsers = ['admin', 'manager', 'user01', 'user02', 'user03']
-  const currentIndex = mockUsers.findIndex(u => u === currentUsername)
-  return currentIndex >= 0 && currentIndex < mockUsers.length - 1 ? { username: mockUsers[currentIndex + 1] } : null
 }
 
 // Metodi per la navigazione ad albero
@@ -1397,31 +1379,47 @@ const loadUserData = async () => {
   errorMessage.value = ''
 
   try {
-    const routerState = history.state?.userData
+    // Prima prova a cercare l'utente nella lista già caricata
+    let userData = null
 
-    if (routerState) {
-      userForm.value = {
-        username: routerState.username || userId.value,
-        nomecompleto: routerState.nomecompleto || userId.value,
-        codgruppo: routerState.codgruppo || 'GRP1',
-        codaccesso: routerState.codaccesso || '12345',
-        iD_INTER: routerState.iD_INTER || 0,
-        iD_LINGUA: routerState.iD_LINGUA || 0
+    // Se abbiamo già la lista utenti, cerca l'utente corrente
+    if (allUsers.value.length > 0) {
+      const response = await userService.getUsers()
+      if (response.listaUtenti) {
+        userData = response.listaUtenti.find(user => user.username === userId.value)
       }
-    } else {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+    }
 
-      const mockUser = {
+    // Se non trovato nella lista, prova con i dati del router state
+    if (!userData) {
+      const routerState = history.state?.userData
+      if (routerState && routerState.username === userId.value) {
+        userData = routerState
+      }
+    }
+
+    // Se ancora non trovato, carica i dati dell'utente (fallback)
+    if (!userData) {
+      userData = {
         username: userId.value,
         nomecompleto: userId.value,
         codgruppo: 'GRP1',
         codaccesso: '12345',
-        iD_LINGUA: 0,
-        iD_INTER: 0
+        iD_LINGUA: 1,
+        iD_INTER: 1
       }
-
-      userForm.value = { ...mockUser }
     }
+
+    // Imposta i dati del form assicurandoti che tutti i campi siano popolati
+    userForm.value = {
+      username: userData.username || '',
+      nomecompleto: userData.nomecompleto || '',
+      codgruppo: userData.codgruppo || '',
+      codaccesso: userData.codaccesso || '',
+      iD_LINGUA: Number(userData.iD_LINGUA) || 0,
+      iD_INTER: Number(userData.iD_INTER) || 0
+    }
+
 
     await loadUserPermissions()
   } catch (error) {
@@ -1508,6 +1506,15 @@ const goBack = () => {
 
 const resetForm = () => {
   if (isEditMode.value) {
+    userForm.value = {
+      username: '',
+      nomecompleto: '',
+      codgruppo: '',
+      codaccesso: '',
+      iD_INTER: 0,
+      iD_LINGUA: 0
+    }
+
     loadUserData()
   } else {
     userForm.value = {
@@ -1631,12 +1638,17 @@ onMounted(async() => {
 })
 
 // Watch per cambiamenti di route
-watch(() => route.params.id, () => {
+watch(() => route.params.id, async () => {
   if (route.params.id) {
-    resetForm()
+    // Reset dei messaggi
+    errorMessage.value = ''
+    successMessage.value = ''
+
     if (isEditMode.value) {
-      loadUserData()
+      await loadUserData()
+      await loadAdjacentUsers()
     } else {
+      resetForm()
       handleDuplicateMode()
     }
   }
@@ -1936,5 +1948,9 @@ input[type="text"]:focus {
     background-color: rgba(var(--primary), 0.3);
     color: rgb(var(--primary-content));
   }
+}
+
+.btn-outline:hover {
+  color: white !important;
 }
 </style>

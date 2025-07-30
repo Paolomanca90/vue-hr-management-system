@@ -89,6 +89,7 @@ import {
   faLock,
   faUnlock,
   faKey,
+  faUndo,
   faShieldAlt,
   // Social e comunicazione
   faComment,
@@ -217,6 +218,7 @@ library.add(
   faLock,
   faUnlock,
   faKey,
+  faUndo,
   faShieldAlt,
   faComment,
   faComments,
