@@ -18,13 +18,13 @@ export const API_CONFIG = {
 
     //Profile
     users: '/api/users', //GET,POST,PUT
-    deleteUser: 'api/users/by-key', //DELETE
+    deleteUser: '/api/users/by-key?username=', //DELETE
 
     // Gruppi Utente
     menuGruppiUtente: '/api/gruppiutente/menuXGruppiUtente',
     aggiornaAbilitazioniGruppiUtente: '/api/gruppiutente/aggiornaAbilitazioniGruppiUtente', //POST
     gruppiUtente: '/api/gruppiutente', //GET,POST,PUT
-    deleteGruppiUtente: 'api/gruppiutente/by-key', //DELETE
+    deleteGruppiUtente: '/api/gruppiutente/by-key', //DELETE
 
     // Setting
     lingue: '/api/settings/lingue',

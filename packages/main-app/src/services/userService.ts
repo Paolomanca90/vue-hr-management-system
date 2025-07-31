@@ -97,28 +97,28 @@ class UserService {
     }
   }
 
-  // async deleteUser(user:User): Promise<boolean> {
-  //   try {
-  //     const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.deleteUser}`, {
-  //       method: 'DELETE',
-  //       headers: {
-  //         ...this.config.defaultHeaders,
-  //         'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-  //       }
-  //     })
+  async deleteUser(username:string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.deleteUser}${username}`, {
+        method: 'DELETE',
+        headers: {
+          ...this.config.defaultHeaders,
+          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
+        }
+      })
 
-  //     if (!response.ok) {
-  //       // Se la risposta non è ok, prova a leggere il messaggio di errore
-  //       const errorText = await response.text()
-  //       throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
-  //     }
+      if (!response.ok) {
+        // Se la risposta non è ok, prova a leggere il messaggio di errore
+        const errorText = await response.text()
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
+      }
 
-  //     return await response.json()
+      return true
 
-  //   } catch (error) {
-  //     throw new Error('Errore di connessione al server: ' + error)
-  //   }
-  // }
+    } catch (error) {
+      throw new Error('Errore di connessione al server: ' + error)
+    }
+  }
 
   async getGruppiUtente(): Promise<GruppiUtenti[]> {
     try {

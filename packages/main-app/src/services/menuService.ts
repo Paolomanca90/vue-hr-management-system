@@ -30,7 +30,7 @@ export interface AbilitazioneMenuUtente
 {
     username: string,
     menU_ID: number,
-    modifica: string
+    modifica: string | null
 }
 
 export interface MenuResponse {
@@ -102,23 +102,22 @@ class MenuService {
     }
   }
 
-  async updateMenuUtente(listaAbilitazioni:AbilitazioneMenuUtente[]): Promise<void> {
+  async updateMenuUtente(listaAbilitazioni:AbilitazioneMenuUtente[], username:string): Promise<boolean> {
     try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.updateMenuAbilitazioni}${listaAbilitazioni[0].username}`, {
-        method: 'GET',
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.updateMenuAbilitazioni}${username}`, {
+        method: 'POST',
         headers: {
           ...this.config.defaultHeaders,
           'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        }
+        },
+        body: JSON.stringify(listaAbilitazioni)
       })
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      const result = await response.json()
-
-      return result
+      return true
     } catch (error) {
       console.error('Errore nel caricamento dei menu:', error)
       throw error
@@ -247,7 +246,7 @@ class MenuService {
 
       const menuItem: MenuItem = {
         id: apiItem.id,
-        icon: iconName, // Ora contiene solo il nome dell'icona Font Awesome
+        icon: iconName,
         label: apiItem.nome,
         route: apiItem.path && apiItem.path.trim() !== '' ? apiItem.path : undefined,
         expanded: false,

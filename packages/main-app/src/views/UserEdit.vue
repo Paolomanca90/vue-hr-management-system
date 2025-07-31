@@ -83,7 +83,7 @@
                 type="submit"
                 class="btn btn-primary btn-sm text-white"
                 :class="{ 'loading': saving }"
-                :disabled="saving"
+                :disabled="saving || !isFormValid"
               >
                 <span v-if="saving" class="loading loading-spinner loading-sm"></span>
                 <FaIcon v-if="!saving" icon="save" class="mr-2"/>
@@ -204,6 +204,7 @@
                   placeholder="Inserisci username"
                   required
                   autocomplete="username"
+                  :disabled="isEditMode"
                 />
                 <div v-if="submitted && !userForm.username" class="label">
                   <span class="label-text-alt text-error">Username richiesto</span>
@@ -509,8 +510,8 @@
         <div class="card-body">
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center">
-              <div class="bg-purple-100 dark:bg-purple-900/20 rounded-lg p-2 mr-3">
-                <FaIcon icon="table" class="text-purple-600 text-lg" />
+              <div class="p-2 mr-3">
+                <FaIcon icon="table" class="text-lg" />
               </div>
               <div>
                 <h3 class="text-lg font-semibold text-base-content">Abilitazioni Menu e Tabelle</h3>
@@ -522,7 +523,7 @@
             <div class="flex items-center space-x-2">
               <button
                 type="button"
-                class="btn btn-sm btn-success btn-outline"
+                class="btn btn-sm btn-ghost"
                 @click="selectAllPermissions"
               >
                 <FaIcon icon="check-circle" class="mr-1"/>
@@ -530,7 +531,7 @@
               </button>
               <button
                 type="button"
-                class="btn btn-sm btn-error btn-outline"
+                class="btn btn-sm btn-ghost"
                 @click="deselectAllPermissions"
               >
                 <FaIcon icon="times-circle" class="mr-1"/>
@@ -538,7 +539,7 @@
               </button>
               <button
                 type="button"
-                class="btn btn-sm btn-info btn-outline"
+                class="btn btn-sm btn-ghost"
                 @click="refreshPermissions"
                 :disabled="loadingPermissions"
               >
@@ -556,7 +557,7 @@
                   type="text"
                   v-model="permissionSearchQuery"
                   placeholder="Cerca tabelle o funzionalità..."
-                  class="input input-bordered input-sm w-full max-w-xs pr-10"
+                  class="input input-bordered input-sm w-full pr-10"
                 />
                 <FaIcon
                   icon="search"
@@ -825,6 +826,38 @@
         </div>
       </div> -->
     </form>
+
+    <!-- Modale di conferma eliminazione -->
+    <div v-if="showDeleteModal" class="modal modal-open">
+      <div class="modal-box">
+        <h3 class="font-bold text-lg mb-4">Conferma eliminazione</h3>
+        <p class="mb-4">
+          Sei sicuro di voler eliminare l'utente <strong>{{ userForm.username }}</strong>?
+        </p>
+        <p class="text-sm text-base-content/70 mb-6">
+          Questa azione è irreversibile e rimuoverà tutti i dati associati all'utente.
+        </p>
+        <div class="modal-action">
+          <button
+            class="btn btn-ghost"
+            @click="cancelDelete"
+            :disabled="deleting"
+          >
+            Annulla
+          </button>
+          <button
+            class="btn btn-error text-white"
+            @click="confirmDelete"
+            :disabled="deleting"
+            :class="{ 'loading': deleting }"
+          >
+            <span v-if="deleting" class="loading loading-spinner loading-sm"></span>
+            <span v-if="!deleting">Elimina</span>
+            <span v-if="deleting">Eliminazione...</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -832,9 +865,9 @@
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { menuService, type ApiMenuUtenteItem } from '@/services/menuService'
+import { menuService, type AbilitazioneMenuUtente, type ApiMenuUtenteItem } from '@/services/menuService'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
-import { userService } from '@/services/userService'
+import { userService, type User } from '@/services/userService'
 import { settingsService } from '@/services/settingsService'
 import { accessiService } from '@/services/accessiService'
 
@@ -852,6 +885,7 @@ interface UserForm {
 interface UserPermission {
   visualizza: boolean
   modifica: boolean
+  parent_id?: number
 }
 
 interface UserPermissions {
@@ -882,6 +916,10 @@ const saving = ref(false)
 const submitted = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
+
+// Gestione eliminazione
+const showDeleteModal = ref(false)
+const deleting = ref(false)
 
 // Gestione permessi
 const loadingPermissions = ref(false)
@@ -918,6 +956,13 @@ const isEditMode = computed(() => route.params.id !== undefined && route.params.
 const userId = computed(() => route.params.id as string)
 const hasPreviousUser = computed(() => previousUser.value !== null)
 const hasNextUser = computed(() => nextUser.value !== null)
+
+const isFormValid = computed(() => {
+  return userForm.value.username.trim() !== '' &&
+         userForm.value.nomecompleto.trim() !== '' &&
+         userForm.value.iD_LINGUA > 0 &&
+         userForm.value.iD_INTER > 0
+})
 
 // Computed per la navigazione ad albero
 const filteredPermissionCategories = computed(() => {
@@ -1225,28 +1270,31 @@ const duplicateCurrentUser = () => {
 
 // Elimina utente corrente
 const deleteCurrentUser = async () => {
-  if (confirm(`Sei sicuro di voler eliminare l'utente ${userForm.value.username}?`)) {
-    try {
-      saving.value = true
+  showDeleteModal.value = true
+}
 
-      // Simula chiamata API per eliminazione
-      await new Promise(resolve => setTimeout(resolve, 1000))
+const cancelDelete = () => {
+  showDeleteModal.value = false
+  deleting.value = false
+}
 
-      // Implementare chiamata reale all'API
-      // await userService.deleteUser(userForm.value.username)
+const confirmDelete = async () => {
+  try {
+    deleting.value = true
 
-      successMessage.value = 'Utente eliminato con successo'
+    await userService.deleteUser(userForm.value.username)
 
-      setTimeout(() => {
-        router.push('/app/users')
-      }, 1500)
+    successMessage.value = 'Utente eliminato con successo'
 
-    } catch (error) {
-      errorMessage.value = 'Errore nell\'eliminazione dell\'utente'
-      console.error('Errore eliminazione:', error)
-    } finally {
-      saving.value = false
-    }
+    setTimeout(() => {
+      router.push('/app/users')
+    }, 1500)
+
+  } catch (error) {
+    errorMessage.value = 'Errore nell\'eliminazione dell\'utente'
+  } finally {
+    deleting.value = false
+    showDeleteModal.value = false
   }
 }
 
@@ -1456,7 +1504,8 @@ const initializePermissions = (menuData: ApiMenuUtenteItem[]) => {
       // Aggiunge il permesso per questo item
       permissions[item.id] = {
         visualizza: item.visualizza === 'S',
-        modifica: item.modifica === 'S'
+        modifica: item.modifica === 'S',
+        parent_id: item.parenT_ID
       }
 
       // Processa ricorsivamente i figli
@@ -1561,6 +1610,46 @@ const validateForm = () => {
   return errors
 }
 
+// Preparazione dati per il salvataggio dei permessi - VERSIONE CORRETTA
+const preparePermissionsForSave = (): AbilitazioneMenuUtente[] => {
+  const abilitazioni: AbilitazioneMenuUtente[] = []
+  const addedIds = new Set<number>() // Per evitare duplicati
+
+  Object.keys(userPermissions.value).forEach(itemId => {
+    const permission = userPermissions.value[itemId]
+    const id = Number(itemId)
+
+    if (permission.visualizza === true) {
+      // Aggiunge l'item corrente solo se non è già stato aggiunto
+      if (!addedIds.has(id)) {
+        abilitazioni.push({
+          username: userForm.value.username,
+          menU_ID: id,
+          modifica: permission.modifica ? 'S' : 'N'
+        })
+        addedIds.add(id)
+      }
+
+      // Aggiunge i parent solo se non sono già stati aggiunti
+      let currentParentId = permission.parent_id
+      while (currentParentId && currentParentId > 0 && !addedIds.has(currentParentId)) {
+        abilitazioni.push({
+          username: userForm.value.username,
+          menU_ID: currentParentId,
+          modifica: null
+        })
+        addedIds.add(currentParentId)
+
+        // Va al parent del parent
+        const parentPermission = userPermissions.value[currentParentId]
+        currentParentId = parentPermission?.parent_id
+      }
+    }
+  })
+
+  return abilitazioni
+}
+
 // Gestione submit
 const handleSubmit = async () => {
   submitted.value = true
@@ -1576,26 +1665,48 @@ const handleSubmit = async () => {
   saving.value = true
 
   try {
-    await new Promise(resolve => setTimeout(resolve, 2000))
-
-    const userData = {
-      ...userForm.value,
-      permissions: userPermissions.value
+    const userData: User = {
+      username: userForm.value.username,
+      nomecompleto: userForm.value.nomecompleto,
+      codgruppo: userForm.value.codgruppo,
+      codaccesso: userForm.value.codaccesso,
+      iD_LINGUA: userForm.value.iD_LINGUA,
+      iD_INTER: userForm.value.iD_INTER
     }
 
     if (isEditMode.value) {
+      // Modifica utente esistente
+      await userService.editUser(userData)
+
+      // Salva anche i permessi se sono stati modificati
+      if (Object.keys(userPermissions.value).length > 0) {
+        const abilitazioni = preparePermissionsForSave()
+        await menuService.updateMenuUtente(abilitazioni, userData.username)
+      }
+
       successMessage.value = 'Utente aggiornato con successo'
     } else {
+      // Crea nuovo utente
+      await userService.newUser(userData)
+
+      // Se ci sono permessi impostati, salvali
+      if (Object.keys(userPermissions.value).length > 0) {
+        const abilitazioni = preparePermissionsForSave()
+        await menuService.updateMenuUtente(abilitazioni, userData.username)
+      }
+
       successMessage.value = 'Nuovo utente creato con successo'
     }
 
+    // Nasconde il messaggio dopo 2 secondi
     setTimeout(() => {
-      router.push('/app/users')
-    }, 1500)
+      successMessage.value = ''
+      if(!isEditMode.value)
+        router.push(`/app/users/${userData.username}/edit`)
+    }, 2000)
 
   } catch (error) {
-    errorMessage.value = 'Errore nel salvataggio dei dati'
-    console.error('Errore salvataggio:', error)
+    errorMessage.value = error instanceof Error ? error.message : 'Errore nel salvataggio dei dati'
   } finally {
     saving.value = false
   }
@@ -1614,11 +1725,30 @@ const handleDuplicateMode = () => {
     userForm.value = {
       username: '',
       nomecompleto: sourceNome ? `Copia di ${sourceNome}` : `Copia di ${duplicateUsername}`,
-      codgruppo: sourceGruppo || 'GRP1',
-      codaccesso: sourceAccesso || '12345',
+      codgruppo: sourceGruppo || '',
+      codaccesso: sourceAccesso || '',
       iD_INTER: sourceId_Inter || 0,
       iD_LINGUA: sourceId_Lingua || 0
     }
+
+    // Carica i permessi dell'utente originale per duplicarli
+    if (duplicateUsername) {
+      loadUserPermissionsForDuplication(duplicateUsername)
+    }
+  }
+}
+
+const loadUserPermissionsForDuplication = async (originalUsername: string) => {
+  try {
+    loadingPermissions.value = true
+    const menuData = await menuService.getMenuUtente(originalUsername)
+    menuUtenteData.value = menuData
+    initializePermissions(menuData)
+  } catch (error) {
+    console.error('Errore caricamento permessi per duplicazione:', error)
+    // Non è critico, continua senza permessi
+  } finally {
+    loadingPermissions.value = false
   }
 }
 
@@ -1654,9 +1784,10 @@ watch(() => route.params.id, async () => {
   }
 }, { immediate: true })
 
-// Watch per caricare permessi quando viene inserito username
+// Watch per caricare permessi quando viene inserito username (solo in modalità creazione)
 watch(() => userForm.value.username, (newUsername) => {
-  if (newUsername && isEditMode.value) {
+  if (newUsername && !isEditMode.value && newUsername.trim() !== '') {
+    // In modalità creazione, carica il menu base quando viene inserito un username
     loadUserPermissions()
   }
 })
@@ -1672,6 +1803,20 @@ watch(permissionSearchQuery, (newQuery, oldQuery) => {
     selectedCategoryId.value = null
     selectedSubcategoryId.value = null
     selectedSubSubcategoryId.value = null
+  }
+})
+
+// Clear success/error messages after timeout
+watch([successMessage, errorMessage], ([success, error]) => {
+  if (success) {
+    setTimeout(() => {
+      successMessage.value = ''
+    }, 5000)
+  }
+  if (error) {
+    setTimeout(() => {
+      errorMessage.value = ''
+    }, 8000)
   }
 })
 </script>
@@ -1768,6 +1913,25 @@ watch(permissionSearchQuery, (newQuery, oldQuery) => {
 
 .btn.loading {
   pointer-events: none;
+}
+
+.modal {
+  z-index: 1000;
+}
+
+.modal-box {
+  animation: scaleIn 0.3s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @media (max-width: 768px) {
@@ -1952,5 +2116,119 @@ input[type="text"]:focus {
 
 .btn-outline:hover {
   color: white !important;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.form-control select:disabled,
+.form-control input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: oklch(var(--b2));
+}
+
+.input-error,
+.select-error {
+  border-color: rgb(var(--error));
+  background-color: rgb(var(--error) / 0.05);
+}
+
+.input-error:focus,
+.select-error:focus {
+  outline: 2px solid rgb(var(--error));
+  outline-offset: 2px;
+  border-color: rgb(var(--error));
+}
+
+.label-text:after {
+  content: "";
+}
+
+.label-text:has(+ * [required]):after {
+  content: " *";
+  color: rgb(var(--error));
+}
+
+.btn.loading .loading-spinner {
+  margin-right: 0.5rem;
+}
+
+.alert-success {
+  border-left: 4px solid rgb(var(--success));
+}
+
+.alert-error {
+  border-left: 4px solid rgb(var(--error));
+}
+
+.checkbox:focus {
+  outline: 2px solid rgb(var(--primary));
+  outline-offset: 2px;
+}
+
+.btn:focus {
+  outline: 2px solid rgb(var(--primary));
+  outline-offset: 2px;
+}
+
+.btn, .input, .select, .checkbox {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.alert {
+  position: relative;
+  overflow: hidden;
+}
+
+.alert::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.tooltip {
+  --tooltip-delay: 300ms;
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+*:focus {
+  outline: 2px solid rgb(var(--primary));
+  outline-offset: 2px;
+}
+
+*:focus:not(:focus-visible) {
+  outline: none;
 }
 </style>
