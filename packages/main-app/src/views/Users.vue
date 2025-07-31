@@ -153,6 +153,38 @@
       </div>
     </div>
 
+    <!-- Modale di conferma eliminazione -->
+    <div v-if="showDeleteModal" class="modal modal-open">
+      <div class="modal-box">
+        <h3 class="font-bold text-lg mb-4">Conferma eliminazione</h3>
+        <p class="mb-4">
+          Sei sicuro di voler eliminare l'utente <strong>{{ userToDelete?.username }}</strong>?
+        </p>
+        <p class="text-sm text-base-content/70 mb-6">
+          Questa azione è irreversibile e rimuoverà tutti i dati associati all'utente.
+        </p>
+        <div class="modal-action">
+          <button
+            class="btn btn-ghost"
+            @click="cancelDelete"
+            :disabled="deleting"
+          >
+            Annulla
+          </button>
+          <button
+            class="btn btn-error text-white"
+            @click="confirmDelete"
+            :disabled="deleting"
+            :class="{ 'loading': deleting }"
+          >
+            <span v-if="deleting" class="loading loading-spinner loading-sm"></span>
+            <span v-if="!deleting">Elimina</span>
+            <span v-if="deleting">Eliminazione...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -250,6 +282,11 @@ const enhancedTableColumns = ref<EnhancedColumn[]>([
   }
 ])
 
+// Gestione eliminazione
+const showDeleteModal = ref(false)
+const deleting = ref(false)
+const userToDelete = ref<User | null>(null)
+
 const hasFilters = computed(() => {
   return Object.keys(filters.value).some(key => {
     const filter = filters.value[key]
@@ -329,11 +366,44 @@ const editUser = (user: User) => {
 }
 
 const deleteUser = async (user: User): Promise<void> => {
-  if (confirm(`Sei sicuro di voler eliminare l'utente ${user.username}?`)) {
-    console.log('Elimina utente:', user)
-    // Implementare logica di eliminazione
-    // await userService.deleteUser(user.username)
-    // refreshUsers()
+  userToDelete.value = user
+  showDeleteModal.value = true
+}
+
+const cancelDelete = (): void => {
+  showDeleteModal.value = false
+  deleting.value = false
+  userToDelete.value = null
+}
+
+const confirmDelete = async (): Promise<void> => {
+  if (!userToDelete.value) return
+
+  try {
+    deleting.value = true
+
+    await userService.deleteUser(userToDelete.value.username)
+
+    // Rimuove l'utente dalla lista locale
+    const index = users.value.findIndex(u => u.username === userToDelete.value!.username)
+    if (index !== -1) {
+      users.value.splice(index, 1)
+    }
+
+    // Reset selezione se l'utente eliminato era selezionato
+    if (selectedUser.value?.username === userToDelete.value.username) {
+      selectedUser.value = null
+    }
+
+    // Aggiorna le opzioni dei filtri
+    updateFilterOptions()
+
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : 'Errore nell\'eliminazione dell\'utente'
+  } finally {
+    deleting.value = false
+    showDeleteModal.value = false
+    userToDelete.value = null
   }
 }
 
@@ -417,18 +487,30 @@ onMounted(() => {
   animation: countUp 0.6s ease-out;
 }
 
-@media (max-width: 768px) {
-  .flex.space-x-1 {
-    flex-direction: column;
-    gap: 0.25rem;
-  }
+.btn-outline:hover {
+  color: white !important;
+}
 
-  .grid.grid-cols-2 {
-    grid-template-columns: 1fr;
+.modal {
+  z-index: 1000;
+}
+
+.modal-box {
+  animation: scaleIn 0.3s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
-.btn-outline:hover {
-  color: white !important;
+.btn.loading .loading-spinner {
+  margin-right: 0.5rem;
 }
 </style>
