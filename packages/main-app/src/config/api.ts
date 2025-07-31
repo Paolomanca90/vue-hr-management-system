@@ -14,7 +14,7 @@ export const API_CONFIG = {
     menuVisibili: '/api/Menu/visibili',
     menuUtente: '/api/Menu/menuUtente?usernameUtente=',
     apiDisponibili: 'api/Menu/ApiDisponibili',
-    updateMenuAbilitazioni: '/api/Menu/UpdateMenuAbilitazioni', //POST
+    updateMenuAbilitazioni: '/api/Menu/UpdateMenuAbilitazioni?usernameUtente=', //POST
 
     //Profile
     users: '/api/users', //GET,POST,PUT

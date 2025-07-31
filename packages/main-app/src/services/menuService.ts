@@ -26,6 +26,13 @@ export interface ApiMenuUtenteItem {
   figli: ApiMenuUtenteItem[]
 }
 
+export interface AbilitazioneMenuUtente
+{
+    username: string,
+    menU_ID: number,
+    modifica: string
+}
+
 export interface MenuResponse {
   success: boolean
   data: ApiMenuItem[]
@@ -87,6 +94,29 @@ class MenuService {
       if (!result) {
         throw new Error('Errore nel caricamento del menu')
       }
+
+      return result
+    } catch (error) {
+      console.error('Errore nel caricamento dei menu:', error)
+      throw error
+    }
+  }
+
+  async updateMenuUtente(listaAbilitazioni:AbilitazioneMenuUtente[]): Promise<void> {
+    try {
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.updateMenuAbilitazioni}${listaAbilitazioni[0].username}`, {
+        method: 'GET',
+        headers: {
+          ...this.config.defaultHeaders,
+          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const result = await response.json()
 
       return result
     } catch (error) {
