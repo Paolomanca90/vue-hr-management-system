@@ -4,9 +4,8 @@
     <!-- Header con breadcrumb -->
     <div class="card bg-base-100 shadow-sm">
       <div class="card-body">
-        <div class="flex items-center justify-between">
-          <div>
-
+        <div class="flex flex-col-reverse lg:flex-row lg:items-center lg:justify-between gap-3">
+          <div class="max-md:block">
             <h1 class="text-3xl font-bold text-base-content">
               {{ isEditMode ? 'Modifica Utente' : 'Nuovo Utente' }}
             </h1>
@@ -15,7 +14,7 @@
             </p>
           </div>
 
-          <div class="flex items-center space-x-3">
+          <div>
             <button
               class="btn btn-ghost btn-sm"
               @click="goBack"
@@ -53,10 +52,10 @@
       <!-- Azioni -->
       <div class="card bg-base-100 shadow-sm">
         <div class="card-body">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-3">
+          <div class="lg:flex items-center justify-between gap-3">
+            <div class="flex flex-col lg:flex-row lg:items-center gap-3">
               <!-- Navigazione utenti (solo in modalità modifica) -->
-              <div v-if="isEditMode" class="flex items-center space-x-2">
+              <div v-if="isEditMode" class="flex items-center max-md:justify-center space-x-2">
                 <button
                   type="button"
                   class="btn btn-primary btn-outline btn-sm"
@@ -75,7 +74,6 @@
                 >
                   <FaIcon icon="chevron-right" />
                 </button>
-                <div class="divider divider-horizontal"></div>
               </div>
 
               <!-- Azioni principali -->
@@ -118,10 +116,10 @@
               </button>
             </div>
 
-            <div>
+            <div class="max-md:mt-3">
               <button
                 type="button"
-                class="btn btn-ghost btn-sm"
+                class="max-md:block max-md:w-full btn btn-ghost btn-sm"
                 @click="resetForm"
                 :disabled="saving"
               >
@@ -188,7 +186,7 @@
 
           <div class="grid grid-cols-1 gap-2">
             <!-- Prima riga -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid lg:grid-cols-2 gap-4">
               <!-- Username -->
               <div class="form-control">
                 <label class="label">
@@ -281,7 +279,7 @@
             </div>
 
             <!-- Seconda riga -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid lg:grid-cols-2 gap-4">
               <!-- Gruppo Utenti -->
               <div class="form-control">
                 <label class="label">
@@ -378,7 +376,7 @@
             </div>
 
             <!-- Terza riga -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid lg:grid-cols-2 gap-4">
               <!-- Lingua -->
               <div class="form-control">
                 <label class="label">
@@ -508,7 +506,7 @@
       <!-- Sezione Abilitazioni Menu/Tabelle -->
       <div v-if="authStore.isCompanyUser" class="card bg-base-100 shadow-sm">
         <div class="card-body">
-          <div class="flex items-center justify-between mb-4">
+          <div class="flex flex-col lg:flex-row items-center justify-between mb-4 gap-3">
             <div class="flex items-center">
               <div class="p-2 mr-3">
                 <FaIcon icon="table" class="text-lg" />
@@ -520,10 +518,10 @@
             </div>
 
             <!-- Azioni rapide -->
-            <div class="flex items-center space-x-2">
+            <div class="w-full flex flex-col lg:flex-row lg:items-center gap-2">
               <button
                 type="button"
-                class="btn btn-sm btn-ghost"
+                class="max-md:block max-md:w-full btn btn-sm btn-ghost"
                 @click="selectAllPermissions"
               >
                 <FaIcon icon="check-circle" class="mr-1"/>
@@ -531,7 +529,7 @@
               </button>
               <button
                 type="button"
-                class="btn btn-sm btn-ghost"
+                class="max-md:block max-md:w-full btn btn-sm btn-ghost"
                 @click="deselectAllPermissions"
               >
                 <FaIcon icon="times-circle" class="mr-1"/>
@@ -539,7 +537,7 @@
               </button>
               <button
                 type="button"
-                class="btn btn-sm btn-ghost"
+                class="max-md:block max-md:w-full btn btn-sm btn-ghost"
                 @click="refreshPermissions"
                 :disabled="loadingPermissions"
               >
@@ -589,7 +587,7 @@
           <div v-else class="grid grid-cols-12 gap-4 h-96">
 
             <!-- Colonna 1: Categorie principali -->
-            <div class="col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto">
+            <div class="col-span-12 lg:col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto">
               <div class="text-sm font-semibold mb-2 text-base-content/70 flex items-center justify-between">
                 <span>Categorie</span>
                 <span v-if="permissionSearchQuery" class="badge badge-primary badge-xs">
@@ -637,7 +635,7 @@
             <!-- Colonna 2: Sottocategorie (se presenti) -->
             <div
               v-if="selectedCategory && (selectedCategory.figli?.length > 0 || permissionSearchQuery)"
-              class="col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto"
+              class="col-span-12 lg:col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto"
             >
               <div class="text-sm font-semibold mb-2 text-base-content/70 flex items-center justify-between">
                 <span>Sottocategorie di {{ selectedCategory.nome }}</span>
@@ -685,7 +683,7 @@
             <!-- Colonna 3: Terzo livello (se presenti) -->
             <div
               v-if="selectedSubcategory && (selectedSubcategory.figli?.length > 0 || permissionSearchQuery)"
-              class="col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto"
+              class="col-span-12 lg:col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto"
             >
               <div class="text-sm font-semibold mb-2 text-base-content/70 flex items-center justify-between">
                 <span>Sottosezioni di {{ selectedSubcategory.nome }}</span>
@@ -731,7 +729,7 @@
             </div>
 
             <!-- Colonna 4: Permessi finali -->
-            <div class="col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto">
+            <div class="col-span-12 lg:col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto">
               <div class="text-sm font-semibold mb-2 text-base-content/70 flex items-center justify-between">
                 <span>Permessi</span>
                 <div class="flex items-center space-x-2">
@@ -794,7 +792,7 @@
 
           <!-- Riepilogo permessi -->
           <div class="mt-4 p-3 bg-base-200 rounded-lg">
-            <div class="grid grid-cols-3 gap-4 text-xs">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 text-xs">
               <div class="text-sm font-medium mb-2">Riepilogo Permessi:</div>
               <div class="flex items-center">
                 <span class="w-3 h-3 bg-success rounded-full mr-2"></span>
@@ -863,7 +861,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
-import { useRouter, useRoute, RouterLink } from 'vue-router'
+import { useRouter, useRoute} from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { menuService, type AbilitazioneMenuUtente, type ApiMenuUtenteItem } from '@/services/menuService'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
@@ -1166,7 +1164,7 @@ const performSearchAndExpand = (query: string) => {
     return
   }
 
-  const { matchingItems, pathsToMatches } = findMatchingItemsWithPaths(menuUtenteData.value, query)
+  const { matchingItems } = findMatchingItemsWithPaths(menuUtenteData.value, query)
 
   if (matchingItems.length > 0) {
     // Trova il percorso del primo match più profondo
@@ -1174,7 +1172,7 @@ const performSearchAndExpand = (query: string) => {
     let maxDepth = 0
 
     // Funzione per calcolare la profondità di un item nell'albero
-    const findDepth = (item: ApiMenuUtenteItem, currentDepth = 0): number => {
+    const findDepth = (item: ApiMenuUtenteItem): number => {
       const searchInLevel = (items: ApiMenuUtenteItem[], depth: number): number => {
         for (const currentItem of items) {
           if (currentItem.id === item.id) {
@@ -1290,6 +1288,7 @@ const confirmDelete = async () => {
       router.push('/app/users')
     }, 1500)
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     errorMessage.value = 'Errore nell\'eliminazione dell\'utente'
   } finally {
@@ -1337,6 +1336,7 @@ const loadAdjacentUsers = async () => {
     // Imposta utente successivo
     nextUser.value = currentIndex < allUsers.value.length - 1 ? allUsers.value[currentIndex + 1] : null
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     previousUser.value = null
     nextUser.value = null
@@ -1367,6 +1367,7 @@ const loadGruppiUtente = async () => {
       label: gruppo.codice + ' - ' + gruppo.descrizione,
       value: gruppo.codice
     }))
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     errorMessage.value = 'Errore nel caricamento dei gruppi utente'
   } finally {
@@ -1382,6 +1383,7 @@ const loadLingue = async () => {
       label: gruppo.iD_LINGUA + ' - ' + gruppo.descrizione,
       value: gruppo.iD_LINGUA
     }))
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     errorMessage.value = 'Errore nel caricamento delle lingue'
   } finally {
@@ -1397,6 +1399,7 @@ const loadImpostazioniInternazionali = async () => {
       label: gruppo.iD_INTER + ' - ' + gruppo.formatO_DATA,
       value: gruppo.iD_INTER
     }))
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     errorMessage.value = 'Errore nel caricamento delle impostazioni internazionali'
   } finally {
@@ -1412,6 +1415,7 @@ const loadTabAccessi = async () => {
       label: gruppo.codice + ' - ' + gruppo.descrizione,
       value: gruppo.codice
     }))
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     errorMessage.value = 'Errore nel caricamento delle impostazioni internazionali'
   } finally {
@@ -1470,6 +1474,7 @@ const loadUserData = async () => {
 
 
     await loadUserPermissions()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     errorMessage.value = 'Errore nel caricamento dei dati utente'
   } finally {

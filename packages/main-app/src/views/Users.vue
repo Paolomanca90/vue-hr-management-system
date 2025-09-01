@@ -1,21 +1,22 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div class="space-y-6">
     <!-- Header -->
     <div class="card bg-base-100 shadow-sm">
       <div class="card-body">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col lg:flex-row items-center justify-between space-y-3">
           <div>
             <h1 class="text-3xl font-bold text-base-content">Gestione Utenti</h1>
             <p class="text-base-content/70 mt-1">
               Gestisci gli utenti del sistema - Totale: {{ users.length }} utenti
             </p>
           </div>
-          <div class="flex items-center space-x-3">
-            <button class="btn btn-primary btn-sm text-white" @click="addNewUser">
+          <div class="flex items-center gap-3 flex-wrap">
+            <button class="max-md:w-full max-md:block btn btn-primary btn-sm text-white" @click="addNewUser">
               <FaIcon icon="user-plus" class="mr-2"/>
               Nuovo Utente
             </button>
-            <button class="btn btn-primary btn-outline btn-sm" @click="refreshUsers">
+            <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm" @click="refreshUsers">
               <FaIcon icon="refresh" class="mr-2"/>
               Aggiorna
             </button>
@@ -25,7 +26,7 @@
     </div>
 
     <div class="card bg-base-100 shadow-sm">
-      <div class="card-body">
+      <div class="card-body max-md:p-3">
         <!-- Messaggio di errore -->
         <div v-if="errorMessage" class="alert alert-error mb-4">
           <FaIcon icon="exclamation-triangle" />
@@ -62,18 +63,16 @@
         >
           <!-- Custom toolbar -->
           <template #toolbar>
-            <div class="flex items-center gap-2">
-              <div class="dropdown dropdown-end">
-                <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
-                  <FaIcon icon="cog" class="mr-1" />
-                  Opzioni
-                </div>
-                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-[100]">
-                  <li><a @click="bulkActions"><FaIcon icon="check-circle" class="mr-2" />Azioni Multiple</a></li>
-                  <li><a @click="userSettings"><FaIcon icon="cog" class="mr-2" />Impostazioni</a></li>
-                  <li><a @click="importUsers"><FaIcon icon="upload" class="mr-2" />Importa Utenti</a></li>
-                </ul>
+            <div class="dropdown dropdown-end">
+              <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm">
+                <FaIcon icon="cog" class="mr-1" />
+                Opzioni
               </div>
+              <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-[100]">
+                <li><a @click="bulkActions"><FaIcon icon="check-circle" class="mr-2" />Azioni Multiple</a></li>
+                <li><a @click="userSettings"><FaIcon icon="cog" class="mr-2" />Impostazioni</a></li>
+                <li><a @click="importUsers"><FaIcon icon="upload" class="mr-2" />Importa Utenti</a></li>
+              </ul>
             </div>
           </template>
 
@@ -202,6 +201,7 @@ const errorMessage = ref<string>('')
 
 // Interfaccia per i filtri
 interface FilterValue {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any
   matchMode: string
 }
@@ -340,6 +340,7 @@ const refreshUsers = (): void => {
   loadUsers()
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const onRowSelect = (event: any): void => {
   console.log('Utente selezionato:', event.data)
 }

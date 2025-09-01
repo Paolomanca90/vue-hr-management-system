@@ -40,8 +40,8 @@
       ref="dataTable"
     >
       <template #header>
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 p-4">
-          <div class="flex items-center gap-3 flex-1">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:p-4">
+          <div class="flex flex-col lg:flex-row lg:items-center gap-3 flex-1 text-[oklch(var(--bc))]">
             <!-- Clear -->
             <button
               v-if="showClearFilters"
@@ -54,7 +54,7 @@
             </button>
             
             <!-- Search -->
-            <div v-if="showGlobalSearch" class="relative flex-1 max-w-md">
+            <div v-if="showGlobalSearch" class="relative flex-1 lg:max-w-md">
               <input
                 type="text"
                 v-model="globalSearchValue"
@@ -68,10 +68,10 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-2">
+          <div class="flex flex-col lg:flex-row lg:items-center gap-2 text-[oklch(var(--bc))]">
             <!-- Column Toggle -->
             <div v-if="showColumnToggle" class="dropdown dropdown-end">
-              <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
+              <div tabindex="0" role="button" class="max-md:block max-md:w-full btn btn-ghost max-md:p-[0.5em] btn-sm">
                 <FaIcon icon="columns" class="mr-1" />
                 Colonne
               </div>
@@ -100,7 +100,7 @@
 
             <!-- Export Dropdown -->
             <div v-if="showExport" class="dropdown dropdown-end">
-              <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
+              <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm">
                 <FaIcon icon="download" class="mr-1" />
                 Esporta
               </div>
@@ -639,7 +639,8 @@ watch(() => toggleableColumns.value, () => {
 }
 
 :deep(.p-datatable .p-datatable-thead > tr > th) {
-  background-color: var(--surface-100);
+  background-color: oklch(var(--b1));
+  color: oklch(var(--bc));
   font-weight: 600;
   padding: 0.75rem;
   white-space: nowrap;
@@ -656,7 +657,7 @@ watch(() => toggleableColumns.value, () => {
 :deep(.p-datatable .p-datatable-thead > tr:nth-child(2) > th) {
   padding-top: 0.5rem;
   padding-bottom: 0.75rem;
-  background-color: var(--surface-50);
+  background-color: oklch(var(--b1));
   border-top: 1px solid var(--surface-300);
 }
 
@@ -670,6 +671,8 @@ watch(() => toggleableColumns.value, () => {
   overflow: visible;
   text-overflow: ellipsis;
   position: relative;
+  background-color: oklch(var(--b1));
+  color: oklch(var(--bc));
 }
 
 :deep(.p-datatable .p-datatable-tbody > tr) {
@@ -751,9 +754,11 @@ watch(() => toggleableColumns.value, () => {
 
 :deep(.p-inputtext) {
   border-radius: 0.375rem;
-  border: 1px solid var(--surface-300);
+  border: 1px solid oklch(var(--bc) / 0.3);
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
+  background-color: oklch(var(--b1));
+  color: oklch(var(--bc)) !important;
 }
 
 :deep(.p-inputtext:focus) {
@@ -763,14 +768,17 @@ watch(() => toggleableColumns.value, () => {
 
 :deep(.p-select) {
   border-radius: 0.375rem;
-  border: 1px solid var(--surface-300);
+  border: 1px solid oklch(var(--bc) / 0.3);
   min-height: 2.5rem;
+  background-color: oklch(var(--b1));
+  color: oklch(var(--bc)) !important;
 }
 
 :deep(.p-multiselect) {
   border-radius: 0.375rem;
   border: 1px solid var(--surface-300);
   min-height: 2.5rem;
+  color: oklch(var(--bc)) !important;
 }
 
 :deep(.p-datatable-wrapper) {
@@ -859,7 +867,7 @@ watch(() => toggleableColumns.value, () => {
 
 :deep(.p-datatable .p-datatable-tbody > tr.p-highlight) {
   background-color: var(--primary-50);
-  color: var(--primary-700);
+  color: var(--primary-500) !important;
 }
 
 :deep(.p-datatable .p-datatable-tbody > tr.p-highlight:hover) {
@@ -937,5 +945,27 @@ watch(() => toggleableColumns.value, () => {
   :deep(.p-datatable .p-datatable-tbody > tr:hover) {
     background-color: transparent;
   }
+}
+
+:deep(.p-select-label):not(.p-placeholder) {
+  color: oklch(var(--bc)) !important;
+}
+
+:deep(.p-multiselect-label):not(.p-placeholder) {
+  color: oklch(var(--bc)) !important;
+}
+
+:deep(.p-select .p-select-label):not(.p-placeholder) {
+  color: oklch(var(--bc)) !important;
+}
+
+:deep(.p-button-text.p-button-secondary):not(:disabled):hover,
+:deep(.p-button-text.p-button-secondary):not(:disabled):active{
+  background: oklch(var(--bc) / 0.1) !important;
+  color: oklch(var(--bc)) !important;
+}
+
+:deep(.p-datatable-column-sorted .p-datatable-sort-icon){
+  color: oklch(var(--bc)) !important;
 }
 </style>

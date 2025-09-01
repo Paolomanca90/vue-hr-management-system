@@ -3,7 +3,7 @@
     <input id="drawer-toggle" type="checkbox" class="drawer-toggle" v-model="sidenavOpened" />
 
     <!-- Sidebar -->
-    <div class="drawer-side">
+    <div class="drawer-side z-[999] h-screen">
       <label for="drawer-toggle" aria-label="close sidebar" class="drawer-overlay"></label>
       <aside
         class="min-h-full bg-base-100 dark:bg-base-300 flex flex-col"
@@ -235,9 +235,9 @@
         </div>
 
         <div class="flex-1">
-          <span class="text-xl font-semibold ml-2">
+          <span class="text-lg lg:text-xl font-semibold ml-2">
             HR Management System
-            <span class="text-sm text-base-content/60 ml-2">
+            <span class="text-sm text-base-content/60">
               - {{ authStore.isCompanyUser ? 'Pannello Aziendale' : 'Portale Dipendente' }}
             </span>
           </span>
@@ -271,7 +271,7 @@
           <div class="dropdown dropdown-end">
             <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
               <div class="avatar placeholder">
-                <div class="bg-primary text-primary-content rounded-full w-10">
+                <div class="text-lg">
                   <FaIcon icon="user" />
                 </div>
               </div>
