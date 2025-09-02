@@ -53,6 +53,7 @@ import {
   faAdjust,
   faCopy,
   faColumns,
+  faStar,
   // Dashboard e HR
   faTachometerAlt,
   faChartBar,
@@ -66,6 +67,8 @@ import {
   faFileCsv,
   faFolder,
   faFolderOpen,
+  faList,
+  faTools,
   // Utenti e gestione
   faUserPlus,
   faUserMinus,
@@ -167,6 +170,9 @@ library.add(
   faBell,
   faEnvelope,
   faPhone,
+  faStar,
+  faList,
+  faTools,
   faMapMarkerAlt,
   faCalendar,
   faCalendarAlt,

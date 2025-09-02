@@ -23,6 +23,7 @@ export interface ApiMenuUtenteItem {
   path?: string,
   visualizza: string,
   modifica: string,
+  preferito: string,
   figli: ApiMenuUtenteItem[]
 }
 
@@ -42,6 +43,18 @@ export interface MenuResponse {
 export interface MenuUtenteResponse {
   success: boolean
   data: ApiMenuUtenteItem[]
+  message?: string
+}
+
+export interface AggiornaPreferitoRequest {
+  username: string
+  menU_ID: number
+  modifica: string
+  preferito: string
+}
+
+export interface AggiornaPreferitoResponse {
+  success: boolean
   message?: string
 }
 
@@ -122,6 +135,47 @@ class MenuService {
       console.error('Errore nel caricamento dei menu:', error)
       throw error
     }
+  }
+
+  async aggiornaPreferito(request: AggiornaPreferitoRequest): Promise<AggiornaPreferitoResponse> {
+    try {
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.aggiornaPreferito}`, {
+        method: 'POST',
+        headers: {
+          ...this.config.defaultHeaders,
+          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
+        },
+        body: JSON.stringify(request)
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
+      }
+
+      return {
+        success: true,
+        message: 'Preferito aggiornato con successo'
+      }
+
+    } catch (error) {
+      console.error('Errore nell\'aggiornamento del preferito:', error)
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Errore nell\'aggiornamento del preferito'
+      }
+    }
+  }
+
+  async togglePreferito(username: string, menuId: number, isCurrentlyFavorite: boolean, modifica: string = 'N'): Promise<AggiornaPreferitoResponse> {
+    const request: AggiornaPreferitoRequest = {
+      username,
+      menU_ID: menuId,
+      modifica,
+      preferito: isCurrentlyFavorite ? 'N' : 'S'
+    }
+
+    return this.aggiornaPreferito(request)
   }
 
   // Funzione per ottenere un'icona Font Awesome di default basata sul nome
@@ -276,4 +330,5 @@ export interface MenuItem {
   route?: string
   children: MenuItem[]
   expanded?: boolean
+  isFavorite?: boolean
 }

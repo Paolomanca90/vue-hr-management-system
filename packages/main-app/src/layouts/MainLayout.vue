@@ -94,7 +94,59 @@
           </div>
 
           <!-- Menu esteso quando la sidebar è aperta -->
-          <div class="p-2 space-y-1" v-if="sidenavOpened && displayedMenuItems.length > 0">
+          <div class="p-2 space-y-1" v-if="sidenavOpened && (displayedMenuItems.length > 0 || menuStore.hasFavorites)">
+
+            <div v-if="menuStore.hasFavorites" class="mb-4">
+              <!-- Header Preferiti -->
+              <div class="px-2 py-1 mb-2">
+                <div class="flex items-center text-xs font-semibold text-base-content/70 uppercase tracking-wide">
+                  <FaIcon icon="star" class="text-yellow-500 mr-2 text-sm" />
+                  <span>Preferiti</span>
+                  <span class="ml-auto bg-yellow-500/20 text-yellow-700 rounded-full px-2 py-0.5 text-xs font-medium">
+                    {{ menuStore.favoriteItems.length }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Lista Preferiti -->
+              <div class="space-y-1 mb-4">
+                <RouterLink
+                  v-for="favoriteItem in menuStore.favoriteItems"
+                  :key="`favorite-${favoriteItem.id}`"
+                  :to="String(favoriteItem.route)"
+                  class="flex items-center p-2 rounded-lg hover:bg-base-200 transition-all duration-200 w-full group bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200/50 dark:border-yellow-700/20"
+                  :class="{ 'text-primary bg-yellow-100 dark:bg-yellow-900/20': isActive(String(favoriteItem.route)) }"
+                  @click="handleMenuNavigation"
+                >
+                  <!-- Icona del menu -->
+                  <FaIcon
+                    :icon="favoriteItem.icon || 'folder'"
+                    class="text-sm mr-3 text-yellow-600"
+                  />
+
+                  <!-- Label del menu -->
+                  <span class="font-medium flex-1 text-sm">{{ favoriteItem.label }}</span>
+
+                  <!-- Stellina sempre visibile e colorata per i preferiti -->
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-xs btn-circle ml-2 text-yellow-500 hover:text-yellow-600 hover:scale-110 transition-all duration-200 flex-shrink-0"
+                    @click.prevent.stop="toggleFavorite(favoriteItem.id)"
+                    :disabled="menuStore.savingFavorite"
+                    title="Rimuovi dai preferiti"
+                  >
+                    <FaIcon icon="star" class="text-xs" />
+                  </button>
+                </RouterLink>
+              </div>
+
+              <!-- Divisore -->
+              <div class="divider divider-start text-xs text-base-content/50 my-3">
+                <FaIcon icon="list" class="mr-1" />
+                Menu Completo
+              </div>
+            </div>
+
             <!-- Breadcrumb per la ricerca -->
             <div v-if="isSearchActive && searchQuery" class="mb-3 p-2 bg-primary/10 rounded-lg">
               <div class="text-xs text-primary font-medium mb-1">
@@ -106,10 +158,10 @@
               </div>
             </div>
 
-            <!-- Rendering del menu -->
+            <!-- Rendering del menu normale -->
             <div v-for="item in displayedMenuItems" :key="item.id" class="w-full">
               <MenuItemComponent
-                :item="item"
+                :item="{ ...item, isFavorite: menuStore.favoriteMenuItems.has(item.id) }"
                 :search-query="searchQuery"
                 :is-search-mode="isSearchActive"
                 @navigate="handleMenuNavigation"
@@ -337,10 +389,21 @@ const isSearchActive = computed(() => searchQuery.value.trim().length > 0)
 
 const displayedMenuItems = computed(() => {
   if (isSearchActive.value) {
-    return searchResults.value
+    return searchResults.value.map(item => ({
+      ...item,
+      isFavorite: menuStore.favoriteMenuItems.has(item.id)
+    }))
   }
-  return menuStore.menuItems
+  return menuStore.menuItemsWithFavorites
 })
+
+const toggleFavorite = async (menuId: number) => {
+  try {
+    await menuStore.toggleFavorite(menuId)
+  } catch (error) {
+    console.error('Errore nel toggle preferito:', error)
+  }
+}
 
 // Funzione di ricerca
 const searchInMenuItem = (item: MenuItem, query: string): MenuItem | null => {
@@ -364,6 +427,7 @@ const searchInMenuItem = (item: MenuItem, query: string): MenuItem | null => {
       ...item,
       children: matchingChildren.length > 0 ? matchingChildren : item.children,
       expanded: true, // Espande automaticamente gli item che matchano
+      isFavorite: menuStore.favoriteMenuItems.has(item.id)
     }
   }
 

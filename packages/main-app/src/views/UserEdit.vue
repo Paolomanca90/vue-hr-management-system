@@ -507,7 +507,7 @@
       <div v-if="authStore.isCompanyUser" class="card bg-base-100 shadow-sm">
         <div class="card-body">
           <div class="flex flex-col lg:flex-row items-center justify-between mb-4 gap-3">
-            <div class="flex items-center">
+            <div class="flex w-full items-center">
               <div class="p-2 mr-3">
                 <FaIcon icon="table" class="text-lg" />
               </div>
@@ -518,7 +518,7 @@
             </div>
 
             <!-- Azioni rapide -->
-            <div class="w-full flex flex-col lg:flex-row lg:items-center gap-2">
+            <div class="w-full flex flex-col lg:flex-row lg:items-center lg:justify-end gap-2">
               <button
                 type="button"
                 class="max-md:block max-md:w-full btn btn-sm btn-ghost"

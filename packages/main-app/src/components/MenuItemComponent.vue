@@ -33,7 +33,7 @@
       </div>
     </template>
 
-    <!-- Menu item semplice (senza figli) -->
+    <!-- Menu item semplice (senza figli) - FOGLIA -->
     <RouterLink
       v-else-if="item.route"
       :to="item.route"
@@ -51,17 +51,34 @@
       />
       <span class="font-medium flex-1" v-html="highlightSearchTerm(item.label)"></span>
 
-      <!-- Indicatore che è un link diretto -->
-      <FaIcon
-        icon="external-link-alt"
-        class="text-xs opacity-0 group-hover:opacity-60 transition-opacity"
-      />
+      <!-- Stellina per preferiti (solo per le foglie) -->
+      <button
+        type="button"
+        class="btn btn-ghost btn-xs btn-circle ml-2 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 flex-shrink-0"
+        :class="{
+          'opacity-100': item.isFavorite,
+          'text-blue-500': item.isFavorite,
+          'text-base-content/40': !item.isFavorite
+        }"
+        @click.prevent.stop="toggleFavorite"
+        :disabled="menuStore.savingFavorite"
+        :title="item.isFavorite ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'"
+      >
+        <FaIcon
+          icon="star"
+          :class="{
+            'text-blue-500': item.isFavorite,
+            'text-base-content/40': !item.isFavorite
+          }"
+          class="text-xs transition-colors duration-200"
+        />
+      </button>
     </RouterLink>
 
-    <!-- Menu item senza route (placeholder) -->
+    <!-- Menu item senza route (placeholder) - FOGLIA -->
     <div
       v-else
-      class="flex items-center p-2 rounded-lg cursor-pointer hover:bg-base-200 transition-all duration-200 w-full text-base-content/70"
+      class="flex items-center p-2 rounded-lg cursor-pointer hover:bg-base-200 transition-all duration-200 w-full text-base-content/70 group"
       :class="{ 'bg-primary/5': isHighlighted }"
       @click="toggleExpansion"
     >
@@ -71,6 +88,29 @@
         class="text-sm mr-3"
       />
       <span class="font-medium flex-1" v-html="highlightSearchTerm(item.label)"></span>
+
+      <!-- Stellina per preferiti (anche per foglie senza route) -->
+      <button
+        type="button"
+        class="btn btn-ghost btn-xs btn-circle ml-2 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 flex-shrink-0"
+        :class="{
+          'opacity-100': item.isFavorite,
+          'text-blue-500': item.isFavorite,
+          'text-base-content/40': !item.isFavorite
+        }"
+        @click.prevent.stop="toggleFavorite"
+        :disabled="menuStore.savingFavorite"
+        :title="item.isFavorite ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'"
+      >
+        <FaIcon
+          icon="star"
+          :class="{
+            'text-blue-500': item.isFavorite,
+            'text-base-content/40': !item.isFavorite
+          }"
+          class="text-xs transition-colors duration-200"
+        />
+      </button>
     </div>
   </div>
 </template>
@@ -88,18 +128,11 @@ interface Props {
   level?: number
 }
 
-interface Emits {
-  (e: 'navigate', item: MenuItem): void
-}
-
 const props = withDefaults(defineProps<Props>(), {
   searchQuery: '',
   isSearchMode: false,
   level: 0,
 })
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const emit = defineEmits<Emits>()
 
 const route = useRoute()
 const menuStore = useMenuStore()
@@ -135,16 +168,24 @@ const toggleExpansion = () => {
   }
 }
 
+const toggleFavorite = async () => {
+  try {
+    const success = await menuStore.toggleFavorite(props.item.id)
+    if (success) {
+      console.log(`Preferito ${props.item.isFavorite ? 'rimosso' : 'aggiunto'}: ${props.item.label}`)
+    }
+  } catch (error) {
+    console.error('Errore nel toggle preferito:', error)
+  }
+}
+
 // Converte le icone dalla notazione CSS a Font Awesome
 const getIconName = (iconClass: string): string => {
   if (!iconClass) return 'folder'
 
-  // Rimuove i prefissi CSS e estrae solo il nome dell'icona
-  // Es: "fas fa-user" -> "user"
-  // Es: "fa fa-building" -> "building"
   const iconName = iconClass
-    .replace(/^(fas|far|fab|fa)\s+fa-/, '') // Rimuove prefissi
-    .replace(/^fa-/, '') // Rimuove fa- se rimasto
+    .replace(/^(fas|far|fab|fa)\s+fa-/, '')
+    .replace(/^fa-/, '')
     .trim()
 
   return iconName || 'folder'
@@ -156,22 +197,18 @@ const getIconName = (iconClass: string): string => {
   transform: rotate(180deg);
 }
 
-/* Livelli di indentazione visivi */
-.ml-6 {
-  margin-left: 1.5rem;
-}
-
-/* Stili per evidenziare la gerarchia */
-.border-l-2 {
-  border-left-width: 2px;
-}
-
-/* Hover effects migliorati */
 .group:hover .opacity-0 {
   opacity: 0.6;
 }
 
-/* Transizioni smooth */
+.group:hover .btn-circle {
+  opacity: 1;
+}
+
+.btn-circle:hover {
+  transform: scale(1.1);
+}
+
 .transition-all {
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -190,12 +227,36 @@ const getIconName = (iconClass: string): string => {
   transition-duration: 200ms;
 }
 
-/* Stili per i mark di evidenziazione */
+.transition-colors {
+  transition-property: color, background-color, border-color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
 :deep(mark) {
   background-color: rgba(var(--primary), 0.2);
   color: rgb(var(--primary));
   border-radius: 0.25rem;
   padding: 0.125rem 0.25rem;
   font-weight: 600;
+}
+
+.text-blue-500 {
+  color: #3b82f6 !important;
+}
+
+.btn-circle.btn-xs {
+  width: 1.5rem;
+  height: 1.5rem;
+  min-height: 1.5rem;
+}
+
+.btn-circle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-circle:disabled:hover {
+  transform: none;
 }
 </style>

@@ -15,6 +15,7 @@ export const API_CONFIG = {
     menuUtente: '/api/Menu/menuUtente?usernameUtente=',
     apiDisponibili: 'api/Menu/ApiDisponibili',
     updateMenuAbilitazioni: '/api/Menu/UpdateMenuAbilitazioni?usernameUtente=', //POST
+    aggiornaPreferito: '/api/Menu/AggiornaPreferito', // POST
 
     //Profile
     users: '/api/users', //GET,POST,PUT

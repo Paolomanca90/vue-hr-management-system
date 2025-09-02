@@ -3,7 +3,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useAuthStore } from './auth'
-import { menuService, type MenuItem, type ApiMenuItem } from '@/services/menuService'
+import { menuService, type MenuItem, type ApiMenuItem, type ApiMenuUtenteItem } from '@/services/menuService'
 
 export type { MenuItem }
 
@@ -15,6 +15,8 @@ export const useMenuStore = defineStore('menu', () => {
   const error = ref<string | null>(null)
   const lastUpdated = ref<Date | null>(null)
   const useStaticFallback = ref(false)
+  const favoriteMenuItems = ref<Set<number>>(new Set())
+  const savingFavorite = ref(false)
 
   // Menu statico di fallback (il tuo menu esistente)
   /* const staticCompanyMenu: MenuItem[] = [
@@ -541,6 +543,97 @@ export const useMenuStore = defineStore('menu', () => {
     }
   })
 
+  const favoriteItems = computed(() => {
+    const favorites: MenuItem[] = []
+
+    const findFavoriteItems = (items: MenuItem[]): void => {
+      items.forEach(item => {
+        // Se questo item è nei preferiti, aggiungilo
+        if (favoriteMenuItems.value.has(item.id)) {
+          favorites.push({ ...item, isFavorite: true })
+        }
+
+        // Cerca ricorsivamente nei figli
+        if (item.children && item.children.length > 0) {
+          findFavoriteItems(item.children)
+        }
+      })
+    }
+
+    findFavoriteItems(dynamicMenuItems.value)
+    return favorites
+  })
+
+  const hasFavorites = computed(() => favoriteItems.value.length > 0)
+
+  const menuItemsWithFavorites = computed(() => {
+    const addFavoriteFlags = (items: MenuItem[]): MenuItem[] => {
+      return items.map(item => ({
+        ...item,
+        isFavorite: favoriteMenuItems.value.has(item.id),
+        children: item.children ? addFavoriteFlags(item.children) : []
+      }))
+    }
+
+    return addFavoriteFlags(dynamicMenuItems.value)
+  })
+
+  const initializeFavorites = (menuData: ApiMenuUtenteItem[]) => {
+  const extractFavoriteIds = (items: ApiMenuUtenteItem[]): void => {
+    items.forEach(item => {
+      if (item.preferito === 'S') {
+        favoriteMenuItems.value.add(item.id)
+      }
+
+      if (item.figli && item.figli.length > 0) {
+        extractFavoriteIds(item.figli)
+      }
+    })
+  }
+
+  extractFavoriteIds(menuData)
+}
+
+  const toggleFavorite = async (menuId: number): Promise<boolean> => {
+    if (!authStore.currentUser?.username) {
+      console.error('Username not available for favorites')
+      return false
+    }
+
+    const isCurrentlyFavorite = favoriteMenuItems.value.has(menuId)
+    savingFavorite.value = true
+
+    try {
+      const result = await menuService.togglePreferito(
+        authStore.currentUser.username,
+        menuId,
+        isCurrentlyFavorite
+      )
+
+      if (result.success) {
+        // Aggiorna lo stato locale
+        if (isCurrentlyFavorite) {
+          favoriteMenuItems.value.delete(menuId)
+        } else {
+          favoriteMenuItems.value.add(menuId)
+        }
+        return true
+      } else {
+        console.error('Errore nel toggle preferito:', result.message)
+        return false
+      }
+    } catch (error) {
+      console.error('Errore nel toggle preferito:', error)
+      return false
+    } finally {
+      savingFavorite.value = false
+    }
+  }
+
+  const isLeafMenuItem = (item: MenuItem): boolean => {
+    return !item.children || item.children.length === 0
+  }
+
   // Actions
   const loadMenuFromApi = async (): Promise<void> => {
     loading.value = true
@@ -549,6 +642,8 @@ export const useMenuStore = defineStore('menu', () => {
     try {
       // Carica il menu dinamico dall'API
       const apiMenuItems = await menuService.getMenuVisibili()
+      const menuUtenteData = await menuService.getMenuUtente(authStore.currentUser!.username)
+      initializeFavorites(menuUtenteData)
 
       // Converte il formato API nel formato interno
       dynamicMenuItems.value = menuService.convertApiMenuToMenuItem(apiMenuItems)
@@ -617,6 +712,13 @@ export const useMenuStore = defineStore('menu', () => {
     lastUpdated,
     useStaticFallback,
 
+    // Preferiti
+    favoriteMenuItems,
+    savingFavorite,
+    favoriteItems,
+    hasFavorites,
+    menuItemsWithFavorites,
+
     // Computed
     menuItems,
     getMainMenuItems,
@@ -628,5 +730,7 @@ export const useMenuStore = defineStore('menu', () => {
     toggleMenuItem,
     hasChildren,
     initialize,
+    toggleFavorite,
+    isLeafMenuItem,
   }
 })

@@ -5,13 +5,15 @@ import { type MenuItem } from '@/services/menuService'
 import Login from '@/views/Login.vue'
 import Domain from '@/views/Domain.vue'
 import MainLayout from '@/layouts/MainLayout.vue'
-import Dashboard from '@/views/Dashboard.vue'
+//import Dashboard from '@/views/Dashboard.vue'
 import Payroll from '@/views/Payroll.vue'
 import Reports from '@/views/Reports.vue'
 import Settings from '@/views/Settings.vue'
 import PlaceholderPage from '@/views/PlaceholderPage.vue'
 import Users from '@/views/Users.vue'
 import UserEdit from '@/views/UserEdit.vue'
+import GruppiUtente from '@/views/GruppiUtente.vue'
+import GruppoUtenteEdit from '@/views/GruppoUtenteEdit.vue'
 
 // Route statiche di base (sempre presenti)
 const staticRoutes: RouteRecordRaw[] = [
@@ -64,6 +66,40 @@ const appRoutes: RouteRecordRaw[] = [
       // Verifica che l'ID sia valido
       if (to.params.id === 'new') {
         next('/app/users/new')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: 'gruppi-utente',
+    name: 'GruppiUtente',
+    component: GruppiUtente,
+    meta: {
+      title: 'Gestione Gruppi Utente',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'gruppi-utente/new',
+    name: 'GruppoUtenteNew',
+    component: GruppoUtenteEdit,
+    meta: {
+      title: 'Nuovo Gruppo Utente',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'gruppi-utente/:id/edit',
+    name: 'GruppoUtenteEdit',
+    component: GruppoUtenteEdit,
+    meta: {
+      title: 'Modifica Gruppo Utente',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      if (to.params.id === 'new') {
+        next('/app/gruppi-utente/new')
       } else {
         next()
       }
