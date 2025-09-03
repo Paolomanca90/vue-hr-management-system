@@ -179,7 +179,7 @@ class MenuService {
   }
 
   // Funzione per ottenere un'icona Font Awesome di default basata sul nome
-  private getDefaultIcon(nome: string): string {
+  public getDefaultIcon(nome: string): string {
     const lowerName = nome.toLowerCase()
 
     // Mappatura delle icone basata sul nome - ora ritorna solo il nome dell'icona per Font Awesome
@@ -253,7 +253,7 @@ class MenuService {
   }
 
   // Converte un'icona CSS in formato Font Awesome (se necessario)
-  private convertCssIconToFontAwesome(iconClass?: string): string {
+  public convertCssIconToFontAwesome(iconClass?: string): string {
     if (!iconClass) return this.getDefaultIcon('default')
 
     // Se l'icona è già in formato CSS (fas fa-xxxx), estrae solo il nome

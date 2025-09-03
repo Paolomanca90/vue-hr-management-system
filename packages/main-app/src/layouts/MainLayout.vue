@@ -102,7 +102,7 @@
                 <div class="flex items-center text-xs font-semibold text-base-content/70 uppercase tracking-wide">
                   <FaIcon icon="star" class="text-yellow-500 mr-2 text-sm" />
                   <span>Preferiti</span>
-                  <span class="ml-auto bg-yellow-500/20 text-yellow-700 rounded-full px-2 py-0.5 text-xs font-medium">
+                  <span class="ml-auto bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 rounded-full px-2 py-0.5 text-xs font-medium">
                     {{ menuStore.favoriteItems.length }}
                   </span>
                 </div>
@@ -171,22 +171,51 @@
 
           <!-- Menu compatto quando la sidebar è chiusa -->
           <div class="flex flex-col items-center space-y-2 p-2" v-if="!sidenavOpened">
-            <div
-              v-for="item in menuStore.getMainMenuItems"
-              :key="item.id"
-              class="w-full flex justify-center"
+            <!-- Preferiti -->
+            <RouterLink
+              v-for="favoriteItem in menuStore.favoriteItems"
+              :key="`collapsed-fav-${favoriteItem.id}`"
+              :to="favoriteItem.route || '/app/dashboard'"
+              class="flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 bg-yellow-50 dark:bg-yellow-600/30 border-2 border-yellow-200 dark:border-yellow-700 hover:bg-yellow-100 hover:border-yellow-300"
+              :class="{
+                'bg-primary text-white border-primary': isActive(favoriteItem.route || '')
+              }"
+              @mouseenter="handleMouseEnter($event, favoriteItem.label)"
+              @mouseleave="handleMouseLeave"
+              @click="handleMenuNavigation"
             >
-              <RouterLink
-                v-if="item.route"
-                :to="item.route"
-                class="flex items-center justify-center w-12 h-12 rounded-lg hover:bg-base-200 transition-all duration-200 tooltip tooltip-right"
-                :class="{ 'text-primary bg-blue-100': isActive(item.route) }"
-                :data-tip="item.label"
-              >
-                <FaIcon :icon="item.icon" class="text-lg" />
-              </RouterLink>
-            </div>
+              <div class="relative">
+                <!-- Icona principale -->
+                <FaIcon
+                  :icon="menuService.convertCssIconToFontAwesome(favoriteItem.icon)"
+                  class="text-lg"
+                  :class="isActive(favoriteItem.route || '') ? 'text-white' : 'text-yellow-600'"
+                />
+                <!-- Stellina indicatore preferito -->
+                <FaIcon
+                  icon="star"
+                  class="absolute -top-2 -right-3 text-yellow-500 text-xs drop-shadow-sm"
+                />
+              </div>
+            </RouterLink>
           </div>
+          <!-- Tooltip personalizzato che appare sempre sopra tutto -->
+          <Teleport to="body">
+            <div
+              v-if="showTooltip && tooltipTarget"
+              class="fixed bg-gray-900 text-white text-sm px-3 py-2 rounded-lg shadow-xl pointer-events-none transition-opacity duration-200 max-w-xs z-[99999]"
+              :style="{
+                left: (tooltipTarget.getBoundingClientRect().right + 10) + 'px',
+                top: (tooltipTarget.getBoundingClientRect().top + tooltipTarget.getBoundingClientRect().height / 2 - 20) + 'px'
+              }"
+            >
+              {{ tooltipText }}
+              <!-- Freccia del tooltip -->
+              <div class="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2">
+                <div class="w-0 h-0 border-t-[6px] border-b-[6px] border-r-[6px] border-t-transparent border-b-transparent border-r-gray-900"></div>
+              </div>
+            </div>
+          </Teleport>
 
           <!-- Messaggio quando non ci sono menu -->
           <div
@@ -373,6 +402,7 @@ import { useMenuStore, type MenuItem } from '@/stores/menu'
 import { refreshDynamicRoutes } from '@/router'
 import MenuItemComponent from '@/components/MenuItemComponent.vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
+import { menuService } from '@/services/menuService'
 
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
@@ -383,6 +413,22 @@ const sidenavOpened = ref(true)
 const searchQuery = ref('')
 const isSearchFocused = ref(false)
 const searchResults = ref<MenuItem[]>([])
+
+const showTooltip = ref(false)
+const tooltipText = ref('')
+const tooltipTarget = ref<HTMLElement | null>(null)
+
+const handleMouseEnter = (event: MouseEvent, text: string) => {
+  tooltipTarget.value = event.currentTarget as HTMLElement
+  tooltipText.value = text
+  showTooltip.value = true
+}
+
+const handleMouseLeave = () => {
+  showTooltip.value = false
+  tooltipTarget.value = null
+  tooltipText.value = ''
+}
 
 // Computed
 const isSearchActive = computed(() => searchQuery.value.trim().length > 0)

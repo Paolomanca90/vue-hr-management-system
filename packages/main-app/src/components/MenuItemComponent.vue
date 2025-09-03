@@ -13,7 +13,7 @@
       >
         <!-- FaIcon wrapper -->
         <FaIcon
-          :icon="getIconName(item.icon)"
+          :icon="menuService.convertCssIconToFontAwesome(item.icon)"
           class="text-sm mr-3"
         />
         <span class="font-medium flex-1" v-html="highlightSearchTerm(item.label)"></span>
@@ -46,7 +46,7 @@
     >
       <!-- FaIcon wrapper -->
       <FaIcon
-        :icon="getIconName(item.icon)"
+        :icon="menuService.convertCssIconToFontAwesome(item.icon)"
         class="text-sm mr-3"
       />
       <span class="font-medium flex-1" v-html="highlightSearchTerm(item.label)"></span>
@@ -84,7 +84,7 @@
     >
       <!-- FaIcon wrapper -->
       <FaIcon
-        :icon="getIconName(item.icon)"
+        :icon="menuService.convertCssIconToFontAwesome(item.icon)"
         class="text-sm mr-3"
       />
       <span class="font-medium flex-1" v-html="highlightSearchTerm(item.label)"></span>
@@ -120,6 +120,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMenuStore, type MenuItem } from '@/stores/menu'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
+import { menuService } from '@/services/menuService'
 
 interface Props {
   item: MenuItem
@@ -179,17 +180,6 @@ const toggleFavorite = async () => {
   }
 }
 
-// Converte le icone dalla notazione CSS a Font Awesome
-const getIconName = (iconClass: string): string => {
-  if (!iconClass) return 'folder'
-
-  const iconName = iconClass
-    .replace(/^(fas|far|fab|fa)\s+fa-/, '')
-    .replace(/^fa-/, '')
-    .trim()
-
-  return iconName || 'folder'
-}
 </script>
 
 <style scoped>
