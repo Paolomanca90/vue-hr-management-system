@@ -438,7 +438,6 @@ const totalModifyPermissions = computed(() => {
   return Object.values(permissions.value).filter(perm => perm.modifica).length
 })
 
-// Methods
 const hasMatchingChildren = (item: ApiMenuUtenteItem, query: string): boolean => {
   if (!query || !item.figli) return false
 
@@ -600,7 +599,6 @@ const highlightSearchTerm = (text: string, searchTerm: string): string => {
   return text.replace(regex, '<mark class="bg-primary/20 text-primary rounded px-1 font-semibold">$1</mark>')
 }
 
-// Navigation methods
 const selectCategory = (category: ApiMenuUtenteItem) => {
   selectedCategoryId.value = category.id
   selectedSubcategoryId.value = null
@@ -616,7 +614,6 @@ const selectSubSubcategory = (subsubcategory: ApiMenuUtenteItem) => {
   selectedSubSubcategoryId.value = subsubcategory.id
 }
 
-// Permission methods
 const selectAllPermissions = () => {
   const newPermissions = { ...permissions.value }
   Object.keys(newPermissions).forEach(key => {
@@ -652,7 +649,7 @@ const refreshPermissions = () => {
   emit('refresh')
 }
 
-// Watchers
+// Watcher
 watch(searchQuery, (newQuery, oldQuery) => {
   if (newQuery && newQuery.trim() !== '') {
     nextTick(() => {
@@ -665,7 +662,6 @@ watch(searchQuery, (newQuery, oldQuery) => {
   }
 })
 
-// Expose methods for parent components
 defineExpose({
   resetSelections: () => {
     selectedCategoryId.value = null

@@ -97,9 +97,16 @@
           <div class="p-2 space-y-1" v-if="sidenavOpened && (displayedMenuItems.length > 0 || menuStore.hasFavorites)">
 
             <div v-if="menuStore.hasFavorites" class="mb-4">
-              <!-- Header Preferiti -->
-              <div class="px-2 py-1 mb-2">
-                <div class="flex items-center text-xs font-semibold text-base-content/70 uppercase tracking-wide">
+              <!-- Header Preferiti Collassabile -->
+              <div
+                class="px-2 py-3 mb-2 cursor-pointer hover:bg-base-200 rounded-lg transition-all duration-200"
+                @click="toggleFavoritesSection"
+              >
+                <div class="flex items-center text-sm font-semibold text-base-content/70 uppercase tracking-wide">
+                  <FaIcon
+                    icon="chevron-right"
+                    :class="`mr-2 text-xs transition-transform duration-200 ${favoritesExpanded ? 'rotate-90' : ''}`"
+                  />
                   <FaIcon icon="star" class="text-yellow-500 mr-2 text-sm" />
                   <span>Preferiti</span>
                   <span class="ml-auto bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 rounded-full px-2 py-0.5 text-xs font-medium">
@@ -108,8 +115,15 @@
                 </div>
               </div>
 
-              <!-- Lista Preferiti -->
-              <div class="space-y-1 mb-4">
+              <!-- Lista Preferiti Collassabile -->
+              <div
+                v-show="favoritesExpanded"
+                class="space-y-1 mb-4 overflow-hidden transition-all duration-300 ease-in-out"
+                :class="{
+                  'max-h-96 opacity-100': favoritesExpanded,
+                  'max-h-0 opacity-0': !favoritesExpanded
+                }"
+              >
                 <RouterLink
                   v-for="favoriteItem in menuStore.favoriteItems"
                   :key="`favorite-${favoriteItem.id}`"
@@ -141,7 +155,7 @@
               </div>
 
               <!-- Divisore -->
-              <div class="divider divider-start text-xs text-base-content/50 my-3">
+              <div class="divider divider-start text-xs text-base-content/50 my-3 px-2">
                 <FaIcon icon="list" class="mr-1" />
                 Menu Completo
               </div>
@@ -417,6 +431,11 @@ const searchResults = ref<MenuItem[]>([])
 const showTooltip = ref(false)
 const tooltipText = ref('')
 const tooltipTarget = ref<HTMLElement | null>(null)
+const favoritesExpanded = ref(false)
+
+const toggleFavoritesSection = () => {
+  favoritesExpanded.value = !favoritesExpanded.value
+}
 
 const handleMouseEnter = (event: MouseEvent, text: string) => {
   tooltipTarget.value = event.currentTarget as HTMLElement
