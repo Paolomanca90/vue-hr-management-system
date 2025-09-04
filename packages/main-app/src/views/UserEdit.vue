@@ -452,377 +452,19 @@
         </div>
       </div>
 
-      <!-- Sezione Password (solo per nuovo utente o reset) -->
-      <!-- <div v-if="!isEditMode || showPasswordSection" class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center">
-              <div class="bg-yellow-100 dark:bg-yellow-900/20 rounded-lg p-2 mr-3">
-                <FaIcon icon="key" class="text-yellow-600 text-lg" />
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-base-content">
-                  {{ isEditMode ? 'Reset Password' : 'Impostazioni Password' }}
-                </h3>
-                <p class="text-sm text-base-content/70">
-                  {{ isEditMode ? 'Modifica la password dell\'utente' : 'Imposta la password iniziale' }}
-                </p>
-              </div>
-            </div>
-
-            <div v-if="isEditMode">
-              <button
-                type="button"
-                class="btn btn-warning btn-sm"
-                @click="togglePasswordSection"
-              >
-                <FaIcon :icon="showPasswordSection ? 'eye-slash' : 'key'" class="mr-2"/>
-                {{ showPasswordSection ? 'Annulla Reset' : 'Reset Password' }}
-              </button>
-            </div>
-          </div>
-
-          Password form sections would go here...
-        </div>
-      </div> -->
-
-      <!-- Sezione Analytics -->
-      <!-- <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <div class="flex items-center mb-4">
-            <div class="bg-blue-100 dark:bg-blue-900/20 rounded-lg p-2 mr-3">
-              <FaIcon icon="chart-line" class="text-blue-600 text-lg" />
-            </div>
-            <div>
-              <h3 class="text-lg font-semibold text-base-content">Sezione Analytics</h3>
-              <p class="text-sm text-base-content/70">Configurazione Analytics e Autenticazione Integrata</p>
-            </div>
-          </div>
-
-          Analytics controls would go here...
-        </div>
-      </div> -->
-
       <!-- Sezione Abilitazioni Menu/Tabelle -->
-      <div v-if="authStore.isCompanyUser" class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <div class="flex flex-col lg:flex-row items-center justify-between mb-4 gap-3">
-            <div class="flex w-full items-center">
-              <div class="p-2 mr-3">
-                <FaIcon icon="table" class="text-lg" />
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-base-content">Abilitazioni Menu e Tabelle</h3>
-                <p class="text-sm text-base-content/70">Configura i permessi specifici per ogni sezione</p>
-              </div>
-            </div>
+      <MenuPermissionsManager
+        v-if="authStore.isCompanyUser"
+        title="Abilitazioni Menu e Tabelle"
+        description="Configura i permessi specifici per ogni sezione"
+        :loading="loadingPermissions"
+        :error="permissionsError"
+        :menu-data="menuUtenteData"
+        v-model="userPermissions"
+        @refresh="refreshPermissions"
+        @permission-change="onPermissionChange"
+      />
 
-            <!-- Azioni rapide -->
-            <div class="w-full flex flex-col lg:flex-row lg:items-center lg:justify-end gap-2">
-              <button
-                type="button"
-                class="max-md:block max-md:w-full btn btn-sm btn-ghost"
-                @click="selectAllPermissions"
-              >
-                <FaIcon icon="check-circle" class="mr-1"/>
-                Seleziona Tutto
-              </button>
-              <button
-                type="button"
-                class="max-md:block max-md:w-full btn btn-sm btn-ghost"
-                @click="deselectAllPermissions"
-              >
-                <FaIcon icon="times-circle" class="mr-1"/>
-                Deseleziona Tutto
-              </button>
-              <button
-                type="button"
-                class="max-md:block max-md:w-full btn btn-sm btn-ghost"
-                @click="refreshPermissions"
-                :disabled="loadingPermissions"
-              >
-                <FaIcon icon="refresh" class="mr-1"/>
-                Ricarica
-              </button>
-            </div>
-          </div>
-
-          <!-- Filtro ricerca -->
-          <div class="mb-4">
-            <div class="form-control">
-              <div class="relative">
-                <input
-                  type="text"
-                  v-model="permissionSearchQuery"
-                  placeholder="Cerca tabelle o funzionalità..."
-                  class="input input-bordered input-sm w-full pr-10"
-                />
-                <FaIcon
-                  icon="search"
-                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-base-content/40 text-sm"
-                />
-              </div>
-            </div>
-          </div>
-
-          <!-- Loading permessi -->
-          <div v-if="loadingPermissions" class="flex justify-center items-center py-8">
-            <span class="loading loading-spinner loading-md"></span>
-            <span class="ml-3 text-sm">Caricamento permessi...</span>
-          </div>
-
-          <!-- Errore permessi -->
-          <div v-else-if="permissionsError" class="alert alert-warning">
-            <FaIcon icon="exclamation-triangle" />
-            <div>
-              <div class="font-bold">Errore nel caricamento dei permessi</div>
-              <div class="text-sm">{{ permissionsError }}</div>
-              <button class="btn btn-xs btn-ghost mt-1" @click="refreshPermissions">
-                Riprova
-              </button>
-            </div>
-          </div>
-
-          <!-- Struttura ad albero orizzontale -->
-          <div v-else class="grid grid-cols-12 gap-4 h-96">
-
-            <!-- Colonna 1: Categorie principali -->
-            <div class="col-span-12 lg:col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto">
-              <div class="text-sm font-semibold mb-2 text-base-content/70 flex items-center justify-between">
-                <span>Categorie</span>
-                <span v-if="permissionSearchQuery" class="badge badge-primary badge-xs">
-                  {{ filteredPermissionCategories.length }}
-                </span>
-              </div>
-
-              <!-- Messaggio quando la ricerca non trova risultati -->
-              <div v-if="permissionSearchQuery && filteredPermissionCategories.length === 0"
-                  class="text-center py-4 text-base-content/60">
-                <FaIcon icon="search" class="text-lg mb-2" />
-                <div class="text-xs">Nessun risultato trovato</div>
-              </div>
-
-              <div v-else class="space-y-1">
-                <div
-                  v-for="category in filteredPermissionCategories"
-                  :key="category.id"
-                  class="p-2 rounded cursor-pointer transition-colors hover:bg-base-200"
-                  :class="{ 'bg-primary/10 text-primary': selectedCategoryId === category.id }"
-                  @click="selectCategory(category)"
-                >
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center flex-1 min-w-0">
-                      <FaIcon :icon="category.icona || 'folder'" class="mr-2 text-sm flex-shrink-0" />
-                      <span
-                        class="text-sm font-medium truncate"
-                        v-html="highlightSearchTerm(category.nome, permissionSearchQuery)"
-                      ></span>
-                    </div>
-                    <div class="flex items-center space-x-1 ml-2">
-                      <span class="badge badge-xs">{{ category.figli?.length || 0 }}</span>
-                      <FaIcon
-                        v-if="permissionSearchQuery && hasMatchingChildren(category, permissionSearchQuery)"
-                        icon="search"
-                        class="text-primary text-xs"
-                        title="Contiene risultati di ricerca"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Colonna 2: Sottocategorie (se presenti) -->
-            <div
-              v-if="selectedCategory && (selectedCategory.figli?.length > 0 || permissionSearchQuery)"
-              class="col-span-12 lg:col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto"
-            >
-              <div class="text-sm font-semibold mb-2 text-base-content/70 flex items-center justify-between">
-                <span>Sottocategorie di {{ selectedCategory.nome }}</span>
-                <span v-if="permissionSearchQuery" class="badge badge-primary badge-xs">
-                  {{ filteredSubcategories.length }}
-                </span>
-              </div>
-
-              <!-- Messaggio per sottocategorie filtrate -->
-              <div v-if="permissionSearchQuery && filteredSubcategories.length === 0"
-                  class="text-center py-4 text-base-content/60">
-                <div class="text-xs">Nessun risultato in questa sezione</div>
-              </div>
-
-              <div v-else class="space-y-1">
-                <div
-                  v-for="subcategory in filteredSubcategories"
-                  :key="subcategory.id"
-                  class="p-2 rounded cursor-pointer transition-colors hover:bg-base-200"
-                  :class="{ 'bg-primary/10 text-primary': selectedSubcategoryId === subcategory.id }"
-                  @click="selectSubcategory(subcategory)"
-                >
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center flex-1 min-w-0">
-                      <FaIcon :icon="subcategory.icona || 'folder'" class="mr-2 text-sm flex-shrink-0" />
-                      <span
-                        class="text-sm font-medium truncate"
-                        v-html="highlightSearchTerm(subcategory.nome, permissionSearchQuery)"
-                      ></span>
-                    </div>
-                    <div class="flex items-center space-x-1 ml-2">
-                      <span class="badge badge-xs">{{ subcategory.figli?.length || 0 }}</span>
-                      <FaIcon
-                        v-if="permissionSearchQuery && hasMatchingChildren(subcategory, permissionSearchQuery)"
-                        icon="search"
-                        class="text-primary text-xs"
-                        title="Contiene risultati di ricerca"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Colonna 3: Terzo livello (se presenti) -->
-            <div
-              v-if="selectedSubcategory && (selectedSubcategory.figli?.length > 0 || permissionSearchQuery)"
-              class="col-span-12 lg:col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto"
-            >
-              <div class="text-sm font-semibold mb-2 text-base-content/70 flex items-center justify-between">
-                <span>Sottosezioni di {{ selectedSubcategory.nome }}</span>
-                <span v-if="permissionSearchQuery" class="badge badge-primary badge-xs">
-                  {{ filteredSubSubcategories.length }}
-                </span>
-              </div>
-
-              <!-- Messaggio per sotto-sottocategorie filtrate -->
-              <div v-if="permissionSearchQuery && filteredSubSubcategories.length === 0"
-                  class="text-center py-4 text-base-content/60">
-                <div class="text-xs">Nessun risultato in questa sezione</div>
-              </div>
-
-              <div v-else class="space-y-1">
-                <div
-                  v-for="subsubcategory in filteredSubSubcategories"
-                  :key="subsubcategory.id"
-                  class="p-2 rounded cursor-pointer transition-colors hover:bg-base-200"
-                  :class="{ 'bg-primary/10 text-primary': selectedSubSubcategoryId === subsubcategory.id }"
-                  @click="selectSubSubcategory(subsubcategory)"
-                >
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center flex-1 min-w-0">
-                      <FaIcon :icon="subsubcategory.icona || 'folder'" class="mr-2 text-sm flex-shrink-0" />
-                      <span
-                        class="text-sm font-medium truncate"
-                        v-html="highlightSearchTerm(subsubcategory.nome, permissionSearchQuery)"
-                      ></span>
-                    </div>
-                    <div class="flex items-center space-x-1 ml-2">
-                      <span class="badge badge-xs">{{ subsubcategory.figli?.length || 0 }}</span>
-                      <FaIcon
-                        v-if="permissionSearchQuery && hasMatchingChildren(subsubcategory, permissionSearchQuery)"
-                        icon="search"
-                        class="text-primary text-xs"
-                        title="Contiene risultati di ricerca"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Colonna 4: Permessi finali -->
-            <div class="col-span-12 lg:col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto">
-              <div class="text-sm font-semibold mb-2 text-base-content/70 flex items-center justify-between">
-                <span>Permessi</span>
-                <div class="flex items-center space-x-2">
-                  <span v-if="permissionSearchQuery" class="badge badge-primary badge-xs">
-                    {{ currentPermissionItems.length }}
-                  </span>
-                  <div class="flex items-center space-x-1 text-xs">
-                    <span>Vis.</span>
-                    <span>Mod.</span>
-                  </div>
-                </div>
-              </div>
-
-              <div v-if="currentPermissionItems.length === 0" class="text-center py-8 text-base-content/60">
-                <FaIcon icon="info-circle" class="text-2xl mb-2" />
-                <div class="text-sm">
-                  {{ permissionSearchQuery ? 'Nessun permesso trovato' : 'Seleziona una categoria per vedere i permessi' }}
-                </div>
-              </div>
-
-              <div v-else class="space-y-2">
-                <div
-                  v-for="item in currentPermissionItems"
-                  :key="item.id"
-                  class="p-2 border border-base-200 rounded text-sm transition-colors hover:bg-base-50"
-                  :class="{ 'ring-2 ring-primary/20': permissionSearchQuery && item.nome.toLowerCase().includes(permissionSearchQuery.toLowerCase()) }"
-                >
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center flex-1 min-w-0">
-                      <FaIcon :icon="item.icona || 'file'" class="mr-2 text-xs flex-shrink-0" />
-                      <span
-                        class="font-medium truncate"
-                        v-html="highlightSearchTerm(item.nome, permissionSearchQuery)"
-                      ></span>
-                    </div>
-                    <div class="flex items-center space-x-2 ml-2">
-                      <!-- Visualizza -->
-                      <input
-                        type="checkbox"
-                        v-model="userPermissions[item.id].visualizza"
-                        class="checkbox checkbox-success checkbox-xs"
-                        @change="onPermissionChange(item.id, 'visualizza')"
-                        :title="'Visualizza ' + item.nome"
-                      />
-                      <!-- Modifica -->
-                      <input
-                        type="checkbox"
-                        v-model="userPermissions[item.id].modifica"
-                        :disabled="!userPermissions[item.id].visualizza"
-                        class="checkbox checkbox-warning checkbox-xs"
-                        @change="onPermissionChange(item.id, 'modifica')"
-                        :title="'Modifica ' + item.nome"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Riepilogo permessi -->
-          <div class="mt-4 p-3 bg-base-200 rounded-lg">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 text-xs">
-              <div class="text-sm font-medium mb-2">Riepilogo Permessi:</div>
-              <div class="flex items-center">
-                <span class="w-3 h-3 bg-success rounded-full mr-2"></span>
-                Visualizzazioni: {{ totalViewPermissions }}
-              </div>
-              <div class="flex items-center">
-                <span class="w-3 h-3 bg-warning rounded-full mr-2"></span>
-                Modifiche: {{ totalModifyPermissions }}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sezione Note e Informazioni Aggiuntive -->
-      <!-- <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <div class="flex items-center mb-4">
-            <div class="bg-orange-100 dark:bg-orange-900/20 rounded-lg p-2 mr-3">
-              <FaIcon icon="sticky-note" class="text-orange-600 text-lg" />
-            </div>
-            <div>
-              <h3 class="text-lg font-semibold text-base-content">Informazioni Aggiuntive</h3>
-              <p class="text-sm text-base-content/70">Note e commenti sull'utente</p>
-            </div>
-          </div>
-
-          Additional information fields would go here...
-        </div>
-      </div> -->
     </form>
 
     <!-- Modale di conferma eliminazione -->
@@ -868,6 +510,7 @@ import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import { userService, type User } from '@/services/userService'
 import { settingsService } from '@/services/settingsService'
 import { accessiService } from '@/services/accessiService'
+import MenuPermissionsManager from '@/components/MenuPermissionsManager.vue'
 
 // Interfaccia per il form dell'utente
 interface UserForm {
@@ -962,126 +605,6 @@ const isFormValid = computed(() => {
          userForm.value.iD_INTER > 0
 })
 
-// Computed per la navigazione ad albero
-const filteredPermissionCategories = computed(() => {
-  if (!permissionSearchQuery.value || permissionSearchQuery.value.trim() === '') {
-    return menuUtenteData.value
-  }
-
-  const query = permissionSearchQuery.value.trim()
-  const { matchingItems, pathsToMatches } = findMatchingItemsWithPaths(menuUtenteData.value, query)
-
-  // Se non ci sono match, ritorna array vuoto
-  if (matchingItems.length === 0) {
-    return []
-  }
-
-  // Filtra l'albero mantenendo solo i percorsi che portano ai match
-  return filterItemsByPaths(menuUtenteData.value, pathsToMatches)
-})
-
-const filteredSubcategories = computed(() => {
-  if (!selectedCategory.value) return []
-
-  // Se non c'è ricerca, mostra tutti i figli normalmente
-  if (!permissionSearchQuery.value || permissionSearchQuery.value.trim() === '') {
-    return selectedCategory.value.figli || []
-  }
-
-  // Se c'è una ricerca attiva, filtra i figli mostrando solo quelli nel percorso di ricerca
-  const query = permissionSearchQuery.value.trim()
-  const { pathsToMatches } = findMatchingItemsWithPaths([selectedCategory.value], query)
-
-  if (selectedCategory.value.figli) {
-    return selectedCategory.value.figli.filter(child => pathsToMatches.has(child.id))
-  }
-
-  return []
-})
-
-const filteredSubSubcategories = computed(() => {
-  if (!selectedSubcategory.value) return []
-
-  // Se non c'è ricerca, mostra tutti i figli normalmente
-  if (!permissionSearchQuery.value || permissionSearchQuery.value.trim() === '') {
-    return selectedSubcategory.value.figli || []
-  }
-
-  // Se c'è una ricerca attiva, filtra i figli mostrando solo quelli nel percorso di ricerca
-  const query = permissionSearchQuery.value.trim()
-  const { pathsToMatches } = findMatchingItemsWithPaths([selectedSubcategory.value], query)
-
-  if (selectedSubcategory.value.figli) {
-    return selectedSubcategory.value.figli.filter(child => pathsToMatches.has(child.id))
-  }
-
-  return []
-})
-
-const selectedCategory = computed(() => {
-  return menuUtenteData.value.find(cat => cat.id === selectedCategoryId.value)
-})
-
-const selectedSubcategory = computed(() => {
-  return selectedCategory.value?.figli?.find(sub => sub.id === selectedSubcategoryId.value)
-})
-
-const selectedSubSubcategory = computed(() => {
-  return selectedSubcategory.value?.figli?.find(sub => sub.id === selectedSubSubcategoryId.value)
-})
-
-const currentPermissionItems = computed(() => {
-  let items: ApiMenuUtenteItem[] = []
-
-  // Determina quali items mostrare basandosi sulla selezione corrente
-  if (selectedSubSubcategoryId.value && selectedSubSubcategory.value) {
-    items = selectedSubSubcategory.value.figli || []
-  } else if (selectedSubcategoryId.value && selectedSubcategory.value) {
-    const hasDeepChildren = selectedSubcategory.value.figli?.some(child => child.figli?.length > 0)
-    if (!hasDeepChildren) {
-      items = selectedSubcategory.value.figli || []
-    }
-  } else if (selectedCategoryId.value && selectedCategory.value) {
-    const hasSubcategories = selectedCategory.value.figli?.some(child => child.figli?.length > 0)
-    if (!hasSubcategories) {
-      items = selectedCategory.value.figli || []
-    }
-  }
-
-  return items
-})
-
-const totalViewPermissions = computed(() => {
-  return Object.values(userPermissions.value).filter(perm => perm.visualizza).length
-})
-
-const totalModifyPermissions = computed(() => {
-  return Object.values(userPermissions.value).filter(perm => perm.modifica).length
-})
-
-// Metodi helper
-const hasMatchingChildren = (item: ApiMenuUtenteItem, query: string): boolean => {
-  if (!query || !item.figli) return false
-
-  const lowerQuery = query.toLowerCase()
-
-  const checkRecursively = (children: ApiMenuUtenteItem[]): boolean => {
-    return children.some(child => {
-      // Controlla se questo figlio matcha
-      if (child.nome.toLowerCase().includes(lowerQuery)) {
-        return true
-      }
-      // Controlla ricorsivamente nei suoi figli
-      if (child.figli && child.figli.length > 0) {
-        return checkRecursively(child.figli)
-      }
-      return false
-    })
-  }
-
-  return checkRecursively(item.figli)
-}
-
 // Funzione per trovare tutti i match e i loro percorsi nella gerarchia
 const findMatchingItemsWithPaths = (items: ApiMenuUtenteItem[], query: string): {
   matchingItems: ApiMenuUtenteItem[],
@@ -1129,33 +652,6 @@ const findMatchingItemsWithPaths = (items: ApiMenuUtenteItem[], query: string): 
   })
 
   return { matchingItems, pathsToMatches }
-}
-
-// Funzione per filtrare gli items mantenendo solo quelli nei percorsi validi
-const filterItemsByPaths = (items: ApiMenuUtenteItem[], pathsToMatches: Set<number>): ApiMenuUtenteItem[] => {
-  return items.filter(item => {
-    if (pathsToMatches.has(item.id)) {
-      // Se questo item è nel percorso, filtra anche i suoi figli
-      if (item.figli && item.figli.length > 0) {
-        const filteredChildren = filterItemsByPaths(item.figli, pathsToMatches)
-        return {
-          ...item,
-          figli: filteredChildren
-        } as ApiMenuUtenteItem
-      }
-      return true
-    }
-    return false
-  }).map(item => {
-    if (item.figli && item.figli.length > 0) {
-      const filteredChildren = filterItemsByPaths(item.figli, pathsToMatches)
-      return {
-        ...item,
-        figli: filteredChildren
-      }
-    }
-    return item
-  })
 }
 
 // Funzione per cercare e espandere immediatamente
@@ -1226,16 +722,6 @@ const performSearchAndExpand = (query: string) => {
       selectedSubSubcategoryId.value = pathToMatch[2] || null
     }
   }
-}
-
-// Funzione per evidenziare i termini cercati nel testo
-const highlightSearchTerm = (text: string, searchTerm: string): string => {
-  if (!searchTerm || searchTerm.trim() === '') {
-    return text
-  }
-
-  const regex = new RegExp(`(${searchTerm.trim()})`, 'gi')
-  return text.replace(regex, '<mark class="bg-primary/20 text-primary rounded px-1 font-semibold">$1</mark>')
 }
 
 // Navigazione tra utenti
@@ -1344,21 +830,6 @@ const loadAdjacentUsers = async () => {
 }
 
 // Metodi per la navigazione ad albero
-const selectCategory = (category: ApiMenuUtenteItem) => {
-  selectedCategoryId.value = category.id
-  selectedSubcategoryId.value = null
-  selectedSubSubcategoryId.value = null
-}
-
-const selectSubcategory = (subcategory: ApiMenuUtenteItem) => {
-  selectedSubcategoryId.value = subcategory.id
-  selectedSubSubcategoryId.value = null
-}
-
-const selectSubSubcategory = (subsubcategory: ApiMenuUtenteItem) => {
-  selectedSubSubcategoryId.value = subsubcategory.id
-}
-
 const loadGruppiUtente = async () => {
   loadingGroups.value = true
   try {
@@ -1529,20 +1000,6 @@ const refreshPermissions = async () => {
   if (userForm.value.username) {
     await loadUserPermissions()
   }
-}
-
-const selectAllPermissions = () => {
-  Object.keys(userPermissions.value).forEach(key => {
-    userPermissions.value[key].visualizza = true
-    userPermissions.value[key].modifica = true
-  })
-}
-
-const deselectAllPermissions = () => {
-  Object.keys(userPermissions.value).forEach(key => {
-    userPermissions.value[key].visualizza = false
-    userPermissions.value[key].modifica = false
-  })
 }
 
 const onPermissionChange = (itemId: number, type: 'visualizza' | 'modifica') => {

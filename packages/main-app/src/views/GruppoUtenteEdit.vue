@@ -204,84 +204,19 @@
         </div>
       </div>
 
-      <!-- Sezione Abilitazioni Menu (se l'utente è company user) -->
-      <div v-if="authStore.isCompanyUser && isEditMode" class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <div class="flex flex-col lg:flex-row items-center justify-between mb-4 gap-3">
-            <div class="flex w-full items-center">
-              <div class="p-2 mr-3">
-                <FaIcon icon="table" class="text-lg" />
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-base-content">Abilitazioni Menu Gruppo</h3>
-                <p class="text-sm text-base-content/70">Configura i permessi predefiniti per tutti gli utenti del gruppo</p>
-              </div>
-            </div>
+      <!-- Sezione Abilitazioni Menu Gruppo -->
+      <MenuPermissionsManager
+        v-if="authStore.isCompanyUser && isEditMode"
+        title="Abilitazioni Menu Gruppo"
+        description="Configura i permessi predefiniti per tutti gli utenti del gruppo"
+        :loading="loadingPermissions"
+        :error="permissionsError"
+        :menu-data="menuGruppoData"
+        v-model="gruppoPermissions"
+        @refresh="refreshPermissions"
+        @permission-change="onPermissionChange"
+      />
 
-            <!-- Azioni rapide -->
-            <div class="w-full flex flex-col lg:flex-row lg:items-center lg:justify-end gap-2">
-              <button
-                type="button"
-                class="max-md:block max-md:w-full btn btn-sm btn-ghost"
-                @click="selectAllPermissions"
-              >
-                <FaIcon icon="check-circle" class="mr-1"/>
-                Seleziona Tutto
-              </button>
-              <button
-                type="button"
-                class="max-md:block max-md:w-full btn btn-sm btn-ghost"
-                @click="deselectAllPermissions"
-              >
-                <FaIcon icon="times-circle" class="mr-1"/>
-                Deseleziona Tutto
-              </button>
-              <button
-                type="button"
-                class="max-md:block max-md:w-full btn btn-sm btn-ghost"
-                @click="refreshPermissions"
-                :disabled="loadingPermissions"
-              >
-                <FaIcon icon="refresh" class="mr-1"/>
-                Ricarica
-              </button>
-            </div>
-          </div>
-
-          <!-- Filtro ricerca -->
-          <div class="mb-4">
-            <div class="form-control">
-              <div class="relative">
-                <input
-                  type="text"
-                  v-model="permissionSearchQuery"
-                  placeholder="Cerca tabelle o funzionalità..."
-                  class="input input-bordered input-sm w-full pr-10"
-                />
-                <FaIcon
-                  icon="search"
-                  class="absolute right-3 top-1/2 transform -translate-y-1/2 text-base-content/40 text-sm"
-                />
-              </div>
-            </div>
-          </div>
-
-          <!-- Loading permessi -->
-          <div v-if="loadingPermissions" class="flex justify-center items-center py-8">
-            <span class="loading loading-spinner loading-md"></span>
-            <span class="ml-3 text-sm">Caricamento permessi...</span>
-          </div>
-
-          <!-- Messaggio placeholder -->
-          <div class="alert alert-info">
-            <FaIcon icon="info-circle" />
-            <div>
-              <div class="font-bold">Funzionalità in sviluppo</div>
-              <div class="text-sm">La gestione delle abilitazioni per i gruppi utente sarà disponibile nelle prossime versioni.</div>
-            </div>
-          </div>
-        </div>
-      </div>
     </form>
 
     <!-- Modale di conferma eliminazione -->
@@ -326,7 +261,9 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute} from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
-import { gruppiUtenteService, type GruppoUtente } from '@/services/gruppiUtenteService'
+import { gruppiUtenteService, type AggiornamentoAbilitazioniGruppo, type ApiMenuGruppoItem, type GruppoUtente } from '@/services/gruppiUtenteService'
+import MenuPermissionsManager from '@/components/MenuPermissionsManager.vue'
+import { menuService } from '@/services/menuService'
 
 // Interfaccia per il form del gruppo
 interface GruppoForm {
@@ -354,9 +291,11 @@ const successMessage = ref('')
 const showDeleteModal = ref(false)
 const deleting = ref(false)
 
-// Gestione permessi (placeholder per future funzionalità)
+// Gestione permessi
 const loadingPermissions = ref(false)
-const permissionSearchQuery = ref('')
+const permissionsError = ref('')
+const gruppoPermissions = ref<Record<string, { visualizza: boolean; modifica: boolean; parent_id?: number }>>({})
+const menuGruppoData = ref<ApiMenuGruppoItem[]>([])
 
 // Navigazione gruppi
 const previousGruppo = ref<{ codice: string } | null>(null)
@@ -516,6 +455,8 @@ const loadGruppoData = async () => {
       descrizione: gruppoData.descrizione || ''
     }
 
+    await loadGruppoPermissions()
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     errorMessage.value = 'Errore nel caricamento dei dati del gruppo'
@@ -524,17 +465,88 @@ const loadGruppoData = async () => {
   }
 }
 
-// Metodi per gestione permessi (placeholder)
+const onPermissionChange = (itemId: number, type: 'visualizza' | 'modifica') => {
+  if (type === 'visualizza' && !gruppoPermissions.value[itemId].visualizza) {
+    gruppoPermissions.value[itemId].modifica = false
+  } else if (type === 'modifica' && gruppoPermissions.value[itemId].modifica) {
+    gruppoPermissions.value[itemId].visualizza = true
+  }
+}
+
+// Caricamento permessi del gruppo
+const loadGruppoPermissions = async () => {
+  if (!gruppoForm.value.codice) return
+
+  loadingPermissions.value = true
+  permissionsError.value = ''
+
+  try {
+    // Prima prova a caricare i menu specifici del gruppo
+    const menuData = await gruppiUtenteService.getMenuGruppoUtente(gruppoForm.value.codice)
+    menuGruppoData.value = menuData
+
+    // Se non ci sono dati specifici del gruppo, carica i menu base
+    if (!menuData || menuData.length === 0) {
+      const baseMenuData = await menuService.getMenuVisibili()
+      menuGruppoData.value = gruppiUtenteService.convertMenuToGroupMenu(
+        baseMenuData,
+        gruppoForm.value.codice
+      )
+    }
+
+    // Inizializza i permessi dal formato API
+    gruppoPermissions.value = gruppiUtenteService.initializePermissionsFromGroupData(menuGruppoData.value)
+
+  } catch (error) {
+    permissionsError.value = 'Errore nel caricamento dei permessi del gruppo: ' + error
+
+    // Fallback: carica i menu base se il caricamento specifico fallisce
+    try {
+      const baseMenuData = await menuService.getMenuVisibili()
+      menuGruppoData.value = gruppiUtenteService.convertMenuToGroupMenu(
+        baseMenuData,
+        gruppoForm.value.codice
+      )
+
+      // Inizializza permessi vuoti
+      const emptyPermissions: Record<string, { visualizza: boolean; modifica: boolean; parent_id?: number }> = {}
+      const processItems = (items: ApiMenuGruppoItem[]) => {
+        items.forEach(item => {
+          emptyPermissions[item.id] = {
+            visualizza: false,
+            modifica: false,
+            parent_id: item.parenT_ID
+          }
+          if (item.figli && item.figli.length > 0) {
+            processItems(item.figli)
+          }
+        })
+      }
+      processItems(menuGruppoData.value)
+      gruppoPermissions.value = emptyPermissions
+
+      permissionsError.value = '' // Pulisce l'errore se il fallback funziona
+    } catch (fallbackError) {
+      permissionsError.value = 'Errore nel caricamento dei menu: ' + fallbackError
+    }
+  } finally {
+    loadingPermissions.value = false
+  }
+}
+
 const refreshPermissions = async () => {
-  console.log('Refresh permissions - da implementare')
+  if (gruppoForm.value.codice) {
+    await loadGruppoPermissions()
+  }
 }
 
-const selectAllPermissions = () => {
-  console.log('Select all permissions - da implementare')
-}
-
-const deselectAllPermissions = () => {
-  console.log('Deselect all permissions - da implementare')
+// Preparazione dati per il salvataggio dei permessi
+const preparePermissionsForGroupSave = (): AggiornamentoAbilitazioniGruppo[] => {
+  return gruppiUtenteService.preparePermissionsForGroupSave(
+    gruppoPermissions.value,
+    menuGruppoData.value,
+    gruppoForm.value.codice
+  )
 }
 
 // Metodi utilità
@@ -598,10 +610,24 @@ const handleSubmit = async () => {
     if (isEditMode.value) {
       // Modifica gruppo esistente
       await gruppiUtenteService.editGruppoUtente(gruppoData)
+
+      // Salva anche i permessi se sono stati modificati
+      if (Object.keys(gruppoPermissions.value).length > 0) {
+        const abilitazioni = preparePermissionsForGroupSave()
+        await gruppiUtenteService.aggiornaAbilitazioniGruppoUtente(abilitazioni, gruppoData.codice)
+      }
+
       successMessage.value = 'Gruppo aggiornato con successo'
     } else {
       // Crea nuovo gruppo
       await gruppiUtenteService.newGruppoUtente(gruppoData)
+
+      // Se ci sono permessi impostati, salvali
+      if (Object.keys(gruppoPermissions.value).length > 0) {
+        const abilitazioni = preparePermissionsForGroupSave()
+        await gruppiUtenteService.aggiornaAbilitazioniGruppoUtente(abilitazioni, gruppoData.codice)
+      }
+
       successMessage.value = 'Nuovo gruppo creato con successo'
     }
 
