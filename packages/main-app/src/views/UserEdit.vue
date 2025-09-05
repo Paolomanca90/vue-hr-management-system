@@ -511,6 +511,7 @@ import { userService, type User } from '@/services/userService'
 import { settingsService } from '@/services/settingsService'
 import { accessiService } from '@/services/accessiService'
 import MenuPermissionsManager from '@/components/MenuPermissionsManager.vue'
+import { gruppiUtenteService, type ApiMenuGruppoItem } from '@/services/gruppiUtenteService'
 
 // Interfaccia per il form dell'utente
 interface UserForm {
@@ -586,6 +587,7 @@ const loadingImpostazioniInternazionali = ref(false)
 
 const availableLingue = ref<SelectOption[]>([])
 const loadingLingue = ref(false)
+const loadingGroupPermissions = ref(false)
 
 // Navigazione utenti
 const previousUser = ref<{ username: string } | null>(null)
@@ -1214,6 +1216,65 @@ const loadUserPermissionsForDuplication = async (originalUsername: string) => {
   }
 }
 
+// Funzione per caricare i permessi del gruppo
+const loadGroupPermissions = async (codgruppo: string) => {
+  if (!codgruppo) return
+
+  loadingGroupPermissions.value = true
+  permissionsError.value = ''
+
+  try {
+    const menuGruppoData = await gruppiUtenteService.getMenuGruppoUtente(codgruppo)
+
+    if (menuGruppoData && menuGruppoData.length > 0) {
+      // Aggiorna i dati del menu
+      menuUtenteData.value = menuGruppoData
+
+      // Sovrascrive i permessi con quelli del gruppo
+      const groupPermissions = gruppiUtenteService.initializePermissionsFromGroupData(menuGruppoData)
+      userPermissions.value = JSON.parse(JSON.stringify(groupPermissions))
+
+    } else {
+      // Fallback carica menu base vuoti
+      await loadEmptyPermissions()
+    }
+
+  } catch (error) {
+    permissionsError.value = `Errore nel caricamento dei permessi del gruppo: ${error}`
+    await loadEmptyPermissions()
+  } finally {
+    loadingGroupPermissions.value = false
+  }
+}
+
+// Aggiungere questa funzione
+const loadEmptyPermissions = async () => {
+  try {
+    const baseMenuData = await menuService.getMenuVisibili()
+    const emptyMenuData = gruppiUtenteService.convertMenuToGroupMenu(baseMenuData, userForm.value.codgruppo || 'temp')
+    menuUtenteData.value = emptyMenuData
+
+    const emptyPermissions: UserPermissions = {}
+    const processItems = (items: ApiMenuGruppoItem[]) => {
+      items.forEach(item => {
+        emptyPermissions[item.id] = {
+          visualizza: false,
+          modifica: false,
+          parent_id: item.parenT_ID
+        }
+        if (item.figli && item.figli.length > 0) {
+          processItems(item.figli)
+        }
+      })
+    }
+    processItems(emptyMenuData)
+    userPermissions.value = emptyPermissions
+
+  } catch (error) {
+    console.error('Errore caricamento menu base:', error)
+  }
+}
+
 // Inizializzazione
 onMounted(async() => {
   await loadGruppiUtente()
@@ -1265,6 +1326,14 @@ watch(permissionSearchQuery, (newQuery, oldQuery) => {
     selectedCategoryId.value = null
     selectedSubcategoryId.value = null
     selectedSubSubcategoryId.value = null
+  }
+})
+
+// Watcher per caricare i permessi di un gruppo
+watch(() => userForm.value.codgruppo, async (newCodgruppo, oldCodgruppo) => {
+  // Solo se il gruppo è effettivamente cambiato e non è vuoto
+  if (newCodgruppo && newCodgruppo !== oldCodgruppo) {
+    await loadGroupPermissions(newCodgruppo)
   }
 })
 
