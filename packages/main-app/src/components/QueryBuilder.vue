@@ -394,6 +394,7 @@ interface Props {
     formula: string
   }
 }
+const isBuilding = ref(false)
 
 const props = withDefaults(defineProps<Props>(), {
   showQueryBuilder: true,
@@ -515,6 +516,7 @@ const needsValue = (operator: string): boolean => {
 }
 
 const addCondition = () => {
+  isBuilding.value = true
   queryConditions.value.push({
     logicOperator: queryConditions.value.length > 0 ? 'AND' : '',
     openParen: '',
@@ -526,15 +528,17 @@ const addCondition = () => {
 }
 
 const removeCondition = (index: number) => {
+  isBuilding.value = true
   queryConditions.value.splice(index, 1)
 
-  // Se rimuoviamo la prima condizione, togliamo l'operatore logico dalla nuova prima
+  // Se rimuoviamo la prima condizione togliamo l'operatore logico dalla nuova prima
   if (index === 0 && queryConditions.value.length > 0) {
     queryConditions.value[0].logicOperator = ''
   }
 }
 
 const clearConditions = () => {
+  isBuilding.value = true
   queryConditions.value = []
 }
 
@@ -617,20 +621,95 @@ onMounted(() => {
 const parseFormulaToConditions = (formula: string) => {
   if (!formula || formula.trim() === '') return
 
-  // Parsing semplificato divide per AND/OR
-  const parts = formula.split(/\s+(AND|OR)\s+/i)
+  isBuilding.value = false
+  queryConditions.value = []
 
-  if (parts.length >= 1) {
-    queryConditions.value = []
+  try {
+    // Rimuove spazi extra e divide per operatori logici mantenendo gli operatori
+    const tokens = formula.split(/\s+(AND|OR)\s+/i)
 
-    addCondition()
+    for (let i = 0; i < tokens.length; i += 2) {
+      const conditionText = tokens[i]?.trim()
+      if (!conditionText) continue
+
+      const logicOp = i > 0 ? tokens[i - 1] : ''
+
+      // Prova a parsare la singola condizione
+      const condition = parseCondition(conditionText, logicOp)
+      queryConditions.value.push(condition)
+    }
+
+    // Se non siamo riusciti a parsare nulla aggiunge una condizione vuota
+    if (queryConditions.value.length === 0) {
+      queryConditions.value.push({
+        logicOperator: '',
+        openParen: '',
+        field: '',
+        operator: '',
+        value: '',
+        closeParen: ''
+      })
+    }
+
+  } catch (error) {
+    console.error('Errore nel parsing:', error)
+    // Fallback aggiunge una condizione vuota
+    queryConditions.value.push({
+      logicOperator: '',
+      openParen: '',
+      field: '',
+      operator: '',
+      value: '',
+      closeParen: ''
+    })
+  } finally {
+    setTimeout(() => {
+      isBuilding.value = true
+    }, 100)
+  }
+}
+
+// Funzione helper per parsare una singola condizione
+const parseCondition = (conditionText: string, logicOp: string) => {
+  // Cerca parentesi
+  const openParen = conditionText.match(/^(\(+)/)?.[1] || ''
+  const closeParen = conditionText.match(/(\)+)$/)?.[1] || ''
+
+  // Rimuove parentesi per analizzare il contenuto
+  const cleanText = conditionText.replace(/^(\(+)|(\)+)$/g, '').trim()
+
+  // Cerca pattern campo, operatore, valore
+  const match = cleanText.match(/^(.+?)\s+(=|!=|<>|<=|>=|<|>|LIKE|NOT LIKE|IS NULL|IS NOT NULL|IN|NOT IN|BETWEEN)\s*(.*)$/i)
+
+  if (match) {
+    const [, field, operator, value] = match
+    return {
+      logicOperator: logicOp,
+      openParen,
+      field: field.trim(),
+      operator: operator.trim(),
+      value: value?.trim() || '',
+      closeParen
+    }
+  }
+
+  // Se non riesce a parsare, restituisce una condizione vuota
+  return {
+    logicOperator: logicOp,
+    openParen,
+    field: '',
+    operator: '',
+    value: '',
+    closeParen
   }
 }
 
 // Watch per aggiornare la formula quando cambia la query
 watch(generatedQuery, (newQuery) => {
-  formData.value.formula = newQuery
-}, { immediate: true })
+  if (isBuilding.value) {
+    formData.value.formula = newQuery
+  }
+}, { immediate: false })
 
 watch(() => props.initialData, (newData) => {
   if (newData) {

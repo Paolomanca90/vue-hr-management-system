@@ -1,4 +1,16 @@
 <template>
+  <!-- Messaggio di errore -->
+  <div v-if="errorMessage" class="alert alert-error mb-4">
+    <FaIcon icon="exclamation-triangle" />
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <!-- Messaggio di successo -->
+  <div v-if="successMessage" class="alert alert-success mb-4">
+    <FaIcon icon="check-circle" />
+    <span>{{ successMessage }}</span>
+  </div>
+
   <QueryBuilder
     entity-name="Filtro"
     entity-icon="filter"
