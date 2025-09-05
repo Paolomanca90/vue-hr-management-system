@@ -14,6 +14,10 @@ import Users from '@/views/Users.vue'
 import UserEdit from '@/views/UserEdit.vue'
 import GruppiUtente from '@/views/GruppiUtente.vue'
 import GruppoUtenteEdit from '@/views/GruppoUtenteEdit.vue'
+import Accessi from '@/views/Accessi.vue'
+import AccessoEdit from '@/views/AccessoEdit.vue'
+import Filtri from '@/views/Filtri.vue'
+import FiltroEdit from '@/views/FiltroEdit.vue'
 
 // Route statiche di base (sempre presenti)
 const staticRoutes: RouteRecordRaw[] = [
@@ -100,6 +104,68 @@ const appRoutes: RouteRecordRaw[] = [
     beforeEnter: (to, from, next) => {
       if (to.params.id === 'new') {
         next('/app/gruppi-utente/new')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: 'accessi',
+    name: 'Accessi',
+    component: Accessi,
+  },
+  {
+    path: 'accessi/new',
+    name: 'AccessoNew',
+    component: AccessoEdit,
+    meta: {
+      title: 'Nuovo Accesso',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'accessi/:id/edit',
+    name: 'AccessoEdit',
+    component: AccessoEdit,
+    meta: {
+      title: 'Modifica Accesso',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      // Verifica che l'ID sia valido
+      if (to.params.id === 'new') {
+        next('/app/accessi/new')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: 'filtri',
+    name: 'Filtri',
+    component: Filtri,
+  },
+  {
+    path: 'filtri/new',
+    name: 'FiltroNew',
+    component: FiltroEdit,
+    meta: {
+      title: 'Nuovo Filtro',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'filtri/:id/edit',
+    name: 'FiltroEdit',
+    component: FiltroEdit,
+    meta: {
+      title: 'Modifica Filtro',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      // Verifica che l'ID sia valido
+      if (to.params.id === 'new') {
+        next('/app/filtri/new')
       } else {
         next()
       }

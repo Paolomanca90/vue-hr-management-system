@@ -1,15 +1,15 @@
 import { getApiConfig } from '@/config/api'
 
-export interface Accesso {
+export interface Filtro {
     codice: string,
     descrizione: string,
     formula: string
 }
 
-class AccessiService {
+class FiltriService {
   private config = getApiConfig()
 
-  async getTabAccessi(): Promise<Accesso[]> {
+  async getTabFiltri(): Promise<Filtro[]> {
     try {
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.accessi}`, {
         method: 'GET',
@@ -32,7 +32,7 @@ class AccessiService {
     }
   }
 
-  async addAccesso(accesso:Accesso): Promise<Accesso> {
+  async addFiltro(filtro:Filtro): Promise<Filtro> {
     try {
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.accessi}`, {
         method: 'POST',
@@ -40,7 +40,7 @@ class AccessiService {
           ...this.config.defaultHeaders,
           'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
         },
-        body: JSON.stringify(accesso)
+        body: JSON.stringify(filtro)
       })
 
       if (!response.ok) {
@@ -56,7 +56,7 @@ class AccessiService {
     }
   }
 
-  async editAccesso(accesso:Accesso): Promise<Accesso> {
+  async editFiltro(filtro:Filtro): Promise<Filtro> {
     try {
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.accessi}`, {
         method: 'PUT',
@@ -64,7 +64,7 @@ class AccessiService {
           ...this.config.defaultHeaders,
           'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
         },
-        body: JSON.stringify(accesso)
+        body: JSON.stringify(filtro)
       })
 
       if (!response.ok) {
@@ -80,7 +80,7 @@ class AccessiService {
     }
   }
 
-  async deleteAccesso(codice: string): Promise<boolean> {
+  async deleteFiltro(codice: string): Promise<boolean> {
     try {
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.deleteAccessi}?codice=${encodeURIComponent(codice)}`, {
         method: 'DELETE',
@@ -103,4 +103,4 @@ class AccessiService {
   }
 }
 
-export const accessiService = new AccessiService()
+export const filtriService = new FiltriService()

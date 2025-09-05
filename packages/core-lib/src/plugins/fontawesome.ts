@@ -55,6 +55,7 @@ import {
   faColumns,
   faStar,
   faGlobe,
+  faCode,
   // Dashboard e HR
   faTachometerAlt,
   faChartBar,
@@ -186,6 +187,7 @@ library.add(
   faShare,
   faLink,
   faGlobe,
+  faCode,
   faExternalLinkAlt,
   faArrowLeft,
   faArrowRight,
