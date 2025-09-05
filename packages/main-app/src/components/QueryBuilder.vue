@@ -563,7 +563,7 @@ const handleSubmit = () => {
 
   const submitData = {
     ...formData.value,
-    formula: generatedQuery.value
+    formula: generatedQuery.value || formData.value.formula
   }
 
   emit('save', submitData)
@@ -607,18 +607,40 @@ onMounted(() => {
   if (props.initialData) {
     formData.value = { ...props.initialData }
 
-    // Se c'è una formula, prova a parsarla (semplificato)
-    if (props.initialData.formula) {
-      // Per ora solo una condizione base
-      addCondition()
+    // Se c'è una formula prova a parsarla
+    if (props.initialData.formula && props.initialData.formula.trim() !== '') {
+      parseFormulaToConditions(props.initialData.formula)
     }
   }
 })
 
+const parseFormulaToConditions = (formula: string) => {
+  if (!formula || formula.trim() === '') return
+
+  // Parsing semplificato divide per AND/OR
+  const parts = formula.split(/\s+(AND|OR)\s+/i)
+
+  if (parts.length >= 1) {
+    queryConditions.value = []
+
+    addCondition()
+  }
+}
+
 // Watch per aggiornare la formula quando cambia la query
 watch(generatedQuery, (newQuery) => {
   formData.value.formula = newQuery
-})
+}, { immediate: true })
+
+watch(() => props.initialData, (newData) => {
+  if (newData) {
+    formData.value = { ...newData }
+    if (newData.formula && newData.formula.trim() !== '') {
+      parseFormulaToConditions(newData.formula)
+    }
+  }
+}, { deep: true, immediate: true })
+
 </script>
 
 <style scoped>

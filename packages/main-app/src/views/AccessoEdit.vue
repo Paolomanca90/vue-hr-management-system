@@ -6,12 +6,15 @@
     :is-edit-mode="isEditMode"
     :loading="loading"
     :saving="saving"
+    :success-message="successMessage"
+    :error-message="errorMessage"
     :initial-data="initialData"
     @go-back="goBack"
     @save="handleSave"
     @delete="handleDelete"
     @duplicate="handleDuplicate"
     @reset="handleReset"
+    @clear-messages="clearMessages"
   />
 </template>
 
@@ -27,6 +30,8 @@ const route = useRoute()
 // State
 const loading = ref(false)
 const saving = ref(false)
+const successMessage = ref('')
+const errorMessage = ref('')
 const initialData = ref({
   nome: '',
   descrizione: '',
@@ -38,10 +43,16 @@ const isEditMode = computed(() => route.params.id !== undefined && route.params.
 const accessoId = computed(() => route.params.id as string)
 
 // Methods
+const clearMessages = () => {
+  successMessage.value = ''
+  errorMessage.value = ''
+}
+
 const loadAccessoData = async () => {
   if (!isEditMode.value) return
 
   loading.value = true
+  clearMessages()
 
   try {
     // Prima prova a recuperare dai dati del router state
@@ -53,27 +64,18 @@ const loadAccessoData = async () => {
         formula: routerState.formula || ''
       }
     }
-    // else {
-    //   // Altrimenti carica dall'API
-    //   const accesso = await accessiService.getAccessoById(accessoId.value)
-    //   if (accesso) {
-    //     initialData.value = {
-    //       nome: accesso.codice,
-    //       descrizione: accesso.descrizione,
-    //       formula: accesso.formula || ''
-    //     }
-    //   } else {
-    //     // Fallback se non trovato
-    //     initialData.value = {
-    //       nome: accessoId.value,
-    //       descrizione: `Accesso ${accessoId.value}`,
-    //       formula: ''
-    //     }
-    //   }
-    // }
+    // Fallback se non trovato
+    else {
+      initialData.value = {
+        nome: accessoId.value,
+        descrizione: `Accesso ${accessoId.value}`,
+        formula: ''
+      }
+    }
 
   } catch (error) {
     console.error('Errore nel caricamento dell\'accesso:', error)
+    errorMessage.value = 'Errore nel caricamento dei dati dell\'accesso'
     // Fallback
     initialData.value = {
       nome: accessoId.value,
@@ -92,7 +94,7 @@ const handleDuplicateMode = () => {
 
   if (duplicateCodice && !isEditMode.value) {
     initialData.value = {
-      nome: '',
+      nome: duplicateCodice || '',
       descrizione: sourceDescrizione ? `Copia di ${sourceDescrizione}` : `Copia di ${duplicateCodice}`,
       formula: sourceFormula || ''
     }
@@ -106,6 +108,7 @@ const goBack = () => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handleSave = async (data: any) => {
   saving.value = true
+  clearMessages()
 
   try {
     const accessoData: Accesso = {
@@ -116,8 +119,10 @@ const handleSave = async (data: any) => {
 
     if (isEditMode.value) {
       await accessiService.editAccesso(accessoData)
+      successMessage.value = 'Accesso aggiornato con successo'
     } else {
       await accessiService.addAccesso(accessoData)
+      successMessage.value = 'Nuovo accesso creato con successo'
 
       // Reindirizza alla modalità edit dopo la creazione
       setTimeout(() => {
@@ -125,8 +130,14 @@ const handleSave = async (data: any) => {
       }, 1500)
     }
 
+    // Nasconde il messaggio dopo alcuni secondi
+    setTimeout(() => {
+      successMessage.value = ''
+    }, 5000)
+
   } catch (error) {
     console.error('Errore nel salvataggio dell\'accesso:', error)
+    errorMessage.value = error instanceof Error ? error.message : 'Errore nel salvataggio dell\'accesso'
   } finally {
     saving.value = false
   }
@@ -135,8 +146,11 @@ const handleSave = async (data: any) => {
 const handleDelete = async () => {
   if (!isEditMode.value) return
 
+  clearMessages()
+
   try {
     await accessiService.deleteAccesso(accessoId.value)
+    successMessage.value = 'Accesso eliminato con successo'
 
     setTimeout(() => {
       router.push('/app/accessi')
@@ -144,6 +158,7 @@ const handleDelete = async () => {
 
   } catch (error) {
     console.error('Errore nell\'eliminazione dell\'accesso:', error)
+    errorMessage.value = error instanceof Error ? error.message : 'Errore nell\'eliminazione dell\'accesso'
   }
 }
 
@@ -153,12 +168,13 @@ const handleDuplicate = () => {
     query: {
       duplicate: accessoId.value,
       sourceDescrizione: initialData.value.descrizione,
-      sourceFormula: initialData.value.formula
+      sourceFormula: initialData.value.formula // ← FIX: passa anche la formula
     }
   })
 }
 
 const handleReset = () => {
+  clearMessages()
   if (isEditMode.value) {
     loadAccessoData()
   } else {
@@ -183,6 +199,7 @@ onMounted(async () => {
 // Watch per cambiamenti di route
 watch(() => route.params.id, async () => {
   if (route.params.id) {
+    clearMessages()
     if (isEditMode.value) {
       await loadAccessoData()
     } else {

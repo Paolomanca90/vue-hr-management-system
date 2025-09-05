@@ -6,12 +6,15 @@
     :is-edit-mode="isEditMode"
     :loading="loading"
     :saving="saving"
+    :success-message="successMessage"
+    :error-message="errorMessage"
     :initial-data="initialData"
     @go-back="goBack"
     @save="handleSave"
     @delete="handleDelete"
     @duplicate="handleDuplicate"
     @reset="handleReset"
+    @clear-messages="clearMessages"
   />
 </template>
 
@@ -27,6 +30,8 @@ const route = useRoute()
 // State
 const loading = ref(false)
 const saving = ref(false)
+const successMessage = ref('')
+const errorMessage = ref('')
 const initialData = ref({
   nome: '',
   descrizione: '',
@@ -38,10 +43,16 @@ const isEditMode = computed(() => route.params.id !== undefined && route.params.
 const filtroId = computed(() => route.params.id as string)
 
 // Methods
+const clearMessages = () => {
+  successMessage.value = ''
+  errorMessage.value = ''
+}
+
 const loadFiltroData = async () => {
   if (!isEditMode.value) return
 
   loading.value = true
+  clearMessages()
 
   try {
     // Prima prova a recuperare dai dati del router state
@@ -53,27 +64,18 @@ const loadFiltroData = async () => {
         formula: routerState.formula || ''
       }
     }
-    // else {
-    //   // Altrimenti carica dall'API
-    //   const filtro = await filtriService.getFiltroById(filtroId.value)
-    //   if (filtro) {
-    //     initialData.value = {
-    //       nome: filtro.codice,
-    //       descrizione: filtro.descrizione,
-    //       formula: filtro.formula || ''
-    //     }
-    //   } else {
-    //     // Fallback se non trovato
-    //     initialData.value = {
-    //       nome: filtroId.value,
-    //       descrizione: `Filtro ${filtroId.value}`,
-    //       formula: ''
-    //     }
-    //   }
-    // }
+    // Fallback se non trovato
+    else {
+      initialData.value = {
+        nome: filtroId.value,
+        descrizione: `Filtro ${filtroId.value}`,
+        formula: ''
+      }
+    }
 
   } catch (error) {
     console.error('Errore nel caricamento del filtro:', error)
+    errorMessage.value = 'Errore nel caricamento dei dati del filtro'
     // Fallback
     initialData.value = {
       nome: filtroId.value,
@@ -92,7 +94,7 @@ const handleDuplicateMode = () => {
 
   if (duplicateCodice && !isEditMode.value) {
     initialData.value = {
-      nome: '',
+      nome: duplicateCodice || '',
       descrizione: sourceDescrizione ? `Copia di ${sourceDescrizione}` : `Copia di ${duplicateCodice}`,
       formula: sourceFormula || ''
     }
@@ -106,6 +108,7 @@ const goBack = () => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handleSave = async (data: any) => {
   saving.value = true
+  clearMessages()
 
   try {
     const filtroData: Filtro = {
@@ -116,17 +119,25 @@ const handleSave = async (data: any) => {
 
     if (isEditMode.value) {
       await filtriService.editFiltro(filtroData)
+      successMessage.value = 'Filtro aggiornato con successo'
     } else {
       await filtriService.addFiltro(filtroData)
+      successMessage.value = 'Nuovo filtro creato con successo'
 
-      // Reindirizza alla modadlità edit dopo la creazione
+      // Reindirizza alla modalità edit dopo la creazione
       setTimeout(() => {
         router.push(`/app/filtri/${filtroData.codice}/edit`)
       }, 1500)
     }
 
+    // Nasconde il messaggio dopo alcuni secondi
+    setTimeout(() => {
+      successMessage.value = ''
+    }, 5000)
+
   } catch (error) {
     console.error('Errore nel salvataggio del filtro:', error)
+    errorMessage.value = error instanceof Error ? error.message : 'Errore nel salvataggio del filtro'
   } finally {
     saving.value = false
   }
@@ -135,9 +146,11 @@ const handleSave = async (data: any) => {
 const handleDelete = async () => {
   if (!isEditMode.value) return
 
+  clearMessages()
+
   try {
     await filtriService.deleteFiltro(filtroId.value)
-    console.log('Filtro eliminato con successo')
+    successMessage.value = 'Filtro eliminato con successo'
 
     setTimeout(() => {
       router.push('/app/filtri')
@@ -145,6 +158,7 @@ const handleDelete = async () => {
 
   } catch (error) {
     console.error('Errore nell\'eliminazione del filtro:', error)
+    errorMessage.value = error instanceof Error ? error.message : 'Errore nell\'eliminazione del filtro'
   }
 }
 
@@ -160,6 +174,7 @@ const handleDuplicate = () => {
 }
 
 const handleReset = () => {
+  clearMessages()
   if (isEditMode.value) {
     loadFiltroData()
   } else {
@@ -184,6 +199,7 @@ onMounted(async () => {
 // Watch per cambiamenti di route
 watch(() => route.params.id, async () => {
   if (route.params.id) {
+    clearMessages()
     if (isEditMode.value) {
       await loadFiltroData()
     } else {
