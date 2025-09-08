@@ -588,6 +588,7 @@ const loadingImpostazioniInternazionali = ref(false)
 const availableLingue = ref<SelectOption[]>([])
 const loadingLingue = ref(false)
 const loadingGroupPermissions = ref(false)
+const isInitialLoad = ref(false)
 
 // Navigazione utenti
 const previousUser = ref<{ username: string } | null>(null)
@@ -902,6 +903,7 @@ const loadUserData = async () => {
 
   loading.value = true
   errorMessage.value = ''
+  isInitialLoad.value = true
 
   try {
     // Prima prova a cercare l'utente nella lista già caricata
@@ -952,6 +954,10 @@ const loadUserData = async () => {
     errorMessage.value = 'Errore nel caricamento dei dati utente'
   } finally {
     loading.value = false
+    // Reset del flag dopo il caricamento iniziale
+    setTimeout(() => {
+      isInitialLoad.value = false
+    }, 100)
   }
 }
 
@@ -1330,14 +1336,14 @@ watch(permissionSearchQuery, (newQuery, oldQuery) => {
 })
 
 // Watcher per caricare i permessi di un gruppo
+// Solo quando l'utente cambia manualmente il gruppo, non al caricamento iniziale
 watch(() => userForm.value.codgruppo, async (newCodgruppo, oldCodgruppo) => {
-  // Solo se il gruppo è effettivamente cambiato e non è vuoto
-  if (newCodgruppo && newCodgruppo !== oldCodgruppo) {
+  if (newCodgruppo && newCodgruppo !== oldCodgruppo && oldCodgruppo !== undefined && oldCodgruppo !== '' && !isInitialLoad.value) {
     await loadGroupPermissions(newCodgruppo)
   }
 })
 
-// Clear success/error messages after timeout
+// Auto-hide messaggi di successo/errore dopo alcuni secondi
 watch([successMessage, errorMessage], ([success, error]) => {
   if (success) {
     setTimeout(() => {

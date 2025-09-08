@@ -273,6 +273,7 @@
                     <select
                       v-model="condition.field"
                       class="select select-bordered select-sm"
+                      @change="onFieldChange(condition, $event)"
                     >
                       <option value="">Seleziona Campo</option>
                       <option
@@ -307,7 +308,23 @@
                     v-if="needsValue(condition.operator)"
                     class="form-control flex-1 min-w-[150px]"
                   >
+                    <select
+                      v-if="condition.fieldData && condition.field"
+                      v-model="condition.value"
+                      class="select select-bordered select-sm"
+                      :class="{ 'loading': condition.loadingValues }"
+                    >
+                      <option value="">Seleziona Valore</option>
+                      <option
+                        v-for="value in condition.availableValues || []"
+                        :key="value"
+                        :value="value"
+                      >
+                        {{ value }}
+                      </option>
+                    </select>
                     <input
+                      v-else
                       type="text"
                       v-model="condition.value"
                       placeholder="Valore"
@@ -401,6 +418,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
+import { dipendenteService, type CampoDipendente } from '../services/dipendenteService'
 
 // Props
 interface Props {
@@ -468,24 +486,22 @@ interface QueryCondition {
   operator: string
   value: string
   closeParen: string
+  fieldData?: {
+    tabella: string
+    campo: string
+    tipologia: string
+    dimensione: number
+  }
+  availableValues?: string[]
+  loadingValues?: boolean
 }
 
 const queryConditions = ref<QueryCondition[]>([])
 
-// Campi disponibili (statici)
-const availableFields = ref([
-  { label: 'Dipendente.CODDIP', value: 'Dipendente.CODDIP' },
-  { label: 'Dipendente.CODAZI', value: 'Dipendente.CODAZI' },
-  { label: 'Dipendente.Nome', value: 'Dipendente.Nome' },
-  { label: 'Dipendente.Cognome', value: 'Dipendente.Cognome' },
-  { label: 'Dipendente.DataNascita', value: 'Dipendente.DataNascita' },
-  { label: 'Dipendente.CodiceFiscale', value: 'Dipendente.CodiceFiscale' },
-  { label: 'Dipendente.Livello', value: 'Dipendente.Livello' },
-  { label: 'Dipendente.Qualifica', value: 'Dipendente.Qualifica' },
-  { label: 'Presenza.DataPresenza', value: 'Presenza.DataPresenza' },
-  { label: 'Presenza.OrarioEntrata', value: 'Presenza.OrarioEntrata' },
-  { label: 'Presenza.OrarioUscita', value: 'Presenza.OrarioUscita' }
-])
+// Campi dinamici dal backend
+const availableFields = ref<Array<{ label: string, value: string, data: CampoDipendente }>>([])
+const loadingFields = ref(false)
+const fieldsError = ref('')
 
 // Operatori disponibili (statici)
 const availableOperators = ref([
@@ -527,7 +543,9 @@ const generatedQuery = computed(() => {
       query += `${condition.field} ${condition.operator}`
 
       if (needsValue(condition.operator) && condition.value) {
-        query += ` ${condition.value}`
+        // Aggiunge apici per i valori string
+        const formattedValue = formatValueForQuery(condition.value, condition.fieldData?.tipologia)
+        query += ` ${formattedValue}`
       }
     }
 
@@ -544,6 +562,22 @@ const needsValue = (operator: string): boolean => {
   return !['IS NULL', 'IS NOT NULL'].includes(operator)
 }
 
+// Formatta il valore per la query aggiungendo apici se necessario
+const formatValueForQuery = (value: string, tipologia?: string): string => {
+  if (!tipologia || tipologia === 'int') {
+    // Per i numeri non servono apici
+    return value
+  }
+
+  if (tipologia === 'string') {
+    // Per le stringhe aggiunge apici singoli
+    return `'${value.replace(/'/g, "''")}'`
+  }
+
+  // Default: restituisce il valore così com'è
+  return value
+}
+
 const addCondition = () => {
   isBuilding.value = true
   queryConditions.value.push({
@@ -552,7 +586,10 @@ const addCondition = () => {
     field: '',
     operator: '',
     value: '',
-    closeParen: ''
+    closeParen: '',
+    fieldData: undefined,
+    availableValues: [],
+    loadingValues: false
   })
 }
 
@@ -635,8 +672,71 @@ const confirmDelete = async () => {
   showDeleteModal.value = false
 }
 
+// Carica i campi dinamici
+const loadCampiDipendente = async () => {
+  loadingFields.value = true
+  fieldsError.value = ''
+
+  try {
+    const campi = await dipendenteService.getCampiDipendente()
+
+    availableFields.value = campi.map(campo => ({
+      label: `${campo.tabella}.${campo.campo}`,
+      value: `${campo.tabella}.${campo.campo}`,
+      data: campo
+    }))
+
+  } catch (error) {
+    console.error('Errore nel caricamento dei campi:', error)
+    fieldsError.value = 'Errore nel caricamento dei campi disponibili'
+  } finally {
+    loadingFields.value = false
+  }
+}
+
+// Gestisce il cambio di campo
+const onFieldChange = async (condition: QueryCondition, event: Event) => {
+  const target = event.target as HTMLSelectElement
+  const selectedField = availableFields.value.find(f => f.value === target.value)
+
+  if (selectedField) {
+    condition.fieldData = selectedField.data
+    condition.value = ''
+    condition.availableValues = []
+
+    // Carica i valori per questo campo
+    await loadValoriCampo(condition)
+  } else {
+    condition.fieldData = undefined
+    condition.availableValues = []
+  }
+}
+
+// Carica i valori disponibili per un campo
+const loadValoriCampo = async (condition: QueryCondition) => {
+  if (!condition.fieldData) return
+
+  condition.loadingValues = true
+
+  try {
+    const valori = await dipendenteService.getValoriCampo(
+      condition.fieldData.tabella,
+      condition.fieldData.campo
+    )
+    condition.availableValues = valori
+
+  } catch (error) {
+    console.error('Errore nel caricamento dei valori:', error)
+    condition.availableValues = []
+  } finally {
+    condition.loadingValues = false
+  }
+}
+
 // Inizializza i dati
-onMounted(() => {
+onMounted(async () => {
+  await loadCampiDipendente()
+
   if (props.initialData) {
     formData.value = { ...props.initialData }
 
@@ -676,7 +776,10 @@ const parseFormulaToConditions = (formula: string) => {
         field: '',
         operator: '',
         value: '',
-        closeParen: ''
+        closeParen: '',
+        fieldData: undefined,
+        availableValues: [],
+        loadingValues: false
       })
     }
 
@@ -689,7 +792,10 @@ const parseFormulaToConditions = (formula: string) => {
       field: '',
       operator: '',
       value: '',
-      closeParen: ''
+      closeParen: '',
+      fieldData: undefined,
+      availableValues: [],
+      loadingValues: false
     })
   } finally {
     setTimeout(() => {
@@ -729,7 +835,10 @@ const parseCondition = (conditionText: string, logicOp: string) => {
     field: '',
     operator: '',
     value: '',
-    closeParen
+    closeParen,
+    fieldData: undefined,
+    availableValues: [],
+    loadingValues: false
   }
 }
 

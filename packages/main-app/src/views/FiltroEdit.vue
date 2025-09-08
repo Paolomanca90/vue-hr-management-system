@@ -297,3 +297,9 @@ watch(() => route.params.id, async () => {
   }
 }, { immediate: true })
 </script>
+
+<style>
+  .btn-outline:hover {
+    color: white !important;
+  }
+</style>

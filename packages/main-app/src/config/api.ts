@@ -39,7 +39,11 @@ export const API_CONFIG = {
     // Filtri
     filtri: '/api/filtri', //GET,POST,PUT
     filtriSelect: '/api/filtri/select',
-    deleteFiltri: '/api/filtri/by-key' //DELETE
+    deleteFiltri: '/api/filtri/by-key', //DELETE
+
+    // Dipendente
+    getCampiDipendente: '/api/dipendente/GetCampiDipendente',
+    getValoriCampo: '/api/dipendente/GetValoriCampo'
   },
 
   // Headers di default
