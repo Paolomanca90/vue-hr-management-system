@@ -11,7 +11,7 @@ class FiltriService {
 
   async getTabFiltri(): Promise<Filtro[]> {
     try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.accessi}`, {
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.filtri}`, {
         method: 'GET',
         headers: {
           ...this.config.defaultHeaders,
@@ -34,7 +34,7 @@ class FiltriService {
 
   async addFiltro(filtro:Filtro): Promise<Filtro> {
     try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.accessi}`, {
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.filtri}`, {
         method: 'POST',
         headers: {
           ...this.config.defaultHeaders,
@@ -58,7 +58,7 @@ class FiltriService {
 
   async editFiltro(filtro:Filtro): Promise<Filtro> {
     try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.accessi}`, {
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.filtri}`, {
         method: 'PUT',
         headers: {
           ...this.config.defaultHeaders,
@@ -82,7 +82,7 @@ class FiltriService {
 
   async deleteFiltro(codice: string): Promise<boolean> {
     try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.deleteAccessi}?codice=${encodeURIComponent(codice)}`, {
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.deleteFiltri}${codice}`, {
         method: 'DELETE',
         headers: {
           ...this.config.defaultHeaders,

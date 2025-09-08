@@ -82,7 +82,7 @@ class AccessiService {
 
   async deleteAccesso(codice: string): Promise<boolean> {
     try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.deleteAccessi}?codice=${encodeURIComponent(codice)}`, {
+      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.deleteAccessi}${codice}`, {
         method: 'DELETE',
         headers: {
           ...this.config.defaultHeaders,

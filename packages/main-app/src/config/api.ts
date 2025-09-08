@@ -34,7 +34,12 @@ export const API_CONFIG = {
     // Accessi
     accessi: '/api/accessi', //GET,POST,PUT
     accessiSelect: '/api/accessi/select',
-    deleteAccessi: '/api/accessi/by-key' //DELETE
+    deleteAccessi: '/api/accessi/by-key', //DELETE
+
+    // Filtri
+    filtri: '/api/filtri', //GET,POST,PUT
+    filtriSelect: '/api/filtri/select',
+    deleteFiltri: '/api/filtri/by-key' //DELETE
   },
 
   // Headers di default

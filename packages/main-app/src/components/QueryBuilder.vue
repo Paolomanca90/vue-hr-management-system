@@ -52,6 +52,28 @@
         <div class="card-body">
           <div class="lg:flex items-center justify-between gap-3">
             <div class="flex flex-col lg:flex-row lg:items-center gap-3">
+              <!-- Navigazione (solo in modalità modifica) -->
+              <div v-if="isEditMode" class="flex items-center max-md:justify-center space-x-2">
+                <button
+                  type="button"
+                  class="btn btn-primary btn-outline btn-sm"
+                  @click="$emit('navigate-previous')"
+                  :disabled="saving || !hasPrevious"
+                  title="Elemento precedente"
+                >
+                  <FaIcon icon="chevron-left" />
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary btn-outline btn-sm"
+                  @click="$emit('navigate-next')"
+                  :disabled="saving || !hasNext"
+                  title="Elemento successivo"
+                >
+                  <FaIcon icon="chevron-right" />
+                </button>
+              </div>
+
               <!-- Azioni principali -->
               <button
                 type="submit"
@@ -393,6 +415,9 @@ interface Props {
     descrizione: string
     formula: string
   }
+  // Navigation props
+  hasPrevious?: boolean
+  hasNext?: boolean
 }
 const isBuilding = ref(false)
 
@@ -405,7 +430,9 @@ const props = withDefaults(defineProps<Props>(), {
     nome: '',
     descrizione: '',
     formula: ''
-  })
+  }),
+  hasPrevious: false,
+  hasNext: false
 })
 
 // Emits
@@ -416,6 +443,8 @@ const emit = defineEmits<{
   'delete': []
   'duplicate': []
   'reset': []
+  'navigate-previous': []
+  'navigate-next': []
 }>()
 
 // State

@@ -21,12 +21,16 @@
     :success-message="successMessage"
     :error-message="errorMessage"
     :initial-data="initialData"
+    :has-previous="hasPrevious"
+    :has-next="hasNext"
     @go-back="goBack"
     @save="handleSave"
     @delete="handleDelete"
     @duplicate="handleDuplicate"
     @reset="handleReset"
     @clear-messages="clearMessages"
+    @navigate-previous="navigateToPrevious"
+    @navigate-next="navigateToNext"
   />
 </template>
 
@@ -50,9 +54,16 @@ const initialData = ref({
   formula: ''
 })
 
+// Navigation state
+const previousFiltro = ref<{ codice: string } | null>(null)
+const nextFiltro = ref<{ codice: string } | null>(null)
+const allFiltri = ref<{ codice: string }[]>([])
+
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
 const filtroId = computed(() => route.params.id as string)
+const hasPrevious = computed(() => previousFiltro.value !== null)
+const hasNext = computed(() => nextFiltro.value !== null)
 
 // Methods
 const clearMessages = () => {
@@ -115,6 +126,65 @@ const handleDuplicateMode = () => {
 
 const goBack = () => {
   router.push('/app/filtri')
+}
+
+// Navigation methods
+const navigateToPrevious = () => {
+  if (previousFiltro.value) {
+    router.push(`/app/filtri/${previousFiltro.value.codice}/edit`)
+  }
+}
+
+const navigateToNext = () => {
+  if (nextFiltro.value) {
+    router.push(`/app/filtri/${nextFiltro.value.codice}/edit`)
+  }
+}
+
+// Navigazione filtri
+const loadAdjacentFiltri = async () => {
+  if (!isEditMode.value) return
+
+  try {
+    // Carcica tutti i filtri se non già caricati
+    if (allFiltri.value.length === 0) {
+      const response = await filtriService.getTabFiltri()
+      if (response) {
+        // Ordina alfabeticamente per codice
+        allFiltri.value = response
+          .map(filtro => ({ codice: filtro.codice }))
+          .sort((a, b) => a.codice.localeCompare(b.codice))
+      }
+    }
+
+    // Trova l'indice del filtro corrente
+    const currentCodice = filtroId.value
+    if (!currentCodice || allFiltri.value.length === 0) {
+      previousFiltro.value = null
+      nextFiltro.value = null
+      return
+    }
+
+    const currentIndex = allFiltri.value.findIndex(filtro => filtro.codice === currentCodice)
+
+    if (currentIndex === -1) {
+      // Codice non trovato
+      previousFiltro.value = null
+      nextFiltro.value = null
+      return
+    }
+
+    // Set previous filtro
+    previousFiltro.value = currentIndex > 0 ? allFiltri.value[currentIndex - 1] : null
+
+    // Set next filtro
+    nextFiltro.value = currentIndex < allFiltri.value.length - 1 ? allFiltri.value[currentIndex + 1] : null
+
+  } catch (error) {
+    console.error('Errore nel caricamento dei filtri adiacenti:', error)
+    previousFiltro.value = null
+    nextFiltro.value = null
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -203,6 +273,7 @@ const handleReset = () => {
 onMounted(async () => {
   if (isEditMode.value) {
     await loadFiltroData()
+    await loadAdjacentFiltri()
   } else {
     handleDuplicateMode()
   }
@@ -214,6 +285,7 @@ watch(() => route.params.id, async () => {
     clearMessages()
     if (isEditMode.value) {
       await loadFiltroData()
+      await loadAdjacentFiltri()
     } else {
       initialData.value = {
         nome: '',
