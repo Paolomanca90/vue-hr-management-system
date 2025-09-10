@@ -1,4 +1,5 @@
 import { getApiConfig } from '@/config/api'
+import { createCrudMethods } from './baseService'
 
 export interface ApiMenuItem {
   id: number
@@ -59,115 +60,43 @@ export interface AggiornaPreferitoResponse {
 }
 
 class MenuService {
-  private config = getApiConfig() // Ottiene la configurazione corretta
+  private config = getApiConfig()
+  private menuCrud = createCrudMethods<ApiMenuItem>({
+    list: this.config.endpoints.menuVisibili
+  })
+  private menuUtenteCrud = createCrudMethods<ApiMenuUtenteItem>({
+    list: this.config.endpoints.menuUtente
+  })
 
   async getMenuVisibili(): Promise<ApiMenuItem[]> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.menuVisibili}`, {
-        method: 'GET',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const result = await response.json()
-
-      if (!result) {
-        throw new Error('Errore nel caricamento del menu')
-      }
-
-      return result
-    } catch (error) {
-      console.error('Errore nel caricamento dei menu:', error)
-      throw error
-    }
+    return this.menuCrud.getAll()
   }
 
-  async getMenuUtente(username:string): Promise<ApiMenuUtenteItem[]> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.menuUtente}${username}`, {
-        method: 'GET',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const result = await response.json()
-
-      if (!result) {
-        throw new Error('Errore nel caricamento del menu')
-      }
-
-      return result
-    } catch (error) {
-      console.error('Errore nel caricamento dei menu:', error)
-      throw error
-    }
+  async getMenuUtente(username: string): Promise<ApiMenuUtenteItem[]> {
+    return this.menuUtenteCrud.customRequest<ApiMenuUtenteItem[]>({
+      method: 'GET',
+      customEndpoint: `${this.config.endpoints.menuUtente}${username}`
+    })
   }
 
-  async updateMenuUtente(listaAbilitazioni:AbilitazioneMenuUtente[], username:string): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.updateMenuAbilitazioni}${username}`, {
-        method: 'POST',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        },
-        body: JSON.stringify(listaAbilitazioni)
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      return true
-    } catch (error) {
-      console.error('Errore nel caricamento dei menu:', error)
-      throw error
-    }
+  async updateMenuUtente(listaAbilitazioni: AbilitazioneMenuUtente[], username: string): Promise<boolean> {
+    await this.menuUtenteCrud.customRequest<void>({
+      method: 'POST',
+      customEndpoint: `${this.config.endpoints.updateMenuAbilitazioni}${username}`,
+      body: listaAbilitazioni
+    })
+    return true
   }
 
-  async aggiornaPreferito(request: AggiornaPreferitoRequest): Promise<AggiornaPreferitoResponse> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.aggiornaPreferito}`, {
-        method: 'POST',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        },
-        body: JSON.stringify(request)
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
-      }
-
-      return {
-        success: true,
-        message: 'Preferito aggiornato con successo'
-      }
-
-    } catch (error) {
-      console.error('Errore nell\'aggiornamento del preferito:', error)
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : 'Errore nell\'aggiornamento del preferito'
-      }
-    }
+  async aggiornaPreferito(request: AggiornaPreferitoRequest): Promise<void> {
+    await this.menuUtenteCrud.customRequest<void>({
+      method: 'POST',
+      customEndpoint: this.config.endpoints.aggiornaPreferito,
+      body: request
+    })
   }
 
-  async togglePreferito(username: string, menuId: number, isCurrentlyFavorite: boolean, modifica: string = 'N'): Promise<AggiornaPreferitoResponse> {
+  async togglePreferito(username: string, menuId: number, isCurrentlyFavorite: boolean, modifica: string = 'N'): Promise<void> {
     const request: AggiornaPreferitoRequest = {
       username,
       menU_ID: menuId,
@@ -175,7 +104,7 @@ class MenuService {
       preferito: isCurrentlyFavorite ? 'N' : 'S'
     }
 
-    return this.aggiornaPreferito(request)
+    await this.aggiornaPreferito(request)
   }
 
   // Funzione per ottenere un'icona Font Awesome di default basata sul nome

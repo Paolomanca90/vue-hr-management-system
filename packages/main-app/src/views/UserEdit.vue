@@ -2,49 +2,30 @@
 <template>
   <div class="space-y-6">
     <!-- Header con breadcrumb -->
-    <div class="card bg-base-100 shadow-sm">
-      <div class="card-body">
-        <div class="flex flex-col-reverse lg:flex-row lg:items-center lg:justify-between gap-3">
-          <div class="max-md:block">
-            <h1 class="text-3xl font-bold text-base-content">
-              {{ isEditMode ? 'Modifica Utente' : 'Nuovo Utente' }}
-            </h1>
-            <p class="text-base-content/70 mt-1">
-              {{ isEditMode ? `Modifica i dati dell'utente: ${userForm.username}` : 'Inserisci i dati del nuovo utente' }}
-            </p>
-          </div>
-
-          <div>
-            <button
-              class="btn btn-ghost btn-sm"
-              @click="goBack"
-              :disabled="saving"
-            >
-              <FaIcon icon="arrow-left" class="mr-2"/>
-              Indietro
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <PageHeader
+      :title="isEditMode ? 'Modifica Utente' : 'Nuovo Utente'"
+      :description="isEditMode ? `Modifica i dati dell'utente: ${userForm.username}` : 'Inserisci i dati del nuovo utente'"
+    >
+      <template #actions>
+        <button
+          class="btn btn-ghost btn-sm"
+          @click="goBack"
+          :disabled="saving"
+        >
+          <FaIcon icon="arrow-left" class="mr-2"/>
+          Indietro
+        </button>
+      </template>
+    </PageHeader>
 
     <!-- Loading indicator -->
-    <div v-if="loading" class="flex justify-center items-center py-12">
-      <span class="loading loading-spinner loading-lg"></span>
-      <span class="ml-3">Caricamento dati utente...</span>
-    </div>
+    <LoadingIndicator :loading="loading" message="Caricamento dati utente..." />
 
-    <!-- Messaggio di errore globale -->
-    <div v-if="errorMessage" class="alert alert-error">
-      <FaIcon icon="exclamation-triangle" />
-      <span>{{ errorMessage }}</span>
-    </div>
-
-    <!-- Messaggio di successo -->
-    <div v-if="successMessage" class="alert alert-success">
-      <FaIcon icon="check-circle" />
-      <span>{{ successMessage }}</span>
-    </div>
+    <!-- Messaggi -->
+    <MessageAlerts
+      :error-message="errorMessage"
+      :success-message="successMessage"
+    />
 
     <!-- Form principale -->
     <form v-if="!loading" @submit.prevent="handleSubmit" class="space-y-6">
@@ -54,136 +35,36 @@
         <div class="card-body">
           <div class="lg:flex items-center justify-between gap-3">
             <div class="flex flex-col lg:flex-row lg:items-center gap-3">
-              <!-- Navigazione utenti (solo in modalità modifica) -->
-              <div v-if="isEditMode" class="flex items-center max-md:justify-center space-x-2">
-                <button
-                  type="button"
-                  class="btn btn-primary btn-outline btn-sm"
-                  @click="navigateToPreviousUser"
-                  :disabled="saving || !hasPreviousUser"
-                  title="Utente precedente"
-                >
-                  <FaIcon icon="chevron-left" />
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-primary btn-outline btn-sm"
-                  @click="navigateToNextUser"
-                  :disabled="saving || !hasNextUser"
-                  title="Utente successivo"
-                >
-                  <FaIcon icon="chevron-right" />
-                </button>
-              </div>
+              <!-- Navigazione -->
+              <NavigationButtons
+                :show-navigation="isEditMode"
+                :disabled="saving"
+                entity-name="Utente"
+                :navigation-config="userNavigationConfig"
+              />
 
               <!-- Azioni principali -->
-              <button
-                type="submit"
-                class="btn btn-primary btn-sm text-white"
-                :class="{ 'loading': saving }"
-                :disabled="saving || !isFormValid"
-              >
-                <span v-if="saving" class="loading loading-spinner loading-sm"></span>
-                <FaIcon v-if="!saving" icon="save" class="mr-2"/>
-                <span v-if="saving">
-                  {{ isEditMode ? 'Salvataggio...' : 'Creazione...' }}
-                </span>
-                <span v-if="!saving">
-                  {{ isEditMode ? 'Salva' : 'Crea Utente' }}
-                </span>
-              </button>
-
-              <button
-                v-if="isEditMode"
-                type="button"
-                class="btn btn-primary btn-outline btn-sm"
-                @click="duplicateCurrentUser"
-                :disabled="saving"
-              >
-                <FaIcon icon="copy" class="mr-2"/>
-                Duplica
-              </button>
-
-              <button
-                v-if="isEditMode"
-                type="button"
-                class="btn btn-error btn-outline btn-sm"
-                @click="deleteCurrentUser"
-                :disabled="saving"
-              >
-                <FaIcon icon="trash" class="mr-2"/>
-                Elimina
-              </button>
-            </div>
-
-            <div class="max-md:mt-3">
-              <button
-                type="button"
-                class="max-md:block max-md:w-full btn btn-ghost btn-sm"
-                @click="resetForm"
-                :disabled="saving"
-              >
-                <FaIcon icon="undo" class="mr-2"/>
-                Reset
-              </button>
+              <ActionButtons
+                entity-name="Utente"
+                :is-edit-mode="isEditMode"
+                :saving="saving"
+                :is-form-valid="isFormValid"
+                @duplicate="duplicateCurrentUser"
+                @delete="deleteCurrentUser"
+                @reset="resetForm"
+              />
             </div>
           </div>
         </div>
       </div>
 
       <!-- Sezione Informazioni Base -->
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center">
-              <div class="bg-primary/10 rounded-lg p-2 mr-3">
-                <FaIcon icon="user" class="text-primary text-lg" />
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-base-content">Informazioni Base</h3>
-                <p class="text-sm text-base-content/70">Dati principali e configurazione dell'utente</p>
-              </div>
-            </div>
-
-            <!-- Pulsanti azioni rapide (se in modalità modifica) -->
-            <!-- <div v-if="isEditMode" class="flex items-center space-x-2">
-              <button
-                type="button"
-                class="btn btn-info btn-sm"
-                @click="showUserPreview"
-                :disabled="saving"
-              >
-                <FaIcon icon="eye" class="mr-1"/>
-                Visualizza
-              </button>
-              <button
-                type="button"
-                class="btn btn-warning btn-sm"
-                @click="togglePasswordSection"
-              >
-                <FaIcon icon="key" class="mr-1"/>
-                Cambio Password
-              </button>
-              <button
-                type="button"
-                class="btn btn-error btn-sm"
-                @click="disableUser"
-                :disabled="saving"
-              >
-                <FaIcon icon="ban" class="mr-1"/>
-                Disabilita Utente
-              </button>
-              <button
-                type="button"
-                class="btn btn-ghost btn-sm"
-                @click="showNotesAccess"
-              >
-                <FaIcon icon="sticky-note" class="mr-1"/>
-                Note Accesso
-              </button>
-            </div> -->
-          </div>
-
+      <SectionCard
+        title="Informazioni Base"
+        description="Dati principali e configurazione dell'utente"
+        icon="user"
+      >
+        <template #actions>
           <div class="grid grid-cols-1 gap-2">
             <!-- Prima riga -->
             <div class="grid lg:grid-cols-2 gap-4">
@@ -226,56 +107,6 @@
                   <span class="label-text-alt text-error">Nome completo richiesto</span>
                 </div>
               </div>
-
-              <!-- <div class="col-span-2 grid grid-cols-3 gap-4"> -->
-                  <!-- Disabilita dopo -->
-                  <!-- <div class="form-control">
-                      <div class="flex items-center space-x-2">
-                        <label class="label">
-                          <span class="label-text font-medium">Disabilita dopo</span>
-                        </label>
-                        <input
-                            type="number"
-                            v-model.number="userForm.disabilitaDopo"
-                            class="input input-bordered w-20"
-                            min="0"
-                            max="99"
-                        />
-                        <span class="text-sm text-base-content/60">Mesi di mancato utilizzo</span>
-                    </div>
-                  </div>
-     -->
-                  <!-- Cambio Password ogni -->
-                  <!-- <div class="form-control">
-                      <div class="flex items-center space-x-2">
-                        <label class="label">
-                            <span class="label-text font-medium">Cambio Password ogni</span>
-                        </label>
-                        <input
-                            type="number"
-                            v-model.number="userForm.cambioPasswordOgni"
-                            class="input input-bordered w-20"
-                            min="0"
-                            max="99"
-                        />
-                        <span class="text-sm text-base-content/60">Mesi</span>
-                    </div>
-                  </div> -->
-
-                  <!-- Monitorare -->
-                  <!-- <div class="form-control justify-center">
-                    <div class="flex items-center">
-                        <label class="label justify-start cursor-pointer space-x-2">
-                            <span class="label-text font-medium">Monitorare</span>
-                            <input
-                              type="checkbox"
-                              v-model="userForm.monitorarePassword"
-                              class="checkbox checkbox-sm"
-                            />
-                        </label>
-                    </div>
-                  </div>
-              </div> -->
             </div>
 
             <!-- Seconda riga -->
@@ -319,60 +150,6 @@
                   </option>
                 </select>
               </div>
-
-              <!-- Famiglia Utenti -->
-              <!-- <div class="form-control">
-                <label class="label">
-                  <span class="label-text font-medium">Famiglia Utenti</span>
-                </label>
-                <select
-                  v-model="userForm.famigliaUtenti"
-                  class="select select-bordered w-full"
-                >
-                  <option value="">Nessuno</option>
-                  <option
-                    v-for="famiglia in famigliaUtentiOptions"
-                    :key="famiglia.value"
-                    :value="famiglia.value"
-                  >
-                    {{ famiglia.label }}
-                  </option>
-                </select>
-              </div> -->
-
-              <!-- Controllo Periodi -->
-              <!-- <div class="form-control">
-                <label class="label cursor-pointer justify-start">
-                  <input
-                    type="checkbox"
-                    v-model="userForm.controlloPeriodi"
-                    class="checkbox mr-3"
-                  />
-                  <span class="label-text font-medium">Controllo Periodi</span>
-                </label> -->
-
-                <!-- Campi dipendenti dal controllo periodi -->
-                <!-- <div v-if="userForm.controlloPeriodi" class="mt-3 space-y-3 ml-6">
-                  <div class="flex items-center space-x-3">
-                    <label class="text-sm font-medium w-24">Mesi Precedenti</label>
-                    <input
-                      type="number"
-                      v-model.number="userForm.mesiPrecedenti"
-                      class="input input-bordered input-sm w-20"
-                      min="0"
-                      max="99"
-                    />
-                  </div>
-                  <div class="flex items-center space-x-3">
-                    <label class="text-sm font-medium w-24">Dal Giorno</label>
-                    <input
-                      type="date"
-                      v-model="userForm.dalGiorno"
-                      class="input input-bordered input-sm"
-                    />
-                  </div>
-                </div>
-              </div> -->
             </div>
 
             <!-- Terza riga -->
@@ -426,31 +203,13 @@
                   <span class="label-text-alt text-error">Impost. Internazionale richiesta</span>
                 </div>
               </div>
-
-              <!-- Tipo Utente -->
-              <!-- <div class="form-control">
-                <label class="label">
-                  <span class="label-text font-medium">Tipo Utente</span>
-                </label>
-                <select
-                  v-model="userForm.tipoUtente"
-                  class="select select-bordered w-full"
-                >
-                  <option value="">Nessuno</option>
-                  <option value="ADMIN">Amministratore</option>
-                  <option value="MANAGER">Manager</option>
-                  <option value="EMPLOYEE">Dipendente</option>
-                  <option value="CONSULTANT">Consulente</option>
-                  <option value="GUEST">Ospite</option>
-                </select>
-              </div> -->
             </div>
           </div>
           <div class="text-sm text-base-content/60 mt-4">
             * Campi obbligatori
           </div>
-        </div>
-      </div>
+        </template>
+      </SectionCard>
 
       <!-- Sezione Abilitazioni Menu/Tabelle -->
       <MenuPermissionsManager
@@ -512,6 +271,12 @@ import { settingsService } from '@/services/settingsService'
 import { accessiService } from '@/services/accessiService'
 import MenuPermissionsManager from '@/components/MenuPermissionsManager.vue'
 import { gruppiUtenteService, type ApiMenuGruppoItem } from '@/services/gruppiUtenteService'
+import PageHeader from '@/components/PageHeader.vue'
+import MessageAlerts from '@/components/MessageAlerts.vue'
+import LoadingIndicator from '@/components/LoadingIndicator.vue'
+import NavigationButtons from '@/components/NavigationButtons.vue'
+import ActionButtons from '@/components/ActionButtons.vue'
+import SectionCard from '@/components/SectionCard.vue'
 
 // Interfaccia per il form dell'utente
 interface UserForm {
@@ -590,16 +355,17 @@ const loadingLingue = ref(false)
 const loadingGroupPermissions = ref(false)
 const isInitialLoad = ref(false)
 
-// Navigazione utenti
-const previousUser = ref<{ username: string } | null>(null)
-const nextUser = ref<{ username: string } | null>(null)
-const allUsers = ref<{ username: string }[]>([])
-
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
 const userId = computed(() => route.params.id as string)
-const hasPreviousUser = computed(() => previousUser.value !== null)
-const hasNextUser = computed(() => nextUser.value !== null)
+
+// Navigation configuration
+const userNavigationConfig = {
+  fetchAll: () => userService.getUsers(),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getEntityId: (user: any) => user.username,
+  basePath: '/app/users'
+}
 
 const isFormValid = computed(() => {
   return userForm.value.username.trim() !== '' &&
@@ -727,18 +493,6 @@ const performSearchAndExpand = (query: string) => {
   }
 }
 
-// Navigazione tra utenti
-const navigateToPreviousUser = () => {
-  if (previousUser.value) {
-    router.push(`/app/users/${previousUser.value.username}/edit`)
-  }
-}
-
-const navigateToNextUser = () => {
-  if (nextUser.value) {
-    router.push(`/app/users/${nextUser.value.username}/edit`)
-  }
-}
 
 // Duplica utente corrente
 const duplicateCurrentUser = () => {
@@ -786,51 +540,6 @@ const confirmDelete = async () => {
   }
 }
 
-// Caricamento utenti adiacenti per navigazione
-const loadAdjacentUsers = async () => {
-  if (!isEditMode.value) return
-
-  try {
-    // Carica l'intera lista utenti se non è già stata caricata o se è vuota
-    if (allUsers.value.length === 0) {
-      const response = await userService.getUsers()
-      if (response.listaUtenti) {
-        // Ordina gli utenti alfabeticamente per username
-        allUsers.value = response.listaUtenti
-          .map(user => ({ username: user.username }))
-          .sort((a, b) => a.username.localeCompare(b.username))
-      }
-    }
-
-    // Trova l'utente corrente e determina quello precedente e successivo
-    const currentUsername = userId.value
-    if (!currentUsername || allUsers.value.length === 0) {
-      previousUser.value = null
-      nextUser.value = null
-      return
-    }
-
-    const currentIndex = allUsers.value.findIndex(user => user.username === currentUsername)
-
-    if (currentIndex === -1) {
-      // Utente corrente non trovato nella lista
-      previousUser.value = null
-      nextUser.value = null
-      return
-    }
-
-    // Imposta utente precedente
-    previousUser.value = currentIndex > 0 ? allUsers.value[currentIndex - 1] : null
-
-    // Imposta utente successivo
-    nextUser.value = currentIndex < allUsers.value.length - 1 ? allUsers.value[currentIndex + 1] : null
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
-    previousUser.value = null
-    nextUser.value = null
-  }
-}
 
 // Metodi per la navigazione ad albero
 const loadGruppiUtente = async () => {
@@ -909,12 +618,10 @@ const loadUserData = async () => {
     // Prima prova a cercare l'utente nella lista già caricata
     let userData = null
 
-    // Se abbiamo già la lista utenti, cerca l'utente corrente
-    if (allUsers.value.length > 0) {
-      const response = await userService.getUsers()
-      if (response.listaUtenti) {
-        userData = response.listaUtenti.find(user => user.username === userId.value)
-      }
+    // Carica i dati dell'utente dal servizio
+    const response = await userService.getUsers()
+    if (response) {
+      userData = response.find(user => user.username === userId.value)
     }
 
     // Se non trovato nella lista, prova con i dati del router state
@@ -1290,7 +997,6 @@ onMounted(async() => {
 
   if (isEditMode.value) {
     loadUserData()
-    await loadAdjacentUsers()
   } else {
     handleDuplicateMode()
   }
@@ -1305,7 +1011,6 @@ watch(() => route.params.id, async () => {
 
     if (isEditMode.value) {
       await loadUserData()
-      await loadAdjacentUsers()
     } else {
       resetForm()
       handleDuplicateMode()

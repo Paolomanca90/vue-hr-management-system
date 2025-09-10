@@ -2,36 +2,29 @@
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="card bg-base-100 shadow-sm">
-      <div class="card-body">
-        <div class="flex flex-col lg:flex-row items-center justify-between space-y-3">
-          <div>
-            <h1 class="text-3xl font-bold text-base-content">Gestione Utenti</h1>
-            <p class="text-base-content/70 mt-1">
-              Gestisci gli utenti del sistema - Totale: {{ users.length }} utenti
-            </p>
-          </div>
-          <div class="flex items-center gap-3 flex-wrap">
-            <button class="max-md:w-full max-md:block btn btn-primary btn-sm text-white" @click="addNewUser">
-              <FaIcon icon="user-plus" class="mr-2"/>
-              Nuovo Utente
-            </button>
-            <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm" @click="refreshUsers">
-              <FaIcon icon="refresh" class="mr-2"/>
-              Aggiorna
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <PageHeader
+      title="Gestione Utenti"
+      :description="`Gestisci gli utenti del sistema - Totale: ${users.length} utenti`"
+    >
+      <template #actions>
+        <button class="max-md:w-full max-md:block btn btn-primary btn-sm text-white" @click="addNewUser">
+          <FaIcon icon="user-plus" class="mr-2"/>
+          Nuovo Utente
+        </button>
+        <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm" @click="refreshUsers">
+          <FaIcon icon="refresh" class="mr-2"/>
+          Aggiorna
+        </button>
+      </template>
+    </PageHeader>
 
     <div class="card bg-base-100 shadow-sm">
       <div class="card-body max-md:p-3">
-        <!-- Messaggio di errore -->
-        <div v-if="errorMessage" class="alert alert-error mb-4">
-          <FaIcon icon="exclamation-triangle" />
-          <span>{{ errorMessage }}</span>
-        </div>
+        <!-- Messaggi -->
+        <MessageAlerts
+          :error-message="errorMessage"
+          class="mb-4"
+        />
 
         <PrimeDataTable
           :data="users"
@@ -191,7 +184,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { PrimeDataTable, FaIcon } from '@presenze-in-web-frontend/core-lib'
-import { userService, type User, type GetUsersResponse } from '@/services/userService'
+import PageHeader from '@/components/PageHeader.vue'
+import MessageAlerts from '@/components/MessageAlerts.vue'
+import { userService, type User } from '@/services/userService'
 
 const router = useRouter()
 const users = ref<User[]>([])
@@ -300,20 +295,14 @@ const loadUsers = async (): Promise<void> => {
     tableLoading.value = true
     errorMessage.value = ''
 
-    const response: GetUsersResponse = await userService.getUsers()
+    const response = await userService.getUsers()
 
-    if (response.messaggioDiErrore) {
-      errorMessage.value = response.messaggioDiErrore
-      users.value = []
-    } else if (response.listaUtenti) {
-      users.value = response.listaUtenti
+    if (response) {
+      users.value = response
       updateFilterOptions()
-    } else {
-      users.value = []
     }
 
   } catch (error) {
-    console.error('Errore nel caricamento utenti:', error)
     errorMessage.value = error instanceof Error ? error.message : 'Errore sconosciuto nel caricamento degli utenti'
     users.value = []
   } finally {

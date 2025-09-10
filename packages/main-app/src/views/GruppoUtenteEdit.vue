@@ -2,49 +2,30 @@
 <template>
   <div class="space-y-6">
     <!-- Header con breadcrumb -->
-    <div class="card bg-base-100 shadow-sm">
-      <div class="card-body">
-        <div class="flex flex-col-reverse lg:flex-row lg:items-center lg:justify-between gap-3">
-          <div class="max-md:block">
-            <h1 class="text-3xl font-bold text-base-content">
-              {{ isEditMode ? 'Modifica Gruppo Utente' : 'Nuovo Gruppo Utente' }}
-            </h1>
-            <p class="text-base-content/70 mt-1">
-              {{ isEditMode ? `Modifica i dati del gruppo: ${gruppoForm.codice}` : 'Inserisci i dati del nuovo gruppo utente' }}
-            </p>
-          </div>
-
-          <div>
-            <button
-              class="btn btn-ghost btn-sm"
-              @click="goBack"
-              :disabled="saving"
-            >
-              <FaIcon icon="arrow-left" class="mr-2"/>
-              Indietro
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <PageHeader
+      :title="isEditMode ? 'Modifica Gruppo Utente' : 'Nuovo Gruppo Utente'"
+      :description="isEditMode ? `Modifica i dati del gruppo: ${gruppoForm.codice}` : 'Inserisci i dati del nuovo gruppo utente'"
+    >
+      <template #actions>
+        <button
+          class="btn btn-ghost btn-sm"
+          @click="goBack"
+          :disabled="saving"
+        >
+          <FaIcon icon="arrow-left" class="mr-2"/>
+          Indietro
+        </button>
+      </template>
+    </PageHeader>
 
     <!-- Loading indicator -->
-    <div v-if="loading" class="flex justify-center items-center py-12">
-      <span class="loading loading-spinner loading-lg"></span>
-      <span class="ml-3">Caricamento dati gruppo...</span>
-    </div>
+    <LoadingIndicator :loading="loading" message="Caricamento dati gruppo..." />
 
-    <!-- Messaggio di errore globale -->
-    <div v-if="errorMessage" class="alert alert-error">
-      <FaIcon icon="exclamation-triangle" />
-      <span>{{ errorMessage }}</span>
-    </div>
-
-    <!-- Messaggio di successo -->
-    <div v-if="successMessage" class="alert alert-success">
-      <FaIcon icon="check-circle" />
-      <span>{{ successMessage }}</span>
-    </div>
+    <!-- Messaggi -->
+    <MessageAlerts 
+      :error-message="errorMessage"
+      :success-message="successMessage"
+    />
 
     <!-- Form principale -->
     <form v-if="!loading" @submit.prevent="handleSubmit" class="space-y-6">
@@ -54,97 +35,35 @@
         <div class="card-body">
           <div class="lg:flex items-center justify-between gap-3">
             <div class="flex flex-col lg:flex-row lg:items-center gap-3">
-              <!-- Navigazione gruppi (solo in modalità modifica) -->
-              <div v-if="isEditMode" class="flex items-center max-md:justify-center space-x-2">
-                <button
-                  type="button"
-                  class="btn btn-primary btn-outline btn-sm"
-                  @click="navigateToPreviousGruppo"
-                  :disabled="saving || !hasPreviousGruppo"
-                  title="Gruppo precedente"
-                >
-                  <FaIcon icon="chevron-left" />
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-primary btn-outline btn-sm"
-                  @click="navigateToNextGruppo"
-                  :disabled="saving || !hasNextGruppo"
-                  title="Gruppo successivo"
-                >
-                  <FaIcon icon="chevron-right" />
-                </button>
-              </div>
+              <!-- Navigazione -->
+              <NavigationButtons
+                :show-navigation="isEditMode"
+                :disabled="saving"
+                entity-name="Gruppo"
+                :navigation-config="gruppoNavigationConfig"
+              />
 
               <!-- Azioni principali -->
-              <button
-                type="submit"
-                class="btn btn-primary btn-sm text-white"
-                :class="{ 'loading': saving }"
-                :disabled="saving || !isFormValid"
-              >
-                <span v-if="saving" class="loading loading-spinner loading-sm"></span>
-                <FaIcon v-if="!saving" icon="save" class="mr-2"/>
-                <span v-if="saving">
-                  {{ isEditMode ? 'Salvataggio...' : 'Creazione...' }}
-                </span>
-                <span v-if="!saving">
-                  {{ isEditMode ? 'Salva' : 'Crea Gruppo' }}
-                </span>
-              </button>
-
-              <button
-                v-if="isEditMode"
-                type="button"
-                class="btn btn-primary btn-outline btn-sm"
-                @click="duplicateCurrentGruppo"
-                :disabled="saving"
-              >
-                <FaIcon icon="copy" class="mr-2"/>
-                Duplica
-              </button>
-
-              <button
-                v-if="isEditMode"
-                type="button"
-                class="btn btn-error btn-outline btn-sm"
-                @click="deleteCurrentGruppo"
-                :disabled="saving"
-              >
-                <FaIcon icon="trash" class="mr-2"/>
-                Elimina
-              </button>
-            </div>
-
-            <div class="max-md:mt-3">
-              <button
-                type="button"
-                class="max-md:block max-md:w-full btn btn-ghost btn-sm"
-                @click="resetForm"
-                :disabled="saving"
-              >
-                <FaIcon icon="undo" class="mr-2"/>
-                Reset
-              </button>
+              <ActionButtons
+                entity-name="Gruppo"
+                :is-edit-mode="isEditMode"
+                :saving="saving"
+                :is-form-valid="isFormValid"
+                @duplicate="duplicateCurrentGruppo"
+                @delete="deleteCurrentGruppo"
+                @reset="resetForm"
+              />
             </div>
           </div>
         </div>
       </div>
 
       <!-- Sezione Informazioni Base -->
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center">
-              <div class="bg-primary/10 rounded-lg p-2 mr-3">
-                <FaIcon icon="users" class="text-primary text-lg" />
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-base-content">Informazioni Gruppo</h3>
-                <p class="text-sm text-base-content/70">Dati principali del gruppo utente</p>
-              </div>
-            </div>
-          </div>
+      <SectionCard
+        title="Informazioni Gruppo"
+        description="Dati principali del gruppo utente"
+        icon="users"
+      >
 
           <div class="grid grid-cols-1 gap-6">
             <!-- Codice -->
@@ -201,8 +120,7 @@
           <div class="text-sm text-base-content/60 mt-4">
             * Campi obbligatori
           </div>
-        </div>
-      </div>
+      </SectionCard>
 
       <!-- Sezione Abilitazioni Menu Gruppo -->
       <MenuPermissionsManager
@@ -264,6 +182,12 @@ import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import { gruppiUtenteService, type AggiornamentoAbilitazioniGruppo, type ApiMenuGruppoItem, type GruppoUtente } from '@/services/gruppiUtenteService'
 import MenuPermissionsManager from '@/components/MenuPermissionsManager.vue'
 import { menuService } from '@/services/menuService'
+import PageHeader from '@/components/PageHeader.vue'
+import MessageAlerts from '@/components/MessageAlerts.vue'
+import LoadingIndicator from '@/components/LoadingIndicator.vue'
+import NavigationButtons from '@/components/NavigationButtons.vue'
+import ActionButtons from '@/components/ActionButtons.vue'
+import SectionCard from '@/components/SectionCard.vue'
 
 // Interfaccia per il form del gruppo
 interface GruppoForm {
@@ -297,34 +221,25 @@ const permissionsError = ref('')
 const gruppoPermissions = ref<Record<string, { visualizza: boolean; modifica: boolean; parent_id?: number }>>({})
 const menuGruppoData = ref<ApiMenuGruppoItem[]>([])
 
-// Navigazione gruppi
-const previousGruppo = ref<{ codice: string } | null>(null)
-const nextGruppo = ref<{ codice: string } | null>(null)
-const allGruppi = ref<{ codice: string }[]>([])
-
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
 const gruppoId = computed(() => route.params.id as string)
-const hasPreviousGruppo = computed(() => previousGruppo.value !== null)
-const hasNextGruppo = computed(() => nextGruppo.value !== null)
+
+// Navigation configuration
+const gruppoNavigationConfig = {
+  fetchAll: async () => {
+    const response = await gruppiUtenteService.getGruppiUtente()
+    return response.listaGruppi || []
+  },
+  getEntityId: (gruppo: unknown) => (gruppo as { codice: string }).codice,
+  basePath: '/app/gruppi-utente'
+}
 
 const isFormValid = computed(() => {
   return gruppoForm.value.codice.trim() !== '' &&
          gruppoForm.value.descrizione.trim() !== ''
 })
 
-// Navigazione tra gruppi
-const navigateToPreviousGruppo = () => {
-  if (previousGruppo.value) {
-    router.push(`/app/gruppi-utente/${previousGruppo.value.codice}/edit`)
-  }
-}
-
-const navigateToNextGruppo = () => {
-  if (nextGruppo.value) {
-    router.push(`/app/gruppi-utente/${nextGruppo.value.codice}/edit`)
-  }
-}
 
 // Duplica gruppo corrente
 const duplicateCurrentGruppo = () => {
@@ -368,51 +283,6 @@ const confirmDelete = async () => {
   }
 }
 
-// Caricamento gruppi adiacenti per navigazione
-const loadAdjacentGruppi = async () => {
-  if (!isEditMode.value) return
-
-  try {
-    // Carica l'intera lista gruppi se non è già stata caricata o se è vuota
-    if (allGruppi.value.length === 0) {
-      const response = await gruppiUtenteService.getGruppiUtente()
-      if (response.listaGruppi) {
-        // Ordina i gruppi alfabeticamente per codice
-        allGruppi.value = response.listaGruppi
-          .map(gruppo => ({ codice: gruppo.codice }))
-          .sort((a, b) => a.codice.localeCompare(b.codice))
-      }
-    }
-
-    // Trova il gruppo corrente e determina quello precedente e successivo
-    const currentCodice = gruppoId.value
-    if (!currentCodice || allGruppi.value.length === 0) {
-      previousGruppo.value = null
-      nextGruppo.value = null
-      return
-    }
-
-    const currentIndex = allGruppi.value.findIndex(gruppo => gruppo.codice === currentCodice)
-
-    if (currentIndex === -1) {
-      // Gruppo corrente non trovato nella lista
-      previousGruppo.value = null
-      nextGruppo.value = null
-      return
-    }
-
-    // Imposta gruppo precedente
-    previousGruppo.value = currentIndex > 0 ? allGruppi.value[currentIndex - 1] : null
-
-    // Imposta gruppo successivo
-    nextGruppo.value = currentIndex < allGruppi.value.length - 1 ? allGruppi.value[currentIndex + 1] : null
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
-    previousGruppo.value = null
-    nextGruppo.value = null
-  }
-}
 
 // Caricamento dati gruppo
 const loadGruppoData = async () => {
@@ -425,12 +295,10 @@ const loadGruppoData = async () => {
     // Prima prova a cercare il gruppo nella lista già caricata
     let gruppoData = null
 
-    // Se abbiamo già la lista gruppi, cerca il gruppo corrente
-    if (allGruppi.value.length > 0) {
-      const response = await gruppiUtenteService.getGruppiUtente()
-      if (response.listaGruppi) {
-        gruppoData = response.listaGruppi.find(gruppo => gruppo.codice === gruppoId.value)
-      }
+    // Carica il gruppo dal servizio
+    const response = await gruppiUtenteService.getGruppiUtente()
+    if (response.listaGruppi) {
+      gruppoData = response.listaGruppi.find(gruppo => gruppo.codice === gruppoId.value)
     }
 
     // Se non trovato nella lista, prova con i dati del router state
@@ -662,7 +530,6 @@ const handleDuplicateMode = () => {
 onMounted(async() => {
   if (isEditMode.value) {
     loadGruppoData()
-    await loadAdjacentGruppi()
   } else {
     handleDuplicateMode()
   }
@@ -677,7 +544,6 @@ watch(() => route.params.id, async () => {
 
     if (isEditMode.value) {
       await loadGruppoData()
-      await loadAdjacentGruppi()
     } else {
       resetForm()
       handleDuplicateMode()

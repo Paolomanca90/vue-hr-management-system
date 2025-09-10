@@ -1,4 +1,5 @@
 import { getApiConfig } from '@/config/api'
+import { createCrudMethods } from './baseService'
 
 export interface CampoDipendente {
   tabella: string
@@ -9,56 +10,20 @@ export interface CampoDipendente {
 
 class DipendenteService {
   private config = getApiConfig()
+  private campiCrud = createCrudMethods<CampoDipendente>({
+    list: this.config.endpoints.getCampiDipendente
+  })
 
   async getCampiDipendente(): Promise<CampoDipendente[]> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.getCampiDipendente}`, {
-        method: 'GET',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        }
-      })
-
-      if (!response.ok) {
-        // Se la risposta non è ok, prova a leggere il messaggio di errore
-        const errorText = await response.text()
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
-      }
-
-      return await response.json()
-
-    } catch (error) {
-      throw new Error('Errore di connessione al server: ' + error)
-    }
+    return this.campiCrud.getAll()
   }
 
   async getValoriCampo(tabella: string, campo: string): Promise<string[]> {
-    try {
-      const params = new URLSearchParams({
-        tabella,
-        campo
-      })
-
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.getValoriCampo}?${params}`, {
-        method: 'GET',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        }
-      })
-
-      if (!response.ok) {
-        // Se la risposta non è ok, prova a leggere il messaggio di errore
-        const errorText = await response.text()
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
-      }
-
-      return await response.json()
-
-    } catch (error) {
-      throw new Error('Errore di connessione al server: ' + error)
-    }
+    return this.campiCrud.customRequest<string[]>({
+      method: 'GET',
+      customEndpoint: this.config.endpoints.getValoriCampo,
+      params: { tabella, campo }
+    })
   }
 }
 

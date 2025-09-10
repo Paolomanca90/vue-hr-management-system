@@ -1,4 +1,5 @@
 import { getApiConfig } from '@/config/api'
+import { createCrudMethods } from './baseService'
 
 export interface Lingue {
     iD_LINGUA: number,
@@ -23,51 +24,19 @@ export interface TabAccessi {
 
 class SettingsService {
   private config = getApiConfig()
+  private lingueCrud = createCrudMethods<Lingue>({
+    list: this.config.endpoints.lingue
+  })
+  private impostazioniCrud = createCrudMethods<ImpostazioniInternazionali>({
+    list: this.config.endpoints.impostazioniInternazionali
+  })
 
   async getLingue(): Promise<Lingue[]> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.lingue}`, {
-        method: 'GET',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        }
-      })
-
-      if (!response.ok) {
-        // Se la risposta non è ok, prova a leggere il messaggio di errore
-        const errorText = await response.text()
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
-      }
-
-      return await response.json()
-
-    } catch (error) {
-      throw new Error('Errore di connessione al server: ' + error)
-    }
+    return this.lingueCrud.getAll()
   }
 
   async getImpostazioniInternazionali(): Promise<ImpostazioniInternazionali[]> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.impostazioniInternazionali}`, {
-        method: 'GET',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        }
-      })
-
-      if (!response.ok) {
-        // Se la risposta non è ok, prova a leggere il messaggio di errore
-        const errorText = await response.text()
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
-      }
-
-      return await response.json()
-
-    } catch (error) {
-      throw new Error('Errore di connessione al server: ' + error)
-    }
+    return this.impostazioniCrud.getAll()
   }
 }
 

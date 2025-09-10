@@ -1,4 +1,5 @@
 import { getApiConfig } from '@/config/api'
+import { createCrudMethods } from './baseService'
 
 export interface User {
   username: string;
@@ -15,132 +16,37 @@ export interface GruppiUtenti
   descrizione: string
 }
 
-export interface GetUsersResponse {
-  listaUtenti?: User[]
-  messaggioDiErrore?: string
-}
-
 class UserService {
   private config = getApiConfig()
+  private crud = createCrudMethods<User>({
+    list: this.config.endpoints.users,
+    create: this.config.endpoints.users,
+    update: this.config.endpoints.users,
+    delete: this.config.endpoints.deleteUser
+  })
 
-  async getUsers(): Promise<GetUsersResponse> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.users}`, {
-        method: 'GET',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        }
-      })
+  private gruppiCrud = createCrudMethods<GruppiUtenti>({
+    list: this.config.endpoints.gruppiUtente
+  })
 
-      if (!response.ok) {
-        // Se la risposta non è ok, prova a leggere il messaggio di errore
-        const errorText = await response.text()
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
-      }
-
-      return {
-        listaUtenti: await response.json(),
-        messaggioDiErrore: undefined,
-      }
-
-    } catch (error) {
-      throw new Error('Errore di connessione al server: ' + error)
-    }
+  async getUsers(): Promise<User[]> {
+    return this.crud.getAll()
   }
 
-  async newUser(user:User): Promise<User> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.users}`, {
-        method: 'POST',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        },
-        body: JSON.stringify(user)
-      })
-
-      if (!response.ok) {
-        // Se la risposta non è ok, prova a leggere il messaggio di errore
-        const errorText = await response.text()
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
-      }
-
-      return await response.json()
-
-    } catch (error) {
-      throw new Error('Errore di connessione al server: ' + error)
-    }
+  async newUser(user: User): Promise<User> {
+    return this.crud.create(user)
   }
 
-  async editUser(user:User): Promise<User> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.users}`, {
-        method: 'PUT',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        },
-        body: JSON.stringify(user)
-      })
-
-      if (!response.ok) {
-        // Se la risposta non è ok, prova a leggere il messaggio di errore
-        const errorText = await response.text()
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
-      }
-
-      return await response.json()
-
-    } catch (error) {
-      throw new Error('Errore di connessione al server: ' + error)
-    }
+  async editUser(user: User): Promise<User> {
+    return this.crud.update(user)
   }
 
-  async deleteUser(username:string): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.deleteUser}${username}`, {
-        method: 'DELETE',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        }
-      })
-
-      if (!response.ok) {
-        // Se la risposta non è ok, prova a leggere il messaggio di errore
-        const errorText = await response.text()
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
-      }
-
-      return true
-
-    } catch (error) {
-      throw new Error('Errore di connessione al server: ' + error)
-    }
+  async deleteUser(username: string): Promise<boolean> {
+    return this.crud.delete(username)
   }
 
   async getGruppiUtente(): Promise<GruppiUtenti[]> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.gruppiUtente}`, {
-        method: 'GET',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        }
-      })
-
-      if (!response.ok) {
-        // Se la risposta non è ok, prova a leggere il messaggio di errore
-        const errorText = await response.text()
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
-      }
-
-      return await response.json()
-
-    } catch (error) {
-      throw new Error('Errore di connessione al server: ' + error)
-    }
+    return this.gruppiCrud.getAll()
   }
 }
 

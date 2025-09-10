@@ -2,42 +2,30 @@
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="card bg-base-100 shadow-sm">
-      <div class="card-body">
-        <div class="flex flex-col lg:flex-row items-center justify-between space-y-3">
-          <div>
-            <h1 class="text-3xl font-bold text-base-content">Gestione Filtri</h1>
-            <p class="text-base-content/70 mt-1">
-              Gestisci i filtri del sistema - Totale: {{ filtri.length }} filtri
-            </p>
-          </div>
-          <div class="flex items-center gap-3 flex-wrap">
-            <button class="max-md:w-full max-md:block btn btn-primary btn-sm text-white" @click="addNewFiltro">
-              <FaIcon icon="plus" class="mr-2"/>
-              Nuovo Filtro
-            </button>
-            <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm" @click="refreshFiltri">
-              <FaIcon icon="refresh" class="mr-2"/>
-              Aggiorna
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <PageHeader
+      title="Gestione Filtri"
+      :description="`Gestisci i filtri del sistema - Totale: ${filtri.length} filtri`"
+    >
+      <template #actions>
+        <button class="max-md:w-full max-md:block btn btn-primary btn-sm text-white" @click="addNewFiltro">
+          <FaIcon icon="plus" class="mr-2"/>
+          Nuovo Filtro
+        </button>
+        <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm" @click="refreshFiltri">
+          <FaIcon icon="refresh" class="mr-2"/>
+          Aggiorna
+        </button>
+      </template>
+    </PageHeader>
 
     <div class="card bg-base-100 shadow-sm">
       <div class="card-body max-md:p-3">
-        <!-- Messaggio di errore -->
-        <div v-if="errorMessage" class="alert alert-error mb-4">
-          <FaIcon icon="exclamation-triangle" />
-          <span>{{ errorMessage }}</span>
-        </div>
-
-        <!-- Messaggio di successo -->
-        <div v-if="successMessage" class="alert alert-success mb-4">
-          <FaIcon icon="check-circle" />
-          <span>{{ successMessage }}</span>
-        </div>
+        <!-- Messaggi -->
+        <MessageAlerts 
+          :error-message="errorMessage"
+          :success-message="successMessage"
+          class="mb-4"
+        />
 
         <PrimeDataTable
           :data="filtri"
@@ -192,6 +180,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { PrimeDataTable, FaIcon } from '@presenze-in-web-frontend/core-lib'
+import PageHeader from '@/components/PageHeader.vue'
+import MessageAlerts from '@/components/MessageAlerts.vue'
 import { filtriService, type Filtro } from '@/services/filtriService'
 
 const router = useRouter()

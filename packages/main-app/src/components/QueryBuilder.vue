@@ -1,48 +1,30 @@
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="card bg-base-100 shadow-sm">
-      <div class="card-body">
-        <div class="flex flex-col-reverse lg:flex-row lg:items-center lg:justify-between gap-3">
-          <div>
-            <h1 class="text-3xl font-bold text-base-content">
-              {{ isEditMode ? `Modifica ${entityName}` : `Nuovo ${entityName}` }}
-            </h1>
-            <p class="text-base-content/70 mt-1">
-              {{ isEditMode ? `Modifica i dati del ${entityName.toLowerCase()}: ${formData.nome}` : `Inserisci i dati del nuovo ${entityName.toLowerCase()}` }}
-            </p>
-          </div>
-          <div>
-            <button
-              class="btn btn-ghost btn-sm"
-              @click="$emit('go-back')"
-              :disabled="saving"
-            >
-              <FaIcon icon="arrow-left" class="mr-2"/>
-              Indietro
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <PageHeader
+      :title="isEditMode ? `Modifica ${entityName}` : `Nuovo ${entityName}`"
+      :description="isEditMode ? `Modifica i dati del ${entityName.toLowerCase()}: ${formData.codice}` : `Inserisci i dati del nuovo ${entityName.toLowerCase()}`"
+    >
+      <template #actions>
+        <button
+          class="btn btn-ghost btn-sm"
+          @click="$emit('go-back')"
+          :disabled="saving"
+        >
+          <FaIcon icon="arrow-left" class="mr-2"/>
+          Indietro
+        </button>
+      </template>
+    </PageHeader>
 
     <!-- Loading indicator -->
-    <div v-if="loading" class="flex justify-center items-center py-12">
-      <span class="loading loading-spinner loading-lg"></span>
-      <span class="ml-3">Caricamento dati...</span>
-    </div>
+    <LoadingIndicator :loading="loading" message="Caricamento dati..." />
 
-    <!-- Messaggio di errore -->
-    <div v-if="errorMessage" class="alert alert-error">
-      <FaIcon icon="exclamation-triangle" />
-      <span>{{ errorMessage }}</span>
-    </div>
-
-    <!-- Messaggio di successo -->
-    <div v-if="successMessage" class="alert alert-success">
-      <FaIcon icon="check-circle" />
-      <span>{{ successMessage }}</span>
-    </div>
+    <!-- Messaggi -->
+    <MessageAlerts 
+      :error-message="errorMessage"
+      :success-message="successMessage"
+    />
 
     <!-- Form principale -->
     <form v-if="!loading" @submit.prevent="handleSubmit" class="space-y-6">
@@ -52,117 +34,55 @@
         <div class="card-body">
           <div class="lg:flex items-center justify-between gap-3">
             <div class="flex flex-col lg:flex-row lg:items-center gap-3">
-              <!-- Navigazione (solo in modalità modifica) -->
-              <div v-if="isEditMode" class="flex items-center max-md:justify-center space-x-2">
-                <button
-                  type="button"
-                  class="btn btn-primary btn-outline btn-sm"
-                  @click="$emit('navigate-previous')"
-                  :disabled="saving || !hasPrevious"
-                  title="Elemento precedente"
-                >
-                  <FaIcon icon="chevron-left" />
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-primary btn-outline btn-sm"
-                  @click="$emit('navigate-next')"
-                  :disabled="saving || !hasNext"
-                  title="Elemento successivo"
-                >
-                  <FaIcon icon="chevron-right" />
-                </button>
-              </div>
+              <!-- Navigazione -->
+              <NavigationButtons
+                :show-navigation="isEditMode"
+                :disabled="saving"
+                :entity-name="entityName"
+                :navigation-config="navigationConfig as any"
+              />
 
               <!-- Azioni principali -->
-              <button
-                type="submit"
-                class="btn btn-primary btn-sm text-white"
-                :class="{ 'loading': saving }"
-                :disabled="saving || !isFormValid"
-              >
-                <span v-if="saving" class="loading loading-spinner loading-sm"></span>
-                <FaIcon v-if="!saving" icon="save" class="mr-2"/>
-                <span v-if="saving">
-                  {{ isEditMode ? 'Salvataggio...' : 'Creazione...' }}
-                </span>
-                <span v-if="!saving">
-                  {{ isEditMode ? 'Salva' : `Crea ${entityName}` }}
-                </span>
-              </button>
-
-              <button
-                v-if="isEditMode"
-                type="button"
-                class="btn btn-primary btn-outline btn-sm"
-                @click="duplicateCurrent"
-                :disabled="saving"
-              >
-                <FaIcon icon="copy" class="mr-2"/>
-                Duplica
-              </button>
-
-              <button
-                v-if="isEditMode"
-                type="button"
-                class="btn btn-error btn-outline btn-sm"
-                @click="deleteCurrent"
-                :disabled="saving"
-              >
-                <FaIcon icon="trash" class="mr-2"/>
-                Elimina
-              </button>
-            </div>
-
-            <div class="max-md:mt-3">
-              <button
-                type="button"
-                class="max-md:block max-md:w-full btn btn-ghost btn-sm"
-                @click="resetForm"
-                :disabled="saving"
-              >
-                <FaIcon icon="undo" class="mr-2"/>
-                Reset
-              </button>
+              <ActionButtons
+                :entity-name="entityName"
+                :is-edit-mode="isEditMode"
+                :saving="saving"
+                :is-form-valid="isFormValid"
+                @duplicate="duplicateCurrent"
+                @delete="deleteCurrent"
+                @reset="resetForm"
+              />
             </div>
           </div>
         </div>
       </div>
 
       <!-- Sezione Informazioni Base -->
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center">
-              <div class="bg-primary/10 rounded-lg p-2 mr-3">
-                <FaIcon :icon="entityIcon" class="text-primary text-lg" />
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-base-content">Informazioni Base</h3>
-                <p class="text-sm text-base-content/70">Dati principali del {{ entityName.toLowerCase() }}</p>
-              </div>
-            </div>
-          </div>
+      <SectionCard
+        title="Informazioni Base"
+        :description="`Dati principali del ${entityName.toLowerCase()}`"
+        :icon="entityIcon"
+      >
 
           <div class="grid grid-cols-1 gap-4">
-            <!-- Nome/Codice -->
+            <!-- Codice -->
             <div class="form-control">
               <label class="label">
-                <span class="label-text font-medium">Nome *</span>
+                <span class="label-text font-medium">Codice *</span>
               </label>
               <input
                 type="text"
-                v-model="formData.nome"
-                :class="{ 'input-error': submitted && !formData.nome }"
+                v-model="formData.codice"
+                :class="{ 'input-error': submitted && !formData.codice }"
                 class="input input-bordered w-full"
-                placeholder="Inserisci nome"
+                placeholder="Inserisci codice"
                 required
                 maxlength="50"
               />
               <div class="label">
-                <span class="label-text-alt">{{ formData.nome.length }}/50 caratteri</span>
-                <span v-if="submitted && !formData.nome" class="label-text-alt text-error">
-                  Nome richiesto
+                <span class="label-text-alt">{{ formData.codice.length }}/50 caratteri</span>
+                <span v-if="submitted && !formData.codice" class="label-text-alt text-error">
+                  Codice richiesto
                 </span>
               </div>
             </div>
@@ -187,198 +107,215 @@
                 </span>
               </div>
             </div>
+
+            <!-- Formula -->
+            <div v-if="showQueryBuilder" class="form-control">
+              <label class="label">
+                <span class="label-text font-medium">Formula *</span>
+              </label>
+              <textarea
+                v-model="formData.formula"
+                :class="{ 'textarea-error': submitted && !formData.formula }"
+                class="textarea textarea-bordered w-full h-20 resize-none font-mono text-sm"
+                placeholder="Inserisci la formula o usa il costruttore sotto"
+                required
+              ></textarea>
+              <div class="label">
+                <span class="label-text-alt">Usa il costruttore sotto per generare la formula automaticamente</span>
+                <span v-if="submitted && !formData.formula" class="label-text-alt text-error">
+                  Formula richiesta
+                </span>
+              </div>
+            </div>
           </div>
 
           <div class="text-sm text-base-content/60 mt-4">
             * Campi obbligatori
           </div>
-        </div>
-      </div>
+      </SectionCard>
 
-      <!-- Sezione Query Builder (solo per Accessi e Filtri) -->
-      <div v-if="showQueryBuilder" class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center">
-              <div class="bg-primary/10 rounded-lg p-2 mr-3">
-                <FaIcon icon="code" class="text-primary text-lg" />
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold text-base-content">Costruttore Query</h3>
-                <p class="text-sm text-base-content/70">Costruisci le condizioni per la query</p>
-              </div>
-            </div>
-            <div class="flex gap-2">
-              <button
-                type="button"
-                class="btn btn-primary btn-outline btn-sm"
-                @click="addCondition"
-              >
-                <FaIcon icon="plus" class="mr-1"/>
-                Aggiungi Condizione
-              </button>
-              <button
-                type="button"
-                class="btn btn-warning btn-outline btn-sm"
-                @click="clearConditions"
-                :disabled="queryConditions.length === 0"
-              >
-                <FaIcon icon="trash" class="mr-1"/>
-                Pulisci
-              </button>
-            </div>
-          </div>
+      <!-- Sezione Query Builder -->
+      <SectionCard
+        v-if="showQueryBuilder"
+        title="Costruttore Formula"
+        description="Costruisci una condizione e inseriscila nella formula"
+        icon="code"
+      >
 
-          <!-- Area delle condizioni -->
-          <div class="bg-base-200 rounded-lg p-4 min-h-[200px]">
-            <div class="text-sm font-medium text-base-content/70 mb-3">Condizioni:</div>
+          <!-- Singolo Selettore Formula -->
+          <div class="bg-base-200 rounded-lg p-4 mb-4">
+            <div class="text-sm font-medium text-base-content/70 mb-3">Costruisci Condizione:</div>
 
-            <div v-if="queryConditions.length === 0" class="text-center py-8 text-base-content/60">
-              <FaIcon icon="code" class="text-3xl mb-2"/>
-              <p>Nessuna condizione definita</p>
-              <p class="text-xs">Clicca "Aggiungi Condizione" per iniziare</p>
-            </div>
-
-            <div v-else class="space-y-3">
-              <div
-                v-for="(condition, index) in queryConditions"
-                :key="index"
-                class="bg-base-100 border border-base-300 rounded-lg p-3"
-              >
-                <div class="flex items-center gap-3 flex-wrap">
-                  <!-- Operatore logico (AND/OR) -->
-                  <div v-if="index > 0" class="form-control w-auto">
-                    <select
-                      v-model="condition.logicOperator"
-                      class="select select-bordered select-sm w-20"
-                    >
-                      <option value="AND">AND</option>
-                      <option value="OR">OR</option>
-                    </select>
-                  </div>
-
-                  <!-- Parentesi aperta -->
-                  <div class="form-control w-auto">
-                    <select
-                      v-model="condition.openParen"
-                      class="select select-bordered select-sm w-16"
-                    >
-                      <option value="">-</option>
-                      <option value="(">(</option>
-                    </select>
-                  </div>
-
-                  <!-- Campo -->
-                  <div class="form-control flex-1 min-w-[150px]">
-                    <select
-                      v-model="condition.field"
-                      class="select select-bordered select-sm"
-                      @change="onFieldChange(condition, $event)"
-                    >
-                      <option value="">Seleziona Campo</option>
-                      <option
-                        v-for="field in availableFields"
-                        :key="field.value"
-                        :value="field.value"
-                      >
-                        {{ field.label }}
-                      </option>
-                    </select>
-                  </div>
-
-                  <!-- Operatore -->
-                  <div class="form-control w-auto min-w-[120px]">
-                    <select
-                      v-model="condition.operator"
-                      class="select select-bordered select-sm"
-                    >
-                      <option value="">Operatore</option>
-                      <option
-                        v-for="op in availableOperators"
-                        :key="op.value"
-                        :value="op.value"
-                      >
-                        {{ op.label }}
-                      </option>
-                    </select>
-                  </div>
-
-                  <!-- Valore (se necessario) -->
-                  <div
-                    v-if="needsValue(condition.operator)"
-                    class="form-control flex-1 min-w-[150px]"
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+              <!-- Campo -->
+              <div class="md:col-span-3">
+                <label class="label">
+                  <span class="label-text text-xs">Campo</span>
+                </label>
+                <select
+                  v-model="currentCondition.field"
+                  class="select select-bordered select-sm w-full"
+                  @change="onFieldChange"
+                >
+                  <option value="">Seleziona Campo</option>
+                  <option
+                    v-for="field in availableFields"
+                    :key="field.value"
+                    :value="field.value"
                   >
-                    <select
-                      v-if="condition.fieldData && condition.field"
-                      v-model="condition.value"
-                      class="select select-bordered select-sm"
-                      :class="{ 'loading': condition.loadingValues }"
+                    {{ field.label }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Operatore -->
+              <div class="md:col-span-2">
+                <label class="label">
+                  <span class="label-text text-xs">Operatore</span>
+                </label>
+                <select
+                  v-model="currentCondition.operator"
+                  class="select select-bordered select-sm w-full"
+                  @change="onOperatorChange"
+                >
+                  <option value="">Operatore</option>
+                  <option
+                    v-for="op in availableOperators"
+                    :key="op.value"
+                    :value="op.value"
+                  >
+                    {{ op.label }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Valori -->
+              <div class="md:col-span-5">
+                <label class="label">
+                  <span class="label-text text-xs">
+                    {{ getValueLabel(currentCondition.operator) }}
+                  </span>
+                </label>
+
+                <!-- Single Value -->
+                <div v-if="needsSingleValue(currentCondition.operator)">
+                  <select
+                    v-if="currentCondition.fieldData && currentCondition.field"
+                    v-model="currentCondition.value"
+                    class="select select-bordered select-sm w-full"
+                    :class="{ 'loading': currentCondition.loadingValues }"
+                  >
+                    <option value="">Seleziona Valore</option>
+                    <option
+                      v-for="value in currentCondition.availableValues || []"
+                      :key="value"
+                      :value="value"
                     >
-                      <option value="">Seleziona Valore</option>
-                      <option
-                        v-for="value in condition.availableValues || []"
-                        :key="value"
-                        :value="value"
-                      >
-                        {{ value }}
-                      </option>
-                    </select>
+                      {{ value }}
+                    </option>
+                  </select>
+                  <input
+                    v-else
+                    type="text"
+                    v-model="currentCondition.value"
+                    placeholder="Valore"
+                    class="input input-bordered input-sm w-full"
+                  />
+                </div>
+
+                <!-- Multiple Values (IN, NOT IN) -->
+                <div v-else-if="needsMultipleValues(currentCondition.operator)">
+                  <select
+                    v-if="currentCondition.fieldData && currentCondition.field"
+                    v-model="currentCondition.values"
+                    multiple
+                    class="select select-bordered select-sm w-full h-20"
+                    :class="{ 'loading': currentCondition.loadingValues }"
+                  >
+                    <option
+                      v-for="value in currentCondition.availableValues || []"
+                      :key="value"
+                      :value="value"
+                    >
+                      {{ value }}
+                    </option>
+                  </select>
+                  <div v-else class="space-y-1">
                     <input
-                      v-else
+                      v-for="(_, idx) in currentCondition.values"
+                      :key="idx"
                       type="text"
-                      v-model="condition.value"
-                      placeholder="Valore"
-                      class="input input-bordered input-sm"
+                      v-model="currentCondition.values[idx]"
+                      :placeholder="`Valore ${idx + 1}`"
+                      class="input input-bordered input-sm w-full"
                     />
-                  </div>
-
-                  <!-- Parentesi chiusa -->
-                  <div class="form-control w-auto">
-                    <select
-                      v-model="condition.closeParen"
-                      class="select select-bordered select-sm w-16"
+                    <button
+                      type="button"
+                      class="btn btn-ghost btn-xs"
+                      @click="addValueInput"
                     >
-                      <option value="">-</option>
-                      <option value=")">)</option>
-                    </select>
+                      <FaIcon icon="plus" class="mr-1"/>
+                      Aggiungi valore
+                    </button>
                   </div>
+                </div>
 
-                  <!-- Rimuovi condizione -->
-                  <button
-                    type="button"
-                    class="btn btn-error btn-outline btn-sm btn-circle"
-                    @click="removeCondition(index)"
-                    title="Rimuovi condizione"
-                  >
-                    <FaIcon icon="times" class="text-xs"/>
-                  </button>
+                <!-- Range Values (BETWEEN) -->
+                <div v-else-if="needsRangeValues(currentCondition.operator)" class="grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    v-model="currentCondition.valueMin"
+                    placeholder="Da"
+                    class="input input-bordered input-sm"
+                  />
+                  <input
+                    type="text"
+                    v-model="currentCondition.valueMax"
+                    placeholder="A"
+                    class="input input-bordered input-sm"
+                  />
                 </div>
               </div>
-            </div>
-          </div>
 
-          <!-- Query generata -->
-          <div class="mt-4">
-            <label class="label">
-              <span class="label-text font-medium">Query Generata:</span>
-            </label>
-            <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm">
-              <div class="flex items-start justify-between">
-                <code>{{ generatedQuery || 'Aggiungi condizioni per generare la query' }}</code>
+              <!-- Pulsante Inserisci -->
+              <div class="md:col-span-2">
                 <button
-                  v-if="generatedQuery"
                   type="button"
-                  class="btn btn-ghost btn-xs text-green-400 hover:text-green-300"
-                  @click="copyQuery"
-                  title="Copia query"
+                  class="btn btn-primary btn-sm w-full"
+                  @click="insertCondition"
+                  :disabled="!canInsertCondition"
                 >
-                  <FaIcon icon="copy"/>
+                  <FaIcon icon="plus" class="mr-1"/>
+                  Inserisci
                 </button>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+
+          <!-- Recap Formula Editabile -->
+          <div class="bg-base-200 rounded-lg p-4">
+            <div class="text-sm font-medium text-base-content/70 mb-3">Anteprima Formula:</div>
+            <div class="form-control">
+              <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm min-h-[100px] border">
+                <div class="flex items-start justify-between">
+                  <pre class="whitespace-pre-wrap flex-1">{{ formData.formula || 'Nessuna formula definita. Usa il costruttore sopra per generarla o modifica il campo Formula nella sezione Informazioni Base.' }}</pre>
+                  <button
+                    v-if="formData.formula"
+                    type="button"
+                    class="btn btn-ghost btn-xs text-green-400 hover:text-green-300 ml-2"
+                    @click="clearFormula"
+                    title="Pulisci formula"
+                  >
+                    <FaIcon icon="trash"/>
+                  </button>
+                </div>
+              </div>
+              <div class="label">
+                <span class="label-text-alt">La formula viene aggiornata automaticamente quando inserisci condizioni</span>
+              </div>
+            </div>
+          </div>
+      </SectionCard>
     </form>
 
     <!-- Modale di conferma eliminazione -->
@@ -386,7 +323,7 @@
       <div class="modal-box">
         <h3 class="font-bold text-lg mb-4">Conferma eliminazione</h3>
         <p class="mb-4">
-          Sei sicuro di voler eliminare {{ entityName.toLowerCase() }} <strong>{{ formData.nome }}</strong>?
+          Sei sicuro di voler eliminare {{ entityName.toLowerCase() }} <strong>{{ formData.codice }}</strong>?
         </p>
         <p class="text-sm text-base-content/70 mb-6">
           Questa azione è irreversibile.
@@ -416,9 +353,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
+import PageHeader from './PageHeader.vue'
+import MessageAlerts from './MessageAlerts.vue'
+import LoadingIndicator from './LoadingIndicator.vue'
+import NavigationButtons from './NavigationButtons.vue'
+import ActionButtons from './ActionButtons.vue'
+import SectionCard from './SectionCard.vue'
 import { dipendenteService, type CampoDipendente } from '../services/dipendenteService'
+
+// Import navigation config type
+type NavigationConfig = {
+  fetchAll: () => Promise<unknown[]>
+  getEntityId: (entity: unknown) => string
+  basePath: string
+  sortFn?: (a: unknown, b: unknown) => number
+}
 
 // Props
 interface Props {
@@ -429,15 +380,13 @@ interface Props {
   loading?: boolean
   saving?: boolean
   initialData?: {
-    nome: string
+    codice: string
     descrizione: string
     formula: string
   }
-  // Navigation props
-  hasPrevious?: boolean
-  hasNext?: boolean
+  // Navigation configuration
+  navigationConfig?: NavigationConfig
 }
-const isBuilding = ref(false)
 
 const props = withDefaults(defineProps<Props>(), {
   showQueryBuilder: true,
@@ -445,29 +394,24 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false,
   saving: false,
   initialData: () => ({
-    nome: '',
+    codice: '',
     descrizione: '',
     formula: ''
-  }),
-  hasPrevious: false,
-  hasNext: false
+  })
 })
 
 // Emits
 const emit = defineEmits<{
   'go-back': []
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  'save': [data: any]
+  'save': [data: { codice: string; descrizione: string; formula: string }]
   'delete': []
   'duplicate': []
   'reset': []
-  'navigate-previous': []
-  'navigate-next': []
 }>()
 
 // State
 const formData = ref({
-  nome: '',
+  codice: '',
   descrizione: '',
   formula: ''
 })
@@ -478,178 +422,205 @@ const successMessage = ref('')
 const showDeleteModal = ref(false)
 const deleting = ref(false)
 
-// Query Builder State
-interface QueryCondition {
-  logicOperator: string
-  openParen: string
+interface CurrentCondition {
   field: string
   operator: string
   value: string
-  closeParen: string
-  fieldData?: {
-    tabella: string
-    campo: string
-    tipologia: string
-    dimensione: number
-  }
+  values: string[]
+  valueMin: string
+  valueMax: string
+  fieldData?: CampoDipendente
   availableValues?: string[]
   loadingValues?: boolean
 }
 
-const queryConditions = ref<QueryCondition[]>([])
+const currentCondition = ref<CurrentCondition>({
+  field: '',
+  operator: '',
+  value: '',
+  values: [''],
+  valueMin: '',
+  valueMax: '',
+  availableValues: [],
+  loadingValues: false
+})
 
-// Campi dinamici dal backend
-const availableFields = ref<Array<{ label: string, value: string, data: CampoDipendente }>>([])
-const loadingFields = ref(false)
-const fieldsError = ref('')
+// Dati per Query Builder
+const availableFields = ref<Array<{ value: string; label: string }>>([])
 
-// Operatori disponibili (statici)
-const availableOperators = ref([
-  { label: '= (uguale)', value: '=' },
-  { label: '!= (diverso)', value: '!=' },
-  { label: '< (minore)', value: '<' },
-  { label: '<= (minore uguale)', value: '<=' },
-  { label: '> (maggiore)', value: '>' },
-  { label: '>= (maggiore uguale)', value: '>=' },
-  { label: 'LIKE (contiene)', value: 'LIKE' },
-  { label: 'NOT LIKE (non contiene)', value: 'NOT LIKE' },
-  { label: 'IS NULL (è nullo)', value: 'IS NULL' },
-  { label: 'IS NOT NULL (non è nullo)', value: 'IS NOT NULL' },
-  { label: 'IN (in lista)', value: 'IN' },
-  { label: 'NOT IN (non in lista)', value: 'NOT IN' },
-  { label: 'BETWEEN (tra)', value: 'BETWEEN' }
-])
+const availableOperators = [
+  { value: '=', label: '= (uguale)' },
+  { value: '!=', label: '!= (diverso)' },
+  { value: '<>', label: '<> (diverso)' },
+  { value: '>', label: '> (maggiore)' },
+  { value: '>=', label: '>= (maggiore uguale)' },
+  { value: '<', label: '< (minore)' },
+  { value: '<=', label: '<= (minore uguale)' },
+  { value: 'LIKE', label: 'LIKE (contiene)' },
+  { value: 'NOT LIKE', label: 'NOT LIKE (non contiene)' },
+  { value: 'IS NULL', label: 'IS NULL (vuoto)' },
+  { value: 'IS NOT NULL', label: 'IS NOT NULL (non vuoto)' },
+  { value: 'IN', label: 'IN (in lista)' },
+  { value: 'NOT IN', label: 'NOT IN (non in lista)' },
+  { value: 'BETWEEN', label: 'BETWEEN (tra valori)' }
+]
 
 // Computed
 const isFormValid = computed(() => {
-  return formData.value.nome.trim() !== '' &&
-         formData.value.descrizione.trim() !== ''
+  const baseValid = formData.value.codice.trim() !== '' &&
+                    formData.value.descrizione.trim() !== ''
+
+  if (props.showQueryBuilder) {
+    return baseValid && formData.value.formula.trim() !== ''
+  }
+
+  return baseValid
 })
 
-const generatedQuery = computed(() => {
-  if (queryConditions.value.length === 0) return ''
+const canInsertCondition = computed(() => {
+  const c = currentCondition.value
+  if (!c.field || !c.operator) return false
 
-  let query = ''
-  queryConditions.value.forEach((condition, index) => {
-    if (index > 0 && condition.logicOperator) {
-      query += ` ${condition.logicOperator} `
-    }
+  if (needsSingleValue(c.operator)) {
+    return c.value.trim() !== ''
+  } else if (needsMultipleValues(c.operator)) {
+    return c.values.some(v => v.trim() !== '')
+  } else if (needsRangeValues(c.operator)) {
+    return c.valueMin.trim() !== '' && c.valueMax.trim() !== ''
+  }
 
-    if (condition.openParen) {
-      query += condition.openParen
-    }
-
-    if (condition.field && condition.operator) {
-      query += `${condition.field} ${condition.operator}`
-
-      if (needsValue(condition.operator) && condition.value) {
-        // Aggiunge apici per i valori string
-        const formattedValue = formatValueForQuery(condition.value, condition.fieldData?.tipologia)
-        query += ` ${formattedValue}`
-      }
-    }
-
-    if (condition.closeParen) {
-      query += condition.closeParen
-    }
-  })
-
-  return query.trim()
+  return true
 })
 
 // Methods
-const needsValue = (operator: string): boolean => {
-  return !['IS NULL', 'IS NOT NULL'].includes(operator)
+const needsSingleValue = (operator: string): boolean => {
+  return ['=', '!=', '<>', '>', '>=', '<', '<=', 'LIKE', 'NOT LIKE'].includes(operator)
 }
 
-// Formatta il valore per la query aggiungendo apici se necessario
-const formatValueForQuery = (value: string, tipologia?: string): string => {
-  if (!tipologia || tipologia === 'int') {
-    // Per i numeri non servono apici
-    return value
-  }
-
-  if (tipologia === 'string') {
-    // Per le stringhe aggiunge apici singoli
-    return `'${value.replace(/'/g, "''")}'`
-  }
-
-  // Default: restituisce il valore così com'è
-  return value
+const needsMultipleValues = (operator: string): boolean => {
+  return ['IN', 'NOT IN'].includes(operator)
 }
 
-const addCondition = () => {
-  isBuilding.value = true
-  queryConditions.value.push({
-    logicOperator: queryConditions.value.length > 0 ? 'AND' : '',
-    openParen: '',
+const needsRangeValues = (operator: string): boolean => {
+  return operator === 'BETWEEN'
+}
+
+const getValueLabel = (operator: string): string => {
+  if (needsMultipleValues(operator)) return 'Valori (seleziona multipli)'
+  if (needsRangeValues(operator)) return 'Intervallo'
+  if (['IS NULL', 'IS NOT NULL'].includes(operator)) return 'Nessun valore richiesto'
+  return 'Valore'
+}
+
+const addValueInput = () => {
+  currentCondition.value.values.push('')
+}
+
+const onFieldChange = async () => {
+  const condition = currentCondition.value
+  condition.availableValues = []
+  condition.loadingValues = true
+
+  try {
+    const fields = await dipendenteService.getCampiDipendente()
+    const field = fields.find(f => `${f.tabella}.${f.campo}` === condition.field)
+
+    if (field) {
+      condition.fieldData = field
+      const values = await dipendenteService.getValoriCampo(field.tabella, field.campo)
+      condition.availableValues = values
+    }
+  } catch (error) {
+    console.error('Errore nel caricamento valori campo:', error)
+  } finally {
+    condition.loadingValues = false
+  }
+}
+
+const onOperatorChange = () => {
+  const c = currentCondition.value
+  c.value = ''
+  c.values = ['']
+  c.valueMin = ''
+  c.valueMax = ''
+}
+
+const insertCondition = () => {
+  const c = currentCondition.value
+  let conditionString = ''
+
+  if (needsSingleValue(c.operator)) {
+    const value = c.value.includes(' ') ? `'${c.value}'` : c.value
+    conditionString = `${c.field} ${c.operator} ${value}`
+  } else if (needsMultipleValues(c.operator)) {
+    const values = c.values.filter(v => v.trim() !== '').map(v => `'${v}'`).join(', ')
+    conditionString = `${c.field} ${c.operator} (${values})`
+  } else if (needsRangeValues(c.operator)) {
+    conditionString = `${c.field} ${c.operator} '${c.valueMin}' AND '${c.valueMax}'`
+  } else {
+    conditionString = `${c.field} ${c.operator}`
+  }
+
+  const currentFormula = formData.value.formula
+  const newFormula = currentFormula
+    ? `${currentFormula} AND ${conditionString}`
+    : conditionString
+
+  formData.value.formula = newFormula
+
+  resetCurrentCondition()
+}
+
+const resetCurrentCondition = () => {
+  currentCondition.value = {
     field: '',
     operator: '',
     value: '',
-    closeParen: '',
-    fieldData: undefined,
+    values: [''],
+    valueMin: '',
+    valueMax: '',
     availableValues: [],
     loadingValues: false
-  })
-}
-
-const removeCondition = (index: number) => {
-  isBuilding.value = true
-  queryConditions.value.splice(index, 1)
-
-  // Se rimuoviamo la prima condizione togliamo l'operatore logico dalla nuova prima
-  if (index === 0 && queryConditions.value.length > 0) {
-    queryConditions.value[0].logicOperator = ''
   }
 }
 
-const clearConditions = () => {
-  isBuilding.value = true
-  queryConditions.value = []
+const clearFormula = () => {
+  formData.value.formula = ''
 }
 
-const copyQuery = async () => {
-  if (generatedQuery.value) {
-    try {
-      await navigator.clipboard.writeText(generatedQuery.value)
-      successMessage.value = 'Query copiata negli appunti'
-      setTimeout(() => {
-        successMessage.value = ''
-      }, 2000)
-    } catch (error) {
-      console.log(error)
-      errorMessage.value = 'Errore nella copia della query'
-    }
+const loadAvailableFields = async () => {
+  try {
+    const fields = await dipendenteService.getCampiDipendente()
+    availableFields.value = fields.map(field => ({
+      value: `${field.tabella}.${field.campo}`,
+      label: `${field.tabella}.${field.campo} (${field.tipologia})`
+    }))
+  } catch (error) {
+    console.error('Errore nel caricamento campi:', error)
+    errorMessage.value = 'Errore nel caricamento dei campi disponibili'
   }
+}
+
+const resetForm = () => {
+  formData.value = { ...props.initialData }
+  resetCurrentCondition()
+  submitted.value = false
+  errorMessage.value = ''
+  successMessage.value = ''
+  emit('reset')
 }
 
 const handleSubmit = () => {
   submitted.value = true
+  errorMessage.value = ''
+  successMessage.value = ''
 
   if (!isFormValid.value) {
     errorMessage.value = 'Compila tutti i campi obbligatori'
     return
   }
 
-  const submitData = {
-    ...formData.value,
-    formula: generatedQuery.value || formData.value.formula
-  }
-
-  emit('save', submitData)
-}
-
-const resetForm = () => {
-  formData.value = {
-    nome: '',
-    descrizione: '',
-    formula: ''
-  }
-  queryConditions.value = []
-  submitted.value = false
-  errorMessage.value = ''
-  successMessage.value = ''
-  emit('reset')
+  emit('save', { ...formData.value })
 }
 
 const duplicateCurrent = () => {
@@ -662,260 +633,19 @@ const deleteCurrent = () => {
 
 const cancelDelete = () => {
   showDeleteModal.value = false
-  deleting.value = false
 }
 
-const confirmDelete = async () => {
+const confirmDelete = () => {
   deleting.value = true
   emit('delete')
-  deleting.value = false
-  showDeleteModal.value = false
 }
 
-// Carica i campi dinamici
-const loadCampiDipendente = async () => {
-  loadingFields.value = true
-  fieldsError.value = ''
-
-  try {
-    const campi = await dipendenteService.getCampiDipendente()
-
-    availableFields.value = campi.map(campo => ({
-      label: `${campo.tabella}.${campo.campo}`,
-      value: `${campo.tabella}.${campo.campo}`,
-      data: campo
-    }))
-
-  } catch (error) {
-    console.error('Errore nel caricamento dei campi:', error)
-    fieldsError.value = 'Errore nel caricamento dei campi disponibili'
-  } finally {
-    loadingFields.value = false
-  }
-}
-
-// Gestisce il cambio di campo
-const onFieldChange = async (condition: QueryCondition, event: Event) => {
-  const target = event.target as HTMLSelectElement
-  const selectedField = availableFields.value.find(f => f.value === target.value)
-
-  if (selectedField) {
-    condition.fieldData = selectedField.data
-    condition.value = ''
-    condition.availableValues = []
-
-    // Carica i valori per questo campo
-    await loadValoriCampo(condition)
-  } else {
-    condition.fieldData = undefined
-    condition.availableValues = []
-  }
-}
-
-// Carica i valori disponibili per un campo
-const loadValoriCampo = async (condition: QueryCondition) => {
-  if (!condition.fieldData) return
-
-  condition.loadingValues = true
-
-  try {
-    const valori = await dipendenteService.getValoriCampo(
-      condition.fieldData.tabella,
-      condition.fieldData.campo
-    )
-    condition.availableValues = valori
-
-  } catch (error) {
-    console.error('Errore nel caricamento dei valori:', error)
-    condition.availableValues = []
-  } finally {
-    condition.loadingValues = false
-  }
-}
-
-// Inizializza i dati
+// Lifecycle
 onMounted(async () => {
-  await loadCampiDipendente()
+  formData.value = { ...props.initialData }
 
-  if (props.initialData) {
-    formData.value = { ...props.initialData }
-
-    // Se c'è una formula prova a parsarla
-    if (props.initialData.formula && props.initialData.formula.trim() !== '') {
-      parseFormulaToConditions(props.initialData.formula)
-    }
+  if (props.showQueryBuilder) {
+    await loadAvailableFields()
   }
 })
-
-const parseFormulaToConditions = (formula: string) => {
-  if (!formula || formula.trim() === '') return
-
-  isBuilding.value = false
-  queryConditions.value = []
-
-  try {
-    // Rimuove spazi extra e divide per operatori logici mantenendo gli operatori
-    const tokens = formula.split(/\s+(AND|OR)\s+/i)
-
-    for (let i = 0; i < tokens.length; i += 2) {
-      const conditionText = tokens[i]?.trim()
-      if (!conditionText) continue
-
-      const logicOp = i > 0 ? tokens[i - 1] : ''
-
-      // Prova a parsare la singola condizione
-      const condition = parseCondition(conditionText, logicOp)
-      queryConditions.value.push(condition)
-    }
-
-    // Se non siamo riusciti a parsare nulla aggiunge una condizione vuota
-    if (queryConditions.value.length === 0) {
-      queryConditions.value.push({
-        logicOperator: '',
-        openParen: '',
-        field: '',
-        operator: '',
-        value: '',
-        closeParen: '',
-        fieldData: undefined,
-        availableValues: [],
-        loadingValues: false
-      })
-    }
-
-  } catch (error) {
-    console.error('Errore nel parsing:', error)
-    // Fallback aggiunge una condizione vuota
-    queryConditions.value.push({
-      logicOperator: '',
-      openParen: '',
-      field: '',
-      operator: '',
-      value: '',
-      closeParen: '',
-      fieldData: undefined,
-      availableValues: [],
-      loadingValues: false
-    })
-  } finally {
-    setTimeout(() => {
-      isBuilding.value = true
-    }, 100)
-  }
-}
-
-// Funzione helper per parsare una singola condizione
-const parseCondition = (conditionText: string, logicOp: string) => {
-  // Cerca parentesi
-  const openParen = conditionText.match(/^(\(+)/)?.[1] || ''
-  const closeParen = conditionText.match(/(\)+)$/)?.[1] || ''
-
-  // Rimuove parentesi per analizzare il contenuto
-  const cleanText = conditionText.replace(/^(\(+)|(\)+)$/g, '').trim()
-
-  // Cerca pattern campo, operatore, valore
-  const match = cleanText.match(/^(.+?)\s+(=|!=|<>|<=|>=|<|>|LIKE|NOT LIKE|IS NULL|IS NOT NULL|IN|NOT IN|BETWEEN)\s*(.*)$/i)
-
-  if (match) {
-    const [, field, operator, value] = match
-    return {
-      logicOperator: logicOp,
-      openParen,
-      field: field.trim(),
-      operator: operator.trim(),
-      value: value?.trim() || '',
-      closeParen
-    }
-  }
-
-  // Se non riesce a parsare, restituisce una condizione vuota
-  return {
-    logicOperator: logicOp,
-    openParen,
-    field: '',
-    operator: '',
-    value: '',
-    closeParen,
-    fieldData: undefined,
-    availableValues: [],
-    loadingValues: false
-  }
-}
-
-// Watch per aggiornare la formula quando cambia la query
-watch(generatedQuery, (newQuery) => {
-  if (isBuilding.value) {
-    formData.value.formula = newQuery
-  }
-}, { immediate: false })
-
-watch(() => props.initialData, (newData) => {
-  if (newData) {
-    formData.value = { ...newData }
-    if (newData.formula && newData.formula.trim() !== '') {
-      parseFormulaToConditions(newData.formula)
-    }
-  }
-}, { deep: true, immediate: true })
-
 </script>
-
-<style scoped>
-.input-error,
-.textarea-error,
-.select-error {
-  border-color: rgb(var(--error));
-  background-color: rgb(var(--error) / 0.05);
-}
-
-.input-error:focus,
-.textarea-error:focus,
-.select-error:focus {
-  outline: 2px solid rgb(var(--error));
-  outline-offset: 2px;
-  border-color: rgb(var(--error));
-}
-
-.bg-primary\/10 {
-  background-color: rgb(var(--primary) / 0.1);
-}
-
-.text-primary {
-  color: rgb(var(--primary));
-}
-
-.card {
-  animation: slideInUp 0.6s ease-out;
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.modal-box {
-  animation: scaleIn 0.3s ease-out;
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-code {
-  word-break: break-all;
-  white-space: pre-wrap;
-}
-</style>
