@@ -22,7 +22,7 @@
     <LoadingIndicator :loading="loading" message="Caricamento dati gruppo..." />
 
     <!-- Messaggi -->
-    <MessageAlerts 
+    <MessageAlerts
       :error-message="errorMessage"
       :success-message="successMessage"
     />
@@ -229,7 +229,7 @@ const gruppoId = computed(() => route.params.id as string)
 const gruppoNavigationConfig = {
   fetchAll: async () => {
     const response = await gruppiUtenteService.getGruppiUtente()
-    return response.listaGruppi || []
+    return response || []
   },
   getEntityId: (gruppo: unknown) => (gruppo as { codice: string }).codice,
   basePath: '/app/gruppi-utente'
@@ -297,8 +297,8 @@ const loadGruppoData = async () => {
 
     // Carica il gruppo dal servizio
     const response = await gruppiUtenteService.getGruppiUtente()
-    if (response.listaGruppi) {
-      gruppoData = response.listaGruppi.find(gruppo => gruppo.codice === gruppoId.value)
+    if (response) {
+      gruppoData = response.find(gruppo => gruppo.codice === gruppoId.value)
     }
 
     // Se non trovato nella lista, prova con i dati del router state
