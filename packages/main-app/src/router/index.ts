@@ -273,10 +273,6 @@ const router = createRouter({
       component: MainLayout,
       meta: { requiresAuth: true },
       children: [
-        {
-          path: '',
-          redirect: '/app/dashboard',
-        },
         ...appRoutes,
       ],
     },
@@ -300,6 +296,12 @@ router.beforeEach(async (to, from, next) => {
 
   // Se vai al login ma sei già autenticato
   if (to.path === '/login' && authStore.isAuthenticated) {
+    next('/app/dashboard')
+    return
+  }
+
+  // Se vai a /app/ senza sottopercorso, reindirizza a dashboard
+  if (to.path === '/app' || to.path === '/app/') {
     next('/app/dashboard')
     return
   }

@@ -14,16 +14,13 @@
     :success-message="successMessage"
     :error-message="errorMessage"
     :initial-data="initialData"
-    :has-previous="hasPrevious"
-    :has-next="hasNext"
+    :navigation-config="navigationConfig"
     @go-back="goBack"
     @save="handleSave"
     @delete="handleDelete"
     @duplicate="handleDuplicate"
     @reset="handleReset"
     @clear-messages="clearMessages"
-    @navigate-previous="navigateToPrevious"
-    @navigate-next="navigateToNext"
   />
 </template>
 
@@ -49,15 +46,18 @@ const initialData = ref({
 })
 
 // Navigation state
-const previousAccesso = ref<{ codice: string } | null>(null)
-const nextAccesso = ref<{ codice: string } | null>(null)
-const allAccessi = ref<{ codice: string }[]>([])
-
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
 const accessoId = computed(() => route.params.id as string)
-const hasPrevious = computed(() => previousAccesso.value !== null)
-const hasNext = computed(() => nextAccesso.value !== null)
+
+// Navigation configuration
+const navigationConfig = {
+  fetchAll: async () => {
+    return await accessiService.getTabAccessi()
+  },
+  getEntityId: (entity: unknown) => (entity as Accesso).codice,
+  basePath: '/app/accessi'
+}
 
 // Methods
 const clearMessages = () => {
@@ -122,64 +122,6 @@ const goBack = () => {
   router.push('/app/accessi')
 }
 
-// Navigation methods
-const navigateToPrevious = () => {
-  if (previousAccesso.value) {
-    router.push(`/app/accessi/${previousAccesso.value.codice}/edit`)
-  }
-}
-
-const navigateToNext = () => {
-  if (nextAccesso.value) {
-    router.push(`/app/accessi/${nextAccesso.value.codice}/edit`)
-  }
-}
-
-// Navigazione accessi
-const loadAdjacentAccessi = async () => {
-  if (!isEditMode.value) return
-
-  try {
-    // Carica tutti gli accessi se non già caricati
-    if (allAccessi.value.length === 0) {
-      const response = await accessiService.getTabAccessi()
-      if (response) {
-        // Ordina alfabeticamente per codice
-        allAccessi.value = response
-          .map(accesso => ({ codice: accesso.codice }))
-          .sort((a, b) => a.codice.localeCompare(b.codice))
-      }
-    }
-
-    // Trova l'indice dell'accesso corrente
-    const currentCodice = accessoId.value
-    if (!currentCodice || allAccessi.value.length === 0) {
-      previousAccesso.value = null
-      nextAccesso.value = null
-      return
-    }
-
-    const currentIndex = allAccessi.value.findIndex(accesso => accesso.codice === currentCodice)
-
-    if (currentIndex === -1) {
-      // Codice non trovato
-      previousAccesso.value = null
-      nextAccesso.value = null
-      return
-    }
-
-    // Set previous accesso
-    previousAccesso.value = currentIndex > 0 ? allAccessi.value[currentIndex - 1] : null
-
-    // Set next accesso
-    nextAccesso.value = currentIndex < allAccessi.value.length - 1 ? allAccessi.value[currentIndex + 1] : null
-
-  } catch (error) {
-    console.error('Errore nel caricamento degli accessi adiacenti:', error)
-    previousAccesso.value = null
-    nextAccesso.value = null
-  }
-}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handleSave = async (data: any) => {
@@ -188,7 +130,7 @@ const handleSave = async (data: any) => {
 
   try {
     const accessoData: Accesso = {
-      codice: data.nome,
+      codice: data.codice,
       descrizione: data.descrizione,
       formula: data.formula || ''
     }
@@ -267,7 +209,6 @@ const handleReset = () => {
 onMounted(async () => {
   if (isEditMode.value) {
     await loadAccessoData()
-    await loadAdjacentAccessi()
   } else {
     handleDuplicateMode()
   }
@@ -279,8 +220,7 @@ watch(() => route.params.id, async () => {
     clearMessages()
     if (isEditMode.value) {
       await loadAccessoData()
-      await loadAdjacentAccessi()
-    } else {
+      } else {
       initialData.value = {
         codice: '',
         descrizione: '',

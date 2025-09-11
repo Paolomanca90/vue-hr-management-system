@@ -21,7 +21,7 @@
     <LoadingIndicator :loading="loading" message="Caricamento dati..." />
 
     <!-- Messaggi -->
-    <MessageAlerts 
+    <MessageAlerts
       :error-message="errorMessage"
       :success-message="successMessage"
     />
@@ -108,25 +108,6 @@
               </div>
             </div>
 
-            <!-- Formula -->
-            <div v-if="showQueryBuilder" class="form-control">
-              <label class="label">
-                <span class="label-text font-medium">Formula *</span>
-              </label>
-              <textarea
-                v-model="formData.formula"
-                :class="{ 'textarea-error': submitted && !formData.formula }"
-                class="textarea textarea-bordered w-full h-20 resize-none font-mono text-sm"
-                placeholder="Inserisci la formula o usa il costruttore sotto"
-                required
-              ></textarea>
-              <div class="label">
-                <span class="label-text-alt">Usa il costruttore sotto per generare la formula automaticamente</span>
-                <span v-if="submitted && !formData.formula" class="label-text-alt text-error">
-                  Formula richiesta
-                </span>
-              </div>
-            </div>
           </div>
 
           <div class="text-sm text-base-content/60 mt-4">
@@ -147,6 +128,46 @@
             <div class="text-sm font-medium text-base-content/70 mb-3">Costruisci Condizione:</div>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+              <!-- Operatore Logico (AND/OR) -->
+              <div class="md:col-span-1">
+                <label class="label">
+                  <span class="label-text text-xs">Logica</span>
+                </label>
+                <select
+                  v-model="currentCondition.logicOperator"
+                  class="select select-bordered select-sm w-full"
+                  :disabled="!formData.formula"
+                >
+                  <option value="AND">AND</option>
+                  <option value="OR">OR</option>
+                </select>
+              </div>
+
+              <!-- Parentesi -->
+              <div class="md:col-span-1">
+                <label class="label">
+                  <span class="label-text text-xs">Parentesi</span>
+                </label>
+                <div class="flex gap-1">
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-sm flex-1 text-xs"
+                    @click="addParenthesis('(')"
+                    title="Aggiungi parentesi aperta"
+                  >
+                    (
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-sm flex-1 text-xs"
+                    @click="addParenthesis(')')"
+                    title="Aggiungi parentesi chiusa"
+                  >
+                    )
+                  </button>
+                </div>
+              </div>
+
               <!-- Campo -->
               <div class="md:col-span-3">
                 <label class="label">
@@ -190,7 +211,7 @@
               </div>
 
               <!-- Valori -->
-              <div class="md:col-span-5">
+              <div class="md:col-span-3">
                 <label class="label">
                   <span class="label-text text-xs">
                     {{ getValueLabel(currentCondition.operator) }}
@@ -281,7 +302,7 @@
               <div class="md:col-span-2">
                 <button
                   type="button"
-                  class="btn btn-primary btn-sm w-full"
+                  class="btn btn-primary btn-sm w-full text-white"
                   @click="insertCondition"
                   :disabled="!canInsertCondition"
                 >
@@ -292,27 +313,33 @@
             </div>
           </div>
 
-          <!-- Recap Formula Editabile -->
-          <div class="bg-base-200 rounded-lg p-4">
-            <div class="text-sm font-medium text-base-content/70 mb-3">Anteprima Formula:</div>
-            <div class="form-control">
-              <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm min-h-[100px] border">
-                <div class="flex items-start justify-between">
-                  <pre class="whitespace-pre-wrap flex-1">{{ formData.formula || 'Nessuna formula definita. Usa il costruttore sopra per generarla o modifica il campo Formula nella sezione Informazioni Base.' }}</pre>
-                  <button
-                    v-if="formData.formula"
-                    type="button"
-                    class="btn btn-ghost btn-xs text-green-400 hover:text-green-300 ml-2"
-                    @click="clearFormula"
-                    title="Pulisci formula"
-                  >
-                    <FaIcon icon="trash"/>
-                  </button>
-                </div>
-              </div>
-              <div class="label">
-                <span class="label-text-alt">La formula viene aggiornata automaticamente quando inserisci condizioni</span>
-              </div>
+          <!-- Formula Editabile -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-medium">Formula *</span>
+              <button
+                v-if="formData.formula"
+                type="button"
+                class="btn btn-ghost btn-xs"
+                @click="clearFormula"
+                title="Pulisci formula"
+              >
+                <FaIcon icon="trash" class="mr-1"/>
+                Pulisci
+              </button>
+            </label>
+            <textarea
+              v-model="formData.formula"
+              :class="{ 'textarea-error': submitted && !formData.formula }"
+              class="textarea textarea-bordered w-full h-32 resize-none font-mono text-sm"
+              placeholder="Inserisci la formula manualmente o usa il costruttore sopra per generarla automaticamente"
+              required
+            ></textarea>
+            <div class="label">
+              <span class="label-text-alt">Puoi modificare direttamente la formula qui o usare il costruttore sopra</span>
+              <span v-if="submitted && !formData.formula" class="label-text-alt text-error">
+                Formula richiesta
+              </span>
             </div>
           </div>
       </SectionCard>
@@ -429,6 +456,7 @@ interface CurrentCondition {
   values: string[]
   valueMin: string
   valueMax: string
+  logicOperator: string
   fieldData?: CampoDipendente
   availableValues?: string[]
   loadingValues?: boolean
@@ -441,6 +469,7 @@ const currentCondition = ref<CurrentCondition>({
   values: [''],
   valueMin: '',
   valueMax: '',
+  logicOperator: 'AND',
   availableValues: [],
   loadingValues: false
 })
@@ -563,7 +592,7 @@ const insertCondition = () => {
 
   const currentFormula = formData.value.formula
   const newFormula = currentFormula
-    ? `${currentFormula} AND ${conditionString}`
+    ? `${currentFormula} ${c.logicOperator} ${conditionString}`
     : conditionString
 
   formData.value.formula = newFormula
@@ -579,6 +608,7 @@ const resetCurrentCondition = () => {
     values: [''],
     valueMin: '',
     valueMax: '',
+    logicOperator: 'AND',
     availableValues: [],
     loadingValues: false
   }
@@ -586,6 +616,28 @@ const resetCurrentCondition = () => {
 
 const clearFormula = () => {
   formData.value.formula = ''
+}
+
+const addParenthesis = (parenthesis: '(' | ')') => {
+  const currentFormula = formData.value.formula
+
+  if (parenthesis === '(') {
+    // Se la formula è vuota, aggiunge solo la parentesi aperta
+    if (!currentFormula) {
+      formData.value.formula = '('
+    } else {
+      // Se la formula finisce con AND/OR, aggiunge la parentesi dopo
+      if (currentFormula.endsWith(' AND ') || currentFormula.endsWith(' OR ')) {
+        formData.value.formula = currentFormula + '('
+      } else {
+        // Altrimenti aggiunge AND e poi la parentesi
+        formData.value.formula = currentFormula + ' AND ('
+      }
+    }
+  } else {
+    // Per parentesi chiusa, aggiunge sempre alla fine
+    formData.value.formula = currentFormula + ')'
+  }
 }
 
 const loadAvailableFields = async () => {
