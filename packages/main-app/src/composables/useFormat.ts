@@ -1,10 +1,8 @@
-import { computed } from 'vue'
-
 export function useFormat() {
   const formatCurrency = (value: number): string => {
-    return new Intl.NumberFormat('it-IT', { 
-      style: 'currency', 
-      currency: 'EUR' 
+    return new Intl.NumberFormat('it-IT', {
+      style: 'currency',
+      currency: 'EUR'
     }).format(value)
   }
 

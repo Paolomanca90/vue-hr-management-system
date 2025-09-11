@@ -1,4 +1,4 @@
-import { computed, type ComputedRef, type WritableComputedRef } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useI18nStore, type Locale } from '@/stores/i18n'
 
@@ -34,7 +34,7 @@ export function useI18nApp() {
 
   return {
     // Funzione di traduzione nativa
-    t: t as (key: string, values?: any) => string,
+    t: t as (key: string, values?: Record<string, unknown>) => string,
 
     // Stato reattivo
     currentLocale,

@@ -64,7 +64,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
-import { useRoute, useRouter, RouterLink } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useMenuStore, type MenuItem } from '@/stores/menu'
 import { PrimeDataTable } from '@presenze-in-web-frontend/core-lib'
@@ -90,7 +90,6 @@ interface SampleEmployee {
 }
 
 const route = useRoute()
-const router = useRouter()
 const authStore = useAuthStore()
 const menuStore = useMenuStore()
 
@@ -306,6 +305,7 @@ const getStatusBadgeClass = (status: string): string => {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const onRowSelect = (event: any) => {
   console.log('Riga selezionata:', event.data)
 }
@@ -337,9 +337,9 @@ const addSampleData = () => {
   })
 }
 
-const goBack = () => {
-  router.back()
-}
+// const goBack = () => {
+//   router.back()
+// }
 
 watch(
   () => route.path,

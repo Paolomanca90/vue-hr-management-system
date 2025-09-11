@@ -1,15 +1,8 @@
 <template>
-  <!-- Messaggio di errore -->
-  <div v-if="errorMessage" class="alert alert-error mb-4">
-    <FaIcon icon="exclamation-triangle" />
-    <span>{{ errorMessage }}</span>
-  </div>
-
-  <!-- Messaggio di successo -->
-  <div v-if="successMessage" class="alert alert-success mb-4">
-    <FaIcon icon="check-circle" />
-    <span>{{ successMessage }}</span>
-  </div>
+  <MessageAlerts
+    :error-message="errorMessage"
+    :success-message="successMessage"
+  />
 
   <QueryBuilder
     entity-name="Accesso"
@@ -38,6 +31,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import QueryBuilder from '@/components/QueryBuilder.vue'
+import MessageAlerts from '@/components/MessageAlerts.vue'
 import { accessiService, type Accesso } from '@/services/accessiService'
 
 const router = useRouter()
@@ -49,7 +43,7 @@ const saving = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
 const initialData = ref({
-  nome: '',
+  codice: '',
   descrizione: '',
   formula: ''
 })
@@ -82,7 +76,7 @@ const loadAccessoData = async () => {
     const routerState = history.state?.accessoData
     if (routerState && routerState.codice === accessoId.value) {
       initialData.value = {
-        nome: routerState.codice,
+        codice: routerState.codice,
         descrizione: routerState.descrizione,
         formula: routerState.formula || ''
       }
@@ -90,7 +84,7 @@ const loadAccessoData = async () => {
     // Fallback se non trovato
     else {
       initialData.value = {
-        nome: accessoId.value,
+        codice: accessoId.value,
         descrizione: `Accesso ${accessoId.value}`,
         formula: ''
       }
@@ -101,7 +95,7 @@ const loadAccessoData = async () => {
     errorMessage.value = 'Errore nel caricamento dei dati dell\'accesso'
     // Fallback
     initialData.value = {
-      nome: accessoId.value,
+      codice: accessoId.value,
       descrizione: `Accesso ${accessoId.value}`,
       formula: ''
     }
@@ -117,7 +111,7 @@ const handleDuplicateMode = () => {
 
   if (duplicateCodice && !isEditMode.value) {
     initialData.value = {
-      nome: duplicateCodice || '',
+      codice: duplicateCodice || '',
       descrizione: sourceDescrizione ? `Copia di ${sourceDescrizione}` : `Copia di ${duplicateCodice}`,
       formula: sourceFormula || ''
     }
@@ -261,7 +255,7 @@ const handleReset = () => {
     loadAccessoData()
   } else {
     initialData.value = {
-      nome: '',
+      codice: '',
       descrizione: '',
       formula: ''
     }
@@ -288,7 +282,7 @@ watch(() => route.params.id, async () => {
       await loadAdjacentAccessi()
     } else {
       initialData.value = {
-        nome: '',
+        codice: '',
         descrizione: '',
         formula: ''
       }

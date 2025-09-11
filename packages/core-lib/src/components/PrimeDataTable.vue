@@ -24,12 +24,11 @@
       filterDisplay="row"
       :stateStorage="stateStorage"
       :stateKey="stateKey"
-      columnResizeMode="fit"
+      columnResizeMode="expand"
       stripedRows
       showGridlines
       :tableStyle="computedTableStyle"
       :autoLayout="false"
-      :columnResizeMode="columnResizeMode"
       v-bind="$attrs"
       @row-select="$emit('row-select', $event)"
       @row-unselect="$emit('row-unselect', $event)"
@@ -119,7 +118,6 @@
 
       <!-- Actions Column - SEMPRE PRIMA e SEMPRE FROZEN -->
       <PColumn 
-        v-if="slots.actions" 
         header="Azioni" 
         :exportable="false" 
         frozen 
@@ -157,6 +155,7 @@
       >
         <template #filter="{ filterModel, filterCallback }" v-if="getFilterType(column) === 'text'">
           <PInputText 
+            v-if="filterModel"
             v-model="filterModel.value" 
             type="text" 
             :placeholder="`Cerca per ${(column.header || column.label).toLowerCase()}`"
@@ -377,6 +376,34 @@ const props = defineProps({
     type: String,
     default: '120px'
   },
+  showActions: {
+    type: Boolean,
+    default: true
+  },
+  editAction: {
+    type: Function,
+    default: null
+  },
+  duplicateAction: {
+    type: Function,
+    default: null
+  },
+  deleteAction: {
+    type: Function,
+    default: null
+  },
+  editTooltip: {
+    type: String,
+    default: 'Modifica'
+  },
+  duplicateTooltip: {
+    type: String,
+    default: 'Duplica'
+  },
+  deleteTooltip: {
+    type: String,
+    default: 'Elimina'
+  },
   virtualScrollerOptions: {
     type: Object,
     default: () => ({})
@@ -466,7 +493,7 @@ const getColumnStyle = (column) => {
 }
 
 const getActionColumnStyle = () => {
-  return `min-width: ${props.actionColumnWidth}; width: ${props.actionColumnWidth};`
+  return `width: 1px !important; white-space: nowrap !important; min-width: auto !important; max-width: none !important;`
 }
 
 const clearAllFilters = () => {
@@ -925,6 +952,23 @@ watch(() => toggleableColumns.value, () => {
 :deep(.column-actions) {
   text-align: center;
   white-space: nowrap;
+}
+
+:deep(.p-datatable .p-datatable-table) {
+  width: 100%;
+}
+
+:deep(.p-datatable .p-datatable-tbody > tr > td:first-child) {
+  overflow: visible !important;
+  position: relative !important;
+  z-index: 10 !important;
+  white-space: nowrap !important;
+  width: 1px !important;
+}
+
+:deep(.p-datatable .p-datatable-thead > tr > th:first-child) {
+  white-space: nowrap !important;
+  width: 1px !important;
 }
 
 @media print {

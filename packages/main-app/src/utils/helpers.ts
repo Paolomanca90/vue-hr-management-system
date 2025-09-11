@@ -1,4 +1,4 @@
-export const debounce = <T extends (...args: any[]) => void>(
+export const debounce = <T extends (...args: unknown[]) => void>(
   func: T,
   delay: number
 ): ((...args: Parameters<T>) => void) => {
@@ -9,7 +9,7 @@ export const debounce = <T extends (...args: any[]) => void>(
   }
 }
 
-export const throttle = <T extends (...args: any[]) => void>(
+export const throttle = <T extends (...args: unknown[]) => void>(
   func: T,
   delay: number
 ): ((...args: Parameters<T>) => void) => {
@@ -54,8 +54,8 @@ export const isEmptyObject = (obj: object): boolean => {
   return Object.keys(obj).length === 0
 }
 
-export const removeEmptyValues = (obj: Record<string, any>): Record<string, any> => {
-  const result: Record<string, any> = {}
+export const removeEmptyValues = (obj: Record<string, unknown>): Record<string, unknown> => {
+  const result: Record<string, unknown> = {}
   
   for (const [key, value] of Object.entries(obj)) {
     if (value !== null && value !== undefined && value !== '') {

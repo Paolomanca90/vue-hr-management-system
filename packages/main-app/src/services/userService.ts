@@ -1,7 +1,8 @@
 import { getApiConfig } from '@/config/api'
-import { createCrudMethods } from './baseService'
+import { GenericCrudService } from './genericCrudService'
+import { type CrudEntity } from '@/composables/useCrudView'
 
-export interface User {
+export interface User extends CrudEntity {
   username: string;
   nomecompleto: string;
   codgruppo: string;
@@ -10,43 +11,44 @@ export interface User {
   iD_INTER: number
 }
 
-export interface GruppiUtenti
-{
+export interface GruppiUtenti extends CrudEntity {
   codice: string,
   descrizione: string
 }
 
-class UserService {
-  private config = getApiConfig()
-  private crud = createCrudMethods<User>({
-    list: this.config.endpoints.users,
-    create: this.config.endpoints.users,
-    update: this.config.endpoints.users,
-    delete: this.config.endpoints.deleteUser
-  })
-
-  private gruppiCrud = createCrudMethods<GruppiUtenti>({
+class UserService extends GenericCrudService<User> {
+  protected config = getApiConfig()
+  private gruppiService = new GenericCrudService<GruppiUtenti>({
     list: this.config.endpoints.gruppiUtente
   })
 
+  constructor() {
+    super({
+      list: getApiConfig().endpoints.users,
+      create: getApiConfig().endpoints.users,
+      update: getApiConfig().endpoints.users,
+      delete: getApiConfig().endpoints.deleteUser
+    })
+  }
+
   async getUsers(): Promise<User[]> {
-    return this.crud.getAll()
+    return this.getAll()
   }
 
   async newUser(user: User): Promise<User> {
-    return this.crud.create(user)
+    return this.create(user)
   }
 
   async editUser(user: User): Promise<User> {
-    return this.crud.update(user)
+    return this.update(user)
   }
 
   async deleteUser(username: string): Promise<boolean> {
-    return this.crud.delete(username)
+    return this.delete(username)
   }
 
   async getGruppiUtente(): Promise<GruppiUtenti[]> {
-    return this.gruppiCrud.getAll()
+    return this.gruppiService.getAll()
   }
 }
 

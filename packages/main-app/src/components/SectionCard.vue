@@ -1,7 +1,7 @@
 <template>
   <div class="card bg-base-100 shadow-sm">
     <div class="card-body">
-      <div class="flex items-center justify-between mb-4">
+      <div class="space-y-4">
         <div class="flex items-center">
           <div class="bg-primary/10 rounded-lg p-2 mr-3">
             <FaIcon :icon="icon" class="text-primary text-lg" />

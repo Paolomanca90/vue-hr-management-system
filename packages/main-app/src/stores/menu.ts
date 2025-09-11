@@ -85,24 +85,19 @@ export const useMenuStore = defineStore('menu', () => {
     savingFavorite.value = true
 
     try {
-      const result = await menuService.togglePreferito(
+      await menuService.togglePreferito(
         authStore.currentUser.username,
         menuId,
         isCurrentlyFavorite
       )
 
-      if (result.success) {
-        // Aggiorna lo stato locale
-        if (isCurrentlyFavorite) {
-          favoriteMenuItems.value.delete(menuId)
-        } else {
-          favoriteMenuItems.value.add(menuId)
-        }
-        return true
+      // Aggiorna lo stato locale
+      if (isCurrentlyFavorite) {
+        favoriteMenuItems.value.delete(menuId)
       } else {
-        console.error('Errore nel toggle preferito:', result.message)
-        return false
+        favoriteMenuItems.value.add(menuId)
       }
+      return true
     } catch (error) {
       console.error('Errore nel toggle preferito:', error)
       return false

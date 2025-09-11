@@ -1,35 +1,39 @@
 import { getApiConfig } from '@/config/api'
-import { createCrudMethods } from './baseService'
+import { GenericCrudService } from './genericCrudService'
+import { type CrudEntity } from '@/composables/useCrudView'
 
-export interface Filtro {
+export interface Filtro extends CrudEntity {
     codice: string,
     descrizione: string,
     formula: string
 }
 
-class FiltriService {
-  private config = getApiConfig()
-  private crud = createCrudMethods<Filtro>({
-    list: this.config.endpoints.filtri,
-    create: this.config.endpoints.filtri,
-    update: this.config.endpoints.filtri,
-    delete: this.config.endpoints.deleteFiltri
-  })
+const config = getApiConfig()
+
+class FiltriService extends GenericCrudService<Filtro> {
+  constructor() {
+    super({
+      list: config.endpoints.filtri,
+      create: config.endpoints.filtri,
+      update: config.endpoints.filtri,
+      delete: config.endpoints.deleteFiltri
+    })
+  }
 
   async getTabFiltri(): Promise<Filtro[]> {
-    return this.crud.getAll()
+    return this.getAll()
   }
 
   async addFiltro(filtro: Filtro): Promise<Filtro> {
-    return this.crud.create(filtro)
+    return this.create(filtro)
   }
 
   async editFiltro(filtro: Filtro): Promise<Filtro> {
-    return this.crud.update(filtro)
+    return this.update(filtro)
   }
 
   async deleteFiltro(codice: string): Promise<boolean> {
-    return this.crud.delete(codice)
+    return this.delete(codice)
   }
 }
 

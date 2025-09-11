@@ -1,35 +1,39 @@
 import { getApiConfig } from '@/config/api'
-import { createCrudMethods } from './baseService'
+import { GenericCrudService } from './genericCrudService'
+import { type CrudEntity } from '@/composables/useCrudView'
 
-export interface Accesso {
+export interface Accesso extends CrudEntity {
     codice: string,
     descrizione: string,
     formula: string
 }
 
-class AccessiService {
-  private config = getApiConfig()
-  private crud = createCrudMethods<Accesso>({
-    list: this.config.endpoints.accessi,
-    create: this.config.endpoints.accessi,
-    update: this.config.endpoints.accessi,
-    delete: this.config.endpoints.deleteAccessi
-  })
+const config = getApiConfig()
+
+class AccessiService extends GenericCrudService<Accesso> {
+  constructor() {
+    super({
+      list: config.endpoints.accessi,
+      create: config.endpoints.accessi,
+      update: config.endpoints.accessi,
+      delete: config.endpoints.deleteAccessi
+    })
+  }
 
   async getTabAccessi(): Promise<Accesso[]> {
-    return this.crud.getAll()
+    return this.getAll()
   }
 
   async addAccesso(accesso: Accesso): Promise<Accesso> {
-    return this.crud.create(accesso)
+    return this.create(accesso)
   }
 
   async editAccesso(accesso: Accesso): Promise<Accesso> {
-    return this.crud.update(accesso)
+    return this.update(accesso)
   }
 
   async deleteAccesso(codice: string): Promise<boolean> {
-    return this.crud.delete(codice)
+    return this.delete(codice)
   }
 }
 

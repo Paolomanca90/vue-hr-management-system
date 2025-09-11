@@ -269,6 +269,7 @@ import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import { userService, type User } from '@/services/userService'
 import { settingsService } from '@/services/settingsService'
 import { accessiService } from '@/services/accessiService'
+import { useCrudView } from '@/composables/useCrudView'
 import MenuPermissionsManager from '@/components/MenuPermissionsManager.vue'
 import { gruppiUtenteService, type ApiMenuGruppoItem } from '@/services/gruppiUtenteService'
 import PageHeader from '@/components/PageHeader.vue'
@@ -318,11 +319,20 @@ const userForm = ref<UserForm>({
   iD_INTER: 0
 })
 
-const loading = ref(false)
-const saving = ref(false)
+const {
+  loading,
+  saving,
+  errorMessage,
+  successMessage
+} = useCrudView<User>(userService, {
+  entityName: 'Utente',
+  idField: 'username',
+  listRoute: '/app/users',
+  editRoute: '/app/users',
+  newRoute: '/app/users/new'
+})
+
 const submitted = ref(false)
-const errorMessage = ref('')
-const successMessage = ref('')
 
 // Gestione eliminazione
 const showDeleteModal = ref(false)

@@ -1,14 +1,11 @@
 import { getApiConfig } from '@/config/api'
+import { GenericCrudService } from './genericCrudService'
 import type { ApiMenuItem, ApiMenuUtenteItem } from './menuService'
+import { type CrudEntity } from '@/composables/useCrudView'
 
-export interface GruppoUtente {
+export interface GruppoUtente extends CrudEntity {
   codice: string
   descrizione: string
-}
-
-export interface GetGruppiUtenteResponse {
-  listaGruppi?: GruppoUtente[]
-  messaggioDiErrore?: string
 }
 
 export interface ApiMenuGruppoItem extends ApiMenuUtenteItem {
@@ -29,84 +26,37 @@ export interface AggiornamentoAbilitazioniGruppo {
   figli: AggiornamentoAbilitazioniGruppo[]
 }
 
-class GruppiUtenteService {
-  private config = getApiConfig()
+class GruppiUtenteService extends GenericCrudService<GruppoUtente> {
+  protected config = getApiConfig()
 
-  async getGruppiUtente(): Promise<GetGruppiUtenteResponse> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.gruppiUtente}`, {
-        method: 'GET',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        }
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
-      }
-
-      return {
-        listaGruppi: await response.json(),
-        messaggioDiErrore: undefined,
-      }
-
-    } catch (error) {
-      throw new Error('Errore di connessione al server: ' + error)
-    }
+  constructor() {
+    super({
+      list: getApiConfig().endpoints.gruppiUtente,
+      create: getApiConfig().endpoints.gruppiUtente,
+      update: getApiConfig().endpoints.gruppiUtente,
+      delete: getApiConfig().endpoints.deleteGruppiUtente
+    })
   }
 
   async getMenuGruppoUtente(codgruppo: string): Promise<ApiMenuGruppoItem[]> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.menuGruppiUtente}?codgruppo=${encodeURIComponent(codgruppo)}`, {
-        method: 'GET',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const result = await response.json()
-
-      if (!result) {
-        throw new Error('Errore nel caricamento dei menu del gruppo')
-      }
-
-      return result
-    } catch (error) {
-      console.error('Errore nel caricamento dei menu del gruppo:', error)
-      throw error
-    }
+    return await this.executeRequest({
+      method: 'GET',
+      customEndpoint: this.config.endpoints.menuGruppiUtente,
+      params: { codgruppo }
+    })
   }
 
   async aggiornaAbilitazioniGruppoUtente(
     abilitazioni: AggiornamentoAbilitazioniGruppo[],
     codgruppo: string
   ): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.aggiornaAbilitazioniGruppiUtente}?codgruppo=${encodeURIComponent(codgruppo)}`, {
-        method: 'POST',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        },
-        body: JSON.stringify(abilitazioni)
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      return true
-    } catch (error) {
-      console.error('Errore nell\'aggiornamento delle abilitazioni del gruppo:', error)
-      throw error
-    }
+    await this.executeRequest({
+      method: 'POST',
+      customEndpoint: this.config.endpoints.aggiornaAbilitazioniGruppiUtente,
+      params: { codgruppo },
+      body: abilitazioni
+    })
+    return true
   }
 
   preparePermissionsForGroupSave(
@@ -242,73 +192,24 @@ class GruppiUtenteService {
     return menuData.map(convertItem)
   }
 
+  async getGruppiUtente(): Promise<GruppoUtente[]> {
+    return this.getAll()
+  }
+
   async newGruppoUtente(gruppo: GruppoUtente): Promise<GruppoUtente> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.gruppiUtente}`, {
-        method: 'POST',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        },
-        body: JSON.stringify(gruppo)
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
-      }
-
-      return await response.json()
-
-    } catch (error) {
-      throw new Error('Errore di connessione al server: ' + error)
-    }
+    return this.create(gruppo)
   }
 
   async editGruppoUtente(gruppo: GruppoUtente): Promise<GruppoUtente> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.gruppiUtente}`, {
-        method: 'PUT',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        },
-        body: JSON.stringify(gruppo)
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
-      }
-
-      return await response.json()
-
-    } catch (error) {
-      throw new Error('Errore di connessione al server: ' + error)
-    }
+    return this.update(gruppo)
   }
 
   async deleteGruppoUtente(codice: string): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.deleteGruppiUtente}`, {
-        method: 'DELETE',
-        headers: {
-          ...this.config.defaultHeaders,
-          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
-        },
-        body: JSON.stringify({ codice })
-      })
+    return this.deleteWithBody({ codice })
+  }
 
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
-      }
-
-      return true
-
-    } catch (error) {
-      throw new Error('Errore di connessione al server: ' + error)
-    }
+  async deleteWithBody(body: Record<string, unknown>): Promise<boolean> {
+    return super.deleteWithBody(body)
   }
 }
 

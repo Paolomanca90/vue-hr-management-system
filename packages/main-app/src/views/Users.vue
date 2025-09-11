@@ -20,39 +20,29 @@
 
     <div class="card bg-base-100 shadow-sm">
       <div class="card-body max-md:p-3">
-        <!-- Messaggi -->
-        <MessageAlerts
-          :error-message="errorMessage"
-          class="mb-4"
-        />
-
-        <PrimeDataTable
-          :data="users"
-          :columns="enhancedTableColumns"
-          :loading="tableLoading"
-          selectionMode="single"
-          v-model:selection="selectedUser"
-          v-model:filters="filters"
+        <!-- Data Table Manager -->
+        <DataTableManager
+          :service="userService as unknown as FlexibleCrudService"
+          :columns="tableColumns"
+          entity-name="Utente"
+          entity-name-plural="Utenti"
+          id-field="username"
+          list-route="/app/users"
+          edit-route="/app/users"
+          new-route="/app/users/new"
+          :global-filter-fields="['username', 'nomecompleto', 'codgruppo', 'codaccesso']"
+          search-placeholder="Cerca per username, nome, gruppo..."
+          export-filename="utenti-sistema"
+          data-key="username"
+          filter-display="menu"
+          scroll-height="600px"
+          :virtual-scroller-options="{ itemSize: 40 }"
+          :delete-confirmation="{
+            title: 'Conferma eliminazione',
+            message: (user) => `Sei sicuro di voler eliminare l'utente '${user.username}'?`,
+            warningText: 'Questa azione è irreversibile e rimuoverà tutti i dati associati all\'utente.'
+          }"
           @row-select="onRowSelect"
-          :showGlobalSearch="true"
-          :showColumnFilters="true"
-          :showExport="true"
-          :showColumnToggle="true"
-          :showClearFilters="true"
-          :globalFilterFields="['username', 'nomecompleto', 'codgruppo', 'codaccesso']"
-          searchPlaceholder="Cerca per username, nome, gruppo..."
-          exportFilename="utenti-sistema"
-          :scrollable="true"
-          scrollHeight="600px"
-          :virtualScrollerOptions="{ itemSize: 40 }"
-          :resizableColumns="true"
-          dataKey="username"
-          filterDisplay="menu"
-          stateStorage="session"
-          stateKey="dt-users-state"
-          :autoColumnSizing="true"
-          minTableWidth="50rem"
-          actionColumnWidth="140px"
         >
           <!-- Custom toolbar -->
           <template #toolbar>
@@ -93,35 +83,6 @@
             </span>
           </template>
 
-          <!-- Slot personalizzato per le azioni -->
-          <template #actions="{ data }">
-            <div class="flex items-center space-x-1">
-              <div class="tooltip tooltip-right relative z-[10000]" data-tip="Modifica utente">
-                <button
-                  class="btn btn-sm btn-primary btn-outline relative z-[100]"
-                  @click="editUser(data)"
-                >
-                  <FaIcon icon="edit" />
-                </button>
-              </div>
-              <div class="tooltip tooltip-right relative z-[10000]" data-tip="Duplica utente">
-                <button
-                  class="btn btn-sm btn-primary btn-outline relative z-[100]"
-                  @click="duplicateUser(data)"
-                >
-                  <FaIcon icon="copy" />
-                </button>
-              </div>
-              <div class="tooltip tooltip-right relative z-[10000]" data-tip="Elimina utente">
-                <button
-                  class="btn btn-sm btn-error btn-outline relative z-[100]"
-                  @click="deleteUser(data)"
-                >
-                  <FaIcon icon="trash" />
-                </button>
-              </div>
-            </div>
-          </template>
 
           <!-- Empty state personalizzato -->
           <template #empty>
@@ -141,189 +102,76 @@
               </button>
             </div>
           </template>
-        </PrimeDataTable>
+        </DataTableManager>
       </div>
     </div>
 
-    <!-- Modale di conferma eliminazione -->
-    <div v-if="showDeleteModal" class="modal modal-open">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg mb-4">Conferma eliminazione</h3>
-        <p class="mb-4">
-          Sei sicuro di voler eliminare l'utente <strong>{{ userToDelete?.username }}</strong>?
-        </p>
-        <p class="text-sm text-base-content/70 mb-6">
-          Questa azione è irreversibile e rimuoverà tutti i dati associati all'utente.
-        </p>
-        <div class="modal-action">
-          <button
-            class="btn btn-ghost"
-            @click="cancelDelete"
-            :disabled="deleting"
-          >
-            Annulla
-          </button>
-          <button
-            class="btn btn-error text-white"
-            @click="confirmDelete"
-            :disabled="deleting"
-            :class="{ 'loading': deleting }"
-          >
-            <span v-if="deleting" class="loading loading-spinner loading-sm"></span>
-            <span v-if="!deleting">Elimina</span>
-            <span v-if="deleting">Eliminazione...</span>
-          </button>
-        </div>
-      </div>
-    </div>
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { PrimeDataTable, FaIcon } from '@presenze-in-web-frontend/core-lib'
+import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
-import MessageAlerts from '@/components/MessageAlerts.vue'
+import DataTableManager from '@/components/DataTableManager.vue'
 import { userService, type User } from '@/services/userService'
+import { useCrudView, type FlexibleCrudService } from '@/composables/useCrudView'
 
 const router = useRouter()
-const users = ref<User[]>([])
-const tableLoading = ref(false)
-const selectedUser = ref<User | null>(null)
-const errorMessage = ref<string>('')
 
-// Interfaccia per i filtri
-interface FilterValue {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  value: any
-  matchMode: string
-}
-
-interface FiltersType {
-  global: FilterValue
-  username: FilterValue
-  nomecompleto: FilterValue
-  codgruppo: FilterValue
-  codaccesso: FilterValue
-  [key: string]: FilterValue
-}
-
-// Filtri per DataTable
-const filters = ref<FiltersType>({
-  global: { value: null, matchMode: 'contains' },
-  username: { value: null, matchMode: 'contains' },
-  nomecompleto: { value: null, matchMode: 'contains' },
-  codgruppo: { value: null, matchMode: 'equals' },
-  codaccesso: { value: null, matchMode: 'equals' }
+const {
+  data: users,
+  loadData: loadUsers
+} = useCrudView<User>(userService, {
+  entityName: 'Utente',
+  entityNamePlural: 'Utenti',
+  idField: 'username',
+  listRoute: '/app/users',
+  editRoute: '/app/users',
+  newRoute: '/app/users/new',
+  deleteConfirmation: {
+    title: 'Conferma eliminazione',
+    message: (user) => `Sei sicuro di voler eliminare l'utente "${user.username}"?`,
+    warningText: 'Questa azione è irreversibile e rimuoverà tutti i dati associati all\'utente.'
+  }
 })
 
-// Interfaccia per le opzioni dei filtri
-interface FilterOption {
-  label: string
-  value: string
-}
-
-// Interfaccia per le colonne
-interface EnhancedColumn {
-  field: string
-  header: string
-  sortable: boolean
-  filterType: 'text' | 'select'
-  filterOptions?: FilterOption[]
-  exportable: boolean
-  frozen?: boolean
-  visible?: boolean
-  filterMatchMode?: string
-  width?: string
-  minWidth?: string
-}
-
-const enhancedTableColumns = ref<EnhancedColumn[]>([
+const tableColumns = computed(() => [
   {
     field: 'username',
     header: 'Username',
     sortable: true,
-    filterType: 'text',
-    exportable: true,
-    filterMatchMode: 'contains',
+    filterable: true,
+    filterMatchMode: 'contains'
   },
   {
     field: 'nomecompleto',
     header: 'Nome Completo',
     sortable: true,
-    filterType: 'text',
-    exportable: true,
-    filterMatchMode: 'contains',
+    filterable: true,
+    filterMatchMode: 'contains'
   },
   {
     field: 'codgruppo',
     header: 'Gruppo',
     sortable: true,
-    filterType: 'select',
-    filterOptions: [],
-    exportable: true,
-    filterMatchMode: 'equals',
+    filterable: true,
+    filterMatchMode: 'equals'
   },
   {
     field: 'codaccesso',
     header: 'Codice Accesso',
     sortable: true,
-    filterType: 'select',
-    filterOptions: [],
-    exportable: true,
-    filterMatchMode: 'equals',
+    filterable: true,
+    filterMatchMode: 'equals'
   }
 ])
 
-// Gestione eliminazione
-const showDeleteModal = ref(false)
-const deleting = ref(false)
-const userToDelete = ref<User | null>(null)
-
 const hasFilters = computed(() => {
-  return Object.keys(filters.value).some(key => {
-    const filter = filters.value[key]
-    if (key === 'global') return filter.value != null && filter.value !== ''
-    return filter?.value != null && filter?.value !== ''
-  })
+  return users.value.length > 0
 })
-
-const loadUsers = async (): Promise<void> => {
-  try {
-    tableLoading.value = true
-    errorMessage.value = ''
-
-    const response = await userService.getUsers()
-
-    if (response) {
-      users.value = response
-      updateFilterOptions()
-    }
-
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : 'Errore sconosciuto nel caricamento degli utenti'
-    users.value = []
-  } finally {
-    tableLoading.value = false
-  }
-}
-
-const updateFilterOptions = (): void => {
-  const gruppi = [...new Set(users.value.map(user => user.codgruppo).filter(Boolean))]
-  const codiciAccesso = [...new Set(users.value.map(user => user.codaccesso).filter(Boolean))]
-
-  const gruppoColumn = enhancedTableColumns.value.find(col => col.field === 'codgruppo')
-  if (gruppoColumn) {
-    gruppoColumn.filterOptions = gruppi.map(gruppo => ({ label: gruppo, value: gruppo }))
-  }
-
-  const accessoColumn = enhancedTableColumns.value.find(col => col.field === 'codaccesso')
-  if (accessoColumn) {
-    accessoColumn.filterOptions = codiciAccesso.map(codice => ({ label: codice, value: codice }))
-  }
-}
 
 const refreshUsers = (): void => {
   loadUsers()
@@ -338,78 +186,6 @@ const addNewUser = (): void => {
   router.push('/app/users/new')
 }
 
-const editUser = (user: User) => {
-  router.push({
-    name: 'UserEdit',
-    params: { id: user.username },
-    state: {
-      userData: {
-        username: user.username,
-        nomecompleto: user.nomecompleto,
-        codgruppo: user.codgruppo,
-        codaccesso: user.codaccesso,
-        iD_LINGUA: user.iD_INTER,
-        iD_INTER: user.iD_LINGUA
-      }
-    }
-  })
-}
-
-const deleteUser = async (user: User): Promise<void> => {
-  userToDelete.value = user
-  showDeleteModal.value = true
-}
-
-const cancelDelete = (): void => {
-  showDeleteModal.value = false
-  deleting.value = false
-  userToDelete.value = null
-}
-
-const confirmDelete = async (): Promise<void> => {
-  if (!userToDelete.value) return
-
-  try {
-    deleting.value = true
-
-    await userService.deleteUser(userToDelete.value.username)
-
-    // Rimuove l'utente dalla lista locale
-    const index = users.value.findIndex(u => u.username === userToDelete.value!.username)
-    if (index !== -1) {
-      users.value.splice(index, 1)
-    }
-
-    // Reset selezione se l'utente eliminato era selezionato
-    if (selectedUser.value?.username === userToDelete.value.username) {
-      selectedUser.value = null
-    }
-
-    // Aggiorna le opzioni dei filtri
-    updateFilterOptions()
-
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : 'Errore nell\'eliminazione dell\'utente'
-  } finally {
-    deleting.value = false
-    showDeleteModal.value = false
-    userToDelete.value = null
-  }
-}
-
-const duplicateUser = (user: User): void => {
-  router.push({
-    name: 'UserNew',
-    query: {
-      duplicate: user.username,
-      sourceNome: user.nomecompleto,
-      sourceGruppo: user.codgruppo,
-      sourceAccesso: user.codaccesso,
-      sourceId_Inter: user.iD_INTER,
-      sourceId_Lingua: user.iD_LINGUA
-    }
-  })
-}
 
 const bulkActions = (): void => {
   console.log('Azioni multiple')

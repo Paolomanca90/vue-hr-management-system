@@ -5,7 +5,6 @@ import { availableLocales, setLocale, getStoredLocale } from '@presenze-in-web-f
 export type Locale = 'it' | 'en'
 
 export const useI18nStore = defineStore('i18n', () => {
-  const LOCALE_KEY = 'hr-app-locale'
 
   // State
   const currentLocale = ref<Locale>('it')
@@ -45,10 +44,7 @@ export const useI18nStore = defineStore('i18n', () => {
     }
   }
 
-  // Utility per traduzioni - questa funzione dovrebbe essere usata nei componenti
-  // dove c'è accesso a useI18n di vue-i18n
-  const translate = (key: string, values?: any) => {
-    // Questa è solo una funzione di fallback
+  const translate = (key: string) => {
     return key
   }
 

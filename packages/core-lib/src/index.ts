@@ -5,13 +5,7 @@ export { default as PrimeButton } from './components/PrimeButton.vue'
 export { default as PrimeModal } from './components/PrimeModal.vue'
 export { default as PrimeDataTable } from './components/PrimeDataTable.vue'
 export { default as FaIcon } from './components/FaIcon.vue'
-
-// Esporta composables
-/* export { useApi } from './composables/useApi'
-export { useAuth } from './composables/useAuth' */
-
-// Esporta utils
-// export * from './utils/helpers'
+export { default as ConfirmDialog } from './components/ConfirmDialog.vue'
 
 // Esporta PrimeVue plugin e componenti
 export { installPrimeVue } from './plugins/primevue'

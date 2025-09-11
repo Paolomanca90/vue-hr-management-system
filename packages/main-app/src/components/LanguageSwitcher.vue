@@ -12,7 +12,7 @@
         class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-[1]"
       >
         <li class="menu-title">
-          <span>{{ t('common.selectLanguage', 'Seleziona lingua') }}</span>
+          <span>{{ t('common.selectLanguage', { default: 'Seleziona lingua' }) }}</span>
         </li>
         <li
           v-for="locale in availableLocales"

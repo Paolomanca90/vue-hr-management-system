@@ -1,13 +1,14 @@
 import { ref, type Ref } from 'vue'
-import axios, { type AxiosResponse } from 'axios'
+import { type AxiosResponse } from 'axios'
 
-interface ApiState<T> {
+export interface ApiState<T> {
   data: Ref<T | null>
   loading: Ref<boolean>
   error: Ref<string | null>
+  execute: (apiCall: () => Promise<AxiosResponse<T>>) => Promise<T | null>
 }
 
-export function useApi<T>() {
+export function useApi<T>(): ApiState<T> {
   const data = ref<T | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
@@ -20,8 +21,9 @@ export function useApi<T>() {
       const response = await apiCall()
       data.value = response.data
       return response.data
-    } catch (err: any) {
-      error.value = err.message || 'An error occurred'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred'
+      error.value = errorMessage
       return null
     } finally {
       loading.value = false
@@ -29,7 +31,7 @@ export function useApi<T>() {
   }
 
   return {
-    data,
+    data: data as Ref<T | null>,
     loading,
     error,
     execute
