@@ -20,12 +20,6 @@
     <!-- Loading indicator -->
     <LoadingIndicator :loading="loading" message="Caricamento dati..." />
 
-    <!-- Messaggi -->
-    <MessageAlerts
-      :error-message="errorMessage"
-      :success-message="successMessage"
-    />
-
     <!-- Form principale -->
     <form v-if="!loading" @submit.prevent="handleSubmit" class="space-y-6">
 
@@ -383,7 +377,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from './PageHeader.vue'
-import MessageAlerts from './MessageAlerts.vue'
+import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import LoadingIndicator from './LoadingIndicator.vue'
 import NavigationButtons from './NavigationButtons.vue'
 import ActionButtons from './ActionButtons.vue'
@@ -448,6 +442,9 @@ const errorMessage = ref('')
 const successMessage = ref('')
 const showDeleteModal = ref(false)
 const deleting = ref(false)
+
+
+useMessageAlerts(errorMessage, successMessage)
 
 interface CurrentCondition {
   field: string

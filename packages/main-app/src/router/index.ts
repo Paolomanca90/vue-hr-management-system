@@ -18,6 +18,7 @@ import Accessi from '@/views/Accessi.vue'
 import AccessoEdit from '@/views/AccessoEdit.vue'
 import Filtri from '@/views/Filtri.vue'
 import FiltroEdit from '@/views/FiltroEdit.vue'
+import Aziende from '@/views/Aziende.vue'
 
 // Route statiche di base (sempre presenti)
 const staticRoutes: RouteRecordRaw[] = [
@@ -170,6 +171,11 @@ const appRoutes: RouteRecordRaw[] = [
         next()
       }
     }
+  },
+  {
+    path: 'aziende',
+    name: 'Aziende',
+    component: Aziende,
   },
   {
     path: 'payroll',

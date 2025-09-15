@@ -21,12 +21,6 @@
     <!-- Loading indicator -->
     <LoadingIndicator :loading="loading" message="Caricamento dati gruppo..." />
 
-    <!-- Messaggi -->
-    <MessageAlerts
-      :error-message="errorMessage"
-      :success-message="successMessage"
-    />
-
     <!-- Form principale -->
     <form v-if="!loading" @submit.prevent="handleSubmit" class="space-y-6">
 
@@ -183,7 +177,7 @@ import { gruppiUtenteService, type AggiornamentoAbilitazioniGruppo, type ApiMenu
 import MenuPermissionsManager from '@/components/MenuPermissionsManager.vue'
 import { menuService } from '@/services/menuService'
 import PageHeader from '@/components/PageHeader.vue'
-import MessageAlerts from '@/components/MessageAlerts.vue'
+import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import NavigationButtons from '@/components/NavigationButtons.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
@@ -210,6 +204,9 @@ const saving = ref(false)
 const submitted = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
+
+
+useMessageAlerts(errorMessage, successMessage)
 
 // Gestione eliminazione
 const showDeleteModal = ref(false)

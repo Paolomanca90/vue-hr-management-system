@@ -1,6 +1,8 @@
 <template>
   <div id="app" class="h-screen">
     <RouterView />
+    <!-- Toast Container posizionato in basso a destra -->
+    <PrimeToast position="bottom-right" />
   </div>
 </template>
 
@@ -8,6 +10,7 @@
 import { RouterView } from 'vue-router'
 import { onMounted } from 'vue'
 import { useThemeStore } from '@/stores/theme'
+import { PrimeToast } from '@presenze-in-web-frontend/core-lib'
 
 const themeStore = useThemeStore()
 

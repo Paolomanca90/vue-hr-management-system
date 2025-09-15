@@ -1,11 +1,5 @@
 <template>
   <div class="space-y-4">
-    <!-- Messages -->
-    <MessageAlerts
-      :error-message="errorMessage"
-      :success-message="successMessage"
-      class="mb-4"
-    />
 
     <!-- Table -->
     <PrimeDataTable
@@ -90,7 +84,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
 import { PrimeDataTable, ConfirmDialog, FaIcon } from '@presenze-in-web-frontend/core-lib'
-import MessageAlerts from './MessageAlerts.vue'
+import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { useCrudView, type FlexibleCrudService, type CrudEntity, type CrudViewOptions } from '@/composables/useCrudView'
 
 export interface TableColumn {
@@ -208,6 +202,9 @@ const {
   goToEdit,
   duplicateEntity
 } = useCrudView(props.service, crudOptions)
+
+
+useMessageAlerts(errorMessage, successMessage)
 
 const filters = ref<Record<string, { value: unknown; matchMode: string }>>({})
 

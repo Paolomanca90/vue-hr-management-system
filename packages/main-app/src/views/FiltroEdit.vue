@@ -1,9 +1,4 @@
 <template>
-  <MessageAlerts
-    :error-message="errorMessage"
-    :success-message="successMessage"
-  />
-
   <QueryBuilder
     entity-name="Filtro"
     entity-icon="filter"
@@ -28,7 +23,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import QueryBuilder from '@/components/QueryBuilder.vue'
-import MessageAlerts from '@/components/MessageAlerts.vue'
+import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { filtriService, type Filtro } from '@/services/filtriService'
 
 const router = useRouter()
@@ -39,6 +34,9 @@ const loading = ref(false)
 const saving = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
+
+
+useMessageAlerts(errorMessage, successMessage)
 const initialData = ref({
   codice: '',
   descrizione: '',

@@ -21,12 +21,6 @@
     <!-- Loading indicator -->
     <LoadingIndicator :loading="loading" message="Caricamento dati utente..." />
 
-    <!-- Messaggi -->
-    <MessageAlerts
-      :error-message="errorMessage"
-      :success-message="successMessage"
-    />
-
     <!-- Form principale -->
     <form v-if="!loading" @submit.prevent="handleSubmit" class="space-y-6">
 
@@ -273,7 +267,7 @@ import { useCrudView } from '@/composables/useCrudView'
 import MenuPermissionsManager from '@/components/MenuPermissionsManager.vue'
 import { gruppiUtenteService, type ApiMenuGruppoItem } from '@/services/gruppiUtenteService'
 import PageHeader from '@/components/PageHeader.vue'
-import MessageAlerts from '@/components/MessageAlerts.vue'
+import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import NavigationButtons from '@/components/NavigationButtons.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
@@ -331,6 +325,9 @@ const {
   editRoute: '/app/users',
   newRoute: '/app/users/new'
 })
+
+
+useMessageAlerts(errorMessage, successMessage)
 
 const submitted = ref(false)
 

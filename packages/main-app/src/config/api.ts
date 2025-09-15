@@ -25,7 +25,7 @@ export const API_CONFIG = {
     menuGruppiUtente: '/api/gruppiutente/menuXGruppiUtente',
     aggiornaAbilitazioniGruppiUtente: '/api/gruppiutente/aggiornaAbilitazioniGruppiUtente', //POST
     gruppiUtente: '/api/gruppiutente', //GET,POST,PUT
-    deleteGruppiUtente: '/api/gruppiutente/by-key', //DELETE
+    deleteGruppiUtente: '/api/gruppiutente/by-key?codice=', //DELETE
 
     // Setting
     lingue: '/api/settings/lingue',
@@ -34,12 +34,15 @@ export const API_CONFIG = {
     // Accessi
     accessi: '/api/accessi', //GET,POST,PUT
     accessiSelect: '/api/accessi/select',
-    deleteAccessi: '/api/accessi/by-key', //DELETE
+    deleteAccessi: '/api/accessi/by-key?codice=', //DELETE
 
     // Filtri
     filtri: '/api/filtri', //GET,POST,PUT
     filtriSelect: '/api/filtri/select',
-    deleteFiltri: '/api/filtri/by-key', //DELETE
+    deleteFiltri: '/api/filtri/by-key?codice=', //DELETE
+
+    // Aziende
+    aziende: '/api/azienda', //GET,POST,PUT
 
     // Dipendente
     getCampiDipendente: '/api/dipendente/GetCampiDipendente',
