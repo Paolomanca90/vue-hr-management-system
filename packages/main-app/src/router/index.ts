@@ -19,6 +19,7 @@ import AccessoEdit from '@/views/AccessoEdit.vue'
 import Filtri from '@/views/Filtri.vue'
 import FiltroEdit from '@/views/FiltroEdit.vue'
 import Aziende from '@/views/Aziende.vue'
+import AziendaEdit from '@/views/AziendaEdit.vue'
 
 // Route statiche di base (sempre presenti)
 const staticRoutes: RouteRecordRaw[] = [
@@ -176,6 +177,32 @@ const appRoutes: RouteRecordRaw[] = [
     path: 'aziende',
     name: 'Aziende',
     component: Aziende,
+  },
+  {
+    path: 'aziende/new',
+    name: 'AziendaNew',
+    component: AziendaEdit,
+    meta: {
+      title: 'Nuova Azienda',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'aziende/:id/edit',
+    name: 'AziendaEdit',
+    component: AziendaEdit,
+    meta: {
+      title: 'Modifica Azienda',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      // Verifica che l'ID sia valido
+      if (to.params.id === 'new') {
+        next('/app/aziende/new')
+      } else {
+        next()
+      }
+    }
   },
   {
     path: 'payroll',

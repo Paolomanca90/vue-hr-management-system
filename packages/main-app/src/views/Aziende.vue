@@ -153,7 +153,8 @@ const addNewAzienda = (): void => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const onRowSelect = (event: any): void => {
-  console.log('Azienda selezionata:', event.data)
+  const azienda = event.data as Azienda
+  router.push(`/app/aziende/${azienda.codAzi}/edit`)
 }
 
 const bulkActions = (): void => {
