@@ -20,6 +20,12 @@ import Filtri from '@/views/Filtri.vue'
 import FiltroEdit from '@/views/FiltroEdit.vue'
 import Aziende from '@/views/Aziende.vue'
 import AziendaEdit from '@/views/AziendaEdit.vue'
+import Sedi from '@/views/Sedi.vue'
+import SedeEdit from '@/views/SedeEdit.vue'
+import CentriCosto from '@/views/CentriCosto.vue'
+import CentroCostoEdit from '@/views/CentroCostoEdit.vue'
+import Reparti from '@/views/Reparti.vue'
+import RepartoEdit from '@/views/RepartoEdit.vue'
 
 // Route statiche di base (sempre presenti)
 const staticRoutes: RouteRecordRaw[] = [
@@ -199,6 +205,99 @@ const appRoutes: RouteRecordRaw[] = [
       // Verifica che l'ID sia valido
       if (to.params.id === 'new') {
         next('/app/aziende/new')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: 'sedi',
+    name: 'Sedi',
+    component: Sedi,
+  },
+  {
+    path: 'sedi/new',
+    name: 'SedeNew',
+    component: SedeEdit,
+    meta: {
+      title: 'Nuova Sede',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'sedi/:id/edit',
+    name: 'SedeEdit',
+    component: SedeEdit,
+    meta: {
+      title: 'Modifica Sede',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      // Verifica che l'ID sia valido
+      if (to.params.id === 'new') {
+        next('/app/sedi/new')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: 'centri-costo',
+    name: 'CentriCosto',
+    component: CentriCosto,
+  },
+  {
+    path: 'centri-costo/new',
+    name: 'CentroCostoNew',
+    component: CentroCostoEdit,
+    meta: {
+      title: 'Nuovo Centro di Costo',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'centri-costo/:codAzi/:codCenCo/edit',
+    name: 'CentroCostoEdit',
+    component: CentroCostoEdit,
+    meta: {
+      title: 'Modifica Centro di Costo',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      // Verifica che i parametri siano validi
+      if (to.params.codAzi === 'new' || to.params.codCenCo === 'new') {
+        next('/app/centri-costo/new')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: 'reparti',
+    name: 'Reparti',
+    component: Reparti,
+  },
+  {
+    path: 'reparti/new',
+    name: 'RepartoNew',
+    component: RepartoEdit,
+    meta: {
+      title: 'Nuovo Reparto',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'reparti/:codAzi/:codReparto/edit',
+    name: 'RepartoEdit',
+    component: RepartoEdit,
+    meta: {
+      title: 'Modifica Reparto',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      // Verifica che i parametri siano validi
+      if (to.params.codAzi === 'new' || to.params.codReparto === 'new') {
+        next('/app/reparti/new')
       } else {
         next()
       }

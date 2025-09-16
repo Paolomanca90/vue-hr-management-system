@@ -44,6 +44,15 @@ export const API_CONFIG = {
     // Aziende
     aziende: '/api/azienda', //GET,POST,PUT
 
+    // Sedi
+    sedi: '/api/sede', //GET,POST,PUT
+
+    // Centri di Costo
+    centriCosto: '/api/ccosto', //GET,POST,PUT,DELETE
+
+    // Reparti
+    reparti: '/api/reparto', //GET,POST,PUT,DELETE
+
     // Dipendente
     getCampiDipendente: '/api/dipendente/GetCampiDipendente',
     getValoriCampo: '/api/dipendente/GetValoriCampo'
