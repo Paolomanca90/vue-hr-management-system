@@ -49,10 +49,8 @@ class BaseService<T extends BaseEntity> {
       try {
         const errorData = await response.json()
         throw new Error(`${errorData.errors || errorData.message || `HTTP error! status: ${response.status}`}`)
-      } catch (parseError) {
-        console.error('Error parsing error response:', parseError)
-        const errorText = await response.text()
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
+      } catch (error) {
+        throw new Error(error instanceof Error ? error.message : `HTTP error! status: ${response.status}`)
       }
     }
 

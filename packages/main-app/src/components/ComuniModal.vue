@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isVisible" class="fixed inset-0 z-50 overflow-y-auto">
+  <div v-if="isVisible" class="fixed inset-0 z-[1000] overflow-y-auto">
     <!-- Backdrop -->
     <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" @click="closeModal"></div>
 
@@ -36,7 +36,30 @@
 
         <!-- Table -->
         <div class="max-h-96 overflow-y-auto">
-          <table class="w-full">
+          <!-- Loading state -->
+          <div v-if="loading" class="flex justify-center items-center py-12">
+            <div class="flex flex-col items-center space-y-3">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <span class="text-gray-500">Caricamento comuni...</span>
+            </div>
+          </div>
+
+          <!-- Error state -->
+          <div v-else-if="error" class="flex justify-center items-center py-12">
+            <div class="flex flex-col items-center space-y-3">
+              <FaIcon icon="exclamation-triangle" class="w-8 h-8 text-red-500" />
+              <span class="text-red-500">{{ error }}</span>
+              <button
+                @click="loadInitialData"
+                class="btn btn-sm btn-primary text-white"
+              >
+                Riprova
+              </button>
+            </div>
+          </div>
+
+          <!-- Data table -->
+          <table v-else class="w-full">
             <thead class="bg-gray-50 sticky top-0">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -73,11 +96,12 @@
                   {{ comune.provincia }}
                 </td>
               </tr>
-              <tr v-if="filteredComuni.length === 0">
+              <tr v-if="!loading && !error && filteredComuni.length === 0">
                 <td colspan="4" class="px-6 py-12 text-center text-gray-500">
                   <div class="flex flex-col items-center space-y-2">
                     <FaIcon icon="search" class="w-8 h-8 text-gray-300" />
                     <span>Nessun comune trovato</span>
+                    <span class="text-xs">Prova con un altro termine di ricerca</span>
                   </div>
                 </td>
               </tr>
@@ -100,21 +124,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
-
-export interface Comune {
-  codiceBelfiore: string
-  nome: string
-  cap: string
-  provincia: string
-}
+import { lookupService, type Comune } from '@/services/lookupService'
 
 interface Props {
   isVisible: boolean
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 
 const emit = defineEmits<{
   'close': []
@@ -122,42 +140,66 @@ const emit = defineEmits<{
 }>()
 
 const searchTerm = ref('')
+const comuni = ref<Comune[]>([])
+const loading = ref(false)
+const error = ref('')
 
-// Dati mockup per i comuni italiani (sample)
-const comuniMockup: Comune[] = [
-  { codiceBelfiore: 'A001', nome: 'Abano Terme', cap: '35031', provincia: 'PD' },
-  { codiceBelfiore: 'A002', nome: 'Abbadia Cerreto', cap: '26834', provincia: 'LO' },
-  { codiceBelfiore: 'A003', nome: 'Abbadia Lariana', cap: '23821', provincia: 'LC' },
-  { codiceBelfiore: 'A004', nome: 'Abbadia San Salvatore', cap: '53021', provincia: 'SI' },
-  { codiceBelfiore: 'A005', nome: 'Abbasanta', cap: '09071', provincia: 'OR' },
-  { codiceBelfiore: 'A006', nome: 'Abbateggio', cap: '65020', provincia: 'PE' },
-  { codiceBelfiore: 'A007', nome: 'Abbiategrasso', cap: '20081', provincia: 'MI' },
-  { codiceBelfiore: 'A008', nome: 'Abetone', cap: '51021', provincia: 'PT' },
-  { codiceBelfiore: 'A009', nome: 'Abriola', cap: '85010', provincia: 'PZ' },
-  { codiceBelfiore: 'A010', nome: 'Abruzzo', cap: '67010', provincia: 'AQ' },
-  { codiceBelfiore: 'F205', nome: 'Milano', cap: '20100', provincia: 'MI' },
-  { codiceBelfiore: 'H501', nome: 'Roma', cap: '00100', provincia: 'RM' },
-  { codiceBelfiore: 'D612', nome: 'Firenze', cap: '50100', provincia: 'FI' },
-  { codiceBelfiore: 'A662', nome: 'Bari', cap: '70100', provincia: 'BA' },
-  { codiceBelfiore: 'F839', nome: 'Napoli', cap: '80100', provincia: 'NA' },
-  { codiceBelfiore: 'L219', nome: 'Torino', cap: '10100', provincia: 'TO' },
-  { codiceBelfiore: 'C351', nome: 'Catania', cap: '95100', provincia: 'CT' },
-  { codiceBelfiore: 'A944', nome: 'Bologna', cap: '40100', provincia: 'BO' },
-  { codiceBelfiore: 'D969', nome: 'Genova', cap: '16100', provincia: 'GE' },
-  { codiceBelfiore: 'G273', nome: 'Palermo', cap: '90100', provincia: 'PA' }
-]
+const loadInitialData = async () => {
+  loading.value = true
+  error.value = ''
 
-const filteredComuni = computed(() => {
-  if (!searchTerm.value.trim()) {
-    return comuniMockup
+  try {
+    // Carica solo i primi 100 comuni (quelli che iniziano con A)
+    const result = await lookupService.getComuni('A')
+    comuni.value = result.slice(0, 100)
+  } catch (err) {
+    console.error('Error loading initial comuni:', err)
+    error.value = 'Errore nel caricamento dei comuni'
+  } finally {
+    loading.value = false
+  }
+}
+
+const searchComuni = async (term: string) => {
+  if (!term.trim()) {
+    await loadInitialData()
+    return
   }
 
-  const search = searchTerm.value.toLowerCase().trim()
-  return comuniMockup.filter(comune =>
-    comune.nome.toLowerCase().includes(search) ||
-    comune.codiceBelfiore.toLowerCase().includes(search) ||
-    comune.provincia.toLowerCase().includes(search)
-  )
+  loading.value = true
+  error.value = ''
+
+  try {
+    const result = await lookupService.searchComuni(term)
+    comuni.value = result
+  } catch (err) {
+    console.error('Error searching comuni:', err)
+    error.value = 'Errore nella ricerca'
+  } finally {
+    loading.value = false
+  }
+}
+
+const filteredComuni = computed(() => {
+  if (loading.value || error.value) return []
+  return comuni.value
+})
+
+// Debounce della ricerca
+let searchTimeout: number
+
+watch(searchTerm, (newTerm) => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    searchComuni(newTerm)
+  }, 300)
+})
+
+// Carica i dati quando il modal viene aperto
+watch(() => props.isVisible, (isVisible) => {
+  if (isVisible && comuni.value.length === 0) {
+    loadInitialData()
+  }
 })
 
 const selectComune = (comune: Comune) => {
@@ -169,6 +211,12 @@ const closeModal = () => {
   emit('close')
   searchTerm.value = ''
 }
+
+onMounted(() => {
+  if (props.isVisible) {
+    loadInitialData()
+  }
+})
 </script>
 
 <style scoped>

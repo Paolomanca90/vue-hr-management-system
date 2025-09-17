@@ -121,7 +121,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
-import ComuniModal, { type Comune } from './ComuniModal.vue'
+import ComuniModal from './ComuniModal.vue'
+import { lookupService, type Comune } from '@/services/lookupService'
 
 export interface AddressData {
   indirizzo: string
@@ -147,67 +148,48 @@ const emit = defineEmits<{
 
 const isModalVisible = ref(false)
 
-// Dati mockup comuni (stesso array del modale)
-const comuniMockup: Comune[] = [
-  { codiceBelfiore: 'A001', nome: 'Abano Terme', cap: '35031', provincia: 'PD' },
-  { codiceBelfiore: 'A002', nome: 'Abbadia Cerreto', cap: '26834', provincia: 'LO' },
-  { codiceBelfiore: 'A003', nome: 'Abbadia Lariana', cap: '23821', provincia: 'LC' },
-  { codiceBelfiore: 'A004', nome: 'Abbadia San Salvatore', cap: '53021', provincia: 'SI' },
-  { codiceBelfiore: 'A005', nome: 'Abbasanta', cap: '09071', provincia: 'OR' },
-  { codiceBelfiore: 'A006', nome: 'Abbateggio', cap: '65020', provincia: 'PE' },
-  { codiceBelfiore: 'A007', nome: 'Abbiategrasso', cap: '20081', provincia: 'MI' },
-  { codiceBelfiore: 'A008', nome: 'Abetone', cap: '51021', provincia: 'PT' },
-  { codiceBelfiore: 'A009', nome: 'Abriola', cap: '85010', provincia: 'PZ' },
-  { codiceBelfiore: 'A010', nome: 'Abruzzo', cap: '67010', provincia: 'AQ' },
-  { codiceBelfiore: 'F205', nome: 'Milano', cap: '20100', provincia: 'MI' },
-  { codiceBelfiore: 'H501', nome: 'Roma', cap: '00100', provincia: 'RM' },
-  { codiceBelfiore: 'D612', nome: 'Firenze', cap: '50100', provincia: 'FI' },
-  { codiceBelfiore: 'A662', nome: 'Bari', cap: '70100', provincia: 'BA' },
-  { codiceBelfiore: 'F839', nome: 'Napoli', cap: '80100', provincia: 'NA' },
-  { codiceBelfiore: 'L219', nome: 'Torino', cap: '10100', provincia: 'TO' },
-  { codiceBelfiore: 'C351', nome: 'Catania', cap: '95100', provincia: 'CT' },
-  { codiceBelfiore: 'A944', nome: 'Bologna', cap: '40100', provincia: 'BO' },
-  { codiceBelfiore: 'D969', nome: 'Genova', cap: '16100', provincia: 'GE' },
-  { codiceBelfiore: 'G273', nome: 'Palermo', cap: '90100', provincia: 'PA' }
-]
-
 const updateField = (field: keyof AddressData, value: string) => {
   const newValue = { ...props.modelValue, [field]: value }
   emit('update:modelValue', newValue)
 }
 
-const handleBelfioreBlur = () => {
+const handleBelfioreBlur = async () => {
   const codiceBelfiore = props.modelValue.codiceBelfiore?.trim().toUpperCase()
 
   if (!codiceBelfiore) {
     return
   }
 
-  // Cerca il comune per codice belfiore
-  const comune = comuniMockup.find(c => c.codiceBelfiore.toUpperCase() === codiceBelfiore)
+  try {
+    // Cerca il comune per codice belfiore usando l'API
+    const comune = await lookupService.getComuneByCode(codiceBelfiore)
 
-  if (comune) {
-    // Auto-compila i campi
-    const newValue: AddressData = {
-      ...props.modelValue,
-      codiceBelfiore: comune.codiceBelfiore,
-      comune: comune.nome,
-      cap: comune.cap,
-      provincia: comune.provincia
-    }
-    emit('update:modelValue', newValue)
-  } else {
-    // Codice non trovato
-    alert('Codice Belfiore non valido. Utilizza il pulsante di ricerca per selezionare un comune.')
+    if (comune) {
+      // Auto-compila i campi
+      const newValue: AddressData = {
+        ...props.modelValue,
+        codiceBelfiore: comune.codiceBelfiore,
+        comune: comune.nome,
+        cap: comune.cap,
+        provincia: comune.provincia
+      }
+      emit('update:modelValue', newValue)
+    } else {
+      // Codice non trovato
+      alert('Codice Belfiore non valido. Utilizza il pulsante di ricerca per selezionare un comune.')
 
-    // Reset dei campi auto-compilati
-    const newValue: AddressData = {
-      ...props.modelValue,
-      comune: '',
-      cap: '',
-      provincia: ''
+      // Reset dei campi auto-compilati
+      const newValue: AddressData = {
+        ...props.modelValue,
+        comune: '',
+        cap: '',
+        provincia: ''
+      }
+      emit('update:modelValue', newValue)
     }
-    emit('update:modelValue', newValue)
+  } catch (error) {
+    console.error('Errore nella ricerca del comune:', error)
+    alert('Errore nel recupero dei dati del comune. Riprova.')
   }
 }
 

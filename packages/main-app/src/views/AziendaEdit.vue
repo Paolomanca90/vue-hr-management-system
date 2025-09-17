@@ -53,7 +53,6 @@
         :anagrafica-fields="anagraficaFields"
         :saving="saving"
         :show-presenze-tab="isEditMode"
-        :presenze-data="presenzeData"
         @update:data="azienda = $event as unknown as FormAzienda"
         @tab-changed="handleTabChanged"
       >
@@ -128,94 +127,6 @@
           </div>
 
         </template>
-
-        <!-- Presenze -->
-        <template #presenze>
-          <div class="space-y-4">
-            <div class="flex justify-between items-center">
-              <h3 class="text-lg font-medium text-gray-900">Gestione Gruppi Presenza</h3>
-              <button
-                type="button"
-                class="btn btn-primary btn-sm text-white"
-                :disabled="saving"
-              >
-                <FaIcon icon="plus" class="mr-2" />
-                Aggiungi Gruppo
-              </button>
-            </div>
-
-            <div class="overflow-x-auto">
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Gruppo
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Codice
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Descrizione
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Azioni
-                    </th>
-                  </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                  <tr v-if="!presenzeData || presenzeData.length === 0">
-                    <td colspan="4" class="px-6 py-12 text-center text-gray-500">
-                      <div class="flex flex-col items-center space-y-3">
-                        <FaIcon icon="clock" class="text-4xl" />
-                        <span class="text-lg font-medium">Nessun gruppo presenza configurato</span>
-                        <span class="text-sm">Aggiungi il primo gruppo per iniziare</span>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr v-for="(gruppo, index) in presenzeData" :key="index" class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      Gruppo {{ index + 1 }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <input
-                        v-model="gruppo.codice"
-                        type="text"
-                        class="block w-full border-0 p-0 text-gray-900 placeholder-gray-500 focus:ring-0 sm:text-sm"
-                        placeholder="Codice..."
-                        :disabled="saving"
-                      />
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <input
-                        v-model="gruppo.descrizione"
-                        type="text"
-                        class="block w-full border-0 p-0 text-gray-900 placeholder-gray-500 focus:ring-0 sm:text-sm"
-                        placeholder="Descrizione..."
-                        :disabled="saving"
-                      />
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                      <button
-                        type="button"
-                        class="text-primary hover:text-primary-dark"
-                        :disabled="saving"
-                      >
-                        <FaIcon icon="edit" />
-                      </button>
-                      <button
-                        type="button"
-                        class="text-red-600 hover:text-red-900"
-                        :disabled="saving"
-                      >
-                        <FaIcon icon="trash" />
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </template>
       </DetailTabSelector>
     </form>
   </div>
@@ -278,7 +189,6 @@ const azienda = ref<FormAzienda>({
 
 const saving = ref(false)
 const loading = ref(false)
-const presenzeData = ref<Array<{ codice?: string; descrizione?: string }>>([])
 
 // Computed
 const isEditMode = computed(() => route.params.id !== 'new')
@@ -331,13 +241,6 @@ const loadAzienda = async () => {
           civico: response.numSede
         }
       }
-
-      presenzeData.value = [
-        { codice: String(response.codGrCau1), descrizione: response.abbreviazione1 },
-        { codice: String(response.codGrCau2), descrizione: response.abbreviazione2 },
-        { codice: String(response.codGrCau3), descrizione: response.abbreviazione3 },
-        { codice: String(response.codGrCau4), descrizione: response.abbreviazione4 }
-      ].filter(gruppo => gruppo.codice && gruppo.codice !== '0') // Filtra gruppi vuoti
     }
   } catch (error) {
     console.error('Errore nel caricamento azienda:', error)
@@ -361,14 +264,14 @@ const handleSave = async () => {
       comuSede: azienda.value.address.comune,
       provSede: azienda.value.address.provincia,
       codFisc: azienda.value.codFisc,
-      codGrCau1: Number(azienda.value.codGrCau1),
-      abbreviazione1: azienda.value.abbreviazione1,
-      codGrCau2: Number(azienda.value.codGrCau2),
-      abbreviazione2: azienda.value.abbreviazione2,
-      codGrCau3: Number(azienda.value.codGrCau3),
-      abbreviazione3: azienda.value.abbreviazione3,
-      codGrCau4: Number(azienda.value.codGrCau4),
-      abbreviazione4: azienda.value.abbreviazione4
+      codGrCau1: Number(azienda.value.codGrCau1) || 0,
+      abbreviazione1: azienda.value.abbreviazione1 || '',
+      codGrCau2: Number(azienda.value.codGrCau2) || 0,
+      abbreviazione2: azienda.value.abbreviazione2 || '',
+      codGrCau3: Number(azienda.value.codGrCau3) || 0,
+      abbreviazione3: azienda.value.abbreviazione3 || '',
+      codGrCau4: Number(azienda.value.codGrCau4) || 0,
+      abbreviazione4: azienda.value.abbreviazione4 || ''
     }
 
     if (isEditMode.value) {

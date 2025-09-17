@@ -123,36 +123,34 @@
                     Codice Gruppo
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Descrizione
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Azioni
+                    Abbreviazione
                   </th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-if="!presenzeData || presenzeData.length === 0">
-                  <td colspan="4" class="px-6 py-4 text-center text-gray-500">
-                    <div class="flex flex-col items-center space-y-2">
-                      <FaIcon icon="clock" class="text-2xl" />
-                      <span>Nessun dato presente</span>
-                    </div>
-                  </td>
-                </tr>
-                <tr v-for="(gruppo, index) in presenzeData" :key="index">
+                <tr v-for="index in 4" :key="index">
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    Gruppo {{ index + 1 }}
+                    Gruppo {{ index }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {{ gruppo.codice || '-' }}
+                    <input
+                      :value="data[`codGrCau${index}`] as string || ''"
+                      @input="updateData(`codGrCau${index}`, ($event.target as HTMLInputElement).value)"
+                      type="number"
+                      :placeholder="`Codice gruppo ${index}`"
+                      :disabled="saving"
+                      class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-2"
+                    />
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {{ gruppo.descrizione || '-' }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button class="text-primary hover:text-primary-dark">
-                      <FaIcon icon="edit" />
-                    </button>
+                    <input
+                      :value="data[`abbreviazione${index}`] as string || ''"
+                      @input="updateData(`abbreviazione${index}`, ($event.target as HTMLInputElement).value)"
+                      type="text"
+                      :placeholder="`Abbreviazione ${index}`"
+                      :disabled="saving"
+                      class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-2"
+                    />
                   </td>
                 </tr>
               </tbody>
@@ -207,15 +205,13 @@ interface Props {
   saving?: boolean
   showPresenzeTab?: boolean
   defaultTab?: string
-  presenzeData?: Array<{ codice?: string; descrizione?: string }>
 }
 
 const props = withDefaults(defineProps<Props>(), {
   customTabs: () => [],
   saving: false,
   showPresenzeTab: true,
-  defaultTab: 'anagrafica',
-  presenzeData: () => []
+  defaultTab: 'anagrafica'
 })
 
 const emit = defineEmits<{
