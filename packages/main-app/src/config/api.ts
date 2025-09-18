@@ -47,6 +47,9 @@ export const API_CONFIG = {
     // Sedi
     sedi: '/api/sede', //GET,POST,PUT
 
+    // Filiali
+    filiali: '/api/filiale', //GET,POST,PUT
+
     // Centri di Costo
     centriCosto: '/api/ccosto', //GET,POST,PUT,DELETE
 
@@ -55,11 +58,7 @@ export const API_CONFIG = {
 
     // Dipendente
     getCampiDipendente: '/api/dipendente/GetCampiDipendente',
-    getValoriCampo: '/api/dipendente/GetValoriCampo',
-
-    // Lookup
-    lookup: '/api/Lookup/get', //POST
-    lookupList: '/api/Lookup/getList', //POST
+    getValoriCampo: '/api/dipendente/GetValoriCampo'
   },
 
   // Headers di default

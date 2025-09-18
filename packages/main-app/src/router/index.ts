@@ -22,6 +22,8 @@ import Aziende from '@/views/Aziende.vue'
 import AziendaEdit from '@/views/AziendaEdit.vue'
 import Sedi from '@/views/Sedi.vue'
 import SedeEdit from '@/views/SedeEdit.vue'
+import Filiali from '@/views/Filiali.vue'
+import FilialeEdit from '@/views/FilialeEdit.vue'
 import CentriCosto from '@/views/CentriCosto.vue'
 import CentroCostoEdit from '@/views/CentroCostoEdit.vue'
 import Reparti from '@/views/Reparti.vue'
@@ -236,6 +238,37 @@ const appRoutes: RouteRecordRaw[] = [
       // Verifica che l'ID sia valido
       if (to.params.id === 'new') {
         next('/app/sedi/new')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: 'filiale',
+    name: 'Filiali',
+    component: Filiali,
+  },
+  {
+    path: 'filiale/new',
+    name: 'FilialeNew',
+    component: FilialeEdit,
+    meta: {
+      title: 'Nuova Filiale',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'filiale/:id/edit',
+    name: 'FilialeEdit',
+    component: FilialeEdit,
+    meta: {
+      title: 'Modifica Filiale',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      // Verifica che l'ID sia valido
+      if (to.params.id === 'new') {
+        next('/app/filiale/new')
       } else {
         next()
       }
