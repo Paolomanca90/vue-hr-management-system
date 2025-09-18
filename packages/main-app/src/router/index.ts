@@ -289,7 +289,7 @@ const appRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: 'centri-costo/:codAzi/:codCenCo/edit',
+    path: 'centri-costo/:id/edit',
     name: 'CentroCostoEdit',
     component: CentroCostoEdit,
     meta: {
@@ -297,8 +297,8 @@ const appRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
     },
     beforeEnter: (to, from, next) => {
-      // Verifica che i parametri siano validi
-      if (to.params.codAzi === 'new' || to.params.codCenCo === 'new') {
+      // Verifica che l'ID sia valido
+      if (to.params.id === 'new') {
         next('/app/centri-costo/new')
       } else {
         next()
@@ -320,7 +320,7 @@ const appRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: 'reparti/:codAzi/:codReparto/edit',
+    path: 'reparti/:id/edit',
     name: 'RepartoEdit',
     component: RepartoEdit,
     meta: {
@@ -328,8 +328,8 @@ const appRoutes: RouteRecordRaw[] = [
       requiresAuth: true,
     },
     beforeEnter: (to, from, next) => {
-      // Verifica che i parametri siano validi
-      if (to.params.codAzi === 'new' || to.params.codReparto === 'new') {
+      // Verifica che l'ID sia valido
+      if (to.params.id === 'new') {
         next('/app/reparti/new')
       } else {
         next()

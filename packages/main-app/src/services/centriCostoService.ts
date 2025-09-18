@@ -1,8 +1,16 @@
 import { getApiConfig } from '@/config/api'
-import { GenericCrudService } from './genericCrudService'
+import { CompositeKeyCrudService, type CompositeKeyEntity } from './compositeKeyCrudService'
 import { type CrudEntity } from '@/composables/useCrudView'
 
-export interface CentroCosto extends CrudEntity {
+// Interfacce per il server (senza ID composito)
+interface CentroCostoServer extends CrudEntity {
+  codAzi: number
+  codCenCo: string
+  descriz: string
+}
+
+// Interfacce per il frontend (con ID composito)
+export interface CentroCosto extends CompositeKeyEntity {
   codAzi: number
   codCenCo: string
   descriz: string
@@ -10,7 +18,7 @@ export interface CentroCosto extends CrudEntity {
 
 const config = getApiConfig()
 
-class CentriCostoService extends GenericCrudService<CentroCosto> {
+class CentriCostoService extends CompositeKeyCrudService<CentroCostoServer, CentroCosto> {
   constructor() {
     super({
       list: config.endpoints.centriCosto,
@@ -19,15 +27,39 @@ class CentriCostoService extends GenericCrudService<CentroCosto> {
     })
   }
 
+  protected generateCompositeId(entity: CentroCostoServer): string {
+    return `${entity.codAzi}-${entity.codCenCo}`
+  }
+
+  protected parseCompositeId(id: string): string[] {
+    return id.split('-')
+  }
+
+  protected clientToServer(entity: CentroCosto): CentroCostoServer {
+    return {
+      codAzi: entity.codAzi,
+      codCenCo: entity.codCenCo,
+      descriz: entity.descriz
+    }
+  }
+
+  protected serverToClient(entity: CentroCostoServer): CentroCosto {
+    return {
+      ...entity,
+      id: this.generateCompositeId(entity)
+    }
+  }
+
   async getCentriCosto(): Promise<CentroCosto[]> {
     return this.getAll()
   }
 
-  async getCentroCosto(codAzi: number, codCenCo: string): Promise<CentroCosto> {
-    return this.executeRequest<CentroCosto>({
-      method: 'GET',
-      customEndpoint: `${config.endpoints.centriCosto}/${codAzi}/${codCenCo}`
-    })
+  async getCentroCosto(id: string): Promise<CentroCosto> {
+    return this.getById(id)
+  }
+
+  async getCentroCostoByCompositeKey(codAzi: number, codCenCo: string): Promise<CentroCosto> {
+    return this.getCentroCosto(`${codAzi}-${codCenCo}`)
   }
 
   async addCentroCosto(centroCosto: CentroCosto): Promise<CentroCosto> {
@@ -38,11 +70,8 @@ class CentriCostoService extends GenericCrudService<CentroCosto> {
     return this.update(centroCosto)
   }
 
-  async deleteCentroCosto(codAzi: number, codCenCo: string): Promise<boolean> {
-    return this.executeRequest<boolean>({
-      method: 'DELETE',
-      customEndpoint: `${config.endpoints.centriCosto}/${codAzi}/${codCenCo}`
-    })
+  async deleteCentroCostoByCompositeKey(codAzi: number, codCenCo: string): Promise<boolean> {
+    return this.delete(`${codAzi}-${codCenCo}`)
   }
 }
 

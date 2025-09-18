@@ -26,14 +26,14 @@
           :columns="tableColumns"
           entity-name="Sede"
           entity-name-plural="Sedi"
-          id-field="codSede"
+          id-field="id"
           list-route="/app/sedi"
           edit-route="/app/sedi"
           new-route="/app/sedi/new"
-          :global-filter-fields="['codSede', 'ragSoc']"
-          search-placeholder="Cerca per codice sede o ragione sociale..."
+          :global-filter-fields="['codAzi', 'codSedeAz', 'descriz']"
+          search-placeholder="Cerca per codice azienda, codice sede o descrizione..."
           export-filename="sedi-sistema"
-          data-key="codSede"
+          data-key="id"
           filter-display="menu"
           scroll-height="600px"
           :virtual-scroller-options="{ itemSize: 40 }"
@@ -53,18 +53,23 @@
             </div>
           </template>
 
-          <!-- Slot personalizzato per la colonna codSede -->
-          <template #column-codSede="{ data, value }">
+          <!-- Slot personalizzato per la colonna codAzi -->
+          <template #column-codAzi="{ value }">
+            <span class="text-sm font-mono">{{ value !== "" ? value : '0' }}</span>
+          </template>
+
+          <!-- Slot personalizzato per la colonna codSedeAz -->
+          <template #column-codSedeAz="{ data, value }">
             <div class="flex items-center">
               <div>
-                <div class="font-medium">{{ value }}</div>
-                <div class="text-xs text-base-content/60 truncate max-w-[150px]">{{ data.ragSoc }}</div>
+                <div class="font-medium">{{ value !== "" ? value : '0' }}</div>
+                <div class="text-xs text-base-content/60 truncate max-w-[150px]">{{ data.descriz }}</div>
               </div>
             </div>
           </template>
 
-          <!-- Slot personalizzato per la colonna ragSoc -->
-          <template #column-ragSoc="{ value }">
+          <!-- Slot personalizzato per la colonna descriz -->
+          <template #column-descriz="{ value }">
             <span class="text-sm">{{ value }}</span>
           </template>
 
@@ -110,13 +115,13 @@ const {
 } = useCrudView<Sede>(sediService, {
   entityName: 'Sede',
   entityNamePlural: 'Sedi',
-  idField: 'codSede',
+  idField: 'codSedeAz',
   listRoute: '/app/sedi',
   editRoute: '/app/sedi',
   newRoute: '/app/sedi/new',
   deleteConfirmation: {
     title: 'Conferma eliminazione',
-    message: (sede) => `Sei sicuro di voler eliminare la sede \"${sede.ragSoc}\"?`,
+    message: (sede) => `Sei sicuro di voler eliminare la sede \"${sede.descriz}\"?`,
     warningText: 'Questa azione è irreversibile e potrebbe influenzare i dati che utilizzano questa sede.'
   }
 })
@@ -124,15 +129,22 @@ const {
 // Colonne semplificate
 const tableColumns = computed(() => [
   {
-    field: 'codSede',
-    header: 'Codice Sede',
+    field: 'codAzi',
+    header: 'Codice Azienda',
     sortable: true,
     filterable: true,
     filterMatchMode: 'contains'
   },
   {
-    field: 'ragSoc',
-    header: 'Ragione Sociale',
+    field: 'codSedeAz',
+    header: 'Codice Sede Az.',
+    sortable: true,
+    filterable: true,
+    filterMatchMode: 'contains'
+  },
+  {
+    field: 'descriz',
+    header: 'Descrizione',
     sortable: true,
     filterable: true,
     filterMatchMode: 'contains'
@@ -153,8 +165,7 @@ const addNewSede = (): void => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const onRowSelect = (event: any): void => {
-  const sede = event.data as Sede
-  router.push(`/app/sedi/${sede.codSede}/edit`)
+  console.log('Sede selezionata:', event.data)
 }
 
 const bulkActions = (): void => {
@@ -237,9 +248,5 @@ onMounted(() => {
 
 .btn.loading .loading-spinner {
   margin-right: 0.5rem;
-}
-
-code {
-  font-family: 'Courier New', monospace;
 }
 </style>

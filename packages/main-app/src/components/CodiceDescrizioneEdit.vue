@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts" generic="T extends Record<string, any>">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 
 const props = withDefaults(defineProps<{
   data: T
@@ -68,17 +68,26 @@ const emit = defineEmits<{
 }>()
 
 const internalData = ref<T>({ ...props.data } as T)
+const isUpdating = ref(false)
 
 const codiceFieldId = computed(() => props.codiceField)
 
 // Watch per sincronizzare i dati interni con quelli esterni
 watch(() => props.data, (newData) => {
-  internalData.value = { ...newData } as T
+  if (!isUpdating.value) {
+    isUpdating.value = true
+    internalData.value = { ...newData } as T
+    nextTick(() => {
+      isUpdating.value = false
+    })
+  }
 }, { deep: true })
 
 // Watch per emettere i cambiamenti
 watch(internalData, (newData) => {
-  emit('update:data', newData)
+  if (!isUpdating.value) {
+    emit('update:data', newData)
+  }
 }, { deep: true })
 </script>
 

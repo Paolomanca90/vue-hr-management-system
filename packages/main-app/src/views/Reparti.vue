@@ -26,14 +26,14 @@
           :columns="tableColumns"
           entity-name="Reparto"
           entity-name-plural="Reparti"
-          id-field="codReparto"
+          id-field="id"
           list-route="/app/reparti"
           edit-route="/app/reparti"
           new-route="/app/reparti/new"
-          :global-filter-fields="['codReparto', 'descriz', 'codAzi']"
-          search-placeholder="Cerca per codice, descrizione o azienda..."
+          :global-filter-fields="['codAzi', 'codReparto', 'descriz']"
+          search-placeholder="Cerca per codice azienda, codice reparto o descrizione..."
           export-filename="reparti-sistema"
-          data-key="codReparto"
+          data-key="id"
           filter-display="menu"
           scroll-height="600px"
           :virtual-scroller-options="{ itemSize: 40 }"
@@ -165,8 +165,7 @@ const addNewReparto = (): void => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const onRowSelect = (event: any): void => {
-  const reparto = event.data as Reparto
-  router.push(`/app/reparti/${reparto.codAzi}/${reparto.codReparto}/edit`)
+  console.log('Reparto selezionato:', event.data)
 }
 
 const bulkActions = (): void => {
@@ -249,9 +248,5 @@ onMounted(() => {
 
 .btn.loading .loading-spinner {
   margin-right: 0.5rem;
-}
-
-code {
-  font-family: 'Courier New', monospace;
 }
 </style>

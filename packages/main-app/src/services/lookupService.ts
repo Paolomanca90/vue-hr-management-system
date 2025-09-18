@@ -94,8 +94,7 @@ class LookupService {
     const searchLower = searchTerm.toLowerCase()
 
     return allComuni.filter(comune =>
-      comune.nome.toLowerCase().includes(searchLower) ||
-      comune.provincia.toLowerCase().includes(searchLower)
+      comune.nome.toLowerCase().includes(searchLower)
     )
   }
 }

@@ -26,14 +26,14 @@
           :columns="tableColumns"
           entity-name="Centro di Costo"
           entity-name-plural="Centri di Costo"
-          id-field="codCenCo"
+          id-field="id"
           list-route="/app/centri-costo"
           edit-route="/app/centri-costo"
           new-route="/app/centri-costo/new"
-          :global-filter-fields="['codCenCo', 'descriz', 'codAzi']"
-          search-placeholder="Cerca per codice, descrizione o azienda..."
+          :global-filter-fields="['codAzi', 'codCenCo', 'descriz']"
+          search-placeholder="Cerca per codice azienda, codice centro di costo o descrizione..."
           export-filename="centri-costo-sistema"
-          data-key="codCenCo"
+          data-key="id"
           filter-display="menu"
           scroll-height="600px"
           :virtual-scroller-options="{ itemSize: 40 }"
@@ -165,8 +165,7 @@ const addNewCentroCosto = (): void => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const onRowSelect = (event: any): void => {
-  const centroCosto = event.data as CentroCosto
-  router.push(`/app/centri-costo/${centroCosto.codAzi}/${centroCosto.codCenCo}/edit`)
+  console.log('Centro di costo selezionato:', event.data)
 }
 
 const bulkActions = (): void => {
@@ -249,9 +248,5 @@ onMounted(() => {
 
 .btn.loading .loading-spinner {
   margin-right: 0.5rem;
-}
-
-code {
-  font-family: 'Courier New', monospace;
 }
 </style>

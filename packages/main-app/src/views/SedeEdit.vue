@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `Modifica Sede: ${sede?.ragSoc || sede?.codSede}` : 'Nuova Sede'"
+      :title="isEditMode ? `Modifica Sede: ${sede?.descriz}` : 'Nuova Sede'"
       :description="isEditMode ? 'Modifica i dettagli della sede selezionata' : 'Crea una nuova sede nel sistema'"
     >
       <template #actions>
@@ -49,6 +49,7 @@
 
       <!-- Tab Selector -->
       <DetailTabSelector
+        :key="componentKey"
         :data="sede as any"
         :anagrafica-fields="anagraficaFields"
         :saving="saving"
@@ -61,32 +62,46 @@
           <div class="grid grid-cols-1 gap-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div class="space-y-2">
-                <label for="codSede" class="block text-sm font-medium text-gray-700">
-                  Codice Sede
+                <label for="codAzi" class="block text-sm font-medium text-gray-700">
+                  Codice Azienda
                 </label>
                 <input
-                  id="codSede"
-                  v-model="sede.codSede"
-                  type="text"
-                  placeholder="Inserisci codice sede"
+                  id="codAzi"
+                  v-model="sede.codAzi"
+                  type="number"
+                  placeholder="Inserisci codice azienda"
                   :disabled="saving || isEditMode"
                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
                 />
               </div>
 
               <div class="space-y-2">
-                <label for="ragSoc" class="block text-sm font-medium text-gray-700">
-                  Ragione Sociale
+                <label for="codSedeAz" class="block text-sm font-medium text-gray-700">
+                  Codice Sede Azienda
                 </label>
                 <input
-                  id="ragSoc"
-                  v-model="sede.ragSoc"
-                  type="text"
-                  placeholder="Inserisci ragione sociale"
-                  :disabled="saving"
+                  id="codSedeAz"
+                  v-model="sede.codSedeAz"
+                  type="number"
+                  placeholder="Inserisci codice sede azienda"
+                  :disabled="saving || isEditMode"
                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
                 />
               </div>
+            </div>
+
+            <div class="space-y-2">
+              <label for="descriz" class="block text-sm font-medium text-gray-700">
+                Descrizione
+              </label>
+              <input
+                id="descriz"
+                v-model="sede.descriz"
+                type="text"
+                placeholder="Inserisci descrizione sede"
+                :disabled="saving"
+                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
+              />
             </div>
 
             <!-- Componente Indirizzo -->
@@ -94,36 +109,6 @@
               v-model="sede.address"
               :disabled="saving"
             />
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div class="space-y-2">
-                <label for="codFisc" class="block text-sm font-medium text-gray-700">
-                  Codice Fiscale
-                </label>
-                <input
-                  id="codFisc"
-                  v-model="sede.codFisc"
-                  type="text"
-                  placeholder="Inserisci codice fiscale"
-                  :disabled="saving"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
-                />
-              </div>
-
-              <div class="space-y-2">
-                <label for="sigla" class="block text-sm font-medium text-gray-700">
-                  Sigla
-                </label>
-                <input
-                  id="sigla"
-                  v-model="sede.sigla"
-                  type="text"
-                  placeholder="Inserisci sigla sede"
-                  :disabled="saving"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
-                />
-              </div>
-            </div>
           </div>
 
         </template>
@@ -133,7 +118,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
@@ -149,18 +134,16 @@ const router = useRouter()
 
 // State per il form (tutti i campi come stringhe per l'input)
 interface FormSede {
-  codSede: string
-  ragSoc: string
-  sigla: string
-  codFisc: string
+  codAzi: string
+  codSedeAz: string
+  descriz: string
   address: AddressData
 }
 
 const sede = ref<FormSede>({
-  codSede: '',
-  ragSoc: '',
-  sigla: '',
-  codFisc: '',
+  codAzi: '',
+  codSedeAz: '',
+  descriz: '',
   address: {
     indirizzo: '',
     codiceBelfiore: '',
@@ -173,6 +156,7 @@ const sede = ref<FormSede>({
 
 const saving = ref(false)
 const loading = ref(false)
+const componentKey = ref(0)
 
 // Computed
 const isEditMode = computed(() => route.params.id !== 'new')
@@ -185,7 +169,7 @@ const isFormValid = computed(() => {
 const sedeNavigationConfig = {
   fetchAll: () => sediService.getSedi(),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getEntityId: (sede: any) => String(sede.codSede),
+  getEntityId: (sede: any) => sede.id,
   basePath: '/app/sedi',
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
   sortFn: (_a: any, _b: any) => 0
@@ -204,17 +188,16 @@ const loadSede = async () => {
     const response = await sediService.getSede(id)
     if (response) {
       sede.value = {
-        codSede: String(response.codSede),
-        ragSoc: response.ragSoc,
-        sigla: response.sigla,
-        codFisc: response.codFisc,
+        codAzi: String(response.codAzi),
+        codSedeAz: String(response.codSedeAz),
+        descriz: response.descriz,
         address: {
-          indirizzo: response.indirSede,
-          codiceBelfiore: '', // Da popolare se disponibile
-          comune: response.comuSede,
-          cap: String(response.capSede),
-          provincia: response.provSede,
-          civico: response.numSede
+          indirizzo: response.indirizzo,
+          codiceBelfiore: response.codComune, // Mapping
+          comune: response.localita,
+          cap: response.cap,
+          provincia: response.provincia,
+          civico: response.numCivico
         }
       }
     }
@@ -231,15 +214,16 @@ const handleSave = async () => {
   saving.value = true
   try {
     const sedeToSave: SedeDettaglio = {
-      codSede: Number(sede.value.codSede),
-      ragSoc: sede.value.ragSoc,
-      sigla: sede.value.sigla,
-      indirSede: sede.value.address.indirizzo,
-      numSede: sede.value.address.civico,
-      capSede: Number(sede.value.address.cap) || 0,
-      comuSede: sede.value.address.comune,
-      provSede: sede.value.address.provincia,
-      codFisc: sede.value.codFisc
+      id: `${sede.value.codAzi}-${sede.value.codSedeAz}`,
+      codAzi: Number(sede.value.codAzi),
+      codSedeAz: Number(sede.value.codSedeAz),
+      descriz: sede.value.descriz,
+      indirizzo: sede.value.address.indirizzo,
+      numCivico: sede.value.address.civico,
+      localita: sede.value.address.comune,
+      codComune: sede.value.address.codiceBelfiore,
+      cap: sede.value.address.cap,
+      provincia: sede.value.address.provincia
     }
 
     if (isEditMode.value) {
@@ -259,10 +243,13 @@ const handleSave = async () => {
 const handleDuplicate = () => {
   const duplicated = {
     ...sede.value,
-    codSede: '',
-    ragSoc: `${sede.value.ragSoc} - Copia`
+    codAzi: '',
+    codSedeAz: '',
+    descriz: `${sede.value.descriz} - Copia`
   }
-  sede.value = duplicated
+
+  // Salva i dati duplicati in sessionStorage
+  sessionStorage.setItem('duplicatedSedeData', JSON.stringify(duplicated))
   router.push('/app/sedi/new')
 }
 
@@ -277,10 +264,9 @@ const handleReset = () => {
     loadSede()
   } else {
     sede.value = {
-      codSede: '',
-      ragSoc: '',
-      sigla: '',
-      codFisc: '',
+      codAzi: '',
+      codSedeAz: '',
+      descriz: '',
       address: {
         indirizzo: '',
         codiceBelfiore: '',
@@ -308,9 +294,22 @@ watch(() => route.params.id, (newId, oldId) => {
   }
 }, { immediate: false })
 
-onMounted(() => {
+onMounted(async () => {
   if (isEditMode.value) {
     loadSede()
+  } else {
+    // Controlla se ci sono dati duplicati da caricare
+    const duplicatedDataStr = sessionStorage.getItem('duplicatedSedeData')
+    if (duplicatedDataStr) {
+      const duplicatedData = JSON.parse(duplicatedDataStr)
+      // Usa nextTick per assicurarti che il componente sia completamente montato
+      await nextTick()
+      sede.value = duplicatedData
+      // Forza il re-render del DetailTabSelector
+      componentKey.value++
+      // Rimuovi i dati dal sessionStorage dopo averli usati
+      sessionStorage.removeItem('duplicatedSedeData')
+    }
   }
 })
 </script>

@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted,  } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
@@ -90,8 +90,8 @@ const loading = ref(false)
 
 // Computed
 const isEditMode = computed(() => {
-  return route.params.codAzi !== undefined && route.params.codCenCo !== undefined &&
-         route.params.codAzi !== 'new' && route.params.codCenCo !== 'new'
+  // Se siamo su /centri-costo/new, non abbiamo route.params.id
+  return route.params.id !== 'new' && route.params.id !== undefined
 })
 
 const isFormValid = computed(() => {
@@ -104,7 +104,7 @@ const isFormValid = computed(() => {
 const centroCostoNavigationConfig = {
   fetchAll: () => centriCostoService.getCentriCosto(),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getEntityId: (centroCosto: any) => `${centroCosto.codAzi}/${centroCosto.codCenCo}`,
+  getEntityId: (centroCosto: any) => centroCosto.id,
   basePath: '/app/centri-costo',
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
   sortFn: (_a: any, _b: any) => 0
@@ -114,12 +114,11 @@ const centroCostoNavigationConfig = {
 const loadCentroCosto = async () => {
   if (!isEditMode.value) return
 
-  const codAzi = Number(route.params.codAzi)
-  const codCenCo = String(route.params.codCenCo)
+  const id = String(route.params.id)
   loading.value = true
 
   try {
-    const response = await centriCostoService.getCentroCosto(codAzi, codCenCo)
+    const response = await centriCostoService.getCentroCosto(id)
     if (response) {
       centroCosto.value = {
         codAzi: response.codAzi,
@@ -140,6 +139,7 @@ const handleSave = async () => {
   saving.value = true
   try {
     const centroCostoToSave: CentroCosto = {
+      id: `${centroCosto.value.codAzi}-${centroCosto.value.codCenCo}`,
       codAzi: centroCosto.value.codAzi,
       codCenCo: centroCosto.value.codCenCo,
       descriz: centroCosto.value.descriz
@@ -163,19 +163,21 @@ const goBack = () => {
 }
 
 const handleDuplicate = () => {
-  const duplicated = {
-    ...centroCosto.value,
-    codCenCo: '',
-    descriz: `${centroCosto.value.descriz} - Copia`
-  }
-  centroCosto.value = duplicated
-  router.push('/app/centri-costo/new')
+  // Naviga verso la pagina new con i dati correnti come parametri
+  router.push({
+    name: 'CentroCostoNew',
+    query: {
+      duplicate: route.params.id as string,
+      sourceCodAzi: String(centroCosto.value.codAzi),
+      sourceDescriz: centroCosto.value.descriz
+    }
+  })
 }
 
 const handleDelete = async () => {
   if (confirm('Sei sicuro di voler eliminare questo centro di costo?')) {
     try {
-      await centriCostoService.deleteCentroCosto(centroCosto.value.codAzi, centroCosto.value.codCenCo)
+      await centriCostoService.deleteCentroCostoByCompositeKey(centroCosto.value.codAzi, centroCosto.value.codCenCo)
       router.push('/app/centri-costo')
     } catch (error) {
       console.error('Errore nell\'eliminazione:', error)
@@ -192,19 +194,32 @@ const handleReset = () => {
       codCenCo: '',
       descriz: ''
     }
+    // Reset anche i query parameters se esistono
+    if (route.query.duplicate) {
+      router.replace({ name: 'CentroCostoNew' })
+    }
   }
 }
 
-// Watcher per ricaricare i dati quando cambiano i parametri nell'URL
-watch(() => [route.params.codAzi, route.params.codCenCo], ([newCodAzi, newCodCenCo], [oldCodAzi, oldCodCenCo]) => {
-  if ((newCodAzi !== oldCodAzi || newCodCenCo !== oldCodCenCo) && isEditMode.value) {
-    loadCentroCosto()
+const handleDuplicateMode = () => {
+  const duplicateId = route.query.duplicate as string
+  const sourceCodAzi = route.query.sourceCodAzi as string
+  const sourceDescriz = route.query.sourceDescriz as string
+
+  if (duplicateId && !isEditMode.value) {
+    centroCosto.value = {
+      codAzi: Number(sourceCodAzi) || 0,
+      codCenCo: '',
+      descriz: sourceDescriz ? `${sourceDescriz} - Copia` : ''
+    }
   }
-}, { immediate: false })
+}
 
 onMounted(() => {
   if (isEditMode.value) {
     loadCentroCosto()
+  } else {
+    handleDuplicateMode()
   }
 })
 </script>

@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
@@ -90,8 +90,8 @@ const loading = ref(false)
 
 // Computed
 const isEditMode = computed(() => {
-  return route.params.codAzi !== undefined && route.params.codReparto !== undefined &&
-         route.params.codAzi !== 'new' && route.params.codReparto !== 'new'
+  // Se siamo su /reparti/new, non abbiamo route.params.id
+  return route.params.id !== 'new' && route.params.id !== undefined
 })
 
 const isFormValid = computed(() => {
@@ -104,7 +104,7 @@ const isFormValid = computed(() => {
 const repartoNavigationConfig = {
   fetchAll: () => repartiService.getReparti(),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getEntityId: (reparto: any) => `${reparto.codAzi}/${reparto.codReparto}`,
+  getEntityId: (reparto: any) => reparto.id,
   basePath: '/app/reparti',
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
   sortFn: (_a: any, _b: any) => 0
@@ -114,12 +114,11 @@ const repartoNavigationConfig = {
 const loadReparto = async () => {
   if (!isEditMode.value) return
 
-  const codAzi = Number(route.params.codAzi)
-  const codReparto = String(route.params.codReparto)
+  const id = String(route.params.id)
   loading.value = true
 
   try {
-    const response = await repartiService.getReparto(codAzi, codReparto)
+    const response = await repartiService.getReparto(id)
     if (response) {
       reparto.value = {
         codAzi: response.codAzi,
@@ -140,6 +139,7 @@ const handleSave = async () => {
   saving.value = true
   try {
     const repartoToSave: Reparto = {
+      id: `${reparto.value.codAzi}-${reparto.value.codReparto}`,
       codAzi: reparto.value.codAzi,
       codReparto: reparto.value.codReparto,
       descriz: reparto.value.descriz
@@ -163,19 +163,21 @@ const goBack = () => {
 }
 
 const handleDuplicate = () => {
-  const duplicated = {
-    ...reparto.value,
-    codReparto: '',
-    descriz: `${reparto.value.descriz} - Copia`
-  }
-  reparto.value = duplicated
-  router.push('/app/reparti/new')
+  // Naviga verso la pagina new con i dati correnti come parametri
+  router.push({
+    name: 'RepartoNew',
+    query: {
+      duplicate: route.params.id as string,
+      sourceCodAzi: String(reparto.value.codAzi),
+      sourceDescriz: reparto.value.descriz
+    }
+  })
 }
 
 const handleDelete = async () => {
   if (confirm('Sei sicuro di voler eliminare questo reparto?')) {
     try {
-      await repartiService.deleteReparto(reparto.value.codAzi, reparto.value.codReparto)
+      await repartiService.deleteRepartoByCompositeKey(reparto.value.codAzi, reparto.value.codReparto)
       router.push('/app/reparti')
     } catch (error) {
       console.error('Errore nell\'eliminazione:', error)
@@ -195,16 +197,25 @@ const handleReset = () => {
   }
 }
 
-// Watcher per ricaricare i dati quando cambiano i parametri nell'URL
-watch(() => [route.params.codAzi, route.params.codReparto], ([newCodAzi, newCodReparto], [oldCodAzi, oldCodReparto]) => {
-  if ((newCodAzi !== oldCodAzi || newCodReparto !== oldCodReparto) && isEditMode.value) {
-    loadReparto()
+const handleDuplicateMode = () => {
+  const duplicateId = route.query.duplicate as string
+  const sourceCodAzi = route.query.sourceCodAzi as string
+  const sourceDescriz = route.query.sourceDescriz as string
+
+  if (duplicateId && !isEditMode.value) {
+    reparto.value = {
+      codAzi: Number(sourceCodAzi) || 0,
+      codReparto: '',
+      descriz: sourceDescriz ? `${sourceDescriz} - Copia` : ''
+    }
   }
-}, { immediate: false })
+}
 
 onMounted(() => {
   if (isEditMode.value) {
     loadReparto()
+  } else {
+    handleDuplicateMode()
   }
 })
 </script>
