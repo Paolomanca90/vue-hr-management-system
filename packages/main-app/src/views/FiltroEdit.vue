@@ -67,7 +67,7 @@ const loadFiltroData = async () => {
   clearMessages()
 
   try {
-    // Prima prova a recuperare dai dati del router state
+    // Prova a recuperare dai dati del router state
     const routerState = history.state?.filtroData
     if (routerState && routerState.codice === filtroId.value) {
       initialData.value = {
@@ -75,9 +75,8 @@ const loadFiltroData = async () => {
         descrizione: routerState.descrizione,
         formula: routerState.formula || ''
       }
-    }
-    // Fallback se non trovato
-    else {
+    } else {
+      // Fallback semplice
       initialData.value = {
         codice: filtroId.value,
         descrizione: `Filtro ${filtroId.value}`,
@@ -87,8 +86,7 @@ const loadFiltroData = async () => {
 
   } catch (error) {
     console.error('Errore nel caricamento del filtro:', error)
-    errorMessage.value = 'Errore nel caricamento dei dati del filtro'
-    // Fallback
+    errorMessage.value = 'I dati del filtro verranno caricati dalla lista'
     initialData.value = {
       codice: filtroId.value,
       descrizione: `Filtro ${filtroId.value}`,
@@ -106,8 +104,8 @@ const handleDuplicateMode = () => {
 
   if (duplicateCodice && !isEditMode.value) {
     initialData.value = {
-      codice: duplicateCodice || '',
-      descrizione: sourceDescrizione ? `Copia di ${sourceDescrizione}` : `Copia di ${duplicateCodice}`,
+      codice: '',
+      descrizione: sourceDescrizione || '',
       formula: sourceFormula || ''
     }
   }
@@ -125,7 +123,7 @@ const handleSave = async (data: any) => {
 
   try {
     const filtroData: Filtro = {
-      codice: data.nome,
+      codice: data.codice,
       descrizione: data.descrizione,
       formula: data.formula || ''
     }

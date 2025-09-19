@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `Modifica Centro di Costo: ${centroCosto.codCenCo}` : 'Nuovo Centro di Costo'"
+      :title="isEditMode ? `Modifica Centro di Costo: ${centroCosto.codCenco}` : 'Nuovo Centro di Costo'"
       :description="isEditMode ? 'Modifica i dettagli del centro di costo selezionato' : 'Crea un nuovo centro di costo nel sistema'"
     >
       <template #actions>
@@ -52,7 +52,7 @@
         v-model:data="centroCosto"
         :saving="saving"
         :is-edit-mode="isEditMode"
-        codice-field="codCenCo"
+        codice-field="codCenco"
         codice-label="Codice Centro"
       />
     </form>
@@ -75,13 +75,13 @@ const router = useRouter()
 // State per il form
 interface FormCentroCosto {
   codAzi: number
-  codCenCo: string
+  codCenco: string
   descriz: string
 }
 
 const centroCosto = ref<FormCentroCosto>({
   codAzi: 0,
-  codCenCo: '',
+  codCenco: '',
   descriz: ''
 })
 
@@ -96,7 +96,7 @@ const isEditMode = computed(() => {
 
 const isFormValid = computed(() => {
   return centroCosto.value.codAzi > 0 &&
-         centroCosto.value.codCenCo.trim() !== '' &&
+         centroCosto.value.codCenco.trim() !== '' &&
          centroCosto.value.descriz.trim() !== ''
 })
 
@@ -122,7 +122,7 @@ const loadCentroCosto = async () => {
     if (response) {
       centroCosto.value = {
         codAzi: response.codAzi,
-        codCenCo: response.codCenCo,
+        codCenco: response.codCenco,
         descriz: response.descriz
       }
     }
@@ -139,9 +139,9 @@ const handleSave = async () => {
   saving.value = true
   try {
     const centroCostoToSave: CentroCosto = {
-      id: `${centroCosto.value.codAzi}-${centroCosto.value.codCenCo}`,
+      id: `${centroCosto.value.codAzi}-${centroCosto.value.codCenco}`,
       codAzi: centroCosto.value.codAzi,
-      codCenCo: centroCosto.value.codCenCo,
+      codCenco: centroCosto.value.codCenco,
       descriz: centroCosto.value.descriz
     }
 
@@ -177,7 +177,7 @@ const handleDuplicate = () => {
 const handleDelete = async () => {
   if (confirm('Sei sicuro di voler eliminare questo centro di costo?')) {
     try {
-      await centriCostoService.deleteCentroCostoByCompositeKey(centroCosto.value.codAzi, centroCosto.value.codCenCo)
+      await centriCostoService.deleteCentroCostoByCompositeKey(centroCosto.value.codAzi, centroCosto.value.codCenco)
       router.push('/app/centri-costo')
     } catch (error) {
       console.error('Errore nell\'eliminazione:', error)
@@ -191,7 +191,7 @@ const handleReset = () => {
   } else {
     centroCosto.value = {
       codAzi: 0,
-      codCenCo: '',
+      codCenco: '',
       descriz: ''
     }
     // Reset anche i query parameters se esistono
@@ -209,7 +209,7 @@ const handleDuplicateMode = () => {
   if (duplicateId && !isEditMode.value) {
     centroCosto.value = {
       codAzi: Number(sourceCodAzi) || 0,
-      codCenCo: '',
+      codCenco: '',
       descriz: sourceDescriz ? `${sourceDescriz} - Copia` : ''
     }
   }

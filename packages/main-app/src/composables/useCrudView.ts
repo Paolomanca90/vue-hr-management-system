@@ -257,7 +257,8 @@ export function useCrudView<T extends CrudEntity>(
     const entityId = entity[idField as string]
 
     router.push({
-      path: `${options.editRoute}/${entityId}/edit`
+      path: `${options.editRoute}/${entityId}/edit`,
+      state: { [`${options.entityName.toLowerCase()}Data`]: JSON.parse(JSON.stringify(entity)) }
     })
   }
 

@@ -52,7 +52,7 @@
         :data="azienda as any"
         :anagrafica-fields="anagraficaFields"
         :saving="saving"
-        :show-presenze-tab="isEditMode"
+        :show-presenze-tab="isEditMode || !!route.query.duplicate"
         @update:data="azienda = $event as unknown as FormAzienda"
         @tab-changed="handleTabChanged"
       >
@@ -191,7 +191,7 @@ const saving = ref(false)
 const loading = ref(false)
 
 // Computed
-const isEditMode = computed(() => route.params.id !== 'new')
+const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
 const isFormValid = computed(() => {
   // Il form è sempre valido dato che tutti i campi sono opzionali nel DTO
   return true
@@ -289,13 +289,12 @@ const handleSave = async () => {
 
 
 const handleDuplicate = () => {
-  const duplicated = {
-    ...azienda.value,
-    codAzi: '',
-    ragSoc: `${azienda.value.ragSoc} - Copia`
-  }
-  azienda.value = duplicated
-  router.push('/app/aziende/new')
+  router.push({
+    name: 'AziendaNew',
+    query: {
+      duplicate: azienda.value.codAzi
+    }
+  })
 }
 
 const handleDelete = () => {
@@ -304,7 +303,46 @@ const handleDelete = () => {
   }
 }
 
-const handleReset = () => {
+const handleDuplicateMode = async () => {
+  const duplicateId = route.query.duplicate as string
+
+  if (duplicateId && !isEditMode.value) {
+    loading.value = true
+    try {
+      const response = await aziendeService.getAzienda(duplicateId)
+      if (response) {
+        azienda.value = {
+          codAzi: '', // Codice vuoto per il nuovo record
+          ragSoc: response.ragSoc,
+          sigla: response.sigla,
+          codFisc: response.codFisc,
+          codGrCau1: String(response.codGrCau1),
+          abbreviazione1: response.abbreviazione1,
+          codGrCau2: String(response.codGrCau2),
+          abbreviazione2: response.abbreviazione2,
+          codGrCau3: String(response.codGrCau3),
+          abbreviazione3: response.abbreviazione3,
+          codGrCau4: String(response.codGrCau4),
+          abbreviazione4: response.abbreviazione4,
+          address: {
+            indirizzo: response.indirSede,
+            codiceBelfiore: '',
+            comune: response.comuSede,
+            cap: String(response.capSede),
+            provincia: response.provSede,
+            civico: response.numSede
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Errore nel caricamento azienda per duplicate:', error)
+    } finally {
+      loading.value = false
+    }
+  }
+}
+
+const handleReset = async() => {
   if (isEditMode.value) {
     loadAzienda()
   } else {
@@ -330,6 +368,7 @@ const handleReset = () => {
         civico: ''
       }
     }
+    await handleDuplicateMode()
   }
 }
 
@@ -348,9 +387,18 @@ watch(() => route.params.id, (newId, oldId) => {
   }
 }, { immediate: false })
 
-onMounted(() => {
+// Watcher per gestire i cambiamenti nei query parameters (duplicate)
+watch(() => route.query.duplicate, async (newDuplicate) => {
+  if (newDuplicate && !isEditMode.value) {
+    await handleDuplicateMode()
+  }
+}, { immediate: false })
+
+onMounted(async () => {
   if (isEditMode.value) {
     loadAzienda()
+  } else {
+    await handleDuplicateMode()
   }
 })
 </script>

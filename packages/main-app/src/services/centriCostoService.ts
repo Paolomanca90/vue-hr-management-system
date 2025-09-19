@@ -5,14 +5,14 @@ import { type CrudEntity } from '@/composables/useCrudView'
 // Interfacce per il server (senza ID composito)
 interface CentroCostoServer extends CrudEntity {
   codAzi: number
-  codCenCo: string
+  codCenco: string
   descriz: string
 }
 
 // Interfacce per il frontend (con ID composito)
 export interface CentroCosto extends CompositeKeyEntity {
   codAzi: number
-  codCenCo: string
+  codCenco: string
   descriz: string
 }
 
@@ -28,7 +28,7 @@ class CentriCostoService extends CompositeKeyCrudService<CentroCostoServer, Cent
   }
 
   protected generateCompositeId(entity: CentroCostoServer): string {
-    return `${entity.codAzi}-${entity.codCenCo}`
+    return `${entity.codAzi}-${entity.codCenco}`
   }
 
   protected parseCompositeId(id: string): string[] {
@@ -38,7 +38,7 @@ class CentriCostoService extends CompositeKeyCrudService<CentroCostoServer, Cent
   protected clientToServer(entity: CentroCosto): CentroCostoServer {
     return {
       codAzi: entity.codAzi,
-      codCenCo: entity.codCenCo,
+      codCenco: entity.codCenco,
       descriz: entity.descriz
     }
   }

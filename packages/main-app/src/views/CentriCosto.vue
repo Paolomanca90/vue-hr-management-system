@@ -30,7 +30,7 @@
           list-route="/app/centri-costo"
           edit-route="/app/centri-costo"
           new-route="/app/centri-costo/new"
-          :global-filter-fields="['codAzi', 'codCenCo', 'descriz']"
+          :global-filter-fields="['codAzi', 'codCenco', 'descriz']"
           search-placeholder="Cerca per codice azienda, codice centro di costo o descrizione..."
           export-filename="centri-costo-sistema"
           data-key="id"
@@ -115,7 +115,7 @@ const {
 } = useCrudView<CentroCosto>(centriCostoService, {
   entityName: 'Centro di Costo',
   entityNamePlural: 'Centri di Costo',
-  idField: 'codCenCo',
+  idField: 'codCenco',
   listRoute: '/app/centri-costo',
   editRoute: '/app/centri-costo',
   newRoute: '/app/centri-costo/new',
@@ -136,7 +136,7 @@ const tableColumns = computed(() => [
     filterMatchMode: 'contains'
   },
   {
-    field: 'codCenCo',
+    field: 'codCenco',
     header: 'Codice Centro',
     sortable: true,
     filterable: true,

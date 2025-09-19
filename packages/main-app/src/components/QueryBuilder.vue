@@ -374,7 +374,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from './PageHeader.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
@@ -697,4 +697,11 @@ onMounted(async () => {
     await loadAvailableFields()
   }
 })
+
+// Watch per aggiornamenti di initialData
+watch(() => props.initialData, (newData) => {
+  if (newData) {
+    formData.value = { ...newData }
+  }
+}, { deep: true })
 </script>

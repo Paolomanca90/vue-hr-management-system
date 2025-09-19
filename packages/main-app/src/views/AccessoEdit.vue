@@ -70,7 +70,7 @@ const loadAccessoData = async () => {
   clearMessages()
 
   try {
-    // Prima prova a recuperare dai dati del router state
+    // Prova a recuperare dai dati del router state
     const routerState = history.state?.accessoData
     if (routerState && routerState.codice === accessoId.value) {
       initialData.value = {
@@ -78,9 +78,8 @@ const loadAccessoData = async () => {
         descrizione: routerState.descrizione,
         formula: routerState.formula || ''
       }
-    }
-    // Fallback se non trovato
-    else {
+    } else {
+      // Fallback semplice
       initialData.value = {
         codice: accessoId.value,
         descrizione: `Accesso ${accessoId.value}`,
@@ -90,8 +89,7 @@ const loadAccessoData = async () => {
 
   } catch (error) {
     console.error('Errore nel caricamento dell\'accesso:', error)
-    errorMessage.value = 'Errore nel caricamento dei dati dell\'accesso'
-    // Fallback
+    errorMessage.value = 'I dati dell\'accesso verranno caricati dalla lista'
     initialData.value = {
       codice: accessoId.value,
       descrizione: `Accesso ${accessoId.value}`,
@@ -109,8 +107,8 @@ const handleDuplicateMode = () => {
 
   if (duplicateCodice && !isEditMode.value) {
     initialData.value = {
-      codice: duplicateCodice || '',
-      descrizione: sourceDescrizione ? `Copia di ${sourceDescrizione}` : `Copia di ${duplicateCodice}`,
+      codice: '',
+      descrizione: sourceDescrizione || '',
       formula: sourceFormula || ''
     }
   }
