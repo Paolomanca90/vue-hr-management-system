@@ -20,6 +20,23 @@ export interface Comune {
   provincia: string
 }
 
+export const formatCap = (cap: string | null | undefined): string => {
+  if (!cap) return ''
+
+  // Converte sempre in stringa e rimuove spazi
+  const capString = String(cap).trim()
+
+  // Se la stringa è vuota, restituisce vuoto
+  if (capString.length === 0) return ''
+
+  // Se ha meno di 5 caratteri e sono tutti numeri, aggiunge zeri
+  if (capString.length < 5 && /^\d+$/.test(capString)) {
+    return capString.padStart(5, '0')
+  }
+
+  return capString
+}
+
 class LookupService {
   private config = getApiConfig()
   private baseService = createCrudMethods({
@@ -29,7 +46,7 @@ class LookupService {
   async getComuni(searchFilter?: string): Promise<Comune[]> {
     const request: LookupRequest = {
       tipo: 'comune',
-      chiavi: searchFilter ? { CODICE: `${searchFilter}%` } : {}
+      chiavi: searchFilter ? { codice: `${searchFilter}%` } : {}
     }
 
     try {
@@ -84,8 +101,8 @@ class LookupService {
       return this.getComuni()
     }
 
-    // Se è un codice belfiore (massimo 4 caratteri alfanumerici)
-    if (searchTerm.length <= 4 && /^[A-Z0-9]+$/i.test(searchTerm)) {
+    // Se è un codice belfiore (massimo 4 caratteri alfanumerici con almeno un numero)
+    if (searchTerm.length <= 4 && /^[A-Z0-9]+$/i.test(searchTerm) && /\d/.test(searchTerm)) {
       return this.getComuni(searchTerm.toUpperCase())
     }
 

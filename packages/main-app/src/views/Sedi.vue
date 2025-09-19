@@ -115,7 +115,7 @@ const {
 } = useCrudView<Sede>(sediService, {
   entityName: 'Sede',
   entityNamePlural: 'Sedi',
-  idField: 'codSedeAz',
+  idField: 'id',
   listRoute: '/app/sedi',
   editRoute: '/app/sedi',
   newRoute: '/app/sedi/new',

@@ -118,7 +118,7 @@
 
       <!-- Sezione Abilitazioni Menu Gruppo -->
       <MenuPermissionsManager
-        v-if="authStore.isCompanyUser && isEditMode"
+        v-if="authStore.isCompanyUser && (isEditMode || isDuplicateMode)"
         title="Abilitazioni Menu Gruppo"
         description="Configura i permessi predefiniti per tutti gli utenti del gruppo"
         :loading="loadingPermissions"
@@ -221,6 +221,7 @@ const menuGruppoData = ref<ApiMenuGruppoItem[]>([])
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
 const gruppoId = computed(() => route.params.id as string)
+const isDuplicateMode = computed(() => route.query.duplicate !== undefined)
 
 // Navigation configuration
 const gruppoNavigationConfig = {
@@ -511,7 +512,7 @@ const handleSubmit = async () => {
 }
 
 // Gestione duplicazione gruppo
-const handleDuplicateMode = () => {
+const handleDuplicateMode = async () => {
   const duplicateCodice = route.query.duplicate as string
   const sourceDescrizione = route.query.sourceDescrizione as string
 
@@ -520,6 +521,55 @@ const handleDuplicateMode = () => {
       codice: '',
       descrizione: sourceDescrizione ? `Copia di ${sourceDescrizione}` : `Copia di ${duplicateCodice}`
     }
+
+    // Carica i permessi del gruppo originale per duplicarli
+    if (authStore.isCompanyUser) {
+      await loadPermissionsForDuplication(duplicateCodice)
+    }
+  }
+}
+
+const loadPermissionsForDuplication = async (originalCodice: string) => {
+  loadingPermissions.value = true
+  permissionsError.value = ''
+
+  try {
+    // Carica i permessi del gruppo originale
+    const originalMenuData = await gruppiUtenteService.getMenuGruppoUtente(originalCodice)
+    if (originalMenuData && originalMenuData.length > 0) {
+      menuGruppoData.value = originalMenuData.map(item => ({
+        ...item,
+        codicE_GRUPPO: '' // Reset del codice gruppo per il nuovo gruppo
+      }))
+    } else {
+      // Se non ci sono permessi specifici, carica i menu base
+      const baseMenuData = await menuService.getMenuVisibili()
+      menuGruppoData.value = gruppiUtenteService.convertMenuToGroupMenu(
+        baseMenuData,
+        ''
+      )
+    }
+
+    // Inizializza i permessi dal gruppo originale
+    gruppoPermissions.value = gruppiUtenteService.initializePermissionsFromGroupData(menuGruppoData.value)
+
+  } catch (error) {
+    permissionsError.value = 'Errore nel caricamento dei permessi per la duplicazione: ' + error
+
+    // Fallback: carica i menu base
+    try {
+      const baseMenuData = await menuService.getMenuVisibili()
+      menuGruppoData.value = gruppiUtenteService.convertMenuToGroupMenu(
+        baseMenuData,
+        ''
+      )
+      gruppoPermissions.value = gruppiUtenteService.initializePermissionsFromGroupData(menuGruppoData.value)
+      permissionsError.value = ''
+    } catch (fallbackError) {
+      permissionsError.value = 'Errore nel caricamento dei menu: ' + fallbackError
+    }
+  } finally {
+    loadingPermissions.value = false
   }
 }
 
@@ -528,7 +578,7 @@ onMounted(async() => {
   if (isEditMode.value) {
     loadGruppoData()
   } else {
-    handleDuplicateMode()
+    await handleDuplicateMode()
   }
 })
 
@@ -543,7 +593,7 @@ watch(() => route.params.id, async () => {
       await loadGruppoData()
     } else {
       resetForm()
-      handleDuplicateMode()
+      await handleDuplicateMode()
     }
   }
 }, { immediate: true })

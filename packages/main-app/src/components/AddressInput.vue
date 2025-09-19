@@ -86,8 +86,11 @@
         <input
           id="cap"
           :value="modelValue.cap"
+          @input="updateCapField(($event.target as HTMLInputElement).value)"
+          @blur="formatCapField"
           type="text"
           placeholder="CAP"
+          maxlength="5"
           class="block w-full rounded-md border-gray-300 shadow-sm sm:text-sm p-[0.5em]"
         />
       </div>
@@ -122,7 +125,7 @@
 import { ref } from 'vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import ComuniModal from './ComuniModal.vue'
-import { lookupService, type Comune } from '@/services/lookupService'
+import { lookupService, formatCap, type Comune } from '@/services/lookupService'
 
 export interface AddressData {
   indirizzo: string
@@ -153,6 +156,22 @@ const updateField = (field: keyof AddressData, value: string) => {
   emit('update:modelValue', newValue)
 }
 
+const updateCapField = (value: string) => {
+  // Permette solo numeri
+  const numericValue = value.replace(/\D/g, '')
+  updateField('cap', numericValue)
+}
+
+const formatCapField = () => {
+  const cap = props.modelValue.cap
+  if (cap) {
+    const formattedCap = formatCap(cap)
+    if (formattedCap !== cap) {
+      updateField('cap', formattedCap)
+    }
+  }
+}
+
 const handleBelfioreBlur = async () => {
   const codiceBelfiore = props.modelValue.codiceBelfiore?.trim().toUpperCase()
 
@@ -165,12 +184,15 @@ const handleBelfioreBlur = async () => {
     const comune = await lookupService.getComuneByCode(codiceBelfiore)
 
     if (comune) {
+      // Formatta il CAP se necessario
+      const formattedCap = formatCap(comune.cap)
+
       // Auto-compila i campi
       const newValue: AddressData = {
         ...props.modelValue,
         codiceBelfiore: comune.codiceBelfiore,
         comune: comune.nome,
-        cap: comune.cap,
+        cap: formattedCap,
         provincia: comune.provincia
       }
       emit('update:modelValue', newValue)
@@ -204,11 +226,14 @@ const closeModal = () => {
 }
 
 const handleComuneSelected = (comune: Comune) => {
+  // Formatta il CAP se necessario
+  const formattedCap = formatCap(comune.cap)
+
   const newValue: AddressData = {
     ...props.modelValue,
     codiceBelfiore: comune.codiceBelfiore,
     comune: comune.nome,
-    cap: comune.cap,
+    cap: formattedCap,
     provincia: comune.provincia
   }
   emit('update:modelValue', newValue)

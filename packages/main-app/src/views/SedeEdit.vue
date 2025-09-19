@@ -159,7 +159,7 @@ const loading = ref(false)
 const componentKey = ref(0)
 
 // Computed
-const isEditMode = computed(() => route.params.id !== 'new')
+const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
 const isFormValid = computed(() => {
   // Il form è sempre valido dato che tutti i campi sono opzionali nel DTO
   return true
@@ -208,6 +208,36 @@ const loadSede = async () => {
   }
 }
 
+const loadSedeForDuplication = async (duplicateId: string) => {
+  loading.value = true
+
+  try {
+    const response = await sediService.getSede(duplicateId)
+    if (response) {
+      sede.value = {
+        codAzi: String(response.codAzi),
+        codSedeAz: '',
+        descriz: `${response.descriz} - Copia`,
+        address: {
+          indirizzo: response.indirizzo,
+          codiceBelfiore: response.codComune,
+          comune: response.localita,
+          cap: response.cap,
+          provincia: response.provincia,
+          civico: response.numCivico
+        }
+      }
+      // Forza il re-render del DetailTabSelector
+      await nextTick()
+      componentKey.value++
+    }
+  } catch (error) {
+    console.error('Errore nel caricamento sede per duplicazione:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
 const handleSave = async () => {
   if (!isFormValid.value) return
 
@@ -243,7 +273,6 @@ const handleSave = async () => {
 const handleDuplicate = () => {
   const duplicated = {
     ...sede.value,
-    codAzi: '',
     codSedeAz: '',
     descriz: `${sede.value.descriz} - Copia`
   }
@@ -298,17 +327,23 @@ onMounted(async () => {
   if (isEditMode.value) {
     loadSede()
   } else {
-    // Controlla se ci sono dati duplicati da caricare
-    const duplicatedDataStr = sessionStorage.getItem('duplicatedSedeData')
-    if (duplicatedDataStr) {
-      const duplicatedData = JSON.parse(duplicatedDataStr)
-      // Usa nextTick per assicurarti che il componente sia completamente montato
-      await nextTick()
-      sede.value = duplicatedData
-      // Forza il re-render del DetailTabSelector
-      componentKey.value++
-      // Rimuovi i dati dal sessionStorage dopo averli usati
-      sessionStorage.removeItem('duplicatedSedeData')
+    // Controlla se ci sono parametri di query per la duplicazione (dal DataTableManager)
+    const duplicateId = route.query.duplicate
+    if (duplicateId && typeof duplicateId === 'string') {
+      await loadSedeForDuplication(duplicateId)
+    } else {
+      // Controlla se ci sono dati duplicati da caricare
+      const duplicatedDataStr = sessionStorage.getItem('duplicatedSedeData')
+      if (duplicatedDataStr) {
+        const duplicatedData = JSON.parse(duplicatedDataStr)
+        // Usa nextTick per assicurarti che il componente sia completamente montato
+        await nextTick()
+        sede.value = duplicatedData
+        // Forza il re-render del DetailTabSelector
+        componentKey.value++
+        // Rimuove i dati dal sessionStorage dopo averli usati
+        sessionStorage.removeItem('duplicatedSedeData')
+      }
     }
   }
 })

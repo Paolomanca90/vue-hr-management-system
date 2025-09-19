@@ -90,7 +90,7 @@
                   {{ comune.nome }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ comune.cap }}
+                  {{ formatCapForDisplay(comune.cap) }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {{ comune.provincia }}
@@ -126,7 +126,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
-import { lookupService, type Comune } from '@/services/lookupService'
+import { lookupService, formatCap, type Comune } from '@/services/lookupService'
 
 interface Props {
   isVisible: boolean
@@ -210,6 +210,12 @@ const selectComune = (comune: Comune) => {
 const closeModal = () => {
   emit('close')
   searchTerm.value = ''
+  // Reset dei dati per forzare il ricaricamento alla prossima apertura
+  comuni.value = []
+}
+
+const formatCapForDisplay = (cap: string): string => {
+  return formatCap(cap)
 }
 
 onMounted(() => {
