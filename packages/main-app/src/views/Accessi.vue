@@ -59,13 +59,8 @@
           </template>
 
           <!-- Slot personalizzato per la colonna codice -->
-          <template #column-codice="{ data, value }">
-            <div class="flex items-center">
-              <div>
-                <div class="font-medium">{{ value }}</div>
-                <div class="text-xs text-base-content/60 truncate max-w-[150px]">{{ data.descrizione }}</div>
-              </div>
-            </div>
+          <template #column-codice="{ value }">
+            <span class="text-sm">{{ value }}</span>
           </template>
 
           <!-- Slot personalizzato per la colonna descrizione -->

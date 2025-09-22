@@ -28,6 +28,10 @@ import CentriCosto from '@/views/CentriCosto.vue'
 import CentroCostoEdit from '@/views/CentroCostoEdit.vue'
 import Reparti from '@/views/Reparti.vue'
 import RepartoEdit from '@/views/RepartoEdit.vue'
+import Pat from '@/views/Pat.vue'
+import PatEdit from '@/views/PatEdit.vue'
+import PosizioniInps from '@/views/PosizioniInps.vue'
+import PosizioneInpsEdit from '@/views/PosizioneInpsEdit.vue'
 
 // Route statiche di base (sempre presenti)
 const staticRoutes: RouteRecordRaw[] = [
@@ -331,6 +335,68 @@ const appRoutes: RouteRecordRaw[] = [
       // Verifica che l'ID sia valido
       if (to.params.id === 'new') {
         next('/app/reparti/new')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: 'pat',
+    name: 'Pat',
+    component: Pat,
+  },
+  {
+    path: 'pat/new',
+    name: 'PatNew',
+    component: PatEdit,
+    meta: {
+      title: 'Nuova PAT',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'pat/:id/edit',
+    name: 'PatEdit',
+    component: PatEdit,
+    meta: {
+      title: 'Modifica PAT',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      // Verifica che l'ID sia valido
+      if (to.params.id === 'new') {
+        next('/app/pat/new')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: 'posizioni-inps',
+    name: 'PosizioniInps',
+    component: PosizioniInps,
+  },
+  {
+    path: 'posizioni-inps/new',
+    name: 'PosizioneInpsNew',
+    component: PosizioneInpsEdit,
+    meta: {
+      title: 'Nuova Posizione INPS',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'posizioni-inps/:id/edit',
+    name: 'PosizioneInpsEdit',
+    component: PosizioneInpsEdit,
+    meta: {
+      title: 'Modifica Posizione INPS',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      // Verifica che l'ID sia valido
+      if (to.params.id === 'new') {
+        next('/app/posizioni-inps/new')
       } else {
         next()
       }

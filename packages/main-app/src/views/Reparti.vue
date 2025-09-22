@@ -54,18 +54,13 @@
           </template>
 
           <!-- Slot personalizzato per la colonna codReparto -->
-          <template #column-codReparto="{ data, value }">
-            <div class="flex items-center">
-              <div>
-                <div class="font-medium">{{ value }}</div>
-                <div class="text-xs text-base-content/60 truncate max-w-[150px]">{{ data.descriz }}</div>
-              </div>
-            </div>
+          <template #column-codReparto="{ value }">
+            <span class="text-sm">{{ value }}</span>
           </template>
 
           <!-- Slot personalizzato per la colonna codAzi -->
           <template #column-codAzi="{ value }">
-            <span class="text-sm font-mono">{{ value }}</span>
+            <span class="text-sm">{{ value }}</span>
           </template>
 
           <!-- Slot personalizzato per la colonna descriz -->

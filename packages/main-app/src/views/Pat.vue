@@ -3,15 +3,15 @@
   <div class="space-y-6">
     <!-- Header -->
     <PageHeader
-      title="Gestione Sedi"
-      :description="`Gestisci le sedi del sistema - Totale: ${sedi.length} sedi`"
+      title="Gestione PAT"
+      :description="`Gestisci le Posizioni Assicurative Territoriali - Totale: ${pat.length} PAT`"
     >
       <template #actions>
-        <button class="max-md:w-full max-md:block btn btn-primary btn-sm text-white" @click="addNewSede">
+        <button class="max-md:w-full max-md:block btn btn-primary btn-sm text-white" @click="addNewPat">
           <FaIcon icon="plus" class="mr-2"/>
-          Nuova Sede
+          Nuova PAT
         </button>
-        <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm" @click="refreshSedi">
+        <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm" @click="refreshPat">
           <FaIcon icon="refresh" class="mr-2"/>
           Aggiorna
         </button>
@@ -22,17 +22,17 @@
       <div class="card-body max-md:p-3">
         <!-- Data Table Manager -->
         <DataTableManager
-          :service="sediService as unknown as FlexibleCrudService"
+          :service="patService as unknown as FlexibleCrudService"
           :columns="tableColumns"
-          entity-name="Sede"
-          entity-name-plural="Sedi"
+          entity-name="PAT"
+          entity-name-plural="PAT"
           id-field="id"
-          list-route="/app/sedi"
-          edit-route="/app/sedi"
-          new-route="/app/sedi/new"
-          :global-filter-fields="['codAzi', 'codSedeAz', 'descriz']"
-          search-placeholder="Cerca per codice azienda, codice sede o descrizione..."
-          export-filename="sedi-sistema"
+          list-route="/app/pat"
+          edit-route="/app/pat"
+          new-route="/app/pat/new"
+          :global-filter-fields="['codAzi', 'codicePat', 'pat', 'codCont']"
+          search-placeholder="Cerca per codice azienda, codice PAT, descrizione o codice contribuente..."
+          export-filename="pat-sistema"
           data-key="id"
           filter-display="menu"
           scroll-height="600px"
@@ -48,7 +48,7 @@
               </div>
               <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-[100]">
                 <li><a @click="bulkActions"><FaIcon icon="check-circle" class="mr-2" />Azioni Multiple</a></li>
-                <li><a @click="importSedi"><FaIcon icon="upload" class="mr-2" />Importa Sedi</a></li>
+                <li><a @click="importPat"><FaIcon icon="upload" class="mr-2" />Importa PAT</a></li>
               </ul>
             </div>
           </template>
@@ -58,13 +58,18 @@
             <span class="text-sm">{{ value !== "" ? value : '0' }}</span>
           </template>
 
-          <!-- Slot personalizzato per la colonna codSedeAz -->
-          <template #column-codSedeAz="{ value }">
+          <!-- Slot personalizzato per la colonna codicePat -->
+          <template #column-codicePat="{ value }">
             <span class="text-sm">{{ value !== "" ? value : '0' }}</span>
           </template>
 
-          <!-- Slot personalizzato per la colonna descriz -->
-          <template #column-descriz="{ value }">
+          <!-- Slot personalizzato per la colonna pat -->
+          <template #column-pat="{ value }">
+            <span class="text-sm">{{ value }}</span>
+          </template>
+
+          <!-- Slot personalizzato per la colonna codCont -->
+          <template #column-codCont="{ value }">
             <span class="text-sm">{{ value }}</span>
           </template>
 
@@ -72,17 +77,17 @@
           <template #empty>
             <div class="text-center py-12">
               <FaIcon icon="map-marker-alt" class="text-6xl text-gray-300 mb-4"/>
-              <h3 class="text-xl font-semibold text-base-content mb-2">Nessuna sede trovata</h3>
+              <h3 class="text-xl font-semibold text-base-content mb-2">Nessuna PAT trovata</h3>
               <p class="text-base-content/70 mb-4">
-                {{ hasSedi ? 'Prova a modificare i filtri di ricerca' : 'Non ci sono sedi nel sistema' }}
+                {{ hasPat ? 'Prova a modificare i filtri di ricerca' : 'Non ci sono PAT nel sistema' }}
               </p>
               <button
-                v-if="!hasSedi"
+                v-if="!hasPat"
                 class="btn btn-primary text-white"
-                @click="addNewSede"
+                @click="addNewPat"
               >
                 <FaIcon icon="plus" class="mr-2" />
-                Aggiungi Prima Sede
+                Aggiungi Prima PAT
               </button>
             </div>
           </template>
@@ -99,25 +104,25 @@ import { useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
 import DataTableManager from '@/components/DataTableManager.vue'
-import { sediService, type Sede } from '@/services/sediService'
+import { patService, type Pat } from '@/services/patService'
 import { useCrudView, type FlexibleCrudService } from '@/composables/useCrudView'
 
 const router = useRouter()
 
 const {
-  data: sedi,
-  loadData: loadSedi
-} = useCrudView<Sede>(sediService, {
-  entityName: 'Sede',
-  entityNamePlural: 'Sedi',
+  data: pat,
+  loadData: loadPat
+} = useCrudView<Pat>(patService, {
+  entityName: 'PAT',
+  entityNamePlural: 'PAT',
   idField: 'id',
-  listRoute: '/app/sedi',
-  editRoute: '/app/sedi',
-  newRoute: '/app/sedi/new',
+  listRoute: '/app/pat',
+  editRoute: '/app/pat',
+  newRoute: '/app/pat/new',
   deleteConfirmation: {
     title: 'Conferma eliminazione',
-    message: (sede) => `Sei sicuro di voler eliminare la sede \"${sede.descriz}\"?`,
-    warningText: 'Questa azione è irreversibile e potrebbe influenzare i dati che utilizzano questa sede.'
+    message: (pat) => `Sei sicuro di voler eliminare la PAT \"${pat.pat}\"?`,
+    warningText: 'Questa azione è irreversibile e potrebbe influenzare i dati che utilizzano questa PAT.'
   }
 })
 
@@ -131,36 +136,43 @@ const tableColumns = computed(() => [
     filterMatchMode: 'contains'
   },
   {
-    field: 'codSedeAz',
-    header: 'Codice Sede Az.',
+    field: 'codicePat',
+    header: 'Codice PAT',
     sortable: true,
     filterable: true,
     filterMatchMode: 'contains'
   },
   {
-    field: 'descriz',
-    header: 'Descrizione',
+    field: 'pat',
+    header: 'Descrizione PAT',
+    sortable: true,
+    filterable: true,
+    filterMatchMode: 'contains'
+  },
+  {
+    field: 'codCont',
+    header: 'Codice Contribuente',
     sortable: true,
     filterable: true,
     filterMatchMode: 'contains'
   }
 ])
 
-const hasSedi = computed(() => {
-  return sedi.value.length > 0
+const hasPat = computed(() => {
+  return pat.value.length > 0
 })
 
-const refreshSedi = (): void => {
-  loadSedi()
+const refreshPat = (): void => {
+  loadPat()
 }
 
-const addNewSede = (): void => {
-  router.push('/app/sedi/new')
+const addNewPat = (): void => {
+  router.push('/app/pat/new')
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const onRowSelect = (event: any): void => {
-  console.log('Sede selezionata:', event.data)
+  console.log('PAT selezionata:', event.data)
 }
 
 const bulkActions = (): void => {
@@ -168,13 +180,13 @@ const bulkActions = (): void => {
   // Implementare azioni multiple
 }
 
-const importSedi = (): void => {
-  console.log('Importa sedi')
-  // Implementare importazione sedi
+const importPat = (): void => {
+  console.log('Importa PAT')
+  // Implementare importazione PAT
 }
 
 onMounted(() => {
-  loadSedi()
+  loadPat()
 })
 </script>
 

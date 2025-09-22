@@ -22,7 +22,7 @@ export const API_CONFIG = {
     deleteUser: '/api/users/by-key?username=', //DELETE
 
     // Gruppi Utente
-    menuGruppiUtente: '/api/gruppiutente/menuXGruppiUtente',
+    menuGruppiUtente: '/api/gruppiutente/menuGruppiUtente',
     aggiornaAbilitazioniGruppiUtente: '/api/gruppiutente/aggiornaAbilitazioniGruppiUtente', //POST
     gruppiUtente: '/api/gruppiutente', //GET,POST,PUT
     deleteGruppiUtente: '/api/gruppiutente/by-key?codice=', //DELETE
@@ -55,6 +55,12 @@ export const API_CONFIG = {
 
     // Reparti
     reparti: '/api/reparto', //GET,POST,PUT,DELETE
+
+    // PAT (Posizioni Assicurative Territoriali)
+    pat: '/api/pat', //GET,POST,PUT,DELETE
+
+    // Posizioni INPS
+    posizioneInps: '/api/posizioneinps', //GET,POST,PUT,DELETE
 
     // Dipendente
     getCampiDipendente: '/api/dipendente/GetCampiDipendente',

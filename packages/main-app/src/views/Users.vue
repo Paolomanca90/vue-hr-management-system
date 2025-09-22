@@ -60,13 +60,10 @@
           </template>
 
           <!-- Slot personalizzato per la colonna username -->
-          <template #column-username="{ data, value }">
-            <div class="flex items-center">
-              <div>
-                <div class="font-medium">{{ value }}</div>
-                <div class="text-xs text-base-content/60">{{ data.nomecompleto }}</div>
-              </div>
-            </div>
+          <template #column-username="{ value }">
+            <span class="text-sm">
+              {{ value }}
+            </span>
           </template>
 
           <!-- Slot personalizzato per la colonna codgruppo -->

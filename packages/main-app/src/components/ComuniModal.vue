@@ -37,11 +37,8 @@
         <!-- Table -->
         <div class="max-h-96 overflow-y-auto">
           <!-- Loading state -->
-          <div v-if="loading" class="flex justify-center items-center py-12">
-            <div class="flex flex-col items-center space-y-3">
-              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <span class="text-gray-500">Caricamento comuni...</span>
-            </div>
+          <div v-if="loading">
+            <LoadingIndicator :loading="loading" message="Caricamento comuni..." />
           </div>
 
           <!-- Error state -->
@@ -126,6 +123,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
+import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import { lookupService, formatCap, type Comune } from '@/services/lookupService'
 
 interface Props {

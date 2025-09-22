@@ -118,7 +118,7 @@
               <!-- Lista Preferiti Collassabile -->
               <div
                 v-show="favoritesExpanded"
-                class="space-y-1 mb-4 overflow-hidden transition-all duration-300 ease-in-out"
+                class="space-y-1 mb-4 overflow-auto transition-all duration-300 ease-in-out"
                 :class="{
                   'max-h-96 opacity-100': favoritesExpanded,
                   'max-h-0 opacity-0': !favoritesExpanded

@@ -3,15 +3,15 @@
   <div class="space-y-6">
     <!-- Header -->
     <PageHeader
-      title="Gestione Sedi"
-      :description="`Gestisci le sedi del sistema - Totale: ${sedi.length} sedi`"
+      title="Gestione Posizioni INPS"
+      :description="`Gestisci le Posizioni INPS - Totale: ${posizioniInps.length} posizioni`"
     >
       <template #actions>
-        <button class="max-md:w-full max-md:block btn btn-primary btn-sm text-white" @click="addNewSede">
+        <button class="max-md:w-full max-md:block btn btn-primary btn-sm text-white" @click="addNewPosizioneInps">
           <FaIcon icon="plus" class="mr-2"/>
-          Nuova Sede
+          Nuova Posizione INPS
         </button>
-        <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm" @click="refreshSedi">
+        <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm" @click="refreshPosizioniInps">
           <FaIcon icon="refresh" class="mr-2"/>
           Aggiorna
         </button>
@@ -22,17 +22,17 @@
       <div class="card-body max-md:p-3">
         <!-- Data Table Manager -->
         <DataTableManager
-          :service="sediService as unknown as FlexibleCrudService"
+          :service="posizioneInpsService as unknown as FlexibleCrudService"
           :columns="tableColumns"
-          entity-name="Sede"
-          entity-name-plural="Sedi"
+          entity-name="Posizione INPS"
+          entity-name-plural="Posizioni INPS"
           id-field="id"
-          list-route="/app/sedi"
-          edit-route="/app/sedi"
-          new-route="/app/sedi/new"
-          :global-filter-fields="['codAzi', 'codSedeAz', 'descriz']"
-          search-placeholder="Cerca per codice azienda, codice sede o descrizione..."
-          export-filename="sedi-sistema"
+          list-route="/app/posizioni-inps"
+          edit-route="/app/posizioni-inps"
+          new-route="/app/posizioni-inps/new"
+          :global-filter-fields="['codAzi', 'posInps', 'matrInps']"
+          search-placeholder="Cerca per codice azienda, posizione INPS o matricola INPS..."
+          export-filename="posizioni-inps-sistema"
           data-key="id"
           filter-display="menu"
           scroll-height="600px"
@@ -48,7 +48,7 @@
               </div>
               <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-[100]">
                 <li><a @click="bulkActions"><FaIcon icon="check-circle" class="mr-2" />Azioni Multiple</a></li>
-                <li><a @click="importSedi"><FaIcon icon="upload" class="mr-2" />Importa Sedi</a></li>
+                <li><a @click="importPosizioniInps"><FaIcon icon="upload" class="mr-2" />Importa Posizioni INPS</a></li>
               </ul>
             </div>
           </template>
@@ -58,31 +58,31 @@
             <span class="text-sm">{{ value !== "" ? value : '0' }}</span>
           </template>
 
-          <!-- Slot personalizzato per la colonna codSedeAz -->
-          <template #column-codSedeAz="{ value }">
+          <!-- Slot personalizzato per la colonna posInps -->
+          <template #column-posInps="{ value }">
             <span class="text-sm">{{ value !== "" ? value : '0' }}</span>
           </template>
 
-          <!-- Slot personalizzato per la colonna descriz -->
-          <template #column-descriz="{ value }">
+          <!-- Slot personalizzato per la colonna matrInps -->
+          <template #column-matrInps="{ value }">
             <span class="text-sm">{{ value }}</span>
           </template>
 
           <!-- Empty state personalizzato -->
           <template #empty>
             <div class="text-center py-12">
-              <FaIcon icon="map-marker-alt" class="text-6xl text-gray-300 mb-4"/>
-              <h3 class="text-xl font-semibold text-base-content mb-2">Nessuna sede trovata</h3>
+              <FaIcon icon="id-card" class="text-6xl text-gray-300 mb-4"/>
+              <h3 class="text-xl font-semibold text-base-content mb-2">Nessuna Posizione INPS trovata</h3>
               <p class="text-base-content/70 mb-4">
-                {{ hasSedi ? 'Prova a modificare i filtri di ricerca' : 'Non ci sono sedi nel sistema' }}
+                {{ hasPosizioniInps ? 'Prova a modificare i filtri di ricerca' : 'Non ci sono posizioni INPS nel sistema' }}
               </p>
               <button
-                v-if="!hasSedi"
+                v-if="!hasPosizioniInps"
                 class="btn btn-primary text-white"
-                @click="addNewSede"
+                @click="addNewPosizioneInps"
               >
                 <FaIcon icon="plus" class="mr-2" />
-                Aggiungi Prima Sede
+                Aggiungi Prima Posizione INPS
               </button>
             </div>
           </template>
@@ -99,29 +99,29 @@ import { useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
 import DataTableManager from '@/components/DataTableManager.vue'
-import { sediService, type Sede } from '@/services/sediService'
+import { posizioneInpsService, type PosizioneInps } from '@/services/posizioneInpsService'
 import { useCrudView, type FlexibleCrudService } from '@/composables/useCrudView'
 
 const router = useRouter()
 
 const {
-  data: sedi,
-  loadData: loadSedi
-} = useCrudView<Sede>(sediService, {
-  entityName: 'Sede',
-  entityNamePlural: 'Sedi',
+  data: posizioniInps,
+  loadData: loadPosizioniInps
+} = useCrudView<PosizioneInps>(posizioneInpsService, {
+  entityName: 'Posizione INPS',
+  entityNamePlural: 'Posizioni INPS',
   idField: 'id',
-  listRoute: '/app/sedi',
-  editRoute: '/app/sedi',
-  newRoute: '/app/sedi/new',
+  listRoute: '/app/posizioni-inps',
+  editRoute: '/app/posizioni-inps',
+  newRoute: '/app/posizioni-inps/new',
   deleteConfirmation: {
     title: 'Conferma eliminazione',
-    message: (sede) => `Sei sicuro di voler eliminare la sede \"${sede.descriz}\"?`,
-    warningText: 'Questa azione è irreversibile e potrebbe influenzare i dati che utilizzano questa sede.'
+    message: (posizioneInps) => `Sei sicuro di voler eliminare la Posizione INPS \"${posizioneInps.posInps}\" dell'azienda ${posizioneInps.codAzi}?`,
+    warningText: 'Questa azione è irreversibile e potrebbe influenzare i dati che utilizzano questa posizione INPS.'
   }
 })
 
-// Colonne semplificate
+// Colonne della tabella
 const tableColumns = computed(() => [
   {
     field: 'codAzi',
@@ -131,36 +131,36 @@ const tableColumns = computed(() => [
     filterMatchMode: 'contains'
   },
   {
-    field: 'codSedeAz',
-    header: 'Codice Sede Az.',
+    field: 'posInps',
+    header: 'Posizione INPS',
     sortable: true,
     filterable: true,
     filterMatchMode: 'contains'
   },
   {
-    field: 'descriz',
-    header: 'Descrizione',
+    field: 'matrInps',
+    header: 'Matricola INPS',
     sortable: true,
     filterable: true,
     filterMatchMode: 'contains'
   }
 ])
 
-const hasSedi = computed(() => {
-  return sedi.value.length > 0
+const hasPosizioniInps = computed(() => {
+  return posizioniInps.value.length > 0
 })
 
-const refreshSedi = (): void => {
-  loadSedi()
+const refreshPosizioniInps = (): void => {
+  loadPosizioniInps()
 }
 
-const addNewSede = (): void => {
-  router.push('/app/sedi/new')
+const addNewPosizioneInps = (): void => {
+  router.push('/app/posizioni-inps/new')
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const onRowSelect = (event: any): void => {
-  console.log('Sede selezionata:', event.data)
+  console.log('Posizione INPS selezionata:', event.data)
 }
 
 const bulkActions = (): void => {
@@ -168,13 +168,13 @@ const bulkActions = (): void => {
   // Implementare azioni multiple
 }
 
-const importSedi = (): void => {
-  console.log('Importa sedi')
-  // Implementare importazione sedi
+const importPosizioniInps = (): void => {
+  console.log('Importa Posizioni INPS')
+  // Implementare importazione Posizioni INPS
 }
 
 onMounted(() => {
-  loadSedi()
+  loadPosizioniInps()
 })
 </script>
 

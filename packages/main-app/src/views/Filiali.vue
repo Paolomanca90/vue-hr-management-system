@@ -57,16 +57,6 @@
             <span class="text-sm">{{ value }}</span>
           </template>
 
-          <!-- Slot personalizzato per la colonna codAzi -->
-          <!-- <template #column-codAzi="{ data, value }">
-            <div class="flex items-center">
-              <div>
-                <div class="font-medium">{{ value }}</div>
-                <div class="text-xs text-base-content/60 truncate max-w-[150px]">{{ data.codAzi }}</div>
-              </div>
-            </div>
-          </template>-->
-
           <!-- Slot personalizzato per la colonna ragSoc -->
           <template #column-descriz="{ value }">
             <span class="text-sm">{{ value }}</span>
