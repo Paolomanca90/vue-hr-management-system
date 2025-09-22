@@ -26,14 +26,14 @@
           :columns="tableColumns"
           entity-name="Filiale"
           entity-name-plural="Filiali"
-          id-field="codAzi"
+          id-field="id"
           list-route="/app/filiale"
           edit-route="/app/filiale"
           new-route="/app/filiale/new"
-          :global-filter-fields="['codAzi', 'codCant']"
+          :global-filter-fields="['codAzi', 'codCant','descriz']"
           search-placeholder="Cerca per codice filiale o ragione sociale..."
           export-filename="filiali-sistema"
-          data-key="codAzi"
+          data-key="id"
           filter-display="menu"
           scroll-height="600px"
           :virtual-scroller-options="{ itemSize: 40 }"
@@ -52,16 +52,20 @@
               </ul>
             </div>
           </template>
+          <!-- Slot personalizzato per la colonna codAzi -->
+          <template #column-codAzi="{ value }">
+            <span class="text-sm">{{ value }}</span>
+          </template>
 
           <!-- Slot personalizzato per la colonna codAzi -->
-          <template #column-codAzi="{ data, value }">
+          <!-- <template #column-codAzi="{ data, value }">
             <div class="flex items-center">
               <div>
                 <div class="font-medium">{{ value }}</div>
-                <div class="text-xs text-base-content/60 truncate max-w-[150px]">{{ data.ragSoc }}</div>
+                <div class="text-xs text-base-content/60 truncate max-w-[150px]">{{ data.codAzi }}</div>
               </div>
             </div>
-          </template>
+          </template>-->
 
           <!-- Slot personalizzato per la colonna ragSoc -->
           <template #column-descriz="{ value }">
@@ -110,13 +114,13 @@ const {
 } = useCrudView<Filiale>(filialiService, {
   entityName: 'Filiale',
   entityNamePlural: 'Filiali',
-  idField: 'codAzi',
+  idField: 'id',
   listRoute: '/app/filiale',
   editRoute: '/app/filiale',
   newRoute: '/app/filiale/new',
   deleteConfirmation: {
     title: 'Conferma eliminazione',
-    message: (filiale) => `Sei sicuro di voler eliminare la filiale \"${filiale.ragSoc}\"?`,
+    message: (filiale) => `Sei sicuro di voler eliminare la filiale \"${filiale.descriz}\"?`,
     warningText: 'Questa azione è irreversibile e potrebbe influenzare i dati che utilizzano questa filiale.'
   }
 })
@@ -160,8 +164,7 @@ const addNewFiliale = (): void => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const onRowSelect = (event: any): void => {
-  const filiale = event.data as Filiale
-  router.push(`/app/filiale/${filiale.codAzi}/edit`)
+  console.log('Filiale selezionata:', event.data)
 }
 
 const bulkActions = (): void => {
