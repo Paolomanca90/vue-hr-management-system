@@ -45,7 +45,6 @@
           v-model="localValue[field2Key || '']"
           :type="field2Type"
           :placeholder="field2Placeholder"
-          :disabled="disabled"
           :required="field2Required"
           :maxlength="field2MaxLength"
           :class="field2Classes"
@@ -62,7 +61,6 @@
           v-model="localValue[field3Key || '']"
           :type="field3Type"
           :placeholder="field3Placeholder"
-          :disabled="disabled"
           :maxlength="field3MaxLength"
           :class="field3Classes"
         />

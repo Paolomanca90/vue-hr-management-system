@@ -59,7 +59,7 @@
           <CompanyEntityFormComponent
             v-model="patForm"
             :is-edit-mode="isEditMode"
-            :disabled="saving"
+            :disabled="saving || isEditMode"
             :company-display-text="selectedCompanyDisplay"
             field1-key="codicePat"
             field1-label="Codice"

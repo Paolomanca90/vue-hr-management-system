@@ -30,7 +30,7 @@
           list-route="/app/pat"
           edit-route="/app/pat"
           new-route="/app/pat/new"
-          :global-filter-fields="['codAzi', 'codicePat', 'pat', 'codCont']"
+          :global-filter-fields="['codAzi', 'codicePat', 'pat']"
           search-placeholder="Cerca per codice azienda, codice PAT, descrizione o codice contribuente..."
           export-filename="pat-sistema"
           data-key="id"
@@ -65,11 +65,6 @@
 
           <!-- Slot personalizzato per la colonna pat -->
           <template #column-pat="{ value }">
-            <span class="text-sm">{{ value }}</span>
-          </template>
-
-          <!-- Slot personalizzato per la colonna codCont -->
-          <template #column-codCont="{ value }">
             <span class="text-sm">{{ value }}</span>
           </template>
 
@@ -145,13 +140,6 @@ const tableColumns = computed(() => [
   {
     field: 'pat',
     header: 'Descrizione PAT',
-    sortable: true,
-    filterable: true,
-    filterMatchMode: 'contains'
-  },
-  {
-    field: 'codCont',
-    header: 'Codice Contribuente',
     sortable: true,
     filterable: true,
     filterMatchMode: 'contains'
