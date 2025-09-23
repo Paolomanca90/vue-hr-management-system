@@ -65,6 +65,8 @@ export const API_CONFIG = {
     // Dipendente
     getCampiDipendente: '/api/dipendente/GetCampiDipendente',
     getValoriCampo: '/api/dipendente/GetValoriCampo',
+    getListaDipendenti: '/api/dipendente/GetListaDipendenti', //POST
+    getDettaglioDipendente: '/api/dipendente/GetDettaglioDipendente', //POST
 
     // Lookup
     lookup: '/api/Lookup/get', //POST

@@ -32,6 +32,7 @@ import Pat from '@/views/Pat.vue'
 import PatEdit from '@/views/PatEdit.vue'
 import PosizioniInps from '@/views/PosizioniInps.vue'
 import PosizioneInpsEdit from '@/views/PosizioneInpsEdit.vue'
+import AnagraficaDipendente from '@/views/AnagraficaDipendente.vue'
 
 // Route statiche di base (sempre presenti)
 const staticRoutes: RouteRecordRaw[] = [
@@ -401,6 +402,15 @@ const appRoutes: RouteRecordRaw[] = [
         next()
       }
     }
+  },
+  {
+    path: 'anagrafica-dipendente',
+    name: 'AnagraficaDipendente',
+    component: AnagraficaDipendente,
+    meta: {
+      title: 'Anagrafica Dipendente',
+      requiresAuth: true,
+    },
   },
   {
     path: 'payroll',
