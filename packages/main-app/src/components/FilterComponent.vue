@@ -190,46 +190,30 @@
     </div>
 
     <!-- Modals -->
-    <FilterSelectionModal
-      v-if="showSedeModal"
+    <GenericModal
       :is-visible="showSedeModal"
-      :title="'Seleziona Sede'"
-      :items="filteredSedi"
-      :loading="loadingSedi"
-      :search-placeholder="'Cerca sede...'"
+      :config="sedeModalConfig"
       @close="closeSedeModal"
       @select="selectSede"
     />
 
-    <FilterSelectionModal
-      v-if="showFilialeModal"
+    <GenericModal
       :is-visible="showFilialeModal"
-      :title="'Seleziona Filiale'"
-      :items="filteredFiliali"
-      :loading="loadingFiliali"
-      :search-placeholder="'Cerca filiale...'"
+      :config="filialeModalConfig"
       @close="closeFilialeModal"
       @select="selectFiliale"
     />
 
-    <FilterSelectionModal
-      v-if="showRepartoModal"
+    <GenericModal
       :is-visible="showRepartoModal"
-      :title="'Seleziona Reparto'"
-      :items="filteredReparti"
-      :loading="loadingReparti"
-      :search-placeholder="'Cerca reparto...'"
+      :config="repartoModalConfig"
       @close="closeRepartoModal"
       @select="selectReparto"
     />
 
-    <FilterSelectionModal
-      v-if="showCentroCostoModal"
+    <GenericModal
       :is-visible="showCentroCostoModal"
-      :title="'Seleziona Centro di Costo'"
-      :items="filteredCentriCosto"
-      :loading="loadingCentriCosto"
-      :search-placeholder="'Cerca centro di costo...'"
+      :config="centroCostoModalConfig"
       @close="closeCentroCostoModal"
       @select="selectCentroCosto"
     />
@@ -245,7 +229,8 @@ import { filialiService, type Filiale } from '@/services/filialiService'
 import { repartiService, type Reparto } from '@/services/repartiService'
 import { centriCostoService, type CentroCosto } from '@/services/centriCostoService'
 import { useNotification } from '@/composables/useNotification'
-import FilterSelectionModal, { type FilterItem } from './FilterSelectionModal.vue'
+import GenericModal, { type ModalConfig } from './GenericModal.vue'
+import { filterModalConfigs } from '@/config/lookupConfigs'
 import { dipendenteService, type FiltriDipendente, type Dipendente } from '@/services/dipendenteService'
 
 export interface FilterData {
@@ -288,11 +273,11 @@ const showFilialeModal = ref(false)
 const showRepartoModal = ref(false)
 const showCentroCostoModal = ref(false)
 
-// Loading states
-const loadingSedi = ref(false)
-const loadingFiliali = ref(false)
-const loadingReparti = ref(false)
-const loadingCentriCosto = ref(false)
+// Loading states (unused but kept for potential future use)
+// const loadingSedi = ref(false)
+// const loadingFiliali = ref(false)
+// const loadingReparti = ref(false)
+// const loadingCentriCosto = ref(false)
 
 // Data
 const aziende = ref<Azienda[]>([])
@@ -317,6 +302,27 @@ const filteredReparti = computed(() =>
 const filteredCentriCosto = computed(() =>
   allCentriCosto.value.filter(centro => centro.codAzi === selectedAzienda.value)
 )
+
+// Modal configurations
+const sedeModalConfig = computed<ModalConfig>(() => ({
+  ...filterModalConfigs.sede,
+  loadData: async () => filteredSedi.value
+}))
+
+const filialeModalConfig = computed<ModalConfig>(() => ({
+  ...filterModalConfigs.filiale,
+  loadData: async () => filteredFiliali.value
+}))
+
+const repartoModalConfig = computed<ModalConfig>(() => ({
+  ...filterModalConfigs.reparto,
+  loadData: async () => filteredReparti.value
+}))
+
+const centroCostoModalConfig = computed<ModalConfig>(() => ({
+  ...filterModalConfigs.centroCosto,
+  loadData: async () => filteredCentriCosto.value
+}))
 
 // Methods
 const loadAziende = async () => {
@@ -363,7 +369,7 @@ const closeSedeModal = () => {
   showSedeModal.value = false
 }
 
-const selectSede = (sede: FilterItem) => {
+const selectSede = (sede: Record<string, unknown>) => {
   selectedSede.value = sede as Sede
   closeSedeModal()
 }
@@ -376,7 +382,7 @@ const closeFilialeModal = () => {
   showFilialeModal.value = false
 }
 
-const selectFiliale = (filiale: FilterItem) => {
+const selectFiliale = (filiale: Record<string, unknown>) => {
   selectedFiliale.value = filiale as Filiale
   closeFilialeModal()
 }
@@ -389,7 +395,7 @@ const closeRepartoModal = () => {
   showRepartoModal.value = false
 }
 
-const selectReparto = (reparto: FilterItem) => {
+const selectReparto = (reparto: Record<string, unknown>) => {
   selectedReparto.value = reparto as Reparto
   closeRepartoModal()
 }
@@ -402,7 +408,7 @@ const closeCentroCostoModal = () => {
   showCentroCostoModal.value = false
 }
 
-const selectCentroCosto = (centroCosto: FilterItem) => {
+const selectCentroCosto = (centroCosto: Record<string, unknown>) => {
   selectedCentroCosto.value = centroCosto as CentroCosto
   closeCentroCostoModal()
 }

@@ -9,7 +9,7 @@
         <!-- Header -->
         <div class="flex items-center justify-between p-6 border-b">
           <h3 class="text-lg font-semibold text-gray-900">
-            Seleziona Comune
+            {{ config.title }}
           </h3>
           <button
             @click="closeModal"
@@ -25,7 +25,7 @@
             <input
               v-model="searchTerm"
               type="text"
-              placeholder="Cerca per nome comune o codice belfiore..."
+              :placeholder="config.searchPlaceholder"
               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
             />
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -38,7 +38,7 @@
         <div class="max-h-96 overflow-y-auto">
           <!-- Loading state -->
           <div v-if="loading">
-            <LoadingIndicator :loading="loading" message="Caricamento comuni..." />
+            <LoadingIndicator :loading="loading" :message="loadingMessage" />
           </div>
 
           <!-- Error state -->
@@ -47,7 +47,7 @@
               <FaIcon icon="exclamation-triangle" class="w-8 h-8 text-red-500" />
               <span class="text-red-500">{{ error }}</span>
               <button
-                @click="loadInitialData"
+                @click="loadData"
                 class="btn btn-sm btn-primary text-white"
               >
                 Riprova
@@ -59,45 +59,36 @@
           <table v-else class="w-full">
             <thead class="bg-gray-50 sticky top-0">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Codice Belfiore
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Nome Comune
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  CAP
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Provincia
+                <th
+                  v-for="column in config.columns"
+                  :key="column.key"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  {{ column.label }}
                 </th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr
-                v-for="comune in filteredComuni"
-                :key="comune.codiceBelfiore"
-                @click="selectComune(comune)"
+                v-for="item in filteredData"
+                :key="getItemKey(item)"
+                @click="selectItem(item)"
                 class="hover:bg-gray-50 cursor-pointer transition-colors"
               >
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {{ comune.codiceBelfiore }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {{ comune.nome }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ formatCapForDisplay(comune.cap) }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {{ comune.provincia }}
+                <td
+                  v-for="column in config.columns"
+                  :key="column.key"
+                  class="px-6 py-4 whitespace-nowrap text-sm"
+                  :class="column.primary ? 'font-medium text-gray-900' : 'text-gray-500'"
+                >
+                  {{ formatColumnValue(item, column) }}
                 </td>
               </tr>
-              <tr v-if="!loading && !error && filteredComuni.length === 0">
-                <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+              <tr v-if="!loading && !error && filteredData.length === 0">
+                <td :colspan="config.columns.length" class="px-6 py-12 text-center text-gray-500">
                   <div class="flex flex-col items-center space-y-2">
                     <FaIcon icon="search" class="w-8 h-8 text-gray-300" />
-                    <span>Nessun comune trovato</span>
+                    <span>Nessun elemento trovato</span>
                     <span class="text-xs">Prova con un altro termine di ricerca</span>
                   </div>
                 </td>
@@ -124,101 +115,108 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import LoadingIndicator from '@/components/LoadingIndicator.vue'
-import { lookupService, formatCap, type Comune } from '@/services/lookupService'
+
+export interface ModalColumn {
+  key: string
+  label: string
+  primary?: boolean
+  formatter?: (value: unknown) => string
+}
+
+export interface ModalConfig {
+  title: string
+  searchPlaceholder: string
+  columns: ModalColumn[]
+  loadData: () => Promise<Record<string, unknown>[]>
+  searchFields: string[]
+  keyField?: string
+  loadingMessage?: string
+}
 
 interface Props {
   isVisible: boolean
+  config: ModalConfig
 }
 
 const props = defineProps<Props>()
 
 const emit = defineEmits<{
   'close': []
-  'select': [comune: Comune]
+  'select': [item: Record<string, unknown>]
 }>()
 
 const searchTerm = ref('')
-const comuni = ref<Comune[]>([])
+const data = ref<Record<string, unknown>[]>([])
 const loading = ref(false)
 const error = ref('')
 
-const loadInitialData = async () => {
+const loadingMessage = computed(() =>
+  props.config.loadingMessage || `Caricamento ${props.config.title.toLowerCase()}...`
+)
+
+const loadData = async () => {
   loading.value = true
   error.value = ''
 
   try {
-    // Carica solo i primi 100 comuni (quelli che iniziano con A)
-    const result = await lookupService.getComuni('A')
-    comuni.value = result.slice(0, 100)
+    const result = await props.config.loadData()
+    data.value = result
   } catch (err) {
-    console.error('Error loading initial comuni:', err)
-    error.value = 'Errore nel caricamento dei comuni'
+    console.error(`Error loading ${props.config.title}:`, err)
+    error.value = `Errore nel caricamento ${props.config.title.toLowerCase()}`
   } finally {
     loading.value = false
   }
 }
 
-const searchComuni = async (term: string) => {
-  if (!term.trim()) {
-    await loadInitialData()
-    return
-  }
-
-  loading.value = true
-  error.value = ''
-
-  try {
-    const result = await lookupService.searchComuni(term)
-    comuni.value = result
-  } catch (err) {
-    console.error('Error searching comuni:', err)
-    error.value = 'Errore nella ricerca'
-  } finally {
-    loading.value = false
-  }
-}
-
-const filteredComuni = computed(() => {
+const filteredData = computed(() => {
   if (loading.value || error.value) return []
-  return comuni.value
+
+  if (!searchTerm.value.trim()) {
+    return data.value
+  }
+
+  const searchLower = searchTerm.value.toLowerCase()
+  return data.value.filter(item =>
+    props.config.searchFields.some(field =>
+      String(item[field] || '').toLowerCase().includes(searchLower)
+    )
+  )
 })
 
-// Debounce della ricerca
-let searchTimeout: number
+const getItemKey = (item: Record<string, unknown>): string => {
+  const keyField = props.config.keyField || props.config.columns[0]?.key || 'id'
+  return String(item[keyField] || Math.random())
+}
 
-watch(searchTerm, (newTerm) => {
-  clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => {
-    searchComuni(newTerm)
-  }, 300)
-})
+const formatColumnValue = (item: Record<string, unknown>, column: ModalColumn): string => {
+  const value = item[column.key]
+  if (column.formatter) {
+    return column.formatter(value)
+  }
+  return String(value || '')
+}
 
 // Carica i dati quando il modal viene aperto
 watch(() => props.isVisible, (isVisible) => {
-  if (isVisible && comuni.value.length === 0) {
-    loadInitialData()
+  if (isVisible && data.value.length === 0) {
+    loadData()
   }
 })
 
-const selectComune = (comune: Comune) => {
-  emit('select', comune)
+const selectItem = (item: Record<string, unknown>) => {
+  emit('select', item)
   closeModal()
 }
 
 const closeModal = () => {
   emit('close')
   searchTerm.value = ''
-  // Reset dei dati per forzare il ricaricamento alla prossima apertura
-  comuni.value = []
-}
-
-const formatCapForDisplay = (cap: string): string => {
-  return formatCap(cap)
 }
 
 onMounted(() => {
   if (props.isVisible) {
-    loadInitialData()
+    loadData()
   }
 })
 </script>

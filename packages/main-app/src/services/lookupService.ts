@@ -20,6 +20,18 @@ export interface Comune {
   provincia: string
 }
 
+export interface GruppoCausaleResponse {
+  CODICE: string
+  CODICE_GRUPPO: string
+  ABBR: string
+}
+
+export interface GruppoCausale {
+  codice: string
+  codiceGruppo: string
+  abbreviazione: string
+}
+
 export const formatCap = (cap: string | null | undefined): string => {
   if (!cap) return ''
 
@@ -43,56 +55,70 @@ class LookupService {
     list: this.config.endpoints.lookup
   })
 
-  async getComuni(searchFilter?: string): Promise<Comune[]> {
+  // Metodi generici
+  async getList<T = Record<string, unknown>>(tipo: string, searchFilter?: Record<string, string>): Promise<T[]> {
     const request: LookupRequest = {
-      tipo: 'comune',
-      chiavi: searchFilter ? { codice: `${searchFilter}%` } : {}
+      tipo,
+      chiavi: searchFilter || {}
     }
 
     try {
-      const response = await this.baseService.customRequest<ComuneResponse[]>({
+      const response = await this.baseService.customRequest<T[]>({
         method: 'POST',
         customEndpoint: this.config.endpoints.lookupList,
         body: request
       })
 
-      return response.map(item => ({
-        codiceBelfiore: item.CODICE,
-        nome: item.COMUNE,
-        cap: item.CAP || '',
-        provincia: item.PROVINCIA
-      }))
+      return response
     } catch (error) {
-      console.error('Error fetching comuni:', error)
+      console.error(`Error fetching ${tipo}:`, error)
       throw error
     }
   }
 
-  async getComuneByCode(codice: string): Promise<Comune | null> {
+  async getListByCode<T = Record<string, unknown>>(tipo: string, codice: string, keyField: string = 'CODICE'): Promise<T | null> {
     const request: LookupRequest = {
-      tipo: 'comune',
-      chiavi: { CODICE: codice }
+      tipo,
+      chiavi: { [keyField]: codice }
     }
 
     try {
-      const response = await this.baseService.customRequest<ComuneResponse[]>({
+      const response = await this.baseService.customRequest<T[]>({
         method: 'POST',
         customEndpoint: this.config.endpoints.lookup,
         body: request
       })
 
-      if (response.length === 0) return null
-
-      const item = response[0]
-      return {
-        codiceBelfiore: item.CODICE,
-        nome: item.COMUNE,
-        cap: item.CAP || '',
-        provincia: item.PROVINCIA
-      }
+      return response.length > 0 ? response[0] : null
     } catch (error) {
-      console.error('Error fetching comune by code:', error)
+      console.error(`Error fetching ${tipo} by code:`, error)
       return null
+    }
+  }
+
+  async getComuni(searchFilter?: string): Promise<Comune[]> {
+    const filter = searchFilter ? { codice: `${searchFilter}%` } : undefined
+    const response = await this.getList<ComuneResponse>('comune', filter)
+
+    return response.map(item => ({
+      codiceBelfiore: item.CODICE,
+      nome: item.COMUNE,
+      cap: item.CAP || '',
+      provincia: item.PROVINCIA
+    }))
+  }
+
+
+  async getComuneByCode(codice: string): Promise<Comune | null> {
+    const response = await this.getListByCode<ComuneResponse>('comune', codice)
+
+    if (!response) return null
+
+    return {
+      codiceBelfiore: response.CODICE,
+      nome: response.COMUNE,
+      cap: response.CAP || '',
+      provincia: response.PROVINCIA
     }
   }
 
@@ -113,6 +139,28 @@ class LookupService {
     return allComuni.filter(comune =>
       comune.nome.toLowerCase().includes(searchLower)
     )
+  }
+
+  async getGruppiCausali(): Promise<GruppoCausale[]> {
+    const response = await this.getList<GruppoCausaleResponse>('gruppocausale')
+
+    return response.map(item => ({
+      codice: item.CODICE,
+      codiceGruppo: item.CODICE_GRUPPO,
+      abbreviazione: item.ABBR
+    }))
+  }
+
+  async getGruppoCausaleByCode(codice: string): Promise<GruppoCausale | null> {
+    const response = await this.getListByCode<GruppoCausaleResponse>('gruppocausale', codice)
+
+    if (!response) return null
+
+    return {
+      codice: response.CODICE,
+      codiceGruppo: response.CODICE_GRUPPO,
+      abbreviazione: response.ABBR
+    }
   }
 }
 

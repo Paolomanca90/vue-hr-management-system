@@ -112,49 +112,48 @@
       <!-- Foglio Presenze Tab -->
       <div v-if="activeTab === 'presenze'" class="space-y-6">
         <slot name="presenze" :data="data">
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Gruppo
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Codice Gruppo
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Abbreviazione
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="index in 4" :key="index">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    Gruppo {{ index }}
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <input
-                      :value="data[`codGrCau${index}`] as string || ''"
-                      @input="updateData(`codGrCau${index}`, ($event.target as HTMLInputElement).value)"
-                      type="number"
-                      :placeholder="`Codice gruppo ${index}`"
-                      :disabled="saving"
-                      class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-2"
-                    />
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <input
-                      :value="data[`abbreviazione${index}`] as string || ''"
-                      @input="updateData(`abbreviazione${index}`, ($event.target as HTMLInputElement).value)"
-                      type="text"
-                      :placeholder="`Abbreviazione ${index}`"
-                      :disabled="saving"
-                      class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-2"
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="space-y-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Configurazione Gruppi Causali</h3>
+
+            <!-- Gruppo 1 -->
+            <div class="flex gap-7 w-full items-end">
+              <h4 class="text-md font-medium text-gray-800 whitespace-nowrap">Gruppo 1</h4>
+              <GruppoCausaleInput
+                :model-value="getGruppoCausaleData(1)"
+                @update:model-value="updateGruppoCausaleData(1, $event)"
+                :disabled="saving"
+              />
+            </div>
+
+            <!-- Gruppo 2 -->
+            <div class="flex gap-7 w-full items-end">
+              <h4 class="text-md font-medium text-gray-800 whitespace-nowrap">Gruppo 2</h4>
+              <GruppoCausaleInput
+                :model-value="getGruppoCausaleData(2)"
+                @update:model-value="updateGruppoCausaleData(2, $event)"
+                :disabled="saving"
+              />
+            </div>
+
+            <!-- Gruppo 3 -->
+            <div class="flex gap-7 w-full items-end">
+              <h4 class="text-md font-medium text-gray-800 whitespace-nowrap">Gruppo 3</h4>
+              <GruppoCausaleInput
+                :model-value="getGruppoCausaleData(3)"
+                @update:model-value="updateGruppoCausaleData(3, $event)"
+                :disabled="saving"
+              />
+            </div>
+
+            <!-- Gruppo 4 -->
+            <div class="flex gap-7 w-full items-end">
+              <h4 class="text-md font-medium text-gray-800 whitespace-nowrap">Gruppo 4</h4>
+              <GruppoCausaleInput
+                :model-value="getGruppoCausaleData(4)"
+                @update:model-value="updateGruppoCausaleData(4, $event)"
+                :disabled="saving"
+              />
+            </div>
           </div>
         </slot>
       </div>
@@ -180,6 +179,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
+import GruppoCausaleInput, { type GruppoCausaleData } from './GruppoCausaleInput.vue'
 
 export interface AnagraficaField {
   key: string
@@ -235,6 +235,25 @@ const availableTabs = computed(() => {
 
 const updateData = (key: string, value: unknown) => {
   const newData = { ...props.data, [key]: value }
+  emit('update:data', newData)
+}
+
+const getGruppoCausaleData = (index: number): GruppoCausaleData => {
+  return {
+    codice: (props.data[`codice${index}`] as string) || '',
+    codiceGruppo: (props.data[`codGrCau${index}`] as string) || '',
+    abbreviazione: (props.data[`abbreviazione${index}`] as string) || ''
+  }
+}
+
+const updateGruppoCausaleData = (index: number, data: GruppoCausaleData) => {
+  const updates = {
+    [`codice${index}`]: data.codice,
+    [`codGrCau${index}`]: data.codiceGruppo,
+    [`abbreviazione${index}`]: data.abbreviazione
+  }
+
+  const newData = { ...props.data, ...updates }
   emit('update:data', newData)
 }
 
