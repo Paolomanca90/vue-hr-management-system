@@ -2,8 +2,8 @@
   <div class="space-y-6">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `Modifica Sede: ${sede?.ragSoc || sede?.codSede}` : 'Nuova Sede'"
-      :description="isEditMode ? 'Modifica i dettagli della sede selezionata' : 'Crea una nuova sede nel sistema'"
+      :title="isEditMode ? `Modifica Filiale: ${filiale?.descriz}` : 'Nuova Filiale'"
+      :description="isEditMode ? 'Modifica i dettagli della filiale selezionata' : 'Crea una nuova filiale nel sistema'"
     >
       <template #actions>
         <button
@@ -26,13 +26,13 @@
             <NavigationButtons
               :show-navigation="isEditMode"
               :disabled="saving"
-              entity-name="Sede"
-              :navigation-config="sedeNavigationConfig"
+              entity-name="Filiale"
+              :navigation-config="filialeNavigationConfig"
             />
 
             <!-- Azioni principali -->
             <ActionButtons
-              entity-name="Sede"
+              entity-name="Filiale"
               :is-edit-mode="isEditMode"
               :saving="saving"
               :is-form-valid="isFormValid"
@@ -49,11 +49,12 @@
 
       <!-- Tab Selector -->
       <DetailTabSelector
-        :data="sede as any"
+        :key="componentKey"
+        :data="filiale as any"
         :anagrafica-fields="anagraficaFields"
         :saving="saving"
         :show-presenze-tab="false"
-        @update:data="sede = $event as unknown as FormSede"
+        @update:data="filiale = $event as unknown as FormFiliale"
         @tab-changed="handleTabChanged"
       >
         <!-- Anagrafica -->
@@ -61,69 +62,53 @@
           <div class="grid grid-cols-1 gap-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div class="space-y-2">
-                <label for="codSede" class="block text-sm font-medium text-gray-700">
-                  Codice Sede
+                <label for="codAzi" class="block text-sm font-medium text-gray-700">
+                  Codice Azienda
                 </label>
                 <input
-                  id="codSede"
-                  v-model="sede.codSede"
-                  type="text"
-                  placeholder="Inserisci codice sede"
+                  id="codAzi"
+                  v-model="filiale.codAzi"
+                  type="number"
+                  placeholder="Inserisci codice azienda"
                   :disabled="saving || isEditMode"
                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
                 />
               </div>
 
               <div class="space-y-2">
-                <label for="ragSoc" class="block text-sm font-medium text-gray-700">
-                  Ragione Sociale
+                <label for="codCant" class="block text-sm font-medium text-gray-700">
+                  Codice Cantiere Filiale
                 </label>
                 <input
-                  id="ragSoc"
-                  v-model="sede.ragSoc"
-                  type="text"
-                  placeholder="Inserisci ragione sociale"
-                  :disabled="saving"
+                  id="codCant"
+                  v-model="filiale.codCant"
+                  type="number"
+                  placeholder="Inserisci codice cantiere"
+                  :disabled="saving || isEditMode"
                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
                 />
               </div>
+            </div>
+
+            <div class="space-y-2">
+              <label for="descriz" class="block text-sm font-medium text-gray-700">
+                Descrizione
+              </label>
+              <input
+                id="descriz"
+                v-model="filiale.descriz"
+                type="text"
+                placeholder="Inserisci descrizione filiale"
+                :disabled="saving"
+                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
+              />
             </div>
 
             <!-- Componente Indirizzo -->
             <AddressInput
-              v-model="sede.address"
+              v-model="filiale.address"
               :disabled="saving"
             />
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div class="space-y-2">
-                <label for="codFisc" class="block text-sm font-medium text-gray-700">
-                  Codice Fiscale
-                </label>
-                <input
-                  id="codFisc"
-                  v-model="sede.codFisc"
-                  type="text"
-                  placeholder="Inserisci codice fiscale"
-                  :disabled="saving"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
-                />
-              </div>
-
-              <div class="space-y-2">
-                <label for="sigla" class="block text-sm font-medium text-gray-700">
-                  Sigla
-                </label>
-                <input
-                  id="sigla"
-                  v-model="sede.sigla"
-                  type="text"
-                  placeholder="Inserisci sigla sede"
-                  :disabled="saving"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
-                />
-              </div>
-            </div>
           </div>
 
         </template>
@@ -133,7 +118,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
@@ -141,26 +126,24 @@ import ActionButtons from '@/components/ActionButtons.vue'
 import NavigationButtons from '@/components/NavigationButtons.vue'
 import DetailTabSelector from '@/components/DetailTabSelector.vue'
 import AddressInput, { type AddressData } from '@/components/AddressInput.vue'
-import { sediService, type SedeDettaglio } from '@/services/sediService'
+import { filialiService, type FilialeDettaglio } from '@/services/filialiService'
 import type { AnagraficaField } from '@/components/DetailTabSelector.vue'
 
 const route = useRoute()
 const router = useRouter()
 
 // State per il form (tutti i campi come stringhe per l'input)
-interface FormSede {
-  codSede: string
-  ragSoc: string
-  sigla: string
-  codFisc: string
+interface FormFiliale {
+  codAzi: string
+  codCant: string
+  descriz: string
   address: AddressData
 }
 
-const sede = ref<FormSede>({
-  codSede: '',
-  ragSoc: '',
-  sigla: '',
-  codFisc: '',
+const filiale = ref<FormFiliale>({
+  codAzi: '',
+  codCant: '',
+  descriz: '',
   address: {
     indirizzo: '',
     codiceBelfiore: '',
@@ -173,20 +156,21 @@ const sede = ref<FormSede>({
 
 const saving = ref(false)
 const loading = ref(false)
+const componentKey = ref(0)
 
 // Computed
-const isEditMode = computed(() => route.params.id !== 'new')
+const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
 const isFormValid = computed(() => {
   // Il form è sempre valido dato che tutti i campi sono opzionali nel DTO
   return true
 })
 
 // Navigation configuration
-const sedeNavigationConfig = {
-  fetchAll: () => sediService.getSedi(),
+const filialeNavigationConfig = {
+  fetchAll: () => filialiService.getSedi(),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getEntityId: (sede: any) => String(sede.codSede),
-  basePath: '/app/sedi',
+  getEntityId: (filiale: any) => filiale.id,
+  basePath: '/app/filiali',
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
   sortFn: (_a: any, _b: any) => 0
 }
@@ -194,32 +178,61 @@ const sedeNavigationConfig = {
 const anagraficaFields: AnagraficaField[] = []
 
 // Methods
-const loadSede = async () => {
+const loadFiliale = async () => {
   if (!isEditMode.value) return
 
   const id = String(route.params.id)
   loading.value = true
 
   try {
-    const response = await sediService.getSede(id)
+    const response = await filialiService.getFiliale(id)
     if (response) {
-      sede.value = {
-        codSede: String(response.codSede),
-        ragSoc: response.ragSoc,
-        sigla: response.sigla,
-        codFisc: response.codFisc,
+      filiale.value = {
+        codAzi: String(response.codAzi),
+        codCant: String(response.codCant),
+        descriz: response.descriz,
         address: {
-          indirizzo: response.indirSede,
-          codiceBelfiore: '', // Da popolare se disponibile
-          comune: response.comuSede,
-          cap: String(response.capSede),
-          provincia: response.provSede,
-          civico: response.numSede
+          indirizzo: response.indirizzo,
+          codiceBelfiore: response.codComune, // Mapping
+          comune: response.localita,
+          cap: response.cap,
+          provincia: response.provincia,
+          civico: response.numCivico
         }
       }
     }
   } catch (error) {
-    console.error('Errore nel caricamento sede:', error)
+    console.error('Errore nel caricamento filiale:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const loadFilialeForDuplication = async (duplicateId: string) => {
+  loading.value = true
+
+  try {
+    const response = await filialiService.getFiliale(duplicateId)
+    if (response) {
+      filiale.value = {
+        codAzi: String(response.codAzi),
+        codCant: String(response.codCant),
+        descriz: `${response.descriz} - Copia`,
+        address: {
+          indirizzo: response.indirizzo,
+          codiceBelfiore: response.codComune,
+          comune: response.localita,
+          cap: response.cap,
+          provincia: response.provincia,
+          civico: response.numCivico
+        }
+      }
+      // Forza il re-render del DetailTabSelector
+      await nextTick()
+      componentKey.value++
+    }
+  } catch (error) {
+    console.error('Errore nel caricamento filiale per duplicazione:', error)
   } finally {
     loading.value = false
   }
@@ -230,24 +243,25 @@ const handleSave = async () => {
 
   saving.value = true
   try {
-    const sedeToSave: SedeDettaglio = {
-      codSede: Number(sede.value.codSede),
-      ragSoc: sede.value.ragSoc,
-      sigla: sede.value.sigla,
-      indirSede: sede.value.address.indirizzo,
-      numSede: sede.value.address.civico,
-      capSede: Number(sede.value.address.cap) || 0,
-      comuSede: sede.value.address.comune,
-      provSede: sede.value.address.provincia,
-      codFisc: sede.value.codFisc
+    const filialeToSave: FilialeDettaglio = {
+      id: `${filiale.value.codAzi}-${filiale.value.codCant}`,
+      codAzi: Number(filiale.value.codAzi),
+      codCant: Number(filiale.value.codCant),
+      descriz: filiale.value.descriz,
+      indirizzo: filiale.value.address.indirizzo,
+      numCivico: filiale.value.address.civico,
+      localita: filiale.value.address.comune,
+      codComune: filiale.value.address.codiceBelfiore,
+      cap: filiale.value.address.cap,
+      provincia: filiale.value.address.provincia
     }
 
     if (isEditMode.value) {
-      await sediService.editSede(sedeToSave)
+      await filialiService.editFiliale(filialeToSave)
     } else {
-      await sediService.addSede(sedeToSave)
+      await filialiService.addFiliale(filialeToSave)
     }
-    router.push('/app/sedi')
+    router.push('/app/filiali')
   } catch (error) {
     console.error('Errore nel salvataggio:', error)
   } finally {
@@ -258,29 +272,30 @@ const handleSave = async () => {
 
 const handleDuplicate = () => {
   const duplicated = {
-    ...sede.value,
-    codSede: '',
-    ragSoc: `${sede.value.ragSoc} - Copia`
+    ...filiale.value,
+    codFilialeAz: '',
+    descriz: `${filiale.value.descriz} - Copia`
   }
-  sede.value = duplicated
-  router.push('/app/sedi/new')
+
+  // Salva i dati duplicati in sessionStorage
+  sessionStorage.setItem('duplicatedFilialeData', JSON.stringify(duplicated))
+  router.push('/app/filiali/new')
 }
 
 const handleDelete = () => {
-  if (confirm('Sei sicuro di voler eliminare questa sede?')) {
-    console.log('Delete sede')
+  if (confirm('Sei sicuro di voler eliminare questa filiale?')) {
+    console.log('Delete filiale')
   }
 }
 
 const handleReset = () => {
   if (isEditMode.value) {
-    loadSede()
+    loadFiliale()
   } else {
-    sede.value = {
-      codSede: '',
-      ragSoc: '',
-      sigla: '',
-      codFisc: '',
+    filiale.value = {
+      codAzi: '',
+      codCant: '',
+      descriz: '',
       address: {
         indirizzo: '',
         codiceBelfiore: '',
@@ -298,19 +313,38 @@ const handleTabChanged = (tab: string) => {
 }
 
 const goBack = () => {
-  router.push('/app/sedi')
+  router.push('/app/filiale')
 }
 
 // Watcher per ricaricare i dati quando cambia l'ID nell'URL
 watch(() => route.params.id, (newId, oldId) => {
   if (newId !== oldId && isEditMode.value) {
-    loadSede()
+    loadFiliale()
   }
 }, { immediate: false })
 
-onMounted(() => {
+onMounted(async () => {
   if (isEditMode.value) {
-    loadSede()
+    loadFiliale()
+  } else {
+    // Controlla se ci sono parametri di query per la duplicazione (dal DataTableManager)
+    const duplicateId = route.query.duplicate
+    if (duplicateId && typeof duplicateId === 'string') {
+      await loadFilialeForDuplication(duplicateId)
+    } else {
+      // Controlla se ci sono dati duplicati da caricare
+      const duplicatedDataStr = sessionStorage.getItem('duplicatedFilialeData')
+      if (duplicatedDataStr) {
+        const duplicatedData = JSON.parse(duplicatedDataStr)
+        // Usa nextTick per assicurarti che il componente sia completamente montato
+        await nextTick()
+        filiale.value = duplicatedData
+        // Forza il re-render del DetailTabSelector
+        componentKey.value++
+        // Rimuove i dati dal sessionStorage dopo averli usati
+        sessionStorage.removeItem('duplicatedFilialeData')
+      }
+    }
   }
 })
 </script>
