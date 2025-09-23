@@ -231,7 +231,9 @@ class MenuService {
         id: apiItem.id,
         icon: iconName,
         label: apiItem.nome,
-        route: apiItem.path && apiItem.path.trim() !== '' ? apiItem.path : undefined,
+        route: apiItem.path && apiItem.path.trim() !== ''
+          ? (apiItem.path.startsWith('/') ? apiItem.path : `/app/${apiItem.path}`)
+          : undefined,
         expanded: false,
         children: children,
       }

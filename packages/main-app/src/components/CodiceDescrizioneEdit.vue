@@ -12,7 +12,7 @@
           v-model="internalData.codAzi"
           type="number"
           placeholder="Inserisci codice azienda"
-          :disabled="saving"
+          :disabled="saving || isEditMode"
           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
         />
       </div>

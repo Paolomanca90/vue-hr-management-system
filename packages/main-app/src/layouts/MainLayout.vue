@@ -127,7 +127,7 @@
                 <RouterLink
                   v-for="favoriteItem in menuStore.favoriteItems"
                   :key="`favorite-${favoriteItem.id}`"
-                  :to="String(favoriteItem.route)"
+                  :to="{ path: String(favoriteItem.route) }"
                   class="flex items-center p-2 rounded-lg hover:bg-base-200 transition-all duration-200 w-full group bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200/50 dark:border-yellow-700/20"
                   :class="{ 'text-primary bg-yellow-100 dark:bg-yellow-900/20': isActive(String(favoriteItem.route)) }"
                   @click="handleMenuNavigation"
@@ -189,7 +189,7 @@
             <RouterLink
               v-for="favoriteItem in menuStore.favoriteItems"
               :key="`collapsed-fav-${favoriteItem.id}`"
-              :to="favoriteItem.route || '/app/dashboard'"
+              :to="{ path: favoriteItem.route || '/app/dashboard' }"
               class="flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 bg-yellow-50 dark:bg-yellow-600/30 border-2 border-yellow-200 dark:border-yellow-700 hover:bg-yellow-100 hover:border-yellow-300"
               :class="{
                 'bg-primary text-white border-primary': isActive(favoriteItem.route || '')

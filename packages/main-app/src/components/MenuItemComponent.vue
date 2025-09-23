@@ -36,7 +36,7 @@
     <!-- Menu item semplice (senza figli) - FOGLIA -->
     <RouterLink
       v-else-if="item.route"
-      :to="item.route"
+      :to="{ path: item.route }"
       class="flex items-center p-2 rounded-lg hover:bg-base-200 transition-all duration-200 w-full group"
       :class="{
         'text-primary bg-blue-100': isActive,
