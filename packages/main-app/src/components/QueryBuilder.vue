@@ -71,10 +71,13 @@
                 class="input input-bordered w-full"
                 placeholder="Inserisci codice"
                 required
+                :disabled="isEditMode"
                 maxlength="50"
               />
               <div class="label">
-                <span class="label-text-alt">{{ formData.codice.length }}/50 caratteri</span>
+                <span class="label-text-alt">
+                  {{ isEditMode ? 'Il codice non può essere modificato' : `${formData.codice.length}/50 caratteri` }}
+                </span>
                 <span v-if="submitted && !formData.codice" class="label-text-alt text-error">
                   Codice richiesto
                 </span>

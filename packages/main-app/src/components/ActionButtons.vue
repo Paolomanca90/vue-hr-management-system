@@ -1,16 +1,6 @@
 <template>
   <div class="lg:flex items-center justify-between gap-3">
     <div class="flex flex-col lg:flex-row lg:items-center gap-3">
-      <!-- Navigazione -->
-      <NavigationButtons
-        :show-navigation="isEditMode"
-        :has-previous="hasPrevious"
-        :has-next="hasNext"
-        :disabled="saving"
-        :entity-name="entityName"
-        @navigate-previous="$emit('navigate-previous')"
-        @navigate-next="$emit('navigate-next')"
-      />
 
       <!-- Azioni principali -->
       <button
@@ -84,7 +74,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
-import NavigationButtons from './NavigationButtons.vue'
 import SimpleConfirmDialog from './SimpleConfirmDialog.vue'
 
 interface Props {

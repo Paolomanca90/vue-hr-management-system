@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted,  } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
@@ -212,6 +212,13 @@ const handleDuplicateMode = () => {
     }
   }
 }
+
+// Watcher per route changes (navigation buttons)
+watch(() => route.params.id, async (newId, oldId) => {
+  if (newId !== oldId && newId !== 'new') {
+    await loadCentroCosto()
+  }
+}, { immediate: false })
 
 onMounted(() => {
   if (isEditMode.value) {
