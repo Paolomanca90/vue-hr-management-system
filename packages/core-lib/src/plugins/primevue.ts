@@ -161,7 +161,6 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Dialog from 'primevue/dialog'
 import Toast from 'primevue/toast'
-import ConfirmDialog from 'primevue/confirmdialog'
 import Card from 'primevue/card'
 import Panel from 'primevue/panel'
 import Menu from 'primevue/menu'
@@ -207,7 +206,6 @@ import TabPanels from 'primevue/tabpanels'
 
 // Services
 import ToastService from 'primevue/toastservice'
-import ConfirmationService from 'primevue/confirmationservice'
 import DialogService from 'primevue/dialogservice'
 
 // Directives
@@ -232,7 +230,6 @@ export const installPrimeVue = (app: App) => {
 
   // Installa servizi
   app.use(ToastService)
-  app.use(ConfirmationService)
   app.use(DialogService)
 
   // Installa direttive
@@ -251,7 +248,6 @@ export const installPrimeVue = (app: App) => {
   app.component('PColumn', Column)
   app.component('PDialog', Dialog)
   app.component('PToast', Toast)
-  app.component('PConfirmDialog', ConfirmDialog)
   app.component('PCard', Card)
   app.component('PPanel', Panel)
   app.component('PMenu', Menu)
@@ -307,7 +303,6 @@ export {
   Column,
   Dialog,
   Toast,
-  ConfirmDialog,
   Card,
   Panel,
   Menu,
@@ -351,7 +346,6 @@ export {
   Tab,
   TabPanels,
   ToastService,
-  ConfirmationService,
   DialogService,
   HRPreset,
   italianLocale

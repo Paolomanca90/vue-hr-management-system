@@ -6,7 +6,6 @@ export { default as PrimeModal } from './components/PrimeModal.vue'
 export { default as PrimeDataTable } from './components/PrimeDataTable.vue'
 export { default as PrimeToast } from './components/PrimeToast.vue'
 export { default as FaIcon } from './components/FaIcon.vue'
-export { default as ConfirmDialog } from './components/ConfirmDialog.vue'
 
 // Esporta PrimeVue plugin e componenti
 export { installPrimeVue } from './plugins/primevue'

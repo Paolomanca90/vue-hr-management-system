@@ -44,8 +44,8 @@
         v-if="isEditMode && showDelete"
         type="button"
         class="btn btn-error btn-outline btn-sm"
-        @click="$emit('delete')"
-        :disabled="saving"
+        @click="showDeleteConfirm"
+        :disabled="saving || deleting"
       >
         <FaIcon icon="trash" class="mr-2"/>
         Elimina
@@ -64,12 +64,28 @@
         Reset
       </button>
     </div>
+
   </div>
+
+  <!-- Confirm Dialog -->
+  <SimpleConfirmDialog
+    :visible="confirmDialog.visible"
+    :title="confirmDialog.title"
+    :message="confirmDialog.message"
+    :warningText="confirmDialog.warningText"
+    :type="confirmDialog.type"
+    :confirmLabel="confirmDialog.confirmLabel"
+    :cancelLabel="confirmDialog.cancelLabel"
+    @confirm="confirmDialog.onConfirm"
+    @cancel="cancelDelete"
+  />
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import NavigationButtons from './NavigationButtons.vue'
+import SimpleConfirmDialog from './SimpleConfirmDialog.vue'
 
 interface Props {
   entityName: string
@@ -83,7 +99,7 @@ interface Props {
   showReset?: boolean
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   isEditMode: false,
   saving: false,
   isFormValid: true,
@@ -94,11 +110,44 @@ withDefaults(defineProps<Props>(), {
   showReset: true
 })
 
-defineEmits<{
+const emit = defineEmits<{
   'navigate-previous': []
   'navigate-next': []
   'duplicate': []
   'delete': []
   'reset': []
 }>()
+
+const deleting = ref(false)
+const confirmDialog = ref({
+  visible: false,
+  title: '',
+  message: '',
+  warningText: '',
+  type: 'danger' as const,
+  confirmLabel: 'Elimina',
+  cancelLabel: 'Annulla',
+  onConfirm: () => {}
+})
+
+const showDeleteConfirm = () => {
+  confirmDialog.value = {
+    visible: true,
+    title: `Elimina ${props.entityName}`,
+    message: `Sei sicuro di voler eliminare questo ${props.entityName.toLowerCase()}?`,
+    warningText: 'Questa azione è irreversibile.',
+    type: 'danger',
+    confirmLabel: 'Elimina',
+    cancelLabel: 'Annulla',
+    onConfirm: () => {
+      deleting.value = true
+      emit('delete')
+      confirmDialog.value.visible = false
+    }
+  }
+}
+
+const cancelDelete = () => {
+  confirmDialog.value.visible = false
+}
 </script>

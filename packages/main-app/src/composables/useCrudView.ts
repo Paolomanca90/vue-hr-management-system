@@ -44,6 +44,8 @@ export interface ConfirmDialogState {
   description?: string
   warningText?: string
   type: 'danger' | 'warning' | 'info' | 'success'
+  confirmLabel?: string
+  cancelLabel?: string
   onConfirm?: () => void | Promise<void>
 }
 
@@ -90,7 +92,9 @@ export function useCrudView<T extends CrudEntity>(
     visible: false,
     title: '',
     message: '',
-    type: 'danger'
+    type: 'danger',
+    confirmLabel: 'Elimina',
+    cancelLabel: 'Annulla'
   })
 
   const selectedEntity = ref<T | null>(null)
@@ -199,6 +203,8 @@ export function useCrudView<T extends CrudEntity>(
       message: defaultMessage,
       warningText: options.deleteConfirmation?.warningText || 'Questa azione è irreversibile.',
       type: 'danger',
+      confirmLabel: 'Elimina',
+      cancelLabel: 'Annulla',
       onConfirm: confirmDelete
     }
   }

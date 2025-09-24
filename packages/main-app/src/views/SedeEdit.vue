@@ -40,7 +40,6 @@
               :show-delete="isEditMode"
               :show-reset="true"
               @duplicate="handleDuplicate"
-              @delete="handleDelete"
               @reset="handleReset"
             />
           </div>
@@ -282,11 +281,6 @@ const handleDuplicate = () => {
   router.push('/app/sedi/new')
 }
 
-const handleDelete = () => {
-  if (confirm('Sei sicuro di voler eliminare questa sede?')) {
-    console.log('Delete sede')
-  }
-}
 
 const handleReset = () => {
   if (isEditMode.value) {

@@ -43,7 +43,6 @@
               :show-delete="isEditMode"
               :show-reset="true"
               @duplicate="handleDuplicate"
-              @delete="handleDelete"
               @reset="handleReset"
             />
           </div>
@@ -251,11 +250,6 @@ const handleDuplicate = () => {
   router.push('/app/pat/new')
 }
 
-const handleDelete = () => {
-  if (confirm('Sei sicuro di voler eliminare questa PAT?')) {
-    console.log('Delete PAT')
-  }
-}
 
 const handleReset = () => {
   if (isEditMode.value) {

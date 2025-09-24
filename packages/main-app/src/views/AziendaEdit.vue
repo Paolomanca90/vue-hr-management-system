@@ -40,7 +40,6 @@
               :show-delete="isEditMode"
               :show-reset="true"
               @duplicate="handleDuplicate"
-              @delete="handleDelete"
               @reset="handleReset"
             />
           </div>
@@ -297,11 +296,6 @@ const handleDuplicate = () => {
   })
 }
 
-const handleDelete = () => {
-  if (confirm('Sei sicuro di voler eliminare questa azienda?')) {
-    console.log('Delete azienda')
-  }
-}
 
 const handleDuplicateMode = async () => {
   const duplicateId = route.query.duplicate as string

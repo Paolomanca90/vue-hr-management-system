@@ -73,6 +73,7 @@ export const comuniLookupConfig: LookupInputConfig = {
 export const gruppiCausaliLookupConfig: LookupInputConfig = {
   lookupType: 'gruppocausale',
   autoCompleteField: 'codice',
+  keyField: 'CODGRCAU',
   fields: [
     {
       key: 'codice',
@@ -90,7 +91,7 @@ export const gruppiCausaliLookupConfig: LookupInputConfig = {
     {
       key: 'abbreviazione',
       label: 'Abbreviazione',
-      editable: false,
+      editable: true,
       colSpan: 4
     }
   ],
@@ -98,19 +99,18 @@ export const gruppiCausaliLookupConfig: LookupInputConfig = {
     title: 'Seleziona Gruppo Causale',
     searchPlaceholder: 'Cerca per codice, codice gruppo o abbreviazione...',
     columns: [
-      { key: 'CODICE', label: 'Codice', primary: true },
-      { key: 'CODICE_GRUPPO', label: 'Codice Gruppo' },
-      { key: 'ABBR', label: 'Abbreviazione' }
+      { key: 'CODGRCAU', label: 'Codice', primary: true },
+      { key: 'DESCRIZIONE', label: 'Descrizione' }
     ],
-    searchFields: ['CODICE', 'CODICE_GRUPPO', 'ABBR'],
-    keyField: 'CODICE',
+    searchFields: ['CODGRCAU', 'DESCRIZIONE'],
+    keyField: 'CODGRCAU',
     loadingMessage: 'Caricamento gruppi causali...'
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mapper: (item: any): Partial<GruppoCausale> => ({
-    codice: item.CODICE || '',
-    codiceGruppo: item.CODICE_GRUPPO || '',
-    abbreviazione: item.ABBR || ''
+    codice: item.CODGRCAU || '',
+    codiceGruppo: item.DESCRIZIONE || '',
+    abbreviazione: ''
   })
 }
 

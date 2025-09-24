@@ -66,26 +66,28 @@
       </template>
     </PrimeDataTable>
 
-    <!-- Confirm Dialog -->
-    <ConfirmDialog
-      :visible="confirmDialog.visible"
-      :title="confirmDialog.title"
-      :message="confirmDialog.message"
-      :description="confirmDialog.description"
-      :warning-text="confirmDialog.warningText"
-      :type="confirmDialog.type"
-      :loading="deleting"
-      @confirm="confirmDialog.onConfirm"
-      @cancel="cancelDelete"
-    />
   </div>
+
+  <!-- Confirm Dialog -->
+  <SimpleConfirmDialog
+    :visible="confirmDialog.visible"
+    :title="confirmDialog.title"
+    :message="confirmDialog.message"
+    :warningText="confirmDialog.warningText"
+    :type="confirmDialog.type"
+    :confirmLabel="confirmDialog.confirmLabel"
+    :cancelLabel="confirmDialog.cancelLabel"
+    @confirm="confirmDialog.onConfirm"
+    @cancel="cancelDelete"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
-import { PrimeDataTable, ConfirmDialog, FaIcon } from '@presenze-in-web-frontend/core-lib'
+import { PrimeDataTable, FaIcon } from '@presenze-in-web-frontend/core-lib'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { useCrudView, type FlexibleCrudService, type CrudEntity, type CrudViewOptions } from '@/composables/useCrudView'
+import SimpleConfirmDialog from './SimpleConfirmDialog.vue'
 
 export interface TableColumn {
   field: string
@@ -191,7 +193,6 @@ const crudOptions: CrudViewOptions<CrudEntity> = {
 const {
   data,
   tableLoading: loading,
-  deleting,
   errorMessage,
   successMessage,
   selectedEntity,

@@ -175,13 +175,11 @@ const handleDuplicate = () => {
 }
 
 const handleDelete = async () => {
-  if (confirm('Sei sicuro di voler eliminare questo centro di costo?')) {
-    try {
-      await centriCostoService.deleteCentroCostoByCompositeKey(centroCosto.value.codAzi, centroCosto.value.codCenco)
-      router.push('/app/centri-costo')
-    } catch (error) {
-      console.error('Errore nell\'eliminazione:', error)
-    }
+  try {
+    await centriCostoService.deleteCentroCostoByCompositeKey(centroCosto.value.codAzi, centroCosto.value.codCenco)
+    router.push('/app/centri-costo')
+  } catch (error) {
+    console.error('Errore nell\'eliminazione:', error)
   }
 }
 

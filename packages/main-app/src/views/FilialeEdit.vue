@@ -40,7 +40,6 @@
               :show-delete="isEditMode"
               :show-reset="true"
               @duplicate="handleDuplicate"
-              @delete="handleDelete"
               @reset="handleReset"
             />
           </div>
@@ -282,11 +281,6 @@ const handleDuplicate = () => {
   router.push('/app/filiali/new')
 }
 
-const handleDelete = () => {
-  if (confirm('Sei sicuro di voler eliminare questa filiale?')) {
-    console.log('Delete filiale')
-  }
-}
 
 const handleReset = () => {
   if (isEditMode.value) {

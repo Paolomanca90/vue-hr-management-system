@@ -148,7 +148,12 @@ const addNewAzienda = (): void => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const onRowSelect = (event: any): void => {
-  const azienda = event.data as Azienda
+  console.log('onRowSelect event:', event)
+  const azienda = event?.data as Azienda
+  if (!azienda || !azienda.codAzi) {
+    console.error('Azienda data is missing or invalid:', azienda)
+    return
+  }
   router.push(`/app/aziende/${azienda.codAzi}/edit`)
 }
 
@@ -232,9 +237,5 @@ onMounted(() => {
 
 .btn.loading .loading-spinner {
   margin-right: 0.5rem;
-}
-
-code {
-  font-family: 'Courier New', monospace;
 }
 </style>
