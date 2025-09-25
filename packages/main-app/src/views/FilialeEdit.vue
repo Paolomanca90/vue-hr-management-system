@@ -20,30 +20,20 @@
     <!-- Form Container -->
     <form @submit.prevent="handleSave" class="space-y-6">
       <div class="bg-white p-4 rounded-lg shadow-sm border">
-        <div class="lg:flex items-center justify-between gap-3">
-          <div class="flex flex-col lg:flex-row lg:items-center gap-3">
-            <!-- Navigazione -->
-            <NavigationButtons
-              :show-navigation="isEditMode"
-              :disabled="saving"
-              entity-name="Filiale"
-              :navigation-config="filialeNavigationConfig"
-            />
-
-            <!-- Azioni principali -->
-            <ActionButtons
-              entity-name="Filiale"
-              :is-edit-mode="isEditMode"
-              :saving="saving"
-              :is-form-valid="isFormValid"
-              :show-duplicate="true"
-              :show-delete="isEditMode"
-              :show-reset="true"
-              @duplicate="handleDuplicate"
-              @reset="handleReset"
-            />
-          </div>
-        </div>
+        <!-- Azioni principali con navigazione integrata -->
+        <ActionButtons
+          entity-name="Filiale"
+          :is-edit-mode="isEditMode"
+          :saving="saving"
+          :is-form-valid="isFormValid"
+          :show-duplicate="true"
+          :show-delete="isEditMode"
+          :show-reset="true"
+          :show-navigation="isEditMode"
+          :navigation-config="filialeNavigationConfig"
+          @duplicate="handleDuplicate"
+          @reset="handleReset"
+        />
       </div>
 
       <!-- Tab Selector -->
@@ -122,9 +112,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
-import NavigationButtons from '@/components/NavigationButtons.vue'
 import DetailTabSelector from '@/components/DetailTabSelector.vue'
 import AddressInput, { type AddressData } from '@/components/AddressInput.vue'
+import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { filialiService, type FilialeDettaglio } from '@/services/filialiService'
 import type { AnagraficaField } from '@/components/DetailTabSelector.vue'
 
@@ -156,6 +146,10 @@ const filiale = ref<FormFiliale>({
 const saving = ref(false)
 const loading = ref(false)
 const componentKey = ref(0)
+const errorMessage = ref('')
+const successMessage = ref('')
+
+useMessageAlerts(errorMessage, successMessage)
 
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
@@ -202,6 +196,7 @@ const loadFiliale = async () => {
     }
   } catch (error) {
     console.error('Errore nel caricamento filiale:', error)
+    errorMessage.value = 'Errore nel caricamento dei dati filiale'
   } finally {
     loading.value = false
   }
@@ -232,6 +227,7 @@ const loadFilialeForDuplication = async (duplicateId: string) => {
     }
   } catch (error) {
     console.error('Errore nel caricamento filiale per duplicazione:', error)
+    errorMessage.value = 'Errore nel caricamento dei dati per la duplicazione'
   } finally {
     loading.value = false
   }
@@ -260,9 +256,11 @@ const handleSave = async () => {
     } else {
       await filialiService.addFiliale(filialeToSave)
     }
+    successMessage.value = isEditMode.value ? 'Filiale aggiornata con successo' : 'Filiale creata con successo'
     router.push('/app/filiali')
   } catch (error) {
     console.error('Errore nel salvataggio:', error)
+    errorMessage.value = 'Errore nel salvataggio della filiale'
   } finally {
     saving.value = false
   }
@@ -321,21 +319,16 @@ onMounted(async () => {
   if (isEditMode.value) {
     loadFiliale()
   } else {
-    // Controlla se ci sono parametri di query per la duplicazione (dal DataTableManager)
     const duplicateId = route.query.duplicate
     if (duplicateId && typeof duplicateId === 'string') {
       await loadFilialeForDuplication(duplicateId)
     } else {
-      // Controlla se ci sono dati duplicati da caricare
       const duplicatedDataStr = sessionStorage.getItem('duplicatedFilialeData')
       if (duplicatedDataStr) {
         const duplicatedData = JSON.parse(duplicatedDataStr)
-        // Usa nextTick per assicurarti che il componente sia completamente montato
         await nextTick()
         filiale.value = duplicatedData
-        // Forza il re-render del DetailTabSelector
         componentKey.value++
-        // Rimuove i dati dal sessionStorage dopo averli usati
         sessionStorage.removeItem('duplicatedFilialeData')
       }
     }

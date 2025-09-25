@@ -20,21 +20,20 @@
     <!-- Action Buttons -->
     <form @submit.prevent="handleSave" class="space-y-6">
       <div class="bg-white p-4 rounded-lg shadow-sm border">
-        <div class="lg:flex items-center justify-between gap-3">
-          <div class="flex flex-col lg:flex-row lg:items-center gap-3">
-            <ActionButtons
-              entity-name="Dipendente"
-              :is-edit-mode="isEditMode"
-              :saving="saving"
-              :is-form-valid="isFormValid"
-              :show-duplicate="false"
-              :show-delete="isEditMode"
-              :show-reset="true"
-              @delete="handleDelete"
-              @reset="handleReset"
-            />
-          </div>
-        </div>
+        <!-- Azioni principali con navigazione integrata -->
+        <ActionButtons
+          entity-name="Dipendente"
+          :is-edit-mode="isEditMode"
+          :saving="saving"
+          :is-form-valid="isFormValid"
+          :show-duplicate="false"
+          :show-delete="isEditMode"
+          :show-reset="true"
+          :show-navigation="isEditMode"
+          :navigation-config="dipendenteNavigationConfig"
+          @delete="handleDelete"
+          @reset="handleReset"
+        />
       </div>
     </form>
 
@@ -642,6 +641,18 @@ const isFormValid = computed(() => {
   return dipendente.value.cognome.trim() !== '' && dipendente.value.nome.trim() !== ''
 })
 
+// Navigation configuration
+const dipendenteNavigationConfig = computed(() => ({
+  fetchAll: () => dipendenteService.getListaDipendenti({
+    codAzi: aziendaId.value  // Usa l'azienda corrente dall'URL
+  }),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getEntityId: (dipendente: any) => `${dipendente.codAzi}-${dipendente.codDip}`, // Formato dinamico
+  basePath: '/app/anagrafica-dipendente',
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sortFn: (a: any, b: any) => a.codDip - b.codDip
+}))
+
 const badgeList = computed((): BadgeWithPlaceholder[] => {
   if (!dipendente.value) return []
   if (!dipendente.value.datiAzi.listaBadge) {
@@ -713,7 +724,9 @@ const initializeEmptyDipendente = () => {
       dataAssunzioneConvenzionale: '',
       dataCessazione: '',
       percenpt: 100,
-      listaBadge: []
+      tipoRappor: '',
+      listaBadge: [],
+      listaPAT: []
     },
     datiPers: {
       codDip: dipendenteId.value || 0,
@@ -721,10 +734,12 @@ const initializeEmptyDipendente = () => {
       codFis: '',
       dataNas: '',
       sesso: '',
+      comNas: '',
+      proNas: '',
       viaRes: '',
       numRes: '',
       comRes: '',
-      codResDip: '',
+      codComRes: '',
       capRes: 0,
       proRes: '',
       telefono: '',
@@ -780,12 +795,24 @@ const loadDipendente = async () => {
 const handleSave = async () => {
   if (!dipendente.value) return
 
+  if (!dipendente.value.cognome.trim() || !dipendente.value.nome.trim()) {
+    errorMessage.value = 'Cognome e Nome sono obbligatori'
+    return
+  }
+
   saving.value = true
   try {
-    successMessage.value = 'Dati dipendente salvati con successo'
-  } catch (error) {
+    if (isEditMode.value) {
+      await dipendenteService.updateDipendente(dipendente.value)
+      successMessage.value = 'Dipendente aggiornato con successo'
+    } else {
+      await dipendenteService.createDipendente(dipendente.value)
+      successMessage.value = 'Dipendente creato con successo'
+      router.replace(`/app/anagrafica-dipendente/edit/${dipendente.value.codAzi}-${dipendente.value.codDip}`)
+    }
+  } catch (error: unknown) {
     console.error('Errore nel salvataggio:', error)
-    errorMessage.value = 'Errore nel salvataggio dei dati'
+    errorMessage.value = (error as Error)?.message || 'Errore nel salvataggio dei dati'
   } finally {
     saving.value = false
   }
@@ -807,7 +834,7 @@ const handleCodiceFiscaleBlur = async (event: Event) => {
     dipendente.value.datiPers.comRes = decoded.nomeComune
     dipendente.value.datiPers.proRes = decoded.provincia
     dipendente.value.datiPers.capRes = Number(decoded.cap) || 0
-    dipendente.value.datiPers.codResDip = decoded.codiceComune
+    dipendente.value.datiPers.codComRes = decoded.codiceComune
 
     successMessage.value = 'Codice fiscale decodificato con successo'
   } catch (error) {
@@ -897,8 +924,34 @@ const formatDate = (date: string) => {
 }
 
 const handleDelete = async () => {
-  // TODO: Implementare eliminazione dipendente
-  console.log('Eliminazione dipendente non implementata')
+  if (!dipendente.value) return
+
+  const displayName = dipendente.value.cognome && dipendente.value.nome
+    ? `${dipendente.value.cognome} ${dipendente.value.nome}`
+    : `il dipendente con codice ${dipendente.value.codDip}`
+
+  showConfirmation(
+    'Elimina Dipendente',
+    `Sei sicuro di voler eliminare ${displayName}? Questa operazione non può essere annullata.`,
+    async () => {
+      if (!dipendente.value) return
+
+      try {
+        saving.value = true
+        await dipendenteService.deleteDipendente(dipendente.value.codAzi, dipendente.value.codDip)
+        successMessage.value = 'Dipendente eliminato con successo'
+        // Torna alla lista dipendenti dopo eliminazione
+        setTimeout(() => {
+          router.push('/app/anagrafica-dipendente')
+        }, 1500)
+      } catch (error: unknown) {
+        console.error('Errore nell\'eliminazione:', error)
+        errorMessage.value = (error as Error)?.message || 'Errore nell\'eliminazione del dipendente'
+      } finally {
+        saving.value = false
+      }
+    }
+  )
 }
 
 const handleReset = () => {
@@ -918,6 +971,13 @@ watch(() => dipendente.value, () => {
     ensureBadgesInitialized()
   }
 }, { deep: true, immediate: false })
+
+// Watcher per ricaricare i dati quando cambia l'ID nell'URL (navigazione Previous/Next)
+watch(() => route.params.id, (newId, oldId) => {
+  if (newId !== oldId && isEditMode.value) {
+    loadDipendente()
+  }
+}, { immediate: false })
 
 onMounted(() => {
   loadDipendente()

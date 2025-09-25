@@ -20,31 +20,21 @@
     <!-- Form Container -->
     <form @submit.prevent="handleSave" class="space-y-6">
       <div class="bg-white p-4 rounded-lg shadow-sm border">
-        <div class="lg:flex items-center justify-between gap-3">
-          <div class="flex flex-col lg:flex-row lg:items-center gap-3">
-            <!-- Navigazione -->
-            <NavigationButtons
-              :show-navigation="isEditMode"
-              :disabled="saving"
-              entity-name="Centro di Costo"
-              :navigation-config="centroCostoNavigationConfig"
-            />
-
-            <!-- Azioni principali -->
-            <ActionButtons
-              entity-name="Centro di Costo"
-              :is-edit-mode="isEditMode"
-              :saving="saving"
-              :is-form-valid="isFormValid"
-              :show-duplicate="true"
-              :show-delete="isEditMode"
-              :show-reset="true"
-              @duplicate="handleDuplicate"
-              @delete="handleDelete"
-              @reset="handleReset"
-            />
-          </div>
-        </div>
+        <!-- Azioni principali con navigazione integrata -->
+        <ActionButtons
+          entity-name="Centro di Costo"
+          :is-edit-mode="isEditMode"
+          :saving="saving"
+          :is-form-valid="isFormValid"
+          :show-duplicate="true"
+          :show-delete="isEditMode"
+          :show-reset="true"
+          :show-navigation="isEditMode"
+          :navigation-config="centroCostoNavigationConfig"
+          @duplicate="handleDuplicate"
+          @delete="handleDelete"
+          @reset="handleReset"
+        />
       </div>
 
       <!-- Form Content con componente riutilizzabile -->
@@ -65,8 +55,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
-import NavigationButtons from '@/components/NavigationButtons.vue'
 import CodiceDescrizioneEdit from '@/components/CodiceDescrizioneEdit.vue'
+import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { centriCostoService, type CentroCosto } from '@/services/centriCostoService'
 
 const route = useRoute()
@@ -87,6 +77,10 @@ const centroCosto = ref<FormCentroCosto>({
 
 const saving = ref(false)
 const loading = ref(false)
+const errorMessage = ref('')
+const successMessage = ref('')
+
+useMessageAlerts(errorMessage, successMessage)
 
 // Computed
 const isEditMode = computed(() => {
@@ -100,7 +94,6 @@ const isFormValid = computed(() => {
          centroCosto.value.descriz.trim() !== ''
 })
 
-// Navigation configuration
 const centroCostoNavigationConfig = {
   fetchAll: () => centriCostoService.getCentriCosto(),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -128,6 +121,7 @@ const loadCentroCosto = async () => {
     }
   } catch (error) {
     console.error('Errore nel caricamento centro di costo:', error)
+    errorMessage.value = 'Errore nel caricamento dei dati centro di costo'
   } finally {
     loading.value = false
   }
@@ -150,9 +144,11 @@ const handleSave = async () => {
     } else {
       await centriCostoService.addCentroCosto(centroCostoToSave)
     }
+    successMessage.value = isEditMode.value ? 'Centro di costo aggiornato con successo' : 'Centro di costo creato con successo'
     router.push('/app/centri-costo')
   } catch (error) {
     console.error('Errore nel salvataggio:', error)
+    errorMessage.value = 'Errore nel salvataggio del centro di costo'
   } finally {
     saving.value = false
   }
@@ -177,9 +173,11 @@ const handleDuplicate = () => {
 const handleDelete = async () => {
   try {
     await centriCostoService.deleteCentroCostoByCompositeKey(centroCosto.value.codAzi, centroCosto.value.codCenco)
+    successMessage.value = 'Centro di costo eliminato con successo'
     router.push('/app/centri-costo')
   } catch (error) {
     console.error('Errore nell\'eliminazione:', error)
+    errorMessage.value = 'Errore nell\'eliminazione del centro di costo'
   }
 }
 

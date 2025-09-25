@@ -27,28 +27,21 @@
       <!-- Azioni -->
       <div class="card bg-base-100 shadow-sm">
         <div class="card-body">
-          <div class="lg:flex items-center justify-between gap-3">
-            <div class="flex flex-col lg:flex-row lg:items-center gap-3">
-              <!-- Navigazione -->
-              <NavigationButtons
-                :show-navigation="isEditMode"
-                :disabled="saving"
-                entity-name="Utente"
-                :navigation-config="userNavigationConfig"
-              />
-
-              <!-- Azioni principali -->
-              <ActionButtons
-                entity-name="Utente"
-                :is-edit-mode="isEditMode"
-                :saving="saving"
-                :is-form-valid="isFormValid"
-                @duplicate="duplicateCurrentUser"
-                @delete="deleteCurrentUser"
-                @reset="resetForm"
-              />
-            </div>
-          </div>
+          <!-- Azioni principali con navigazione integrata -->
+          <ActionButtons
+            entity-name="Utente"
+            :is-edit-mode="isEditMode"
+            :saving="saving"
+            :is-form-valid="isFormValid"
+            :show-duplicate="true"
+            :show-delete="isEditMode"
+            :show-reset="true"
+            :show-navigation="isEditMode"
+            :navigation-config="userNavigationConfig"
+            @duplicate="duplicateCurrentUser"
+            @delete="deleteCurrentUser"
+            @reset="resetForm"
+          />
         </div>
       </div>
 
@@ -269,7 +262,6 @@ import { gruppiUtenteService, type ApiMenuGruppoItem } from '@/services/gruppiUt
 import PageHeader from '@/components/PageHeader.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import LoadingIndicator from '@/components/LoadingIndicator.vue'
-import NavigationButtons from '@/components/NavigationButtons.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import SectionCard from '@/components/SectionCard.vue'
 

@@ -57,7 +57,6 @@ const dateValue = computed({
     try {
       // Converte da ISO string a Date object per PrimeVue
       const date = new Date(props.modelValue)
-      console.log('DateValue GET:', { modelValue: props.modelValue, date, isValid: !isNaN(date.getTime()) })
       return isNaN(date.getTime()) ? null : date
     } catch (error) {
       console.log('DateValue GET ERROR:', error)

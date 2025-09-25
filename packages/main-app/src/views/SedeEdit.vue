@@ -22,15 +22,7 @@
       <div class="bg-white p-4 rounded-lg shadow-sm border">
         <div class="lg:flex items-center justify-between gap-3">
           <div class="flex flex-col lg:flex-row lg:items-center gap-3">
-            <!-- Navigazione -->
-            <NavigationButtons
-              :show-navigation="isEditMode"
-              :disabled="saving"
-              entity-name="Sede"
-              :navigation-config="sedeNavigationConfig"
-            />
-
-            <!-- Azioni principali -->
+            <!-- Azioni principali con navigazione integrata -->
             <ActionButtons
               entity-name="Sede"
               :is-edit-mode="isEditMode"
@@ -39,6 +31,8 @@
               :show-duplicate="true"
               :show-delete="isEditMode"
               :show-reset="true"
+              :show-navigation="isEditMode"
+              :navigation-config="sedeNavigationConfig"
               @duplicate="handleDuplicate"
               @reset="handleReset"
             />
@@ -122,9 +116,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
-import NavigationButtons from '@/components/NavigationButtons.vue'
 import DetailTabSelector from '@/components/DetailTabSelector.vue'
 import AddressInput, { type AddressData } from '@/components/AddressInput.vue'
+import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { sediService, type SedeDettaglio } from '@/services/sediService'
 import type { AnagraficaField } from '@/components/DetailTabSelector.vue'
 
@@ -156,6 +150,10 @@ const sede = ref<FormSede>({
 const saving = ref(false)
 const loading = ref(false)
 const componentKey = ref(0)
+const errorMessage = ref('')
+const successMessage = ref('')
+
+useMessageAlerts(errorMessage, successMessage)
 
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
@@ -202,6 +200,7 @@ const loadSede = async () => {
     }
   } catch (error) {
     console.error('Errore nel caricamento sede:', error)
+    errorMessage.value = 'Errore nel caricamento dei dati sede'
   } finally {
     loading.value = false
   }
@@ -232,6 +231,7 @@ const loadSedeForDuplication = async (duplicateId: string) => {
     }
   } catch (error) {
     console.error('Errore nel caricamento sede per duplicazione:', error)
+    errorMessage.value = 'Errore nel caricamento dei dati per la duplicazione'
   } finally {
     loading.value = false
   }
@@ -260,9 +260,11 @@ const handleSave = async () => {
     } else {
       await sediService.addSede(sedeToSave)
     }
+    successMessage.value = isEditMode.value ? 'Sede aggiornata con successo' : 'Sede creata con successo'
     router.push('/app/sedi')
   } catch (error) {
     console.error('Errore nel salvataggio:', error)
+    errorMessage.value = 'Errore nel salvataggio della sede'
   } finally {
     saving.value = false
   }

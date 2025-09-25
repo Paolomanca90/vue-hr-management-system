@@ -36,6 +36,14 @@ export interface Badge {
   al: string
 }
 
+export interface PAT {
+  codDip: number
+  codAzi: number
+  codPat: number
+  dal: string
+  al: string
+}
+
 export interface DatiAziendali {
   codDip: number
   codAzi: number
@@ -52,7 +60,9 @@ export interface DatiAziendali {
   dataAssunzioneConvenzionale: string
   dataCessazione: string
   percenpt: number
+  tipoRappor: string
   listaBadge: Badge[]
+  listaPAT: PAT[]
 }
 
 export interface DatiPersonali {
@@ -61,10 +71,12 @@ export interface DatiPersonali {
   codFis: string
   dataNas: string
   sesso: string
+  comNas: string
+  proNas: string
   viaRes: string
   numRes: string
   comRes: string
-  codResDip: string
+  codComRes: string
   capRes: number
   proRes: string
   telefono: string
@@ -164,6 +176,30 @@ class DipendenteService {
     return this.campiCrud.customRequest<CodiceFiscaleDecoded>({
       method: 'GET',
       customEndpoint: `${this.config.endpoints.decodeCodiceFiscale}/${encodeURIComponent(codiceFiscale)}`
+    })
+  }
+
+  async createDipendente(dipendente: DettaglioDipendente): Promise<void> {
+    return this.campiCrud.customRequest<void>({
+      method: 'POST',
+      customEndpoint: this.config.endpoints.createDipendente,
+      body: dipendente
+    })
+  }
+
+  async updateDipendente(dipendente: DettaglioDipendente): Promise<void> {
+    return this.campiCrud.customRequest<void>({
+      method: 'PUT',
+      customEndpoint: this.config.endpoints.updateDipendente,
+      body: dipendente
+    })
+  }
+
+  async deleteDipendente(codAzi: number, codDip: number): Promise<void> {
+    return this.campiCrud.customRequest<void>({
+      method: 'DELETE',
+      customEndpoint: this.config.endpoints.deleteDipendente,
+      params: { codAzi, codDip }
     })
   }
 }

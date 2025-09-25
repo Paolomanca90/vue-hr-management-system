@@ -20,30 +20,20 @@
     <!-- Form Container -->
     <form @submit.prevent="handleSave" class="space-y-6">
       <div class="bg-white p-4 rounded-lg shadow-sm border">
-        <div class="lg:flex items-center justify-between gap-3">
-          <div class="flex flex-col lg:flex-row lg:items-center gap-3">
-            <!-- Navigazione -->
-            <NavigationButtons
-              :show-navigation="isEditMode"
-              :disabled="saving"
-              entity-name="Azienda"
-              :navigation-config="aziendaNavigationConfig"
-            />
-
-            <!-- Azioni principali -->
-            <ActionButtons
-              entity-name="Azienda"
-              :is-edit-mode="isEditMode"
-              :saving="saving"
-              :is-form-valid="isFormValid"
-              :show-duplicate="true"
-              :show-delete="isEditMode"
-              :show-reset="true"
-              @duplicate="handleDuplicate"
-              @reset="handleReset"
-            />
-          </div>
-        </div>
+        <!-- Azioni principali con navigazione integrata -->
+        <ActionButtons
+          entity-name="Azienda"
+          :is-edit-mode="isEditMode"
+          :saving="saving"
+          :is-form-valid="isFormValid"
+          :show-duplicate="true"
+          :show-delete="isEditMode"
+          :show-reset="true"
+          :show-navigation="isEditMode"
+          :navigation-config="aziendaNavigationConfig"
+          @duplicate="handleDuplicate"
+          @reset="handleReset"
+        />
       </div>
 
       <!-- Tab Selector -->
@@ -137,9 +127,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
-import NavigationButtons from '@/components/NavigationButtons.vue'
 import DetailTabSelector from '@/components/DetailTabSelector.vue'
 import AddressInput, { type AddressData } from '@/components/AddressInput.vue'
+import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { aziendeService, type AziendaDettaglio } from '@/services/aziendeService'
 import type { AnagraficaField } from '@/components/DetailTabSelector.vue'
 
@@ -188,6 +178,10 @@ const azienda = ref<FormAzienda>({
 
 const saving = ref(false)
 const loading = ref(false)
+const errorMessage = ref('')
+const successMessage = ref('')
+
+useMessageAlerts(errorMessage, successMessage)
 
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
@@ -243,6 +237,7 @@ const loadAzienda = async () => {
     }
   } catch (error) {
     console.error('Errore nel caricamento azienda:', error)
+    errorMessage.value = 'Errore nel caricamento dei dati azienda'
   } finally {
     loading.value = false
   }
@@ -278,9 +273,11 @@ const handleSave = async () => {
     } else {
       await aziendeService.addAzienda(aziendaToSave)
     }
+    successMessage.value = isEditMode.value ? 'Azienda aggiornata con successo' : 'Azienda creata con successo'
     router.push('/app/aziende')
   } catch (error) {
     console.error('Errore nel salvataggio:', error)
+    errorMessage.value = 'Errore nel salvataggio dell\'azienda'
   } finally {
     saving.value = false
   }
@@ -330,6 +327,7 @@ const handleDuplicateMode = async () => {
       }
     } catch (error) {
       console.error('Errore nel caricamento azienda per duplicate:', error)
+      errorMessage.value = 'Errore nel caricamento dei dati per la duplicazione'
     } finally {
       loading.value = false
     }

@@ -23,30 +23,20 @@
     <!-- Form Container -->
     <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
       <div class="bg-white p-4 rounded-lg shadow-sm border">
-        <div class="lg:flex items-center justify-between gap-3">
-          <div class="flex flex-col lg:flex-row lg:items-center gap-3">
-            <!-- Navigazione -->
-            <NavigationButtons
-              :show-navigation="isEditMode"
-              :disabled="saving"
-              entity-name="PAT"
-              :navigation-config="patNavigationConfig"
-            />
-
-            <!-- Azioni principali -->
-            <ActionButtons
-              entity-name="PAT"
-              :is-edit-mode="isEditMode"
-              :saving="saving"
-              :is-form-valid="isFormValid"
-              :show-duplicate="true"
-              :show-delete="isEditMode"
-              :show-reset="true"
-              @duplicate="handleDuplicate"
-              @reset="handleReset"
-            />
-          </div>
-        </div>
+        <!-- Azioni principali con navigazione integrata -->
+        <ActionButtons
+          entity-name="PAT"
+          :is-edit-mode="isEditMode"
+          :saving="saving"
+          :is-form-valid="isFormValid"
+          :show-duplicate="true"
+          :show-delete="isEditMode"
+          :show-reset="true"
+          :show-navigation="isEditMode"
+          :navigation-config="patNavigationConfig"
+          @duplicate="handleDuplicate"
+          @reset="handleReset"
+        />
       </div>
 
       <!-- Form Fields -->
@@ -98,7 +88,6 @@ import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
 import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
-import NavigationButtons from '@/components/NavigationButtons.vue'
 import CompanyEntityFormComponent, { type EntityFormData } from '@/components/CompanyEntityFormComponent.vue'
 import { patService, type Pat } from '@/services/patService'
 import { aziendeService, type Azienda } from '@/services/aziendeService'

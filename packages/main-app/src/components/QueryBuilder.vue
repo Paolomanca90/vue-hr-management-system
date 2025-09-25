@@ -26,28 +26,21 @@
       <!-- Azioni -->
       <div class="card bg-base-100 shadow-sm">
         <div class="card-body">
-          <div class="lg:flex items-center justify-between gap-3">
-            <div class="flex flex-col lg:flex-row lg:items-center gap-3">
-              <!-- Navigazione -->
-              <NavigationButtons
-                :show-navigation="isEditMode"
-                :disabled="saving"
-                :entity-name="entityName"
-                :navigation-config="navigationConfig as any"
-              />
-
-              <!-- Azioni principali -->
-              <ActionButtons
-                :entity-name="entityName"
-                :is-edit-mode="isEditMode"
-                :saving="saving"
-                :is-form-valid="isFormValid"
-                @duplicate="duplicateCurrent"
-                @delete="deleteCurrent"
-                @reset="resetForm"
-              />
-            </div>
-          </div>
+          <!-- Azioni principali con navigazione integrata -->
+          <ActionButtons
+            :entity-name="entityName"
+            :is-edit-mode="isEditMode"
+            :saving="saving"
+            :is-form-valid="isFormValid"
+            :show-duplicate="true"
+            :show-delete="isEditMode"
+            :show-reset="true"
+            :show-navigation="isEditMode"
+            :navigation-config="navigationConfig"
+            @duplicate="duplicateCurrent"
+            @delete="deleteCurrent"
+            @reset="resetForm"
+          />
         </div>
       </div>
 
@@ -382,18 +375,11 @@ import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from './PageHeader.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import LoadingIndicator from './LoadingIndicator.vue'
-import NavigationButtons from './NavigationButtons.vue'
 import ActionButtons from './ActionButtons.vue'
 import SectionCard from './SectionCard.vue'
 import { dipendenteService, type CampoDipendente } from '../services/dipendenteService'
 
-// Import navigation config type
-type NavigationConfig = {
-  fetchAll: () => Promise<unknown[]>
-  getEntityId: (entity: unknown) => string
-  basePath: string
-  sortFn?: (a: unknown, b: unknown) => number
-}
+// Navigation config types importati da ActionButtons
 
 // Props
 interface Props {
@@ -409,7 +395,8 @@ interface Props {
     formula: string
   }
   // Navigation configuration
-  navigationConfig?: NavigationConfig
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  navigationConfig?: any
 }
 
 const props = withDefaults(defineProps<Props>(), {

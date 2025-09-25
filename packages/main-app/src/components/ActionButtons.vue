@@ -2,6 +2,14 @@
   <div class="lg:flex items-center justify-between gap-3">
     <div class="flex flex-col lg:flex-row lg:items-center gap-3">
 
+      <!-- Navigation buttons -->
+      <NavigationButtons
+        :show-navigation="showNavigation"
+        :disabled="saving"
+        :entity-name="entityName"
+        :navigation-config="navigationConfig"
+      />
+
       <!-- Azioni principali -->
       <button
         type="submit"
@@ -75,28 +83,40 @@
 import { ref } from 'vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import SimpleConfirmDialog from './SimpleConfirmDialog.vue'
+import NavigationButtons from './NavigationButtons.vue'
+
+interface EntityItem {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any
+}
+
+interface NavigationConfig {
+  fetchAll: () => Promise<EntityItem[]>
+  getEntityId: (entity: EntityItem) => string
+  basePath: string
+  sortFn?: (a: EntityItem, b: EntityItem) => number
+}
 
 interface Props {
   entityName: string
   isEditMode?: boolean
   saving?: boolean
   isFormValid?: boolean
-  hasPrevious?: boolean
-  hasNext?: boolean
   showDuplicate?: boolean
   showDelete?: boolean
   showReset?: boolean
+  showNavigation?: boolean
+  navigationConfig?: NavigationConfig
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isEditMode: false,
   saving: false,
   isFormValid: true,
-  hasPrevious: false,
-  hasNext: false,
   showDuplicate: true,
   showDelete: true,
-  showReset: true
+  showReset: true,
+  showNavigation: false
 })
 
 const emit = defineEmits<{

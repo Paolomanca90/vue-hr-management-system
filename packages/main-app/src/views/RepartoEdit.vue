@@ -20,31 +20,21 @@
     <!-- Form Container -->
     <form @submit.prevent="handleSave" class="space-y-6">
       <div class="bg-white p-4 rounded-lg shadow-sm border">
-        <div class="lg:flex items-center justify-between gap-3">
-          <div class="flex flex-col lg:flex-row lg:items-center gap-3">
-            <!-- Navigazione -->
-            <NavigationButtons
-              :show-navigation="isEditMode"
-              :disabled="saving"
-              entity-name="Reparto"
-              :navigation-config="repartoNavigationConfig"
-            />
-
-            <!-- Azioni principali -->
-            <ActionButtons
-              entity-name="Reparto"
-              :is-edit-mode="isEditMode"
-              :saving="saving"
-              :is-form-valid="isFormValid"
-              :show-duplicate="true"
-              :show-delete="isEditMode"
-              :show-reset="true"
-              @duplicate="handleDuplicate"
-              @delete="handleDelete"
-              @reset="handleReset"
-            />
-          </div>
-        </div>
+        <!-- Azioni principali con navigazione integrata -->
+        <ActionButtons
+          entity-name="Reparto"
+          :is-edit-mode="isEditMode"
+          :saving="saving"
+          :is-form-valid="isFormValid"
+          :show-duplicate="true"
+          :show-delete="isEditMode"
+          :show-reset="true"
+          :show-navigation="isEditMode"
+          :navigation-config="repartoNavigationConfig"
+          @duplicate="handleDuplicate"
+          @delete="handleDelete"
+          @reset="handleReset"
+        />
       </div>
 
       <!-- Form Content con componente riutilizzabile -->
@@ -65,8 +55,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
-import NavigationButtons from '@/components/NavigationButtons.vue'
 import CodiceDescrizioneEdit from '@/components/CodiceDescrizioneEdit.vue'
+import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { repartiService, type Reparto } from '@/services/repartiService'
 
 const route = useRoute()
@@ -87,6 +77,10 @@ const reparto = ref<FormReparto>({
 
 const saving = ref(false)
 const loading = ref(false)
+const errorMessage = ref('')
+const successMessage = ref('')
+
+useMessageAlerts(errorMessage, successMessage)
 
 // Computed
 const isEditMode = computed(() => {
@@ -128,6 +122,7 @@ const loadReparto = async () => {
     }
   } catch (error) {
     console.error('Errore nel caricamento reparto:', error)
+    errorMessage.value = 'Errore nel caricamento dei dati reparto'
   } finally {
     loading.value = false
   }
@@ -150,9 +145,11 @@ const handleSave = async () => {
     } else {
       await repartiService.addReparto(repartoToSave)
     }
+    successMessage.value = isEditMode.value ? 'Reparto aggiornato con successo' : 'Reparto creato con successo'
     router.push('/app/reparti')
   } catch (error) {
     console.error('Errore nel salvataggio:', error)
+    errorMessage.value = 'Errore nel salvataggio del reparto'
   } finally {
     saving.value = false
   }
@@ -175,13 +172,13 @@ const handleDuplicate = () => {
 }
 
 const handleDelete = async () => {
-  if (confirm('Sei sicuro di voler eliminare questo reparto?')) {
-    try {
-      await repartiService.deleteRepartoByCompositeKey(reparto.value.codAzi, reparto.value.codReparto)
-      router.push('/app/reparti')
-    } catch (error) {
-      console.error('Errore nell\'eliminazione:', error)
-    }
+  try {
+    await repartiService.deleteRepartoByCompositeKey(reparto.value.codAzi, reparto.value.codReparto)
+    successMessage.value = 'Reparto eliminato con successo'
+    router.push('/app/reparti')
+  } catch (error) {
+    console.error('Errore nell\'eliminazione:', error)
+    errorMessage.value = 'Errore nell\'eliminazione del reparto'
   }
 }
 

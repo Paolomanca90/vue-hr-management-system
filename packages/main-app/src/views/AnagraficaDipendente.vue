@@ -134,11 +134,9 @@ const mockDipendentiService = computed<FlexibleCrudService>(() => ({
 }))
 
 const onDipendentiLoaded = (nuoviDipendenti: Dipendente[]) => {
-  // Aggiunge l'ID composito e codAzi a ogni dipendente
   dipendenti.value = nuoviDipendenti.map(dip => ({
     ...dip,
-    id: `1-${dip.codDip}`, // Per ora usiamo codAzi = 1, ma dovrebbe essere dinamico
-    codAzi: 1
+    id: `${dip.codAzi}-${dip.codDip}` // Usa il codAzi effettivo
   }))
   hasSearched.value = true
   showFilters.value = false
