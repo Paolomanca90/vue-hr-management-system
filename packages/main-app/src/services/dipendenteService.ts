@@ -21,6 +21,8 @@ export interface FiltriDipendente {
 }
 
 export interface Dipendente {
+  id: string
+  codAzi: number
   codDip: number
   cognome: string
   nome: string
@@ -106,6 +108,16 @@ export interface DettaglioDipendente {
   familiari: Familiare[]
 }
 
+export interface CodiceFiscaleDecoded {
+  value: string
+  dataNascita: string
+  sesso: string
+  codiceComune: string
+  nomeComune: string
+  provincia: string
+  cap: string
+}
+
 export interface GetDettaglioDipendenteRequest {
   codAzi: number
   codDip: number
@@ -141,7 +153,17 @@ class DipendenteService {
     return this.campiCrud.customRequest<DettaglioDipendente>({
       method: 'POST',
       customEndpoint: this.config.endpoints.getDettaglioDipendente,
-      body: request
+      params: {
+        codAzi: request.codAzi,
+        codDip: request.codDip
+      }
+    })
+  }
+
+  async decodeCodiceFiscale(codiceFiscale: string): Promise<CodiceFiscaleDecoded> {
+    return this.campiCrud.customRequest<CodiceFiscaleDecoded>({
+      method: 'GET',
+      customEndpoint: `${this.config.endpoints.decodeCodiceFiscale}/${encodeURIComponent(codiceFiscale)}`
     })
   }
 }

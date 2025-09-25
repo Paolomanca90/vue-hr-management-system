@@ -97,7 +97,7 @@ class LookupService {
   }
 
   async getComuni(searchFilter?: string): Promise<Comune[]> {
-    const filter = searchFilter ? { codice: `${searchFilter}%` } : undefined
+    const filter = searchFilter ? { CODICE: `${searchFilter}%` } : undefined
     const response = await this.getList<ComuneResponse>('comune', filter)
 
     return response.map(item => ({

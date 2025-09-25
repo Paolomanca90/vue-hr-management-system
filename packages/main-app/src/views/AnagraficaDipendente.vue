@@ -38,18 +38,17 @@
           :columns="columns"
           entity-name="Dipendente"
           entity-name-plural="Dipendenti"
-          data-key="codDip"
+          id-field="id"
+          list-route="/app/anagrafica-dipendente"
+          edit-route="/app/anagrafica-dipendente"
+          new-route="/app/anagrafica-dipendente/new"
+          data-key="id"
           :global-filter-fields="['codDip', 'cognome', 'nome']"
           search-placeholder="Cerca per codice, cognome, nome..."
           export-filename="dipendenti"
           filter-display="menu"
           scroll-height="calc(100vh - 300px)"
           :virtual-scroller-options="{ itemSize: 40 }"
-          :show-add="false"
-          :show-edit="false"
-          :show-duplicate="false"
-          :show-delete="false"
-          :show-actions="false"
         >
           <!-- Custom toolbar -->
           <template #toolbar>
@@ -128,14 +127,19 @@ const columns = ref([
 // Mock service per DataTableManager
 const mockDipendentiService = computed<FlexibleCrudService>(() => ({
   getAll: async () => dipendenti.value,
-  getById: async (id: string | number) => dipendenti.value.find(d => d.codDip === id) || null,
+  getById: async (id: string | number) => dipendenti.value.find(d => d.id === id) || null,
   create: async () => { throw new Error('Not implemented') },
   update: async () => { throw new Error('Not implemented') },
   delete: async () => { throw new Error('Not implemented') }
 }))
 
 const onDipendentiLoaded = (nuoviDipendenti: Dipendente[]) => {
-  dipendenti.value = nuoviDipendenti
+  // Aggiunge l'ID composito e codAzi a ogni dipendente
+  dipendenti.value = nuoviDipendenti.map(dip => ({
+    ...dip,
+    id: `1-${dip.codDip}`, // Per ora usiamo codAzi = 1, ma dovrebbe essere dinamico
+    codAzi: 1
+  }))
   hasSearched.value = true
   showFilters.value = false
 }

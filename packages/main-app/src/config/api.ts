@@ -67,6 +67,7 @@ export const API_CONFIG = {
     getValoriCampo: '/api/dipendente/GetValoriCampo',
     getListaDipendenti: '/api/dipendente/GetListaDipendenti', //POST
     getDettaglioDipendente: '/api/dipendente/GetDettaglioDipendente', //POST
+    decodeCodiceFiscale: '/api/utility/decodecodfisc',
 
     // Lookup
     lookup: '/api/Lookup/get', //POST

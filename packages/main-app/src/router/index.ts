@@ -33,6 +33,7 @@ import PatEdit from '@/views/PatEdit.vue'
 import PosizioniInps from '@/views/PosizioniInps.vue'
 import PosizioneInpsEdit from '@/views/PosizioneInpsEdit.vue'
 import AnagraficaDipendente from '@/views/AnagraficaDipendente.vue'
+import AnagraficaDipendenteEdit from '@/views/AnagraficaDipendenteEdit.vue'
 
 // Route statiche di base (sempre presenti)
 const staticRoutes: RouteRecordRaw[] = [
@@ -411,6 +412,32 @@ const appRoutes: RouteRecordRaw[] = [
       title: 'Anagrafica Dipendente',
       requiresAuth: true,
     },
+  },
+  {
+    path: 'anagrafica-dipendente/new',
+    name: 'AnagraficaDipendenteNew',
+    component: AnagraficaDipendenteEdit,
+    meta: {
+      title: 'Nuovo Dipendente',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'anagrafica-dipendente/:id/edit',
+    name: 'AnagraficaDipendenteEdit',
+    component: AnagraficaDipendenteEdit,
+    meta: {
+      title: 'Modifica Dipendente',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      // Verifica che l'ID sia valido
+      if (to.params.id === 'new') {
+        next('/app/anagrafica-dipendente/new')
+      } else {
+        next()
+      }
+    }
   },
   {
     path: 'payroll',
