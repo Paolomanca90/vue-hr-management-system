@@ -43,26 +43,56 @@
 
     <div v-if="!loading && dipendente" class="space-y-6">
       <div class="bg-white p-6 rounded-lg shadow-sm border">
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Codice</label>
-            <div class="text-lg font-semibold text-gray-900">{{ dipendente.codDip }}</div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-medium">Codice *</span>
+            </label>
+            <input
+              v-if="!isEditMode"
+              v-model.number="dipendente.codDip"
+              type="number"
+              class="input input-bordered"
+              :disabled="saving"
+              placeholder="Inserisci codice dipendente"
+            />
+            <div v-else class="text-lg font-semibold text-gray-900 py-2">{{ dipendente.codDip }}</div>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Cognome</label>
-            <div class="text-lg font-semibold text-gray-900">{{ dipendente.cognome }}</div>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-medium">Cognome *</span>
+            </label>
+            <input
+              v-model="dipendente.cognome"
+              type="text"
+              class="input input-bordered"
+              :disabled="saving"
+              placeholder="Inserisci cognome"
+            />
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Nome</label>
-            <div class="text-lg font-semibold text-gray-900">{{ dipendente.nome }}</div>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-medium">Nome *</span>
+            </label>
+            <input
+              v-model="dipendente.nome"
+              type="text"
+              class="input input-bordered"
+              :disabled="saving"
+              placeholder="Inserisci nome"
+            />
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Matricola</label>
-            <div class="text-lg font-semibold text-gray-900">{{ dipendente.matricola }}</div>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700">Codice Paghe</label>
-            <div class="text-lg font-semibold text-gray-900">{{ dipendente.datiAzi?.codicePat || '-' }}</div>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-medium">Matricola</span>
+            </label>
+            <input
+              v-model="dipendente.matricola"
+              type="text"
+              class="input input-bordered"
+              :disabled="saving"
+              placeholder="Inserisci matricola"
+            />
           </div>
         </div>
       </div>
@@ -156,7 +186,7 @@
 
                 <div class="form-control">
                   <label class="label">
-                    <span class="label-text font-medium">Data Assunzione</span>
+                    <span class="label-text font-medium">Data Assunzione *</span>
                   </label>
                   <DateInput
                     v-model="dipendente.datiAzi.dataAssunz"
@@ -168,7 +198,7 @@
 
                 <div class="form-control">
                   <label class="label">
-                    <span class="label-text font-medium">Data Anzianità Convenzionale</span>
+                    <span class="label-text font-medium">Data Assunzione Convenzionale</span>
                   </label>
                   <DateInput
                     v-model="dipendente.datiAzi.dataAssunzioneConvenzionale"
@@ -192,6 +222,17 @@
 
                 <div class="form-control">
                   <label class="label">
+                    <span class="label-text font-medium">Tipo Rapporto</span>
+                  </label>
+                  <select v-model="dipendente.datiAzi.tipoRappor" class="select select-bordered" :disabled="saving">
+                    <option value="">Seleziona...</option>
+                    <option value="1">1 - Tempo Indeterminato</option>
+                    <option value="2">2 - Tempo Determinato</option>
+                  </select>
+                </div>
+
+                <div class="form-control">
+                  <label class="label">
                     <span class="label-text font-medium">Percentuale Part-time</span>
                   </label>
                   <input
@@ -199,6 +240,45 @@
                     type="number"
                     class="input input-bordered"
                     :disabled="saving"
+                  />
+                </div>
+
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Codice Qualifica</span>
+                  </label>
+                  <input
+                    v-model="dipendente.datiAzi.codQualif"
+                    type="text"
+                    class="input input-bordered"
+                    :disabled="saving"
+                    placeholder="Inserisci codice qualifica"
+                  />
+                </div>
+
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Codice Livello</span>
+                  </label>
+                  <input
+                    v-model="dipendente.datiAzi.codLivello"
+                    type="text"
+                    class="input input-bordered"
+                    :disabled="saving"
+                    placeholder="Inserisci codice livello"
+                  />
+                </div>
+
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text font-medium">Codice CCNL</span>
+                  </label>
+                  <input
+                    v-model.number="dipendente.datiAzi.codCCNL"
+                    type="number"
+                    class="input input-bordered"
+                    :disabled="saving"
+                    placeholder="Inserisci codice CCNL"
                   />
                 </div>
               </div>
@@ -282,9 +362,6 @@
                     :disabled="saving"
                     maxlength="16"
                   />
-                  <div class="label">
-                    <span class="label-text-alt">Il codice fiscale verrà decodificato automaticamente</span>
-                  </div>
                 </div>
 
                 <div class="form-control">
@@ -293,8 +370,14 @@
                   </label>
                   <select v-model="dipendente.datiPers.statoCivi" class="select select-bordered" :disabled="saving">
                     <option value="">Seleziona...</option>
-                    <option value="1">Coniugato/a</option>
-                    <option value="2">Non coniugato/a</option>
+                    <option value="C">1 - Coniugato/a</option>
+                    <option value="D">2 - Divorziato/a</option>
+                    <option value="N">3 - Nubile (Celibe)</option>
+                    <option value="S">4 - Separato/a</option>
+                    <option value="V">5 - Vedovo/a</option>
+                    <option value="U">6 - Unito/a civilmente</option>
+                    <option value="L">7 - Sciolto/a da unione civile</option>
+                    <option value="A">8 - Abbandonato/a</option>
                   </select>
                 </div>
 
@@ -369,7 +452,9 @@
                   </label>
                   <select v-model="dipendente.datiPers.militare" class="select select-bordered" :disabled="saving">
                     <option value="">Seleziona...</option>
-                    <option value="1">Esente</option>
+                    <option value="1">1 - Esente</option>
+                    <option value="2">2 - Assolto</option>
+                    <option value="3">3 - Da fare</option>
                   </select>
                 </div>
               </div>
@@ -701,7 +786,11 @@ const isEditMode = computed(() => {
 
 const isFormValid = computed(() => {
   if (!dipendente.value) return false
-  return dipendente.value.cognome.trim() !== '' && dipendente.value.nome.trim() !== ''
+  return dipendente.value.cognome.trim() !== '' &&
+         dipendente.value.nome.trim() !== '' &&
+         dipendente.value.codDip > 0 &&
+         dipendente.value.datiPers.codFis.trim() !== '' &&
+         dipendente.value.datiAzi.dataAssunz.trim() !== ''
 })
 
 // Navigation configuration
@@ -823,6 +912,7 @@ const loadDipendenteForDuplication = async (duplicateId: string) => {
       familiari: []
     }
 
+    normalizeSelectValues()
     ensureBadgesInitialized()
     ensurePatsInitialized()
   } catch (error) {
@@ -839,6 +929,7 @@ const initializeEmptyDipendente = async () => {
     try {
       dipendente.value = JSON.parse(duplicatedData)
       sessionStorage.removeItem('duplicatedDipendente')
+      normalizeSelectValues()
       ensureBadgesInitialized()
       ensurePatsInitialized()
       return
@@ -869,7 +960,7 @@ const initializeEmptyDipendente = async () => {
       dataAssunzioneConvenzionale: '',
       dataCessazione: '',
       percenpt: 100,
-      tipoRappor: '',
+      tipoRappor: '2',
       listaBadge: [],
       listaPAT: []
     },
@@ -888,8 +979,8 @@ const initializeEmptyDipendente = async () => {
       capRes: 0,
       proRes: '',
       telefono: '',
-      statoCivi: '',
-      militare: '',
+      statoCivi: 'C',
+      militare: '1',
       mail: '',
       note: ''
     },
@@ -911,6 +1002,51 @@ const initializeEmptyDipendente = async () => {
   ensurePatsInitialized()
 }
 
+const normalizeSelectValues = () => {
+  if (!dipendente.value) return
+
+  // Normalizza i valori delle select per assicurarsi che siano stringhe
+  if (dipendente.value.datiAzi.tipoRappor && typeof dipendente.value.datiAzi.tipoRappor === 'number') {
+    dipendente.value.datiAzi.tipoRappor = String(dipendente.value.datiAzi.tipoRappor)
+  }
+
+  // Gestisce stato civile: converte vecchi valori numerici in nuovi codici lettera
+  if (dipendente.value.datiPers.statoCivi) {
+    if (typeof dipendente.value.datiPers.statoCivi === 'number') {
+      // Conversione da vecchi valori numerici a nuovi codici lettera
+      const statoCiviMap: Record<number, string> = {
+        1: 'C', // Coniugato/a
+        2: 'N', // Celibe/Nubile
+        3: 'S', // Separato/a
+        4: 'D', // Divorziato/a
+        5: 'V'  // Vedovo/a
+      }
+      dipendente.value.datiPers.statoCivi = statoCiviMap[dipendente.value.datiPers.statoCivi] || 'C'
+    } else if (typeof dipendente.value.datiPers.statoCivi === 'string' && dipendente.value.datiPers.statoCivi.match(/^[1-5]$/)) {
+      // Conversione da vecchi valori stringa numerici a nuovi codici lettera
+      const statoCiviMap: Record<string, string> = {
+        '1': 'C', // Coniugato/a
+        '2': 'N', // Celibe/Nubile
+        '3': 'S', // Separato/a
+        '4': 'D', // Divorziato/a
+        '5': 'V'  // Vedovo/a
+      }
+      dipendente.value.datiPers.statoCivi = statoCiviMap[dipendente.value.datiPers.statoCivi] || 'C'
+    }
+    // Se è già un codice lettera valido, non fare nulla
+  } else {
+    // Se null o undefined, imposta default
+    dipendente.value.datiPers.statoCivi = 'C'
+  }
+
+  // Gestisce servizio militare: se null o undefined, imposta "1" (Esente)
+  if (dipendente.value.datiPers.militare === null || dipendente.value.datiPers.militare === undefined || dipendente.value.datiPers.militare === '') {
+    dipendente.value.datiPers.militare = '1'
+  } else if (typeof dipendente.value.datiPers.militare === 'number') {
+    dipendente.value.datiPers.militare = String(dipendente.value.datiPers.militare)
+  }
+}
+
 const loadDipendente = async () => {
   if (!dipendenteId.value && isEditMode.value) return
 
@@ -925,6 +1061,8 @@ const loadDipendente = async () => {
       if (!dipendente.value.datiAzi.listaBadge) {
         dipendente.value.datiAzi.listaBadge = []
       }
+
+      normalizeSelectValues()
       ensureBadgesInitialized()
     }
   } catch (error) {
@@ -939,9 +1077,41 @@ const loadDipendente = async () => {
 const handleSave = async () => {
   if (!dipendente.value) return
 
-  if (!dipendente.value.cognome.trim() || !dipendente.value.nome.trim()) {
-    errorMessage.value = 'Cognome e Nome sono obbligatori'
+  // Validazione campi obbligatori
+  const errors = []
+  if (!dipendente.value.cognome.trim()) errors.push('Cognome')
+  if (!dipendente.value.nome.trim()) errors.push('Nome')
+  if (!dipendente.value.codDip || dipendente.value.codDip <= 0) errors.push('Codice Dipendente')
+  if (!dipendente.value.datiPers.codFis.trim()) errors.push('Codice Fiscale')
+  if (!dipendente.value.datiAzi.dataAssunz.trim()) errors.push('Data Assunzione')
+
+  if (errors.length > 0) {
+    errorMessage.value = `I seguenti campi sono obbligatori: ${errors.join(', ')}`
     return
+  }
+
+  // Validazione PAT: solo uno attivo alla volta
+  if (dipendente.value.datiAzi.listaPAT && dipendente.value.datiAzi.listaPAT.length > 0) {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const activePats = dipendente.value.datiAzi.listaPAT.filter(pat => {
+      if (!pat.al) return true // Nessuna data fine = attivo
+
+      // Converte la data da DD/MM/YYYY a Date
+      const [day, month, year] = pat.al.split('/')
+      if (!day || !month || !year) return true // Data malformata = attivo
+
+      const endDate = new Date(Number(year), Number(month) - 1, Number(day))
+      endDate.setHours(0, 0, 0, 0)
+
+      return endDate >= today // Data fine >= oggi = attivo
+    })
+
+    if (activePats.length > 1) {
+      errorMessage.value = 'È possibile avere solo un P.A.T. attivo alla volta. Verificare le date di fine.'
+      return
+    }
   }
 
   saving.value = true
@@ -966,7 +1136,22 @@ const handleCodiceFiscaleBlur = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const codiceFiscale = target.value.trim().toUpperCase()
 
-  if (!codiceFiscale || codiceFiscale.length !== 16 || !dipendente.value) {
+  if (!codiceFiscale || !dipendente.value) {
+    return
+  }
+
+  // Validazione lunghezza codice fiscale
+  if (codiceFiscale.length !== 16) {
+    // CF errato - svuota tutti i campi collegati
+    if (dipendente.value) {
+      dipendente.value.datiPers.dataNas = ''
+      dipendente.value.datiPers.sesso = ''
+      dipendente.value.datiPers.comRes = ''
+      dipendente.value.datiPers.proRes = ''
+      dipendente.value.datiPers.capRes = 0
+      dipendente.value.datiPers.codComRes = ''
+    }
+    errorMessage.value = 'Codice fiscale non valido: deve essere di 16 caratteri'
     return
   }
 
@@ -983,7 +1168,18 @@ const handleCodiceFiscaleBlur = async (event: Event) => {
     successMessage.value = 'Codice fiscale decodificato con successo'
   } catch (error) {
     console.error('Errore nella decodifica del codice fiscale:', error)
-    errorMessage.value = 'Errore nella decodifica del codice fiscale'
+
+    // CF errato - svuota tutti i campi collegati
+    if (dipendente.value) {
+      dipendente.value.datiPers.dataNas = ''
+      dipendente.value.datiPers.sesso = ''
+      dipendente.value.datiPers.comRes = ''
+      dipendente.value.datiPers.proRes = ''
+      dipendente.value.datiPers.capRes = 0
+      dipendente.value.datiPers.codComRes = ''
+    }
+
+    errorMessage.value = 'Codice fiscale non valido: impossibile decodificare'
   }
 }
 
@@ -1067,6 +1263,28 @@ const addNewPat = () => {
 
   if (!dipendente.value.datiAzi.listaPAT) {
     dipendente.value.datiAzi.listaPAT = []
+  }
+
+  // Controlla se esiste già un PAT attivo (senza data fine o con data fine successiva a oggi)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const hasActivePat = dipendente.value.datiAzi.listaPAT.some(pat => {
+    if (!pat.al) return true // Nessuna data fine = attivo
+
+    // Converte la data da DD/MM/YYYY a Date
+    const [day, month, year] = pat.al.split('/')
+    if (!day || !month || !year) return true // Data malformata = attivo
+
+    const endDate = new Date(Number(year), Number(month) - 1, Number(day))
+    endDate.setHours(0, 0, 0, 0)
+
+    return endDate >= today // Data fine >= oggi = attivo
+  })
+
+  if (hasActivePat) {
+    errorMessage.value = 'Esiste già un P.A.T. attivo. È possibile avere solo un P.A.T. attivo alla volta.'
+    return
   }
 
   const newPat: PAT = {
@@ -1180,6 +1398,13 @@ watch(() => dipendente.value, () => {
     ensurePatsInitialized()
   }
 }, { deep: true, immediate: false })
+
+// Watcher per auto-compilare data assunzione convenzionale
+watch(() => dipendente.value?.datiAzi.dataAssunz, (newDataAssunz) => {
+  if (dipendente.value && newDataAssunz && !dipendente.value.datiAzi.dataAssunzioneConvenzionale) {
+    dipendente.value.datiAzi.dataAssunzioneConvenzionale = newDataAssunz
+  }
+}, { immediate: false })
 
 // Watcher per ricaricare i dati quando cambia l'ID nell'URL (navigazione Previous/Next)
 watch(() => route.params.id, (newId, oldId) => {
