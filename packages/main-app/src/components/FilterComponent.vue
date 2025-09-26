@@ -249,7 +249,7 @@ export interface FilterData {
 const emit = defineEmits<{
   'apply': [filters: FilterData]
   'reset': []
-  'dipendenti-loaded': [dipendenti: Dipendente[]]
+  'dipendenti-loaded': [dipendenti: Dipendente[], codAzi: number]
   'loading': [isLoading: boolean]
 }>()
 
@@ -477,7 +477,7 @@ const applyFilters = async () => {
   try {
     emit('loading', true)
     const dipendenti = await dipendenteService.getListaDipendenti(filtriApi)
-    emit('dipendenti-loaded', dipendenti)
+    emit('dipendenti-loaded', dipendenti, selectedAzienda.value as number)
     emit('apply', filters)
   } catch (error) {
     console.error('Errore nel caricamento dipendenti:', error)

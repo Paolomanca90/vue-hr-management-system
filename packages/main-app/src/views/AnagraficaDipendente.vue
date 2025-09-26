@@ -133,10 +133,11 @@ const mockDipendentiService = computed<FlexibleCrudService>(() => ({
   delete: async () => { throw new Error('Not implemented') }
 }))
 
-const onDipendentiLoaded = (nuoviDipendenti: Dipendente[]) => {
+const onDipendentiLoaded = (nuoviDipendenti: Dipendente[], codAzi: number) => {
   dipendenti.value = nuoviDipendenti.map(dip => ({
     ...dip,
-    id: `${dip.codAzi}-${dip.codDip}` // Usa il codAzi effettivo
+    codAzi: codAzi,
+    id: `${codAzi}-${dip.codDip}`
   }))
   hasSearched.value = true
   showFilters.value = false

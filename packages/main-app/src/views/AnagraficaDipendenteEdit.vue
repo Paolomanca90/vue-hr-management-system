@@ -26,12 +26,13 @@
           :is-edit-mode="isEditMode"
           :saving="saving"
           :is-form-valid="isFormValid"
-          :show-duplicate="false"
+          :show-duplicate="isEditMode"
           :show-delete="isEditMode"
           :show-reset="true"
           :show-navigation="isEditMode"
           :navigation-config="dipendenteNavigationConfig"
           @delete="handleDelete"
+          @duplicate="handleDuplicate"
           @reset="handleReset"
         />
       </div>
@@ -383,7 +384,7 @@
                 <h3 class="text-lg font-medium">Elenco Badge</h3>
                 <button
                   @click="addNewBadge"
-                  class="btn btn-primary btn-sm"
+                  class="btn btn-primary btn-sm text-white"
                 >
                   <FaIcon icon="plus" class="mr-2" />
                   Aggiungi Badge
@@ -460,27 +461,77 @@
           <div v-if="activeTab === 'pat'" class="space-y-6">
             <div class="space-y-4">
               <div class="flex justify-between items-center">
-                <h3 class="text-lg font-medium">Gestione P.A.T.</h3>
+                <h3 class="text-lg font-medium">Elenco P.A.T.</h3>
                 <button
-                  @click="showAddPatForm = true"
-                  class="btn btn-primary btn-sm"
+                  @click="addNewPat"
+                  class="btn btn-primary btn-sm text-white"
                 >
                   <FaIcon icon="plus" class="mr-2" />
-                  Gestione P.A.T.
+                  Aggiungi P.A.T.
                 </button>
               </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-base-200 rounded-lg">
-                <div>
-                  <label class="block text-sm font-medium">P.A.T.</label>
-                  <div class="text-lg font-semibold">{{ dipendente.datiAzi.codicePat || '-' }}</div>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium">Data</label>
-                  <div>{{ formatDate('24/09/2025') }}</div>
-                </div>
-                <div class="flex items-end">
-                  <span class="badge badge-success">Attivo</span>
+              <div class="space-y-3">
+                <div
+                  v-for="(pat, index) in patList"
+                  :key="index"
+                  class="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 bg-base-100 border border-gray-200 rounded-lg"
+                >
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Cod. Azienda</label>
+                    <input
+                      v-model.number="pat.codAzi"
+                      type="number"
+                      class="input input-bordered input-sm w-full"
+                      disabled
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Cod. Dipendente</label>
+                    <input
+                      v-model.number="pat.codDip"
+                      type="number"
+                      class="input input-bordered input-sm w-full"
+                      disabled
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Codice P.A.T.</label>
+                    <input
+                      v-model.number="pat.codPat"
+                      type="number"
+                      class="input input-bordered input-sm w-full"
+                      placeholder="Codice P.A.T."
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Dal</label>
+                    <DateInput
+                      v-model="pat.dal"
+                      format="european"
+                      :input-class="'input input-bordered input-sm w-full'"
+                      placeholder="dd/mm/yyyy"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Al</label>
+                    <DateInput
+                      v-model="pat.al"
+                      format="european"
+                      :input-class="'input input-bordered input-sm w-full'"
+                      placeholder="dd/mm/yyyy"
+                    />
+                  </div>
+                  <div class="flex items-end gap-2">
+                    <button
+                      v-if="patList.length > 1 || (patList.length === 1 && pat.codPat > 0)"
+                      @click="removePat(index)"
+                      class="btn btn-sm btn-error btn-outline"
+                      title="Elimina P.A.T."
+                    >
+                      <FaIcon icon="trash" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -493,7 +544,7 @@
                 <h3 class="text-lg font-medium">Elenco Familiari</h3>
                 <button
                   @click="addNewFamiliare"
-                  class="btn btn-primary btn-sm"
+                  class="btn btn-primary btn-sm text-white"
                 >
                   <FaIcon icon="plus" class="mr-2" />
                   Aggiungi Familiare
@@ -504,8 +555,17 @@
                 <div
                   v-for="(familiare, index) in dipendente.familiari"
                   :key="index"
-                  class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-base-100 border border-gray-200 rounded-lg"
+                  class="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-base-100 border border-gray-200 rounded-lg"
                 >
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Codice</label>
+                    <input
+                      v-model.number="familiare.codice"
+                      type="number"
+                      class="input input-bordered input-sm w-full"
+                      placeholder="Codice"
+                    />
+                  </div>
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Cognome</label>
                     <input
@@ -550,7 +610,7 @@
               <div v-else class="text-center py-8">
                 <FaIcon icon="users" class="text-6xl text-gray-300 mb-4" />
                 <h3 class="text-xl font-semibold text-gray-700 mb-2">Nessun familiare presente</h3>
-                <button @click="addNewFamiliare" class="btn btn-primary">
+                <button @click="addNewFamiliare" class="btn btn-primary text-white">
                   <FaIcon icon="plus" class="mr-2" />
                   Aggiungi Primo Familiare
                 </button>
@@ -586,9 +646,13 @@ import ActionButtons from '@/components/ActionButtons.vue'
 import DateInput from '@/components/DateInput.vue'
 import SimpleConfirmDialog from '@/components/SimpleConfirmDialog.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
-import { dipendenteService, type DettaglioDipendente, type Familiare, type Badge } from '@/services/dipendenteService'
+import { dipendenteService, type DettaglioDipendente, type Familiare, type Badge, type PAT } from '@/services/dipendenteService'
 
 type BadgeWithPlaceholder = Badge & {
+  _isPlaceholder?: boolean
+}
+
+type PatWithPlaceholder = PAT & {
   _isPlaceholder?: boolean
 }
 
@@ -605,7 +669,6 @@ const confirmDialogTitle = ref('')
 const confirmDialogMessage = ref('')
 const confirmAction = ref<(() => void) | null>(null)
 const activeTab = ref('aziendali')
-const showAddPatForm = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
 
@@ -661,6 +724,14 @@ const badgeList = computed((): BadgeWithPlaceholder[] => {
   return dipendente.value.datiAzi.listaBadge.map(badge => ({ ...badge, _isPlaceholder: false }))
 })
 
+const patList = computed((): PatWithPlaceholder[] => {
+  if (!dipendente.value) return []
+  if (!dipendente.value.datiAzi.listaPAT) {
+    return []
+  }
+  return dipendente.value.datiAzi.listaPAT.map(pat => ({ ...pat, _isPlaceholder: false }))
+})
+
 const ensureBadgesInitialized = () => {
   if (!dipendente.value) return
 
@@ -677,6 +748,25 @@ const ensureBadgesInitialized = () => {
       al: ''
     }
     dipendente.value.datiAzi.listaBadge.push(emptyBadge)
+  }
+}
+
+const ensurePatsInitialized = () => {
+  if (!dipendente.value) return
+
+  if (!dipendente.value.datiAzi.listaPAT) {
+    dipendente.value.datiAzi.listaPAT = []
+  }
+
+  if (dipendente.value.datiAzi.listaPAT.length === 0) {
+    const emptyPat: PAT = {
+      codAzi: dipendente.value.codAzi,
+      codDip: dipendente.value.codDip,
+      codPat: 0,
+      dal: '',
+      al: ''
+    }
+    dipendente.value.datiAzi.listaPAT.push(emptyPat)
   }
 }
 
@@ -701,7 +791,62 @@ const handleCancel = () => {
 }
 
 // Methods
-const initializeEmptyDipendente = () => {
+const loadDipendenteForDuplication = async (duplicateId: string) => {
+  loading.value = true
+
+  try {
+    const [codAzi, codDip] = duplicateId.split('-')
+    const originalDipendente = await dipendenteService.getDettaglioDipendente({
+      codDip: Number(codDip),
+      codAzi: Number(codAzi)
+    })
+
+    dipendente.value = {
+      ...originalDipendente,
+      codDip: 0,
+      matricola: '',
+      cognome: `${originalDipendente.cognome} - Copia`,
+      datiAzi: {
+        ...originalDipendente.datiAzi,
+        codDip: 0,
+        listaBadge: [],
+        listaPAT: []
+      },
+      datiPers: {
+        ...originalDipendente.datiPers,
+        codDip: 0,
+        codFis: ''
+      },
+      codUte: {
+        ...originalDipendente.codUte
+      },
+      familiari: []
+    }
+
+    ensureBadgesInitialized()
+    ensurePatsInitialized()
+  } catch (error) {
+    console.error('Errore nel caricamento del dipendente per duplicazione:', error)
+    errorMessage.value = 'Errore nel caricamento dei dati per la duplicazione'
+  } finally {
+    loading.value = false
+  }
+}
+
+const initializeEmptyDipendente = async () => {
+  const duplicatedData = sessionStorage.getItem('duplicatedDipendente')
+  if (duplicatedData) {
+    try {
+      dipendente.value = JSON.parse(duplicatedData)
+      sessionStorage.removeItem('duplicatedDipendente')
+      ensureBadgesInitialized()
+      ensurePatsInitialized()
+      return
+    } catch (error) {
+      console.error('Errore nel parsing dei dati duplicati:', error)
+    }
+  }
+
   dipendente.value = {
     codDip: dipendenteId.value || 0,
     codAzi: aziendaId.value || 1,
@@ -763,6 +908,7 @@ const initializeEmptyDipendente = () => {
     familiari: []
   }
   ensureBadgesInitialized()
+  ensurePatsInitialized()
 }
 
 const loadDipendente = async () => {
@@ -780,12 +926,10 @@ const loadDipendente = async () => {
         dipendente.value.datiAzi.listaBadge = []
       }
       ensureBadgesInitialized()
-    } else {
-      initializeEmptyDipendente()
     }
   } catch (error) {
     console.error('Errore nel caricamento dipendente:', error)
-    initializeEmptyDipendente()
+    await initializeEmptyDipendente()
     errorMessage.value = 'Dati non trovati nel database. È possibile inserire i dati manualmente.'
   } finally {
     loading.value = false
@@ -918,9 +1062,73 @@ const removeBadge = (index: number) => {
   }
 }
 
-const formatDate = (date: string) => {
-  if (!date) return '-'
-  return new Date(date).toLocaleDateString('it-IT')
+const addNewPat = () => {
+  if (!dipendente.value) return
+
+  if (!dipendente.value.datiAzi.listaPAT) {
+    dipendente.value.datiAzi.listaPAT = []
+  }
+
+  const newPat: PAT = {
+    codAzi: dipendente.value.codAzi,
+    codDip: dipendente.value.codDip,
+    codPat: 0,
+    dal: '',
+    al: ''
+  }
+
+  dipendente.value.datiAzi.listaPAT.push(newPat)
+}
+
+const removePat = (index: number) => {
+  if (!dipendente.value) return
+
+  // Se stiamo rimuovendo dall'array originale (quando ci sono P.A.T. reali)
+  if (dipendente.value.datiAzi.listaPAT.length > 0) {
+    const pat = dipendente.value.datiAzi.listaPAT[index]
+    const displayName = pat.codPat && pat.codPat > 0
+      ? `il P.A.T. ${pat.codPat}`
+      : 'questo P.A.T.'
+
+    showConfirmation(
+      'Elimina P.A.T.',
+      `Sei sicuro di voler eliminare ${displayName}?`,
+      () => {
+        if (!dipendente.value) return
+        dipendente.value.datiAzi.listaPAT.splice(index, 1)
+        successMessage.value = 'P.A.T. eliminato con successo'
+      }
+    )
+  }
+}
+
+const handleDuplicate = () => {
+  if (!dipendente.value) return
+
+  const duplicated = {
+    ...dipendente.value,
+    codDip: 0,
+    matricola: '',
+    cognome: `${dipendente.value.cognome} - Copia`,
+    datiAzi: {
+      ...dipendente.value.datiAzi,
+      codDip: 0,
+      listaBadge: [],
+      listaPAT: []
+    },
+    datiPers: {
+      ...dipendente.value.datiPers,
+      codDip: 0,
+      codFis: ''
+    },
+    codUte: {
+      ...dipendente.value.codUte
+    },
+    familiari: []
+  }
+
+  sessionStorage.setItem('duplicatedDipendente', JSON.stringify(duplicated))
+  router.push('/app/anagrafica-dipendente/new')
 }
 
 const handleDelete = async () => {
@@ -954,11 +1162,11 @@ const handleDelete = async () => {
   )
 }
 
-const handleReset = () => {
+const handleReset = async () => {
   if (isEditMode.value) {
     loadDipendente()
   } else {
-    initializeEmptyDipendente()
+    await initializeEmptyDipendente()
   }
 }
 
@@ -969,6 +1177,7 @@ const goBack = () => {
 watch(() => dipendente.value, () => {
   if (dipendente.value) {
     ensureBadgesInitialized()
+    ensurePatsInitialized()
   }
 }, { deep: true, immediate: false })
 
@@ -979,8 +1188,17 @@ watch(() => route.params.id, (newId, oldId) => {
   }
 }, { immediate: false })
 
-onMounted(() => {
-  loadDipendente()
+onMounted(async () => {
+  if (isEditMode.value) {
+    loadDipendente()
+  } else {
+    const duplicateId = route.query.duplicate
+    if (duplicateId && typeof duplicateId === 'string') {
+      await loadDipendenteForDuplication(duplicateId)
+    } else {
+      await initializeEmptyDipendente()
+    }
+  }
 })
 </script>
 
