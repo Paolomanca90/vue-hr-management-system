@@ -117,6 +117,7 @@ export interface LookupInputConfig {
   modalConfig: Omit<ModalConfig, 'loadData'>
   autoCompleteField: string
   keyField?: string
+  searchFilter?: Record<string, string>
   mapper?: (item: Record<string, unknown>) => Record<string, unknown>
 }
 
@@ -178,17 +179,41 @@ const modalConfig = computed<ModalConfig>(() => ({
         PROVINCIA: comune.provincia
       }))
     }
-    // Per altri tipi, carica tutto
-    return lookupService.getList(props.config.lookupType)
+    // Per altri tipi, carica tutto con filtri opzionali
+    return lookupService.getList(props.config.lookupType, props.config.searchFilter)
   }
 }))
 
 const updateField = (field: string, value: unknown) => {
-  const newValue = { ...props.modelValue, [field]: value }
+  let processedValue = value
+
+  if (field === 'cap' && typeof value === 'string') {
+    const currentValue = String(props.modelValue[field] || '')
+    const newValue = value.trim()
+
+    if (currentValue === '00000' && newValue.length > 0 && !/^0+$/.test(newValue)) {
+      processedValue = newValue
+    } else {
+      processedValue = newValue
+    }
+  }
+
+  const newValue = { ...props.modelValue, [field]: processedValue }
   emit('update:modelValue', newValue)
 }
 
 const handleFieldBlur = (fieldKey: string) => {
+  if (fieldKey === 'cap') {
+    const currentValue = props.modelValue[fieldKey]
+    if (typeof currentValue === 'string') {
+      const formattedValue = formatCap(currentValue)
+      if (formattedValue !== currentValue) {
+        const newValue = { ...props.modelValue, [fieldKey]: formattedValue }
+        emit('update:modelValue', newValue)
+      }
+    }
+  }
+
   if (fieldKey === props.config.autoCompleteField) {
     handleLookupBlur()
   }

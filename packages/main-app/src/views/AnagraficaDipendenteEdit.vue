@@ -229,20 +229,20 @@
                 <h4 class="text-md font-medium text-gray-900 mb-4">Qualifiche e CCNL</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <GenericLookupInput
-                    v-model="qualificaData"
-                    :config="qualificaConfig"
+                    v-model="ccnlData"
+                    :config="ccnlConfig"
                     :disabled="saving"
                   />
 
                   <GenericLookupInput
                     v-model="livelloData"
                     :config="livelloConfig"
-                    :disabled="saving"
+                    :disabled="saving || !ccnlData.codCCNL || Number(ccnlData.codCCNL) <= 0"
                   />
 
                   <GenericLookupInput
-                    v-model="ccnlData"
-                    :config="ccnlConfig"
+                    v-model="qualificaData"
+                    :config="qualificaConfig"
                     :disabled="saving"
                   />
                 </div>
@@ -346,68 +346,10 @@
               <!-- Sezione Residenza -->
               <div class="bg-gray-50 p-4 rounded-lg">
                 <h4 class="text-md font-medium text-gray-900 mb-4">Dati di Residenza</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <div class="form-control">
-                    <label class="label">
-                      <span class="label-text font-medium">Indirizzo</span>
-                    </label>
-                    <input
-                      v-model="dipendente.datiPers.viaRes"
-                      type="text"
-                      class="input input-bordered"
-                      :disabled="saving"
-                    />
-                  </div>
-
-                  <div class="form-control">
-                    <label class="label">
-                      <span class="label-text font-medium">Numero Civico</span>
-                    </label>
-                    <input
-                      v-model="dipendente.datiPers.numRes"
-                      type="text"
-                      class="input input-bordered"
-                      :disabled="saving"
-                    />
-                  </div>
-
-                  <div class="form-control">
-                    <label class="label">
-                      <span class="label-text font-medium">Località</span>
-                    </label>
-                    <input
-                      v-model="dipendente.datiPers.comRes"
-                      type="text"
-                      class="input input-bordered"
-                      :disabled="saving"
-                    />
-                  </div>
-
-                  <div class="form-control">
-                    <label class="label">
-                      <span class="label-text font-medium">Provincia</span>
-                    </label>
-                    <input
-                      v-model="dipendente.datiPers.proRes"
-                      type="text"
-                      class="input input-bordered"
-                      :disabled="saving"
-                      maxlength="2"
-                    />
-                  </div>
-
-                  <div class="form-control">
-                    <label class="label">
-                      <span class="label-text font-medium">CAP</span>
-                    </label>
-                    <input
-                      v-model.number="dipendente.datiPers.capRes"
-                      type="number"
-                      class="input input-bordered"
-                      :disabled="saving"
-                    />
-                  </div>
-                </div>
+                <AddressInput
+                  v-model="addressData"
+                  :disabled="saving"
+                />
               </div>
 
               <!-- Sezione Contatti -->
@@ -712,9 +654,10 @@ import ActionButtons from '@/components/ActionButtons.vue'
 import DateInput from '@/components/DateInput.vue'
 import SimpleConfirmDialog from '@/components/SimpleConfirmDialog.vue'
 import GenericLookupInput, { type LookupInputConfig } from '@/components/GenericLookupInput.vue'
+import AddressInput, { type AddressData } from '@/components/AddressInput.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { dipendenteService, type DettaglioDipendente, type Familiare, type Badge, type PAT } from '@/services/dipendenteService'
-import { lookupService } from '@/services/lookupService'
+import { lookupService, formatCap } from '@/services/lookupService'
 
 type BadgeWithPlaceholder = Badge & {
   _isPlaceholder?: boolean
@@ -782,7 +725,28 @@ const ccnlData = ref<Record<string, unknown>>({
   descrizCCNL: ''
 })
 
-const sedeConfig: LookupInputConfig = {
+const addressData = ref<AddressData>({
+  indirizzo: '',
+  codiceBelfiore: '',
+  comune: '',
+  cap: '',
+  provincia: '',
+  civico: ''
+})
+
+// Cache per i dati dei lookup per evitare chiamate duplicate
+const lookupCache = ref<Record<string, Array<Record<string, unknown>>>>({
+  sede: [],
+  filiale: [],
+  ccosto: [],
+  reparto: [],
+  posinps: [],
+  qualifica: [],
+  livello: [],
+  contratto: []
+})
+
+const sedeConfig = computed<LookupInputConfig>(() => ({
   lookupType: 'sede',
   autoCompleteField: 'codSedeAz',
   keyField: 'CODSEDEAZ',
@@ -797,13 +761,20 @@ const sedeConfig: LookupInputConfig = {
       { key: 'DESCRIZ', label: 'Descrizione' }
     ],
     searchPlaceholder: 'Cerca per codice o descrizione...',
-    searchFields: ['CODSEDEAZ', 'DESCRIZ']
+    searchFields: ['CODSEDEAZ', 'DESCRIZ'],
+    // Usa dati cachati invece di fare nuove chiamate API
+    loadData: async () => {
+      if (lookupCache.value.sede.length === 0) {
+        lookupCache.value.sede = await lookupService.getList('sede')
+      }
+      return lookupCache.value.sede
+    }
   },
   mapper: (item: Record<string, unknown>) => ({
     codSedeAz: Number(item.CODSEDEAZ) || 0,
     descrizSede: String(item.DESCRIZ || '')
   })
-}
+}))
 
 const filialeConfig: LookupInputConfig = {
   lookupType: 'filiale',
@@ -921,28 +892,46 @@ const qualificaConfig: LookupInputConfig = {
   })
 }
 
-const livelloConfig: LookupInputConfig = {
-  lookupType: 'livello',
-  autoCompleteField: 'codLivello',
-  keyField: 'CODLIVELLO',
-  fields: [
-    { key: 'codLivello', label: 'Cod. Livello', editable: true, colSpan: 3 },
-    { key: 'descrizLivello', label: 'Descrizione Livello', editable: false, hasLookup: true, colSpan: 9 }
-  ],
-  modalConfig: {
-    title: 'Selezione Livello',
-    columns: [
-      { key: 'CODLIVELLO', label: 'Codice' },
-      { key: 'DESCRIZ', label: 'Descrizione' }
+const livelloConfig = computed<LookupInputConfig>(() => {
+  const selectedCCNL = ccnlData.value.codCCNL
+  const hasCCNL = selectedCCNL && Number(selectedCCNL) > 0
+
+  return {
+    lookupType: 'livello',
+    autoCompleteField: 'codLivello',
+    keyField: 'CODLIVELLO',
+    searchFilter: hasCCNL ? { CODCCNL: String(selectedCCNL) } : undefined,
+    fields: [
+      { key: 'codLivello', label: 'Cod. Livello', editable: true, colSpan: 3 },
+      { key: 'descrizLivello', label: 'Descrizione Livello', editable: false, hasLookup: true, colSpan: 9 }
     ],
-    searchPlaceholder: 'Cerca per codice o descrizione...',
-    searchFields: ['CODLIVELLO', 'DESCRIZ']
-  },
-  mapper: (item: Record<string, unknown>) => ({
-    codLivello: String(item.CODLIVELLO || ''),
-    descrizLivello: String(item.DESCRIZ || '')
-  })
-}
+    modalConfig: {
+      title: 'Selezione Livello',
+      columns: [
+        { key: 'CODLIVELLO', label: 'Codice' },
+        { key: 'DESCRIZ', label: 'Descrizione' },
+        { key: 'CODCCNL', label: 'CCNL' }
+      ],
+      searchPlaceholder: 'Cerca per codice o descrizione...',
+      searchFields: ['CODLIVELLO', 'DESCRIZ'],
+      // Usa dati cachati con invalidazione per CCNL
+      loadData: async () => {
+        const cacheKey = hasCCNL ? `livello_${selectedCCNL}` : 'livello'
+
+        if (!lookupCache.value[cacheKey]) {
+          const filter = hasCCNL ? { CODCCNL: String(selectedCCNL) } : undefined
+          lookupCache.value[cacheKey] = await lookupService.getList('livello', filter)
+        }
+
+        return lookupCache.value[cacheKey] || []
+      }
+    },
+    mapper: (item: Record<string, unknown>) => ({
+      codLivello: String(item.CODLIVELLO || ''),
+      descrizLivello: String(item.DESCRIZ || '')
+    })
+  }
+})
 
 const ccnlConfig: LookupInputConfig = {
   lookupType: 'contratto',
@@ -1591,137 +1580,103 @@ const goBack = () => {
   router.push('/app/anagrafica-dipendente')
 }
 
-const loadSedeDescription = async (codSedeAz: number) => {
-  if (!codSedeAz || codSedeAz === 0) return
-  try {
-    const result = await lookupService.getListByCode('sede', String(codSedeAz), 'CODSEDEAZ')
-    if (result) {
-      sedeData.value.descrizSede = String(result.DESCRIZ || '')
-    }
-  } catch (error) {
-    console.error('Errore nel caricamento descrizione sede:', error)
-  }
-}
-
-const loadFilialeDescription = async (codCant: number) => {
-  if (!codCant || codCant === 0) return
-  try {
-    const result = await lookupService.getListByCode('filiale', String(codCant), 'CODCANT')
-    if (result) {
-      filialeData.value.descrizFiliale = String(result.DESCRIZ || '')
-    }
-  } catch (error) {
-    console.error('Errore nel caricamento descrizione filiale:', error)
-  }
-}
-
-const loadCentroCostoDescription = async (codCenco: string) => {
-  if (!codCenco || codCenco.trim() === '') return
-  try {
-    const result = await lookupService.getListByCode('ccosto', codCenco, 'CODCENCO')
-    if (result) {
-      centroCostoData.value.descrizCentroCosto = String(result.DESCRIZ || '')
-    }
-  } catch (error) {
-    console.error('Errore nel caricamento descrizione centro di costo:', error)
-  }
-}
-
-const loadRepartoDescription = async (codReparto: string) => {
-  if (!codReparto || codReparto.trim() === '') return
-  try {
-    const result = await lookupService.getListByCode('reparto', codReparto, 'CODREPARTO')
-    if (result) {
-      repartoData.value.descrizReparto = String(result.DESCRIZ || '')
-    }
-  } catch (error) {
-    console.error('Errore nel caricamento descrizione reparto:', error)
-  }
-}
-
-const loadPosinpsDescription = async (posinps: number) => {
-  if (!posinps || posinps === 0) return
-  try {
-    const result = await lookupService.getListByCode('posinps', String(posinps), 'POSINPS')
-    if (result) {
-      posinpsData.value.matrinps = String(result.MATRINPS || '')
-    }
-  } catch (error) {
-    console.error('Errore nel caricamento descrizione posizione INPS:', error)
-  }
-}
-
-const loadQualificaDescription = async (codQualif: string) => {
-  if (!codQualif || codQualif.trim() === '') return
-  try {
-    const result = await lookupService.getListByCode('qualifica', codQualif, 'CODQUALIF')
-    if (result) {
-      qualificaData.value.descrizQualifica = String(result.DESCRIZ || '')
-    }
-  } catch (error) {
-    console.error('Errore nel caricamento descrizione qualifica:', error)
-  }
-}
-
-const loadLivelloDescription = async (codLivello: string) => {
-  if (!codLivello || codLivello.trim() === '') return
-  try {
-    const result = await lookupService.getListByCode('livello', codLivello, 'CODLIVELLO')
-    if (result) {
-      livelloData.value.descrizLivello = String(result.DESCRIZ || '')
-    }
-  } catch (error) {
-    console.error('Errore nel caricamento descrizione livello:', error)
-  }
-}
-
-const loadCCNLDescription = async (codCCNL: number) => {
-  if (!codCCNL || codCCNL === 0) return
-  try {
-    const result = await lookupService.getListByCode('contratto', String(codCCNL), 'CODCCNL')
-    if (result) {
-      ccnlData.value.descrizCCNL = String(result.DESCRIZ || '')
-    }
-  } catch (error) {
-    console.error('Errore nel caricamento descrizione CCNL:', error)
-  }
-}
-
-const loadAllDescriptions = async () => {
+const loadAndCacheLookupData = async () => {
   if (!dipendente.value) return
 
+  // Carica e cacha tutti i dati lookup in parallelo
   const promises = []
 
-  if (dipendente.value.datiAzi.codSedeAz) {
-    promises.push(loadSedeDescription(dipendente.value.datiAzi.codSedeAz))
-  }
+  // Per ogni lookup, carica i dati completi e trova la descrizione
+  promises.push(
+    lookupService.getList('sede').then(data => {
+      lookupCache.value.sede = data
+      if (dipendente.value?.datiAzi.codSedeAz) {
+        const found = data.find(item => Number(item.CODSEDEAZ) === dipendente.value!.datiAzi.codSedeAz)
+        if (found) sedeData.value.descrizSede = String(found.DESCRIZ || '')
+      }
+    })
+  )
 
-  if (dipendente.value.datiAzi.codCant) {
-    promises.push(loadFilialeDescription(dipendente.value.datiAzi.codCant))
-  }
+  promises.push(
+    lookupService.getList('filiale').then(data => {
+      lookupCache.value.filiale = data
+      if (dipendente.value?.datiAzi.codCant) {
+        const found = data.find(item => Number(item.CODCANT) === dipendente.value!.datiAzi.codCant)
+        if (found) filialeData.value.descrizFiliale = String(found.DESCRIZ || '')
+      }
+    })
+  )
 
-  if (dipendente.value.datiAzi.codCenco) {
-    promises.push(loadCentroCostoDescription(dipendente.value.datiAzi.codCenco))
-  }
+  promises.push(
+    lookupService.getList('ccosto').then(data => {
+      lookupCache.value.ccosto = data
+      if (dipendente.value?.datiAzi.codCenco) {
+        const found = data.find(item => String(item.CODCENCO) === dipendente.value!.datiAzi.codCenco)
+        if (found) centroCostoData.value.descrizCentroCosto = String(found.DESCRIZ || '')
+      }
+    })
+  )
 
-  if (dipendente.value.datiAzi.codReparto) {
-    promises.push(loadRepartoDescription(dipendente.value.datiAzi.codReparto))
-  }
+  promises.push(
+    lookupService.getList('reparto').then(data => {
+      lookupCache.value.reparto = data
+      if (dipendente.value?.datiAzi.codReparto) {
+        const found = data.find(item => String(item.CODREPARTO) === dipendente.value!.datiAzi.codReparto)
+        if (found) repartoData.value.descrizReparto = String(found.DESCRIZ || '')
+      }
+    })
+  )
 
-  if (dipendente.value.datiAzi.posinps) {
-    promises.push(loadPosinpsDescription(dipendente.value.datiAzi.posinps))
-  }
+  promises.push(
+    lookupService.getList('posinps').then(data => {
+      lookupCache.value.posinps = data
+      if (dipendente.value?.datiAzi.posinps) {
+        const found = data.find(item => Number(item.POSINPS) === dipendente.value!.datiAzi.posinps)
+        if (found) posinpsData.value.matrinps = String(found.MATRINPS || '')
+      }
+    })
+  )
 
-  if (dipendente.value.datiAzi.codQualif) {
-    promises.push(loadQualificaDescription(dipendente.value.datiAzi.codQualif))
-  }
+  promises.push(
+    lookupService.getList('qualifica').then(data => {
+      lookupCache.value.qualifica = data
+      if (dipendente.value?.datiAzi.codQualif) {
+        const found = data.find(item => String(item.CODQUALIF) === dipendente.value!.datiAzi.codQualif)
+        if (found) qualificaData.value.descrizQualifica = String(found.DESCRIZ || '')
+      }
+    })
+  )
+
+  promises.push(
+    lookupService.getList('contratto').then(data => {
+      lookupCache.value.contratto = data
+      if (dipendente.value?.datiAzi.codCCNL) {
+        const found = data.find(item => Number(item.CODCCNL) === dipendente.value!.datiAzi.codCCNL)
+        if (found) ccnlData.value.descrizCCNL = String(found.DESCRIZ || '')
+      }
+    })
+  )
 
   if (dipendente.value.datiAzi.codLivello) {
-    promises.push(loadLivelloDescription(dipendente.value.datiAzi.codLivello))
-  }
+    const hasCCNL = dipendente.value.datiAzi.codCCNL > 0
+    const ccnlFilter = hasCCNL ? { CODCCNL: String(dipendente.value.datiAzi.codCCNL) } : undefined
+    const cacheKey = hasCCNL ? `livello_${dipendente.value.datiAzi.codCCNL}` : 'livello'
 
-  if (dipendente.value.datiAzi.codCCNL) {
-    promises.push(loadCCNLDescription(dipendente.value.datiAzi.codCCNL))
+    const currentCodLivello = dipendente.value.datiAzi.codLivello
+
+    promises.push(
+      lookupService.getList('livello', ccnlFilter).then(data => {
+        lookupCache.value[cacheKey] = data
+        const found = data.find(item => String(item.CODLIVELLO) === currentCodLivello)
+
+        if (found) {
+          livelloData.value.codLivello = currentCodLivello
+          livelloData.value.descrizLivello = String(found.DESCRIZ || '')
+        } else {
+          console.log('Livello not found in data')
+        }
+      })
+    )
   }
 
   await Promise.all(promises)
@@ -1739,6 +1694,14 @@ const syncLookupDataToDipendente = () => {
   dipendente.value.datiAzi.codQualif = String(qualificaData.value.codQualif || '')
   dipendente.value.datiAzi.codLivello = String(livelloData.value.codLivello || '')
   dipendente.value.datiAzi.codCCNL = Number(ccnlData.value.codCCNL) || 0
+
+  // Sincronizza i dati dell'indirizzo
+  dipendente.value.datiPers.viaRes = addressData.value.indirizzo || ''
+  dipendente.value.datiPers.numRes = addressData.value.civico || ''
+  dipendente.value.datiPers.comRes = addressData.value.comune || ''
+  dipendente.value.datiPers.proRes = addressData.value.provincia || ''
+  dipendente.value.datiPers.capRes = addressData.value.cap ? Number(addressData.value.cap) || 0 : 0
+  dipendente.value.datiPers.codComRes = addressData.value.codiceBelfiore || ''
 }
 
 const syncDipendenteToLookupData = () => {
@@ -1750,8 +1713,21 @@ const syncDipendenteToLookupData = () => {
   repartoData.value.codReparto = dipendente.value.datiAzi.codReparto || ''
   posinpsData.value.posinps = dipendente.value.datiAzi.posinps || 0
   qualificaData.value.codQualif = dipendente.value.datiAzi.codQualif || ''
-  livelloData.value.codLivello = dipendente.value.datiAzi.codLivello || ''
+
+  // Solo se il codice livello non è già presente (per evitare sovrascritture)
+  if (!livelloData.value.codLivello || livelloData.value.codLivello !== dipendente.value.datiAzi.codLivello) {
+    livelloData.value.codLivello = dipendente.value.datiAzi.codLivello || ''
+  }
+
   ccnlData.value.codCCNL = dipendente.value.datiAzi.codCCNL || 0
+
+  // Sincronizza i dati dell'indirizzo
+  addressData.value.indirizzo = dipendente.value.datiPers.viaRes || ''
+  addressData.value.civico = dipendente.value.datiPers.numRes || ''
+  addressData.value.comune = dipendente.value.datiPers.comRes || ''
+  addressData.value.provincia = dipendente.value.datiPers.proRes || ''
+  addressData.value.cap = dipendente.value.datiPers.capRes ? formatCap(String(dipendente.value.datiPers.capRes)) : ''
+  addressData.value.codiceBelfiore = dipendente.value.datiPers.codComRes || ''
 }
 
 // Watchers per sincronizzazione dei lookup
@@ -1783,16 +1759,32 @@ watch(() => livelloData.value.codLivello, () => {
   syncLookupDataToDipendente()
 }, { deep: false })
 
-watch(() => ccnlData.value.codCCNL, () => {
+watch(() => ccnlData.value.codCCNL, (newCCNL, oldCCNL) => {
+  // Reset del campo livello quando cambia il CCNL
+  if (newCCNL !== oldCCNL && oldCCNL !== undefined) {
+    livelloData.value.codLivello = ''
+    livelloData.value.descrizLivello = ''
+
+    // Invalida la cache del livello per il nuovo CCNL
+    const oldCacheKey = oldCCNL && Number(oldCCNL) > 0 ? `livello_${oldCCNL}` : 'livello'
+    const newCacheKey = newCCNL && Number(newCCNL) > 0 ? `livello_${newCCNL}` : 'livello'
+
+    delete lookupCache.value[oldCacheKey]
+    delete lookupCache.value[newCacheKey]
+  }
   syncLookupDataToDipendente()
 }, { deep: false })
+
+watch(() => addressData.value, () => {
+  syncLookupDataToDipendente()
+}, { deep: true })
 
 watch(() => dipendente.value, async () => {
   if (dipendente.value) {
     ensureBadgesInitialized()
     ensurePatsInitialized()
     syncDipendenteToLookupData()
-    await loadAllDescriptions()
+    await loadAndCacheLookupData()
   }
 }, { deep: true, immediate: false })
 
