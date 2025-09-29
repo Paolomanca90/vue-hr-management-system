@@ -5,12 +5,13 @@
       <div
         v-for="field in row"
         :key="field.key"
-        class="space-y-2"
+        class="form-control"
         :class="getColumnClass(field.colSpan)"
       >
-        <label :for="field.key" class="block text-sm font-medium text-gray-700">
-          {{ field.label }}
-          <span v-if="field.required" class="text-red-500">*</span>
+        <label :for="field.key" class="label">
+          <span class="label-text font-medium">{{ field.label }}
+            <span v-if="field.required" class="text-red-500">*</span>
+          </span>
         </label>
 
         <!-- Editable field -->
@@ -23,7 +24,7 @@
           :type="field.type || 'text'"
           :placeholder="field.placeholder || `Inserisci ${field.label.toLowerCase()}`"
           :disabled="disabled"
-          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
+          class="input input-bordered w-full"
         />
 
         <!-- Editable field with lookup button -->
@@ -36,13 +37,13 @@
             :type="field.type || 'text'"
             :placeholder="field.placeholder || `Inserisci ${field.label.toLowerCase()}`"
             :disabled="disabled"
-            class="flex-1 rounded-l-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
+            class="input input-bordered flex-1 rounded-r-none"
           />
           <button
             type="button"
             @click="openModal"
             :disabled="disabled"
-            class="p-1 border border-l-0 border-gray-300 bg-gray-50 text-gray-700 rounded-r-md hover:bg-gray-100 focus:ring-primary focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            class="btn btn-outline rounded-l-none h-12"
           >
             <FaIcon icon="search" class="w-4 h-4" />
           </button>
@@ -57,13 +58,13 @@
             :placeholder="field.placeholder"
             readonly
             :disabled="disabled"
-            class="flex-1 rounded-l-md border-gray-300 shadow-sm bg-gray-50 sm:text-sm p-[0.5em]"
+            class="input input-bordered flex-1 rounded-r-none"
           />
           <button
             type="button"
             @click="openModal"
             :disabled="disabled"
-            class="p-1 border border-l-0 border-gray-300 bg-gray-50 text-gray-700 rounded-r-md hover:bg-gray-100 focus:ring-primary focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            class="btn btn-outline rounded-l-none h-12"
           >
             <FaIcon icon="search" class="w-4 h-4" />
           </button>
@@ -78,7 +79,7 @@
           :placeholder="field.placeholder"
           readonly
           :disabled="disabled"
-          class="block w-full rounded-md border-gray-300 shadow-sm bg-gray-50 sm:text-sm p-[0.5em]"
+          class="input input-bordered w-full"
         />
       </div>
     </div>

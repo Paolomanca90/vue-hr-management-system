@@ -123,162 +123,127 @@
           <!-- Dati Aziendali -->
           <div v-if="activeTab === 'aziendali'" class="space-y-6">
             <form @submit.prevent="handleSave" class="space-y-6">
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Sede</span>
-                  </label>
-                  <input
-                    v-model.number="dipendente.datiAzi.codSedeAz"
-                    type="number"
-                    class="input input-bordered"
+              <!-- Sezione Organizzazione Aziendale -->
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h4 class="text-md font-medium text-gray-900 mb-4">Organizzazione Aziendale</h4>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <GenericLookupInput
+                    v-model="sedeData"
+                    :config="sedeConfig"
+                    :disabled="saving"
+                  />
+
+                  <GenericLookupInput
+                    v-model="filialeData"
+                    :config="filialeConfig"
+                    :disabled="saving"
+                  />
+
+                  <GenericLookupInput
+                    v-model="centroCostoData"
+                    :config="centroCostoConfig"
+                    :disabled="saving"
+                  />
+
+                  <GenericLookupInput
+                    v-model="repartoData"
+                    :config="repartoConfig"
                     :disabled="saving"
                   />
                 </div>
+              </div>
 
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Filiale</span>
-                  </label>
-                  <input
-                    v-model.number="dipendente.datiAzi.codCant"
-                    type="number"
-                    class="input input-bordered"
+              <!-- Sezione Rapporto di Lavoro -->
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h4 class="text-md font-medium text-gray-900 mb-4">Rapporto di Lavoro</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">Data Assunzione *</span>
+                    </label>
+                    <DateInput
+                      v-model="dipendente.datiAzi.dataAssunz"
+                      format="european"
+                      :disabled="saving"
+                      :input-class="'input input-bordered'"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">Data Assunzione Convenzionale</span>
+                    </label>
+                    <DateInput
+                      v-model="dipendente.datiAzi.dataAssunzioneConvenzionale"
+                      format="european"
+                      :disabled="saving"
+                      :input-class="'input input-bordered'"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">Data Cessazione</span>
+                    </label>
+                    <DateInput
+                      v-model="dipendente.datiAzi.dataCessazione"
+                      format="european"
+                      :disabled="saving"
+                      :input-class="'input input-bordered'"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">Tipo Rapporto</span>
+                    </label>
+                    <select v-model="dipendente.datiAzi.tipoRappor" class="select select-bordered" :disabled="saving">
+                      <option value="">Seleziona...</option>
+                      <option value="1">1 - Tempo Indeterminato</option>
+                      <option value="2">2 - Tempo Determinato</option>
+                    </select>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">Percentuale Part-time</span>
+                    </label>
+                    <input
+                      v-model.number="dipendente.datiAzi.percenpt"
+                      type="number"
+                      class="input input-bordered"
+                      :disabled="saving"
+                    />
+                  </div>
+
+                  <GenericLookupInput
+                    v-model="posinpsData"
+                    :config="posinpsConfig"
                     :disabled="saving"
                   />
                 </div>
+              </div>
 
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Centro di Costo</span>
-                  </label>
-                  <input
-                    v-model="dipendente.datiAzi.codCenco"
-                    type="text"
-                    class="input input-bordered"
+              <!-- Sezione Qualifiche e CCNL -->
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h4 class="text-md font-medium text-gray-900 mb-4">Qualifiche e CCNL</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <GenericLookupInput
+                    v-model="qualificaData"
+                    :config="qualificaConfig"
                     :disabled="saving"
                   />
-                </div>
 
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Reparto</span>
-                  </label>
-                  <input
-                    v-model="dipendente.datiAzi.codReparto"
-                    type="text"
-                    class="input input-bordered"
+                  <GenericLookupInput
+                    v-model="livelloData"
+                    :config="livelloConfig"
                     :disabled="saving"
                   />
-                </div>
 
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Posizione INPS</span>
-                  </label>
-                  <input
-                    v-model.number="dipendente.datiAzi.posinps"
-                    type="number"
-                    class="input input-bordered"
+                  <GenericLookupInput
+                    v-model="ccnlData"
+                    :config="ccnlConfig"
                     :disabled="saving"
-                  />
-                </div>
-
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Data Assunzione *</span>
-                  </label>
-                  <DateInput
-                    v-model="dipendente.datiAzi.dataAssunz"
-                    format="european"
-                    :disabled="saving"
-                    :input-class="'input input-bordered'"
-                  />
-                </div>
-
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Data Assunzione Convenzionale</span>
-                  </label>
-                  <DateInput
-                    v-model="dipendente.datiAzi.dataAssunzioneConvenzionale"
-                    format="european"
-                    :disabled="saving"
-                    :input-class="'input input-bordered'"
-                  />
-                </div>
-
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Data Cessazione</span>
-                  </label>
-                  <DateInput
-                    v-model="dipendente.datiAzi.dataCessazione"
-                    format="european"
-                    :disabled="saving"
-                    :input-class="'input input-bordered'"
-                  />
-                </div>
-
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Tipo Rapporto</span>
-                  </label>
-                  <select v-model="dipendente.datiAzi.tipoRappor" class="select select-bordered" :disabled="saving">
-                    <option value="">Seleziona...</option>
-                    <option value="1">1 - Tempo Indeterminato</option>
-                    <option value="2">2 - Tempo Determinato</option>
-                  </select>
-                </div>
-
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Percentuale Part-time</span>
-                  </label>
-                  <input
-                    v-model.number="dipendente.datiAzi.percenpt"
-                    type="number"
-                    class="input input-bordered"
-                    :disabled="saving"
-                  />
-                </div>
-
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Codice Qualifica</span>
-                  </label>
-                  <input
-                    v-model="dipendente.datiAzi.codQualif"
-                    type="text"
-                    class="input input-bordered"
-                    :disabled="saving"
-                    placeholder="Inserisci codice qualifica"
-                  />
-                </div>
-
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Codice Livello</span>
-                  </label>
-                  <input
-                    v-model="dipendente.datiAzi.codLivello"
-                    type="text"
-                    class="input input-bordered"
-                    :disabled="saving"
-                    placeholder="Inserisci codice livello"
-                  />
-                </div>
-
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Codice CCNL</span>
-                  </label>
-                  <input
-                    v-model.number="dipendente.datiAzi.codCCNL"
-                    type="number"
-                    class="input input-bordered"
-                    :disabled="saving"
-                    placeholder="Inserisci codice CCNL"
                   />
                 </div>
               </div>
@@ -289,173 +254,189 @@
           <!-- Dati Personali -->
           <div v-if="activeTab === 'personali'" class="space-y-6">
             <form @submit.prevent="handleSave" class="space-y-6">
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Data Nascita</span>
-                  </label>
-                  <DateInput
-                    v-model="dipendente.datiPers.dataNas"
-                    format="european"
-                    :disabled="saving"
-                    :input-class="'input input-bordered'"
-                  />
-                </div>
-
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Indirizzo</span>
-                  </label>
-                  <input
-                    v-model="dipendente.datiPers.viaRes"
-                    type="text"
-                    class="input input-bordered"
-                    :disabled="saving"
-                  />
-                </div>
-
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Località</span>
-                  </label>
-                  <input
-                    v-model="dipendente.datiPers.comRes"
-                    type="text"
-                    class="input input-bordered"
-                    :disabled="saving"
-                  />
-                </div>
-
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">CAP</span>
-                  </label>
-                  <input
-                    v-model.number="dipendente.datiPers.capRes"
-                    type="number"
-                    class="input input-bordered"
-                    :disabled="saving"
-                  />
-                </div>
-
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Telefono</span>
-                  </label>
-                  <input
-                    v-model="dipendente.datiPers.telefono"
-                    type="text"
-                    class="input input-bordered"
-                    :disabled="saving"
-                  />
-                </div>
-
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Codice Fiscale *</span>
-                  </label>
-                  <input
-                    v-model="dipendente.datiPers.codFis"
-                    type="text"
-                    class="input input-bordered"
-                    @blur="handleCodiceFiscaleBlur"
-                    :disabled="saving"
-                    maxlength="16"
-                  />
-                </div>
-
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Stato Civile</span>
-                  </label>
-                  <select v-model="dipendente.datiPers.statoCivi" class="select select-bordered" :disabled="saving">
-                    <option value="">Seleziona...</option>
-                    <option value="C">1 - Coniugato/a</option>
-                    <option value="D">2 - Divorziato/a</option>
-                    <option value="N">3 - Nubile (Celibe)</option>
-                    <option value="S">4 - Separato/a</option>
-                    <option value="V">5 - Vedovo/a</option>
-                    <option value="U">6 - Unito/a civilmente</option>
-                    <option value="L">7 - Sciolto/a da unione civile</option>
-                    <option value="A">8 - Abbandonato/a</option>
-                  </select>
-                </div>
-
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">E-Mail</span>
-                  </label>
-                  <input
-                    v-model="dipendente.datiPers.mail"
-                    type="email"
-                    class="input input-bordered"
-                    :disabled="saving"
-                  />
-                </div>
-
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Numero Civico</span>
-                  </label>
-                  <input
-                    v-model="dipendente.datiPers.numRes"
-                    type="text"
-                    class="input input-bordered"
-                    :disabled="saving"
-                  />
-                </div>
-
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Provincia</span>
-                  </label>
-                  <input
-                    v-model="dipendente.datiPers.proRes"
-                    type="text"
-                    class="input input-bordered"
-                    :disabled="saving"
-                    maxlength="2"
-                  />
-                </div>
-
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Sesso</span>
-                  </label>
-                  <div class="flex gap-4 pt-2">
-                    <label class="cursor-pointer label">
-                      <input
-                        v-model="dipendente.datiPers.sesso"
-                        type="radio"
-                        value="F"
-                        class="radio radio-primary"
-                        :disabled="saving"
-                      />
-                      <span class="label-text ml-2">Femmina</span>
+              <!-- Sezione Dati Anagrafici -->
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h4 class="text-md font-medium text-gray-900 mb-4">Dati Anagrafici</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">Codice Fiscale *</span>
                     </label>
-                    <label class="cursor-pointer label">
-                      <input
-                        v-model="dipendente.datiPers.sesso"
-                        type="radio"
-                        value="M"
-                        class="radio radio-primary"
-                        :disabled="saving"
-                      />
-                      <span class="label-text ml-2">Maschio</span>
+                    <input
+                      v-model="dipendente.datiPers.codFis"
+                      type="text"
+                      class="input input-bordered"
+                      @blur="handleCodiceFiscaleBlur"
+                      :disabled="saving"
+                      maxlength="16"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">Data Nascita</span>
                     </label>
+                    <DateInput
+                      v-model="dipendente.datiPers.dataNas"
+                      format="european"
+                      :disabled="saving"
+                      :input-class="'input input-bordered'"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">Sesso</span>
+                    </label>
+                    <div class="flex gap-4 pt-2">
+                      <label class="cursor-pointer label">
+                        <input
+                          v-model="dipendente.datiPers.sesso"
+                          type="radio"
+                          value="F"
+                          class="radio radio-primary"
+                          :disabled="saving"
+                        />
+                        <span class="label-text ml-2">Femmina</span>
+                      </label>
+                      <label class="cursor-pointer label">
+                        <input
+                          v-model="dipendente.datiPers.sesso"
+                          type="radio"
+                          value="M"
+                          class="radio radio-primary"
+                          :disabled="saving"
+                        />
+                        <span class="label-text ml-2">Maschio</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">Stato Civile</span>
+                    </label>
+                    <select v-model="dipendente.datiPers.statoCivi" class="select select-bordered" :disabled="saving">
+                      <option value="">Seleziona...</option>
+                      <option value="C">1 - Coniugato/a</option>
+                      <option value="D">2 - Divorziato/a</option>
+                      <option value="N">3 - Nubile (Celibe)</option>
+                      <option value="S">4 - Separato/a</option>
+                      <option value="V">5 - Vedovo/a</option>
+                      <option value="U">6 - Unito/a civilmente</option>
+                      <option value="L">7 - Sciolto/a da unione civile</option>
+                      <option value="A">8 - Abbandonato/a</option>
+                    </select>
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">Servizio Militare</span>
+                    </label>
+                    <select v-model="dipendente.datiPers.militare" class="select select-bordered" :disabled="saving">
+                      <option value="">Seleziona...</option>
+                      <option value="1">1 - Esente</option>
+                      <option value="2">2 - Assolto</option>
+                      <option value="3">3 - Da fare</option>
+                    </select>
                   </div>
                 </div>
+              </div>
 
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium">Servizio Militare</span>
-                  </label>
-                  <select v-model="dipendente.datiPers.militare" class="select select-bordered" :disabled="saving">
-                    <option value="">Seleziona...</option>
-                    <option value="1">1 - Esente</option>
-                    <option value="2">2 - Assolto</option>
-                    <option value="3">3 - Da fare</option>
-                  </select>
+              <!-- Sezione Residenza -->
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h4 class="text-md font-medium text-gray-900 mb-4">Dati di Residenza</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">Indirizzo</span>
+                    </label>
+                    <input
+                      v-model="dipendente.datiPers.viaRes"
+                      type="text"
+                      class="input input-bordered"
+                      :disabled="saving"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">Numero Civico</span>
+                    </label>
+                    <input
+                      v-model="dipendente.datiPers.numRes"
+                      type="text"
+                      class="input input-bordered"
+                      :disabled="saving"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">Località</span>
+                    </label>
+                    <input
+                      v-model="dipendente.datiPers.comRes"
+                      type="text"
+                      class="input input-bordered"
+                      :disabled="saving"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">Provincia</span>
+                    </label>
+                    <input
+                      v-model="dipendente.datiPers.proRes"
+                      type="text"
+                      class="input input-bordered"
+                      :disabled="saving"
+                      maxlength="2"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">CAP</span>
+                    </label>
+                    <input
+                      v-model.number="dipendente.datiPers.capRes"
+                      type="number"
+                      class="input input-bordered"
+                      :disabled="saving"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sezione Contatti -->
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h4 class="text-md font-medium text-gray-900 mb-4">Informazioni di Contatto</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">Telefono</span>
+                    </label>
+                    <input
+                      v-model="dipendente.datiPers.telefono"
+                      type="text"
+                      class="input input-bordered"
+                      :disabled="saving"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium">E-Mail</span>
+                    </label>
+                    <input
+                      v-model="dipendente.datiPers.mail"
+                      type="email"
+                      class="input input-bordered"
+                      :disabled="saving"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -730,8 +711,10 @@ import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import DateInput from '@/components/DateInput.vue'
 import SimpleConfirmDialog from '@/components/SimpleConfirmDialog.vue'
+import GenericLookupInput, { type LookupInputConfig } from '@/components/GenericLookupInput.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { dipendenteService, type DettaglioDipendente, type Familiare, type Badge, type PAT } from '@/services/dipendenteService'
+import { lookupService } from '@/services/lookupService'
 
 type BadgeWithPlaceholder = Badge & {
   _isPlaceholder?: boolean
@@ -758,6 +741,231 @@ const errorMessage = ref('')
 const successMessage = ref('')
 
 useMessageAlerts(errorMessage, successMessage)
+
+const sedeData = ref<Record<string, unknown>>({
+  codSedeAz: 0,
+  descrizSede: ''
+})
+
+const filialeData = ref<Record<string, unknown>>({
+  codCant: 0,
+  descrizFiliale: ''
+})
+
+const centroCostoData = ref<Record<string, unknown>>({
+  codCenco: '',
+  descrizCentroCosto: ''
+})
+
+const repartoData = ref<Record<string, unknown>>({
+  codReparto: '',
+  descrizReparto: ''
+})
+
+const posinpsData = ref<Record<string, unknown>>({
+  posinps: 0,
+  matrinps: ''
+})
+
+const qualificaData = ref<Record<string, unknown>>({
+  codQualif: '',
+  descrizQualifica: ''
+})
+
+const livelloData = ref<Record<string, unknown>>({
+  codLivello: '',
+  descrizLivello: ''
+})
+
+const ccnlData = ref<Record<string, unknown>>({
+  codCCNL: 0,
+  descrizCCNL: ''
+})
+
+const sedeConfig: LookupInputConfig = {
+  lookupType: 'sede',
+  autoCompleteField: 'codSedeAz',
+  keyField: 'CODSEDEAZ',
+  fields: [
+    { key: 'codSedeAz', label: 'Codice Sede', editable: true, type: 'number', colSpan: 3 },
+    { key: 'descrizSede', label: 'Descrizione Sede', editable: false, hasLookup: true, colSpan: 9 }
+  ],
+  modalConfig: {
+    title: 'Selezione Sede',
+    columns: [
+      { key: 'CODSEDEAZ', label: 'Codice' },
+      { key: 'DESCRIZ', label: 'Descrizione' }
+    ],
+    searchPlaceholder: 'Cerca per codice o descrizione...',
+    searchFields: ['CODSEDEAZ', 'DESCRIZ']
+  },
+  mapper: (item: Record<string, unknown>) => ({
+    codSedeAz: Number(item.CODSEDEAZ) || 0,
+    descrizSede: String(item.DESCRIZ || '')
+  })
+}
+
+const filialeConfig: LookupInputConfig = {
+  lookupType: 'filiale',
+  autoCompleteField: 'codCant',
+  keyField: 'CODCANT',
+  fields: [
+    { key: 'codCant', label: 'Codice Filiale', editable: true, type: 'number', colSpan: 3 },
+    { key: 'descrizFiliale', label: 'Descrizione Filiale', editable: false, hasLookup: true, colSpan: 9 }
+  ],
+  modalConfig: {
+    title: 'Selezione Filiale',
+    columns: [
+      { key: 'CODCANT', label: 'Codice' },
+      { key: 'DESCRIZ', label: 'Descrizione' }
+    ],
+    searchPlaceholder: 'Cerca per codice o descrizione...',
+    searchFields: ['CODCANT', 'DESCRIZ']
+  },
+  mapper: (item: Record<string, unknown>) => ({
+    codCant: Number(item.CODCANT) || 0,
+    descrizFiliale: String(item.DESCRIZ || '')
+  })
+}
+
+const centroCostoConfig: LookupInputConfig = {
+  lookupType: 'ccosto',
+  autoCompleteField: 'codCenco',
+  keyField: 'CODCENCO',
+  fields: [
+    { key: 'codCenco', label: 'Codice C. Costo', editable: true, colSpan: 3 },
+    { key: 'descrizCentroCosto', label: 'Descrizione Centro di Costo', editable: false, hasLookup: true, colSpan: 9 }
+  ],
+  modalConfig: {
+    title: 'Selezione Centro di Costo',
+    columns: [
+      { key: 'CODCENCO', label: 'Codice' },
+      { key: 'DESCRIZ', label: 'Descrizione' }
+    ],
+    searchPlaceholder: 'Cerca per codice o descrizione...',
+    searchFields: ['CODCENCO', 'DESCRIZ']
+  },
+  mapper: (item: Record<string, unknown>) => ({
+    codCenco: String(item.CODCENCO || ''),
+    descrizCentroCosto: String(item.DESCRIZ || '')
+  })
+}
+
+const repartoConfig: LookupInputConfig = {
+  lookupType: 'reparto',
+  autoCompleteField: 'codReparto',
+  keyField: 'CODREPARTO',
+  fields: [
+    { key: 'codReparto', label: 'Codice Reparto', editable: true, colSpan: 3 },
+    { key: 'descrizReparto', label: 'Descrizione Reparto', editable: false, hasLookup: true, colSpan: 9 }
+  ],
+  modalConfig: {
+    title: 'Selezione Reparto',
+    columns: [
+      { key: 'CODAZI', label: 'Cod. Azienda' },
+      { key: 'CODREPARTO', label: 'Codice' },
+      { key: 'DESCRIZ', label: 'Descrizione' }
+    ],
+    searchPlaceholder: 'Cerca per codice o descrizione...',
+    searchFields: ['CODREPARTO', 'DESCRIZ']
+  },
+  mapper: (item: Record<string, unknown>) => ({
+    codReparto: String(item.CODREPARTO || ''),
+    descrizReparto: String(item.DESCRIZ || '')
+  })
+}
+
+const posinpsConfig: LookupInputConfig = {
+  lookupType: 'posinps',
+  autoCompleteField: 'posinps',
+  keyField: 'POSINPS',
+  fields: [
+    { key: 'posinps', label: 'Pos. INPS', editable: true, type: 'number', colSpan: 3 },
+    { key: 'matrinps', label: 'Matricola INPS', editable: false, hasLookup: true, colSpan: 9 }
+  ],
+  modalConfig: {
+    title: 'Selezione Posizione INPS',
+    columns: [
+      { key: 'POSINPS', label: 'Posizione' },
+      { key: 'MATRINPS', label: 'Matricola INPS' }
+    ],
+    searchPlaceholder: 'Cerca per posizione o matricola...',
+    searchFields: ['POSINPS', 'MATRINPS']
+  },
+  mapper: (item: Record<string, unknown>) => ({
+    posinps: Number(item.POSINPS) || 0,
+    matrinps: String(item.MATRINPS || '')
+  })
+}
+
+const qualificaConfig: LookupInputConfig = {
+  lookupType: 'qualifica',
+  autoCompleteField: 'codQualif',
+  keyField: 'CODQUALIF',
+  fields: [
+    { key: 'codQualif', label: 'Cod. Qualifica', editable: true, colSpan: 3 },
+    { key: 'descrizQualifica', label: 'Descrizione Qualifica', editable: false, hasLookup: true, colSpan: 9 }
+  ],
+  modalConfig: {
+    title: 'Selezione Qualifica',
+    columns: [
+      { key: 'CODQUALIF', label: 'Codice' },
+      { key: 'DESCRIZ', label: 'Descrizione' }
+    ],
+    searchPlaceholder: 'Cerca per codice o descrizione...',
+    searchFields: ['CODQUALIF', 'DESCRIZ']
+  },
+  mapper: (item: Record<string, unknown>) => ({
+    codQualif: String(item.CODQUALIF || ''),
+    descrizQualifica: String(item.DESCRIZ || '')
+  })
+}
+
+const livelloConfig: LookupInputConfig = {
+  lookupType: 'livello',
+  autoCompleteField: 'codLivello',
+  keyField: 'CODLIVELLO',
+  fields: [
+    { key: 'codLivello', label: 'Cod. Livello', editable: true, colSpan: 3 },
+    { key: 'descrizLivello', label: 'Descrizione Livello', editable: false, hasLookup: true, colSpan: 9 }
+  ],
+  modalConfig: {
+    title: 'Selezione Livello',
+    columns: [
+      { key: 'CODLIVELLO', label: 'Codice' },
+      { key: 'DESCRIZ', label: 'Descrizione' }
+    ],
+    searchPlaceholder: 'Cerca per codice o descrizione...',
+    searchFields: ['CODLIVELLO', 'DESCRIZ']
+  },
+  mapper: (item: Record<string, unknown>) => ({
+    codLivello: String(item.CODLIVELLO || ''),
+    descrizLivello: String(item.DESCRIZ || '')
+  })
+}
+
+const ccnlConfig: LookupInputConfig = {
+  lookupType: 'contratto',
+  autoCompleteField: 'codCCNL',
+  keyField: 'CODCCNL',
+  fields: [
+    { key: 'codCCNL', label: 'Cod. CCNL', editable: true, type: 'number', colSpan: 3 },
+    { key: 'descrizCCNL', label: 'Descrizione CCNL', editable: false, hasLookup: true, colSpan: 9 }
+  ],
+  modalConfig: {
+    title: 'Selezione CCNL',
+    columns: [
+      { key: 'CODCCNL', label: 'Codice' },
+      { key: 'DESCRIZ', label: 'Descrizione' }
+    ],
+    searchPlaceholder: 'Cerca per codice o descrizione...',
+    searchFields: ['CODCCNL', 'DESCRIZ']
+  },
+  mapper: (item: Record<string, unknown>) => ({
+    codCCNL: Number(item.CODCCNL) || 0,
+    descrizCCNL: String(item.DESCRIZ || '')
+  })
+}
 
 // Computed
 const dipendenteId = computed(() => {
@@ -794,16 +1002,16 @@ const isFormValid = computed(() => {
 })
 
 // Navigation configuration
-const dipendenteNavigationConfig = computed(() => ({
+const dipendenteNavigationConfig = {
   fetchAll: () => dipendenteService.getListaDipendenti({
     codAzi: aziendaId.value  // Usa l'azienda corrente dall'URL
   }),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  getEntityId: (dipendente: any) => `${dipendente.codAzi}-${dipendente.codDip}`, // Formato dinamico
+  getEntityId: (dipendente: any) => `${aziendaId.value}-${dipendente.codDip}`,
   basePath: '/app/anagrafica-dipendente',
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sortFn: (a: any, b: any) => a.codDip - b.codDip
-}))
+}
 
 const badgeList = computed((): BadgeWithPlaceholder[] => {
   if (!dipendente.value) return []
@@ -1010,10 +1218,8 @@ const normalizeSelectValues = () => {
     dipendente.value.datiAzi.tipoRappor = String(dipendente.value.datiAzi.tipoRappor)
   }
 
-  // Gestisce stato civile: converte vecchi valori numerici in nuovi codici lettera
   if (dipendente.value.datiPers.statoCivi) {
     if (typeof dipendente.value.datiPers.statoCivi === 'number') {
-      // Conversione da vecchi valori numerici a nuovi codici lettera
       const statoCiviMap: Record<number, string> = {
         1: 'C', // Coniugato/a
         2: 'N', // Celibe/Nubile
@@ -1023,7 +1229,6 @@ const normalizeSelectValues = () => {
       }
       dipendente.value.datiPers.statoCivi = statoCiviMap[dipendente.value.datiPers.statoCivi] || 'C'
     } else if (typeof dipendente.value.datiPers.statoCivi === 'string' && dipendente.value.datiPers.statoCivi.match(/^[1-5]$/)) {
-      // Conversione da vecchi valori stringa numerici a nuovi codici lettera
       const statoCiviMap: Record<string, string> = {
         '1': 'C', // Coniugato/a
         '2': 'N', // Celibe/Nubile
@@ -1033,7 +1238,6 @@ const normalizeSelectValues = () => {
       }
       dipendente.value.datiPers.statoCivi = statoCiviMap[dipendente.value.datiPers.statoCivi] || 'C'
     }
-    // Se è già un codice lettera valido, non fare nulla
   } else {
     // Se null o undefined, imposta default
     dipendente.value.datiPers.statoCivi = 'C'
@@ -1098,14 +1302,13 @@ const handleSave = async () => {
     const activePats = dipendente.value.datiAzi.listaPAT.filter(pat => {
       if (!pat.al) return true // Nessuna data fine = attivo
 
-      // Converte la data da DD/MM/YYYY a Date
       const [day, month, year] = pat.al.split('/')
-      if (!day || !month || !year) return true // Data malformata = attivo
+      if (!day || !month || !year) return true
 
       const endDate = new Date(Number(year), Number(month) - 1, Number(day))
       endDate.setHours(0, 0, 0, 0)
 
-      return endDate >= today // Data fine >= oggi = attivo
+      return endDate >= today
     })
 
     if (activePats.length > 1) {
@@ -1169,7 +1372,6 @@ const handleCodiceFiscaleBlur = async (event: Event) => {
   } catch (error) {
     console.error('Errore nella decodifica del codice fiscale:', error)
 
-    // CF errato - svuota tutti i campi collegati
     if (dipendente.value) {
       dipendente.value.datiPers.dataNas = ''
       dipendente.value.datiPers.sesso = ''
@@ -1265,21 +1467,19 @@ const addNewPat = () => {
     dipendente.value.datiAzi.listaPAT = []
   }
 
-  // Controlla se esiste già un PAT attivo (senza data fine o con data fine successiva a oggi)
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
   const hasActivePat = dipendente.value.datiAzi.listaPAT.some(pat => {
-    if (!pat.al) return true // Nessuna data fine = attivo
+    if (!pat.al) return true
 
-    // Converte la data da DD/MM/YYYY a Date
     const [day, month, year] = pat.al.split('/')
-    if (!day || !month || !year) return true // Data malformata = attivo
+    if (!day || !month || !year) return true
 
     const endDate = new Date(Number(year), Number(month) - 1, Number(day))
     endDate.setHours(0, 0, 0, 0)
 
-    return endDate >= today // Data fine >= oggi = attivo
+    return endDate >= today
   })
 
   if (hasActivePat) {
@@ -1366,7 +1566,6 @@ const handleDelete = async () => {
         saving.value = true
         await dipendenteService.deleteDipendente(dipendente.value.codAzi, dipendente.value.codDip)
         successMessage.value = 'Dipendente eliminato con successo'
-        // Torna alla lista dipendenti dopo eliminazione
         setTimeout(() => {
           router.push('/app/anagrafica-dipendente')
         }, 1500)
@@ -1392,10 +1591,208 @@ const goBack = () => {
   router.push('/app/anagrafica-dipendente')
 }
 
-watch(() => dipendente.value, () => {
+const loadSedeDescription = async (codSedeAz: number) => {
+  if (!codSedeAz || codSedeAz === 0) return
+  try {
+    const result = await lookupService.getListByCode('sede', String(codSedeAz), 'CODSEDEAZ')
+    if (result) {
+      sedeData.value.descrizSede = String(result.DESCRIZ || '')
+    }
+  } catch (error) {
+    console.error('Errore nel caricamento descrizione sede:', error)
+  }
+}
+
+const loadFilialeDescription = async (codCant: number) => {
+  if (!codCant || codCant === 0) return
+  try {
+    const result = await lookupService.getListByCode('filiale', String(codCant), 'CODCANT')
+    if (result) {
+      filialeData.value.descrizFiliale = String(result.DESCRIZ || '')
+    }
+  } catch (error) {
+    console.error('Errore nel caricamento descrizione filiale:', error)
+  }
+}
+
+const loadCentroCostoDescription = async (codCenco: string) => {
+  if (!codCenco || codCenco.trim() === '') return
+  try {
+    const result = await lookupService.getListByCode('ccosto', codCenco, 'CODCENCO')
+    if (result) {
+      centroCostoData.value.descrizCentroCosto = String(result.DESCRIZ || '')
+    }
+  } catch (error) {
+    console.error('Errore nel caricamento descrizione centro di costo:', error)
+  }
+}
+
+const loadRepartoDescription = async (codReparto: string) => {
+  if (!codReparto || codReparto.trim() === '') return
+  try {
+    const result = await lookupService.getListByCode('reparto', codReparto, 'CODREPARTO')
+    if (result) {
+      repartoData.value.descrizReparto = String(result.DESCRIZ || '')
+    }
+  } catch (error) {
+    console.error('Errore nel caricamento descrizione reparto:', error)
+  }
+}
+
+const loadPosinpsDescription = async (posinps: number) => {
+  if (!posinps || posinps === 0) return
+  try {
+    const result = await lookupService.getListByCode('posinps', String(posinps), 'POSINPS')
+    if (result) {
+      posinpsData.value.matrinps = String(result.MATRINPS || '')
+    }
+  } catch (error) {
+    console.error('Errore nel caricamento descrizione posizione INPS:', error)
+  }
+}
+
+const loadQualificaDescription = async (codQualif: string) => {
+  if (!codQualif || codQualif.trim() === '') return
+  try {
+    const result = await lookupService.getListByCode('qualifica', codQualif, 'CODQUALIF')
+    if (result) {
+      qualificaData.value.descrizQualifica = String(result.DESCRIZ || '')
+    }
+  } catch (error) {
+    console.error('Errore nel caricamento descrizione qualifica:', error)
+  }
+}
+
+const loadLivelloDescription = async (codLivello: string) => {
+  if (!codLivello || codLivello.trim() === '') return
+  try {
+    const result = await lookupService.getListByCode('livello', codLivello, 'CODLIVELLO')
+    if (result) {
+      livelloData.value.descrizLivello = String(result.DESCRIZ || '')
+    }
+  } catch (error) {
+    console.error('Errore nel caricamento descrizione livello:', error)
+  }
+}
+
+const loadCCNLDescription = async (codCCNL: number) => {
+  if (!codCCNL || codCCNL === 0) return
+  try {
+    const result = await lookupService.getListByCode('contratto', String(codCCNL), 'CODCCNL')
+    if (result) {
+      ccnlData.value.descrizCCNL = String(result.DESCRIZ || '')
+    }
+  } catch (error) {
+    console.error('Errore nel caricamento descrizione CCNL:', error)
+  }
+}
+
+const loadAllDescriptions = async () => {
+  if (!dipendente.value) return
+
+  const promises = []
+
+  if (dipendente.value.datiAzi.codSedeAz) {
+    promises.push(loadSedeDescription(dipendente.value.datiAzi.codSedeAz))
+  }
+
+  if (dipendente.value.datiAzi.codCant) {
+    promises.push(loadFilialeDescription(dipendente.value.datiAzi.codCant))
+  }
+
+  if (dipendente.value.datiAzi.codCenco) {
+    promises.push(loadCentroCostoDescription(dipendente.value.datiAzi.codCenco))
+  }
+
+  if (dipendente.value.datiAzi.codReparto) {
+    promises.push(loadRepartoDescription(dipendente.value.datiAzi.codReparto))
+  }
+
+  if (dipendente.value.datiAzi.posinps) {
+    promises.push(loadPosinpsDescription(dipendente.value.datiAzi.posinps))
+  }
+
+  if (dipendente.value.datiAzi.codQualif) {
+    promises.push(loadQualificaDescription(dipendente.value.datiAzi.codQualif))
+  }
+
+  if (dipendente.value.datiAzi.codLivello) {
+    promises.push(loadLivelloDescription(dipendente.value.datiAzi.codLivello))
+  }
+
+  if (dipendente.value.datiAzi.codCCNL) {
+    promises.push(loadCCNLDescription(dipendente.value.datiAzi.codCCNL))
+  }
+
+  await Promise.all(promises)
+}
+
+const syncLookupDataToDipendente = () => {
+  if (!dipendente.value) return
+
+  // Sincronizza sede
+  dipendente.value.datiAzi.codSedeAz = Number(sedeData.value.codSedeAz) || 0
+  dipendente.value.datiAzi.codCant = Number(filialeData.value.codCant) || 0
+  dipendente.value.datiAzi.codCenco = String(centroCostoData.value.codCenco || '')
+  dipendente.value.datiAzi.codReparto = String(repartoData.value.codReparto || '')
+  dipendente.value.datiAzi.posinps = Number(posinpsData.value.posinps) || 0
+  dipendente.value.datiAzi.codQualif = String(qualificaData.value.codQualif || '')
+  dipendente.value.datiAzi.codLivello = String(livelloData.value.codLivello || '')
+  dipendente.value.datiAzi.codCCNL = Number(ccnlData.value.codCCNL) || 0
+}
+
+const syncDipendenteToLookupData = () => {
+  if (!dipendente.value) return
+
+  sedeData.value.codSedeAz = dipendente.value.datiAzi.codSedeAz || 0
+  filialeData.value.codCant = dipendente.value.datiAzi.codCant || 0
+  centroCostoData.value.codCenco = dipendente.value.datiAzi.codCenco || ''
+  repartoData.value.codReparto = dipendente.value.datiAzi.codReparto || ''
+  posinpsData.value.posinps = dipendente.value.datiAzi.posinps || 0
+  qualificaData.value.codQualif = dipendente.value.datiAzi.codQualif || ''
+  livelloData.value.codLivello = dipendente.value.datiAzi.codLivello || ''
+  ccnlData.value.codCCNL = dipendente.value.datiAzi.codCCNL || 0
+}
+
+// Watchers per sincronizzazione dei lookup
+watch(() => sedeData.value.codSedeAz, () => {
+  syncLookupDataToDipendente()
+}, { deep: false })
+
+watch(() => filialeData.value.codCant, () => {
+  syncLookupDataToDipendente()
+}, { deep: false })
+
+watch(() => centroCostoData.value.codCenco, () => {
+  syncLookupDataToDipendente()
+}, { deep: false })
+
+watch(() => repartoData.value.codReparto, () => {
+  syncLookupDataToDipendente()
+}, { deep: false })
+
+watch(() => posinpsData.value.posinps, () => {
+  syncLookupDataToDipendente()
+}, { deep: false })
+
+watch(() => qualificaData.value.codQualif, () => {
+  syncLookupDataToDipendente()
+}, { deep: false })
+
+watch(() => livelloData.value.codLivello, () => {
+  syncLookupDataToDipendente()
+}, { deep: false })
+
+watch(() => ccnlData.value.codCCNL, () => {
+  syncLookupDataToDipendente()
+}, { deep: false })
+
+watch(() => dipendente.value, async () => {
   if (dipendente.value) {
     ensureBadgesInitialized()
     ensurePatsInitialized()
+    syncDipendenteToLookupData()
+    await loadAllDescriptions()
   }
 }, { deep: true, immediate: false })
 
