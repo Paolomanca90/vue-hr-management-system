@@ -1309,11 +1309,45 @@ const handleSave = async () => {
 
   saving.value = true
   try {
+    // Helper function per convertire stringhe vuote in null per le date
+    const cleanDateString = (date: string | null | undefined): string | null => {
+      if (!date || date.trim() === '') return null
+      return date
+    }
+
+    const dipendenteToSave = {
+      ...dipendente.value,
+      datiAzi: {
+        ...dipendente.value.datiAzi,
+        dataAssunz: cleanDateString(dipendente.value.datiAzi.dataAssunz),
+        dataAssunzioneConvenzionale: cleanDateString(dipendente.value.datiAzi.dataAssunzioneConvenzionale),
+        dataCessazione: cleanDateString(dipendente.value.datiAzi.dataCessazione),
+        listaBadge: dipendente.value.datiAzi.listaBadge
+          .filter(badge => badge.codBadge > 0)
+          .map(badge => ({
+            ...badge,
+            dal: cleanDateString(badge.dal),
+            al: cleanDateString(badge.al)
+          })),
+        listaPAT: dipendente.value.datiAzi.listaPAT
+          .filter(pat => pat.codPat > 0)
+          .map(pat => ({
+            ...pat,
+            dal: cleanDateString(pat.dal),
+            al: cleanDateString(pat.al)
+          }))
+      },
+      datiPers: {
+        ...dipendente.value.datiPers,
+        dataNas: cleanDateString(dipendente.value.datiPers.dataNas)
+      }
+    } as DettaglioDipendente
+
     if (isEditMode.value) {
-      await dipendenteService.updateDipendente(dipendente.value)
+      await dipendenteService.updateDipendente(dipendenteToSave)
       successMessage.value = 'Dipendente aggiornato con successo'
     } else {
-      await dipendenteService.createDipendente(dipendente.value)
+      await dipendenteService.createDipendente(dipendenteToSave)
       successMessage.value = 'Dipendente creato con successo'
       router.replace(`/app/anagrafica-dipendente/edit/${dipendente.value.codAzi}-${dipendente.value.codDip}`)
     }
