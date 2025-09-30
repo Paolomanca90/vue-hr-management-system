@@ -19,24 +19,22 @@
 
     <!-- Form Container -->
     <form @submit.prevent="handleSave" class="space-y-6">
-      <div class="bg-white p-4 rounded-lg shadow-sm border">
-        <div class="lg:flex items-center justify-between gap-3">
-          <div class="flex flex-col lg:flex-row lg:items-center gap-3">
-            <!-- Azioni principali con navigazione integrata -->
-            <ActionButtons
-              entity-name="Sede"
-              :is-edit-mode="isEditMode"
-              :saving="saving"
-              :is-form-valid="isFormValid"
-              :show-duplicate="true"
-              :show-delete="isEditMode"
-              :show-reset="true"
-              :show-navigation="isEditMode"
-              :navigation-config="sedeNavigationConfig"
-              @duplicate="handleDuplicate"
-              @reset="handleReset"
-            />
-          </div>
+      <div class="card bg-base-100 shadow-sm">
+        <div class="card-body">
+          <!-- Azioni principali con navigazione integrata -->
+          <ActionButtons
+            entity-name="Sede"
+            :is-edit-mode="isEditMode"
+            :saving="saving"
+            :is-form-valid="isFormValid"
+            :show-duplicate="true"
+            :show-delete="isEditMode"
+            :show-reset="true"
+            :show-navigation="isEditMode"
+            :navigation-config="sedeNavigationConfig"
+            @duplicate="handleDuplicate"
+            @reset="handleReset"
+          />
         </div>
       </div>
 
@@ -55,7 +53,7 @@
           <div class="grid grid-cols-1 gap-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div class="space-y-2">
-                <label for="codAzi" class="block text-sm font-medium text-gray-700">
+                <label for="codAzi" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Codice Azienda
                 </label>
                 <input
@@ -64,12 +62,12 @@
                   type="number"
                   placeholder="Inserisci codice azienda"
                   :disabled="saving || isEditMode"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
+                  class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
                 />
               </div>
 
               <div class="space-y-2">
-                <label for="codSedeAz" class="block text-sm font-medium text-gray-700">
+                <label for="codSedeAz" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Codice Sede Azienda
                 </label>
                 <input
@@ -78,13 +76,13 @@
                   type="number"
                   placeholder="Inserisci codice sede azienda"
                   :disabled="saving || isEditMode"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
+                  class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
                 />
               </div>
             </div>
 
             <div class="space-y-2">
-              <label for="descriz" class="block text-sm font-medium text-gray-700">
+              <label for="descriz" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Descrizione
               </label>
               <input
@@ -93,7 +91,7 @@
                 type="text"
                 placeholder="Inserisci descrizione sede"
                 :disabled="saving"
-                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
+                class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
               />
             </div>
 

@@ -1,10 +1,10 @@
 <template>
   <!-- Form Content -->
-  <div class="bg-white p-6 rounded-lg shadow-sm border">
+  <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Codice Azienda -->
       <div class="space-y-2">
-        <label for="codAzi" class="block text-sm font-medium text-gray-700">
+        <label for="codAzi" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Codice Azienda
         </label>
         <input
@@ -13,13 +13,13 @@
           type="number"
           placeholder="Inserisci codice azienda"
           :disabled="saving || isEditMode"
-          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
+          class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
         />
       </div>
 
       <!-- Codice -->
       <div class="space-y-2">
-        <label :for="codiceFieldId" class="block text-sm font-medium text-gray-700">
+        <label :for="codiceFieldId" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
           {{ codiceLabel }}
         </label>
         <input
@@ -28,7 +28,7 @@
           type="text"
           :placeholder="`Inserisci ${codiceLabel.toLowerCase()}`"
           :disabled="saving || isEditMode"
-          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
+          class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
         />
       </div>
     </div>
@@ -36,7 +36,7 @@
     <div class="mt-6">
       <!-- Descrizione -->
       <div class="space-y-2">
-        <label for="descriz" class="block text-sm font-medium text-gray-700">
+        <label for="descriz" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Descrizione
         </label>
         <input
@@ -45,7 +45,7 @@
           type="text"
           placeholder="Inserisci descrizione"
           :disabled="saving"
-          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
+          class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
         />
       </div>
     </div>

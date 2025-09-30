@@ -22,27 +22,28 @@
 
     <!-- Form Container -->
     <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
-      <div class="bg-white p-4 rounded-lg shadow-sm border">
-        <!-- Azioni principali con navigazione integrata -->
-        <ActionButtons
-          entity-name="PAT"
-          :is-edit-mode="isEditMode"
-          :saving="saving"
-          :is-form-valid="isFormValid"
-          :show-duplicate="true"
-          :show-delete="isEditMode"
-          :show-reset="true"
-          :show-navigation="isEditMode"
-          :navigation-config="patNavigationConfig"
-          @duplicate="handleDuplicate"
-          @reset="handleReset"
-        />
+      <div class="card bg-base-100 shadow-sm">
+        <div class="card-body">
+          <ActionButtons
+            entity-name="PAT"
+            :is-edit-mode="isEditMode"
+            :saving="saving"
+            :is-form-valid="isFormValid"
+            :show-duplicate="true"
+            :show-delete="isEditMode"
+            :show-reset="true"
+            :show-navigation="isEditMode"
+            :navigation-config="patNavigationConfig"
+            @duplicate="handleDuplicate"
+            @reset="handleReset"
+          />
+        </div>
       </div>
 
       <!-- Form Fields -->
       <div class="card bg-base-100 shadow-sm">
         <div class="card-body">
-          <h2 class="card-title mb-6">Dati PAT</h2>
+          <h2 class="card-title mb-6 dark:text-gray-100">Dati PAT</h2>
 
           <!-- PAT Form Component -->
           <CompanyEntityFormComponent

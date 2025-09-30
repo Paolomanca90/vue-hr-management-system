@@ -19,21 +19,23 @@
 
     <!-- Form Container -->
     <form @submit.prevent="handleSave" class="space-y-6">
-      <div class="bg-white p-4 rounded-lg shadow-sm border">
-        <!-- Azioni principali con navigazione integrata -->
-        <ActionButtons
-          entity-name="Azienda"
-          :is-edit-mode="isEditMode"
-          :saving="saving"
-          :is-form-valid="isFormValid"
-          :show-duplicate="true"
-          :show-delete="isEditMode"
-          :show-reset="true"
-          :show-navigation="isEditMode"
-          :navigation-config="aziendaNavigationConfig"
-          @duplicate="handleDuplicate"
-          @reset="handleReset"
-        />
+      <div class="card bg-base-100 shadow-sm">
+        <div class="card-body">
+          <!-- Azioni principali con navigazione integrata -->
+          <ActionButtons
+            entity-name="Azienda"
+            :is-edit-mode="isEditMode"
+            :saving="saving"
+            :is-form-valid="isFormValid"
+            :show-duplicate="true"
+            :show-delete="isEditMode"
+            :show-reset="true"
+            :show-navigation="isEditMode"
+            :navigation-config="aziendaNavigationConfig"
+            @duplicate="handleDuplicate"
+            @reset="handleReset"
+          />
+        </div>
       </div>
 
       <!-- Tab Selector -->
@@ -50,7 +52,7 @@
           <div class="grid grid-cols-1 gap-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div class="space-y-2">
-                <label for="codAzi" class="block text-sm font-medium text-gray-700">
+                <label for="codAzi" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Codice Azienda
                 </label>
                 <input
@@ -59,12 +61,12 @@
                   type="text"
                   placeholder="Inserisci codice azienda"
                   :disabled="saving || isEditMode"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
+                  class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
                 />
               </div>
 
               <div class="space-y-2">
-                <label for="ragSoc" class="block text-sm font-medium text-gray-700">
+                <label for="ragSoc" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Ragione Sociale
                 </label>
                 <input
@@ -73,7 +75,7 @@
                   type="text"
                   placeholder="Inserisci ragione sociale"
                   :disabled="saving"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
+                  class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
                 />
               </div>
             </div>
@@ -86,7 +88,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div class="space-y-2">
-                <label for="codFisc" class="block text-sm font-medium text-gray-700">
+                <label for="codFisc" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Codice Fiscale
                 </label>
                 <input
@@ -95,12 +97,12 @@
                   type="text"
                   placeholder="Inserisci codice fiscale"
                   :disabled="saving"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
+                  class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
                 />
               </div>
 
               <div class="space-y-2">
-                <label for="sigla" class="block text-sm font-medium text-gray-700">
+                <label for="sigla" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Sigla
                 </label>
                 <input
@@ -109,7 +111,7 @@
                   type="text"
                   placeholder="Inserisci sigla azienda"
                   :disabled="saving"
-                  class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]"
+                  class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
                 />
               </div>
             </div>

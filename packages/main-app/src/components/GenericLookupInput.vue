@@ -9,7 +9,7 @@
         :class="getColumnClass(field.colSpan)"
       >
         <label :for="field.key" class="label">
-          <span class="label-text font-medium">{{ field.label }}
+          <span class="label-text font-medium dark:text-gray-200">{{ field.label }}
             <span v-if="field.required" class="text-red-500">*</span>
           </span>
         </label>

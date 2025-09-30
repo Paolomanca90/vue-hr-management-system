@@ -22,28 +22,29 @@
 
     <!-- Form Container -->
     <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
-      <div class="bg-white p-4 rounded-lg shadow-sm border">
-        <!-- Azioni principali con navigazione integrata -->
-        <ActionButtons
-          entity-name="Posizione INPS"
-          :is-edit-mode="isEditMode"
-          :saving="saving"
-          :is-form-valid="isFormValid"
-          :show-duplicate="true"
-          :show-delete="isEditMode"
-          :show-reset="true"
-          :show-navigation="isEditMode"
-          :navigation-config="posizioneInpsNavigationConfig"
-          @duplicate="handleDuplicate"
-          @delete="handleDelete"
-          @reset="handleReset"
-        />
+      <div class="card bg-base-100 shadow-sm">
+        <div class="card-body">
+          <ActionButtons
+            entity-name="Posizione INPS"
+            :is-edit-mode="isEditMode"
+            :saving="saving"
+            :is-form-valid="isFormValid"
+            :show-duplicate="true"
+            :show-delete="isEditMode"
+            :show-reset="true"
+            :show-navigation="isEditMode"
+            :navigation-config="posizioneInpsNavigationConfig"
+            @duplicate="handleDuplicate"
+            @delete="handleDelete"
+            @reset="handleReset"
+          />
+        </div>
       </div>
 
       <!-- Form Fields -->
       <div class="card bg-base-100 shadow-sm">
         <div class="card-body">
-          <h2 class="card-title mb-6">Dati Posizione INPS</h2>
+          <h2 class="card-title mb-6 dark:text-gray-100">Dati Posizione INPS</h2>
 
           <!-- Posizione INPS Form Component -->
           <CompanyEntityFormComponent

@@ -19,22 +19,23 @@
 
     <!-- Action Buttons -->
     <form @submit.prevent="handleSave" class="space-y-6">
-      <div class="bg-white p-4 rounded-lg shadow-sm border">
-        <!-- Azioni principali con navigazione integrata -->
-        <ActionButtons
-          entity-name="Dipendente"
-          :is-edit-mode="isEditMode"
-          :saving="saving"
-          :is-form-valid="isFormValid"
-          :show-duplicate="isEditMode"
-          :show-delete="isEditMode"
-          :show-reset="true"
-          :show-navigation="isEditMode"
-          :navigation-config="dipendenteNavigationConfig"
-          @delete="handleDelete"
-          @duplicate="handleDuplicate"
-          @reset="handleReset"
-        />
+      <div class="card bg-base-100 shadow-sm">
+        <div class="card-body">
+          <ActionButtons
+            entity-name="Dipendente"
+            :is-edit-mode="isEditMode"
+            :saving="saving"
+            :is-form-valid="isFormValid"
+            :show-duplicate="isEditMode"
+            :show-delete="isEditMode"
+            :show-reset="true"
+            :show-navigation="isEditMode"
+            :navigation-config="dipendenteNavigationConfig"
+            @delete="handleDelete"
+            @duplicate="handleDuplicate"
+            @reset="handleReset"
+          />
+        </div>
       </div>
     </form>
 
@@ -42,11 +43,11 @@
     <LoadingIndicator :loading="loading" message="Caricamento dati dipendente..." />
 
     <div v-if="!loading && dipendente" class="space-y-6">
-      <div class="bg-white p-6 rounded-lg shadow-sm border">
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-medium">Codice *</span>
+              <span class="label-text font-medium dark:text-gray-200">Codice *</span>
             </label>
             <input
               v-if="!isEditMode"
@@ -56,11 +57,11 @@
               :disabled="saving"
               placeholder="Inserisci codice dipendente"
             />
-            <div v-else class="text-lg font-semibold text-gray-900 py-2">{{ dipendente.codDip }}</div>
+            <div v-else class="text-lg font-semibold text-gray-900 dark:text-gray-100 py-2">{{ dipendente.codDip }}</div>
           </div>
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-medium">Cognome *</span>
+              <span class="label-text font-medium dark:text-gray-200">Cognome *</span>
             </label>
             <input
               v-model="dipendente.cognome"
@@ -72,7 +73,7 @@
           </div>
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-medium">Nome *</span>
+              <span class="label-text font-medium dark:text-gray-200">Nome *</span>
             </label>
             <input
               v-model="dipendente.nome"
@@ -84,7 +85,7 @@
           </div>
           <div class="form-control">
             <label class="label">
-              <span class="label-text font-medium">Matricola</span>
+              <span class="label-text font-medium dark:text-gray-200">Matricola</span>
             </label>
             <input
               v-model="dipendente.matricola"
@@ -98,8 +99,8 @@
       </div>
 
       <!-- Tabs System -->
-      <div class="bg-white rounded-lg shadow-sm border">
-        <div class="border-b">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="border-b border-gray-200 dark:border-gray-700">
           <nav class="flex space-x-8 px-6" aria-label="Tabs">
             <button
               v-for="tab in availableTabs"
@@ -109,7 +110,7 @@
                 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm focus:outline-none',
                 activeTab === tab.key
                   ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
               ]"
               type="button"
             >
@@ -124,8 +125,8 @@
           <div v-if="activeTab === 'aziendali'" class="space-y-6">
             <form @submit.prevent="handleSave" class="space-y-6">
               <!-- Sezione Organizzazione Aziendale -->
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <h4 class="text-md font-medium text-gray-900 mb-4">Organizzazione Aziendale</h4>
+              <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Organizzazione Aziendale</h4>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <GenericLookupInput
                     v-model="sedeData"
@@ -154,12 +155,12 @@
               </div>
 
               <!-- Sezione Rapporto di Lavoro -->
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <h4 class="text-md font-medium text-gray-900 mb-4">Rapporto di Lavoro</h4>
+              <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Rapporto di Lavoro</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div class="form-control">
                     <label class="label">
-                      <span class="label-text font-medium">Data Assunzione *</span>
+                      <span class="label-text font-medium dark:text-gray-200">Data Assunzione *</span>
                     </label>
                     <DateInput
                       v-model="dipendente.datiAzi.dataAssunz"
@@ -171,7 +172,7 @@
 
                   <div class="form-control">
                     <label class="label">
-                      <span class="label-text font-medium">Data Assunzione Convenzionale</span>
+                      <span class="label-text font-medium dark:text-gray-200">Data Assunzione Convenzionale</span>
                     </label>
                     <DateInput
                       v-model="dipendente.datiAzi.dataAssunzioneConvenzionale"
@@ -183,7 +184,7 @@
 
                   <div class="form-control">
                     <label class="label">
-                      <span class="label-text font-medium">Data Cessazione</span>
+                      <span class="label-text font-medium dark:text-gray-200">Data Cessazione</span>
                     </label>
                     <DateInput
                       v-model="dipendente.datiAzi.dataCessazione"
@@ -195,7 +196,7 @@
 
                   <div class="form-control">
                     <label class="label">
-                      <span class="label-text font-medium">Tipo Rapporto</span>
+                      <span class="label-text font-medium dark:text-gray-200">Tipo Rapporto</span>
                     </label>
                     <select v-model="dipendente.datiAzi.tipoRappor" class="select select-bordered" :disabled="saving">
                       <option value="">Seleziona...</option>
@@ -206,7 +207,7 @@
 
                   <div class="form-control">
                     <label class="label">
-                      <span class="label-text font-medium">Percentuale Part-time</span>
+                      <span class="label-text font-medium dark:text-gray-200">Percentuale Part-time</span>
                     </label>
                     <input
                       v-model.number="dipendente.datiAzi.percenpt"
@@ -225,8 +226,8 @@
               </div>
 
               <!-- Sezione Qualifiche e CCNL -->
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <h4 class="text-md font-medium text-gray-900 mb-4">Qualifiche e CCNL</h4>
+              <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Qualifiche e CCNL</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <GenericLookupInput
                     v-model="ccnlData"
@@ -255,12 +256,12 @@
           <div v-if="activeTab === 'personali'" class="space-y-6">
             <form @submit.prevent="handleSave" class="space-y-6">
               <!-- Sezione Dati Anagrafici -->
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <h4 class="text-md font-medium text-gray-900 mb-4">Dati Anagrafici</h4>
+              <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Dati Anagrafici</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div class="form-control">
                     <label class="label">
-                      <span class="label-text font-medium">Codice Fiscale *</span>
+                      <span class="label-text font-medium dark:text-gray-200">Codice Fiscale *</span>
                     </label>
                     <input
                       v-model="dipendente.datiPers.codFis"
@@ -274,7 +275,7 @@
 
                   <div class="form-control">
                     <label class="label">
-                      <span class="label-text font-medium">Data Nascita</span>
+                      <span class="label-text font-medium dark:text-gray-200">Data Nascita</span>
                     </label>
                     <DateInput
                       v-model="dipendente.datiPers.dataNas"
@@ -286,7 +287,7 @@
 
                   <div class="form-control">
                     <label class="label">
-                      <span class="label-text font-medium">Sesso</span>
+                      <span class="label-text font-medium dark:text-gray-200">Sesso</span>
                     </label>
                     <div class="flex gap-4 pt-2">
                       <label class="cursor-pointer label">
@@ -297,7 +298,7 @@
                           class="radio radio-primary"
                           :disabled="saving"
                         />
-                        <span class="label-text ml-2">Femmina</span>
+                        <span class="label-text ml-2 dark:text-gray-200">Femmina</span>
                       </label>
                       <label class="cursor-pointer label">
                         <input
@@ -307,14 +308,14 @@
                           class="radio radio-primary"
                           :disabled="saving"
                         />
-                        <span class="label-text ml-2">Maschio</span>
+                        <span class="label-text ml-2 dark:text-gray-200">Maschio</span>
                       </label>
                     </div>
                   </div>
 
                   <div class="form-control">
                     <label class="label">
-                      <span class="label-text font-medium">Stato Civile</span>
+                      <span class="label-text font-medium dark:text-gray-200">Stato Civile</span>
                     </label>
                     <select v-model="dipendente.datiPers.statoCivi" class="select select-bordered" :disabled="saving">
                       <option value="">Seleziona...</option>
@@ -331,7 +332,7 @@
 
                   <div class="form-control">
                     <label class="label">
-                      <span class="label-text font-medium">Servizio Militare</span>
+                      <span class="label-text font-medium dark:text-gray-200">Servizio Militare</span>
                     </label>
                     <select v-model="dipendente.datiPers.militare" class="select select-bordered" :disabled="saving">
                       <option value="">Seleziona...</option>
@@ -344,8 +345,8 @@
               </div>
 
               <!-- Sezione Residenza -->
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <h4 class="text-md font-medium text-gray-900 mb-4">Dati di Residenza</h4>
+              <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Dati di Residenza</h4>
                 <AddressInput
                   v-model="addressData"
                   :disabled="saving"
@@ -353,12 +354,12 @@
               </div>
 
               <!-- Sezione Contatti -->
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <h4 class="text-md font-medium text-gray-900 mb-4">Informazioni di Contatto</h4>
+              <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Informazioni di Contatto</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div class="form-control">
                     <label class="label">
-                      <span class="label-text font-medium">Telefono</span>
+                      <span class="label-text font-medium dark:text-gray-200">Telefono</span>
                     </label>
                     <input
                       v-model="dipendente.datiPers.telefono"
@@ -370,7 +371,7 @@
 
                   <div class="form-control">
                     <label class="label">
-                      <span class="label-text font-medium">E-Mail</span>
+                      <span class="label-text font-medium dark:text-gray-200">E-Mail</span>
                     </label>
                     <input
                       v-model="dipendente.datiPers.mail"
@@ -389,7 +390,7 @@
           <div v-if="activeTab === 'badge'" class="space-y-6">
             <div class="space-y-4">
               <div class="flex justify-between items-center">
-                <h3 class="text-lg font-medium">Elenco Badge</h3>
+                <h3 class="text-lg font-medium dark:text-gray-100">Elenco Badge</h3>
                 <button
                   @click="addNewBadge"
                   class="btn btn-primary btn-sm text-white"
@@ -403,10 +404,10 @@
                 <div
                   v-for="(badge, index) in badgeList"
                   :key="index"
-                  class="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 bg-base-100 border border-gray-200 rounded-lg"
+                  class="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 bg-base-100 border border-gray-200 dark:border-gray-700 rounded-lg"
                 >
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Cod. Azienda</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cod. Azienda</label>
                     <input
                       v-model.number="badge.codAzi"
                       type="number"
@@ -415,7 +416,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Cod. Dipendente</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cod. Dipendente</label>
                     <input
                       v-model.number="badge.codDip"
                       type="number"
@@ -424,7 +425,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Numero Badge</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Numero Badge</label>
                     <input
                       v-model.number="badge.codBadge"
                       type="number"
@@ -433,7 +434,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Dal</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Dal</label>
                     <DateInput
                       v-model="badge.dal"
                       format="european"
@@ -442,7 +443,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Al</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Al</label>
                     <DateInput
                       v-model="badge.al"
                       format="european"
@@ -469,7 +470,7 @@
           <div v-if="activeTab === 'pat'" class="space-y-6">
             <div class="space-y-4">
               <div class="flex justify-between items-center">
-                <h3 class="text-lg font-medium">Elenco P.A.T.</h3>
+                <h3 class="text-lg font-medium dark:text-gray-100">Elenco P.A.T.</h3>
                 <button
                   @click="addNewPat"
                   class="btn btn-primary btn-sm text-white"
@@ -483,10 +484,10 @@
                 <div
                   v-for="(pat, index) in patList"
                   :key="index"
-                  class="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 bg-base-100 border border-gray-200 rounded-lg"
+                  class="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 bg-base-100 border border-gray-200 dark:border-gray-700 rounded-lg"
                 >
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Cod. Azienda</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cod. Azienda</label>
                     <input
                       v-model.number="pat.codAzi"
                       type="number"
@@ -495,7 +496,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Cod. Dipendente</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cod. Dipendente</label>
                     <input
                       v-model.number="pat.codDip"
                       type="number"
@@ -504,7 +505,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Codice P.A.T.</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Codice P.A.T.</label>
                     <input
                       v-model.number="pat.codPat"
                       type="number"
@@ -513,7 +514,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Dal</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Dal</label>
                     <DateInput
                       v-model="pat.dal"
                       format="european"
@@ -522,7 +523,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Al</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Al</label>
                     <DateInput
                       v-model="pat.al"
                       format="european"
@@ -549,7 +550,7 @@
           <div v-if="activeTab === 'familiari'" class="space-y-6">
             <div class="space-y-4">
               <div class="flex justify-between items-center">
-                <h3 class="text-lg font-medium">Elenco Familiari</h3>
+                <h3 class="text-lg font-medium dark:text-gray-100">Elenco Familiari</h3>
                 <button
                   @click="addNewFamiliare"
                   class="btn btn-primary btn-sm text-white"
@@ -563,10 +564,10 @@
                 <div
                   v-for="(familiare, index) in dipendente.familiari"
                   :key="index"
-                  class="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-base-100 border border-gray-200 rounded-lg"
+                  class="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-base-100 border border-gray-200 dark:border-gray-700 rounded-lg"
                 >
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Codice</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Codice</label>
                     <input
                       v-model.number="familiare.codice"
                       type="number"
@@ -575,7 +576,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Cognome</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cognome</label>
                     <input
                       v-model="familiare.cognome"
                       type="text"
@@ -584,7 +585,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome</label>
                     <input
                       v-model="familiare.nome"
                       type="text"
@@ -593,7 +594,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Codice Fiscale</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Codice Fiscale</label>
                     <input
                       v-model="familiare.codFisc"
                       type="text"
@@ -616,8 +617,8 @@
 
               <!-- Empty State -->
               <div v-else class="text-center py-8">
-                <FaIcon icon="users" class="text-6xl text-gray-300 mb-4" />
-                <h3 class="text-xl font-semibold text-gray-700 mb-2">Nessun familiare presente</h3>
+                <FaIcon icon="users" class="text-6xl text-gray-300 dark:text-gray-600 mb-4" />
+                <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">Nessun familiare presente</h3>
                 <button @click="addNewFamiliare" class="btn btn-primary text-white">
                   <FaIcon icon="plus" class="mr-2" />
                   Aggiungi Primo Familiare

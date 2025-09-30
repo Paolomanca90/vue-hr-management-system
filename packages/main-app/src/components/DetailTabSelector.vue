@@ -1,7 +1,7 @@
 <template>
-  <div class="bg-white rounded-lg shadow-sm border">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
     <!-- Tab Headers -->
-    <div class="border-b">
+    <div class="border-b border-gray-200 dark:border-gray-700">
       <nav class="flex space-x-8 px-6" aria-label="Tabs">
         <button
           v-for="tab in availableTabs"
@@ -11,7 +11,7 @@
             'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm focus:outline-none',
             activeTab === tab.key
               ? 'border-primary text-primary'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
           ]"
           type="button"
         >
@@ -28,7 +28,7 @@
         <slot name="anagrafica" :data="data">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div v-for="field in anagraficaFields" :key="field.key" class="space-y-2">
-              <label :for="field.key" class="block text-sm font-medium text-gray-700">
+              <label :for="field.key" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {{ field.label }}
                 <span v-if="field.required" class="text-red-500">*</span>
               </label>
@@ -43,7 +43,7 @@
                 :placeholder="field.placeholder"
                 :required="field.required"
                 :disabled="field.disabled || saving"
-                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm dark:bg-gray-700 dark:text-gray-100"
               />
 
               <!-- Email Input -->
@@ -56,7 +56,7 @@
                 :placeholder="field.placeholder"
                 :required="field.required"
                 :disabled="field.disabled || saving"
-                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm dark:bg-gray-700 dark:text-gray-100"
               />
 
               <!-- Number Input -->
@@ -69,7 +69,7 @@
                 :placeholder="field.placeholder"
                 :required="field.required"
                 :disabled="field.disabled || saving"
-                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm dark:bg-gray-700 dark:text-gray-100"
               />
 
               <!-- Textarea -->
@@ -82,7 +82,7 @@
                 :placeholder="field.placeholder"
                 :required="field.required"
                 :disabled="field.disabled || saving"
-                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm dark:bg-gray-700 dark:text-gray-100"
               />
 
               <!-- Select -->
@@ -93,7 +93,7 @@
                 @change="updateData(field.key, ($event.target as HTMLSelectElement).value)"
                 :required="field.required"
                 :disabled="field.disabled || saving"
-                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm dark:bg-gray-700 dark:text-gray-100"
               >
                 <option value="">{{ field.placeholder || 'Seleziona...' }}</option>
                 <option
@@ -113,11 +113,11 @@
       <div v-if="activeTab === 'presenze'" class="space-y-6">
         <slot name="presenze" :data="data">
           <div class="space-y-6">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Configurazione Gruppi Causali</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Configurazione Gruppi Causali</h3>
 
             <!-- Gruppo 1 -->
             <div class="flex gap-7 w-full items-end">
-              <h4 class="text-md font-medium text-gray-800 whitespace-nowrap">Gruppo 1</h4>
+              <h4 class="text-md font-medium text-gray-800 dark:text-gray-200 whitespace-nowrap">Gruppo 1</h4>
               <GruppoCausaleInput
                 :model-value="getGruppoCausaleData(1)"
                 @update:model-value="updateGruppoCausaleData(1, $event)"
@@ -127,7 +127,7 @@
 
             <!-- Gruppo 2 -->
             <div class="flex gap-7 w-full items-end">
-              <h4 class="text-md font-medium text-gray-800 whitespace-nowrap">Gruppo 2</h4>
+              <h4 class="text-md font-medium text-gray-800 dark:text-gray-200 whitespace-nowrap">Gruppo 2</h4>
               <GruppoCausaleInput
                 :model-value="getGruppoCausaleData(2)"
                 @update:model-value="updateGruppoCausaleData(2, $event)"
@@ -137,7 +137,7 @@
 
             <!-- Gruppo 3 -->
             <div class="flex gap-7 w-full items-end">
-              <h4 class="text-md font-medium text-gray-800 whitespace-nowrap">Gruppo 3</h4>
+              <h4 class="text-md font-medium text-gray-800 dark:text-gray-200 whitespace-nowrap">Gruppo 3</h4>
               <GruppoCausaleInput
                 :model-value="getGruppoCausaleData(3)"
                 @update:model-value="updateGruppoCausaleData(3, $event)"
@@ -147,7 +147,7 @@
 
             <!-- Gruppo 4 -->
             <div class="flex gap-7 w-full items-end">
-              <h4 class="text-md font-medium text-gray-800 whitespace-nowrap">Gruppo 4</h4>
+              <h4 class="text-md font-medium text-gray-800 dark:text-gray-200 whitespace-nowrap">Gruppo 4</h4>
               <GruppoCausaleInput
                 :model-value="getGruppoCausaleData(4)"
                 @update:model-value="updateGruppoCausaleData(4, $event)"
@@ -162,8 +162,8 @@
       <div v-for="tab in customTabs" :key="tab.key">
         <div v-if="activeTab === tab.key">
           <slot :name="tab.key" :data="data">
-            <div class="bg-gray-50 p-6 rounded-lg">
-              <div class="text-center text-gray-500">
+            <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
+              <div class="text-center text-gray-500 dark:text-gray-400">
                 <FaIcon :icon="tab.icon || 'file'" class="text-4xl mb-4" />
                 <p class="text-lg font-medium">{{ tab.title }}</p>
                 <p class="text-sm">Contenuto per {{ tab.title }}</p>
