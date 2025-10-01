@@ -221,7 +221,7 @@ export const installPrimeVue = (app: App) => {
       preset: HRPreset,
       options: {
         prefix: 'p',
-        darkModeSelector: 'system',
+        darkModeSelector: '.dark',
         cssLayer: false
       }
     },

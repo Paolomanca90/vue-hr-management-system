@@ -99,6 +99,7 @@ import { ref, computed } from 'vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import GenericModal, { type ModalConfig } from './GenericModal.vue'
 import { lookupService, formatCap } from '@/services/lookupService'
+import { useMessageAlerts } from '@/composables/useMessageAlerts'
 
 export interface LookupField {
   key: string
@@ -136,6 +137,10 @@ const emit = defineEmits<{
 }>()
 
 const isModalVisible = ref(false)
+const errorMessage = ref('')
+const successMessage = ref('')
+
+useMessageAlerts(errorMessage, successMessage)
 
 // Organize fields into rows of 3 (or based on colSpan)
 const fieldRows = computed(() => {
@@ -167,19 +172,18 @@ const fieldRows = computed(() => {
 
 const modalConfig = computed<ModalConfig>(() => ({
   ...props.config.modalConfig,
-  loadData: async () => {
-    // Per i comuni, usa la logica originale del ComuniModal
+  enableDynamicSearch: props.config.lookupType === 'comune',
+  loadData: async (searchTerm?: string) => {
     if (props.config.lookupType === 'comune') {
-      const result = await lookupService.getComuni('A')
-      // Converti da Comune[] a ComuneResponse[] per il modal
-      return result.slice(0, 100).map(comune => ({
+      const result = await lookupService.searchComuni(searchTerm || '')
+      return result.map(comune => ({
         CODICE: comune.codiceBelfiore,
         COMUNE: comune.nome,
         CAP: comune.cap,
         PROVINCIA: comune.provincia
       }))
     }
-    // Per altri tipi, carica tutto con filtri opzionali
+    // Per altri tipi, carica tutto con filtri opzionali (una volta sola)
     return lookupService.getList(props.config.lookupType, props.config.searchFilter)
   }
 }))
@@ -246,7 +250,7 @@ const handleLookupBlur = async () => {
         emit('update:modelValue', newValue)
       } else {
         // Codice belfiore non trovato
-        alert('Codice Belfiore non valido. Utilizza il pulsante di ricerca per selezionare un comune.')
+        errorMessage.value = 'Codice Belfiore non valido. Utilizza il pulsante di ricerca per selezionare un comune.'
 
         // Reset dei campi auto-compilati
         const newValue = {
@@ -274,7 +278,7 @@ const handleLookupBlur = async () => {
       emit('update:modelValue', newValue)
     } else {
       // Codice non trovato
-      alert(`${props.config.modalConfig.title} non trovato. Utilizza il pulsante di ricerca per selezionare un elemento.`)
+      errorMessage.value = `${props.config.modalConfig.title} non trovato. Utilizza il pulsante di ricerca per selezionare un elemento.`
 
       // Reset dei campi auto-compilati (non editabili)
       const resetFields = props.config.fields
@@ -286,7 +290,7 @@ const handleLookupBlur = async () => {
     }
   } catch (error) {
     console.error(`Errore nella ricerca ${props.config.lookupType}:`, error)
-    alert(`Errore nel recupero dei dati. Riprova.`)
+    errorMessage.value = `Errore nel recupero dei dati. Riprova.`
   }
 }
 

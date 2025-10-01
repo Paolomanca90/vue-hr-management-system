@@ -728,7 +728,7 @@ const ccnlData = ref<Record<string, unknown>>({
 
 const addressData = ref<AddressData>({
   indirizzo: '',
-  codiceBelfiore: '',
+  codiceBelfiore: null,
   comune: '',
   cap: '',
   provincia: '',
@@ -1173,7 +1173,7 @@ const initializeEmptyDipendente = async () => {
       viaRes: '',
       numRes: '',
       comRes: '',
-      codComRes: '',
+      codComRes: null,
       capRes: 0,
       proRes: '',
       telefono: '',
@@ -1736,7 +1736,7 @@ const syncLookupDataToDipendente = () => {
   dipendente.value.datiPers.comRes = addressData.value.comune || ''
   dipendente.value.datiPers.proRes = addressData.value.provincia || ''
   dipendente.value.datiPers.capRes = addressData.value.cap ? Number(addressData.value.cap) || 0 : 0
-  dipendente.value.datiPers.codComRes = addressData.value.codiceBelfiore || ''
+  dipendente.value.datiPers.codComRes = addressData.value.codiceBelfiore || null
 }
 
 const syncDipendenteToLookupData = () => {
@@ -1762,7 +1762,7 @@ const syncDipendenteToLookupData = () => {
   addressData.value.comune = dipendente.value.datiPers.comRes || ''
   addressData.value.provincia = dipendente.value.datiPers.proRes || ''
   addressData.value.cap = dipendente.value.datiPers.capRes ? formatCap(String(dipendente.value.datiPers.capRes)) : ''
-  addressData.value.codiceBelfiore = dipendente.value.datiPers.codComRes || ''
+  addressData.value.codiceBelfiore = dipendente.value.datiPers.codComRes || null
 }
 
 // Watchers per sincronizzazione dei lookup

@@ -47,7 +47,7 @@
               <FaIcon icon="exclamation-triangle" class="w-8 h-8 text-red-500" />
               <span class="text-red-500">{{ error }}</span>
               <button
-                @click="loadData"
+                @click="() => loadData()"
                 class="btn btn-sm btn-primary text-white"
               >
                 Riprova
@@ -127,10 +127,11 @@ export interface ModalConfig {
   title: string
   searchPlaceholder: string
   columns: ModalColumn[]
-  loadData: () => Promise<Record<string, unknown>[]>
+  loadData: (searchTerm?: string) => Promise<Record<string, unknown>[]>
   searchFields: string[]
   keyField?: string
   loadingMessage?: string
+  enableDynamicSearch?: boolean  // Se true, fa chiamate API successive durante la digitazione
 }
 
 interface Props {
@@ -149,17 +150,18 @@ const searchTerm = ref('')
 const data = ref<Record<string, unknown>[]>([])
 const loading = ref(false)
 const error = ref('')
+let debounceTimeout: number | null = null
 
 const loadingMessage = computed(() =>
   props.config.loadingMessage || `Caricamento ${props.config.title.toLowerCase()}...`
 )
 
-const loadData = async () => {
+const loadData = async (search?: string) => {
   loading.value = true
   error.value = ''
 
   try {
-    const result = await props.config.loadData()
+    const result = await props.config.loadData(search)
     data.value = result
   } catch (err) {
     console.error(`Error loading ${props.config.title}:`, err)
@@ -171,6 +173,10 @@ const loadData = async () => {
 
 const filteredData = computed(() => {
   if (loading.value || error.value) return []
+
+  if (props.config.enableDynamicSearch) {
+    return data.value
+  }
 
   if (!searchTerm.value.trim()) {
     return data.value
@@ -199,9 +205,29 @@ const formatColumnValue = (item: Record<string, unknown>, column: ModalColumn): 
 
 // Carica i dati quando il modal viene aperto
 watch(() => props.isVisible, (isVisible) => {
-  if (isVisible && data.value.length === 0) {
+  if (isVisible) {
     loadData()
   }
+})
+
+watch(searchTerm, (newSearch) => {
+  if (!props.config.enableDynamicSearch) {
+    return
+  }
+
+  // Non fare chiamate API se il searchTerm è vuoto
+  const trimmedSearch = newSearch.trim()
+  if (trimmedSearch.length === 0) {
+    return
+  }
+
+  if (debounceTimeout !== null) {
+    clearTimeout(debounceTimeout)
+  }
+
+  debounceTimeout = window.setTimeout(() => {
+    loadData(trimmedSearch)
+  }, 300)
 })
 
 const selectItem = (item: Record<string, unknown>) => {

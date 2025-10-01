@@ -15,7 +15,7 @@ import { formatCap } from '@/services/lookupService'
 
 export interface AddressData extends Record<string, unknown> {
   indirizzo: string
-  codiceBelfiore: string
+  codiceBelfiore: string | null
   comune: string
   cap: string
   provincia: string
@@ -46,7 +46,7 @@ const handleAddressUpdate = (data: Record<string, unknown>) => {
 
   const addressData: AddressData = {
     indirizzo: String(data.indirizzo || ''),
-    codiceBelfiore: String(data.codiceBelfiore || ''),
+    codiceBelfiore: data.codiceBelfiore && String(data.codiceBelfiore).trim() ? String(data.codiceBelfiore) : null,
     comune: String(data.comune || ''),
     cap: String(data.cap || ''),
     provincia: String(data.provincia || ''),

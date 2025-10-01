@@ -21,15 +21,13 @@ export interface Comune {
 }
 
 export interface GruppoCausaleResponse {
-  CODICE: string
-  CODICE_GRUPPO: string
-  ABBR: string
+  CODGRCAU: string
+  DESCRIZIONE: string
 }
 
 export interface GruppoCausale {
   codice: string
-  codiceGruppo: string
-  abbreviazione: string
+  descrizione: string
 }
 
 export const formatCap = (cap: string | null | undefined): string => {
@@ -124,30 +122,29 @@ class LookupService {
 
   async searchComuni(searchTerm: string): Promise<Comune[]> {
     if (!searchTerm.trim()) {
-      return this.getComuni()
+      return this.getComuni('A')
     }
 
-    // Se è un codice belfiore (massimo 4 caratteri alfanumerici con almeno un numero)
-    if (searchTerm.length <= 4 && /^[A-Z0-9]+$/i.test(searchTerm) && /\d/.test(searchTerm)) {
-      return this.getComuni(searchTerm.toUpperCase())
-    }
+    const trimmed = searchTerm.trim().toUpperCase()
 
-    // Altrimenti cerca per nome comune
-    const allComuni = await this.getComuni()
-    const searchLower = searchTerm.toLowerCase()
+    const response = await this.getList<ComuneResponse>('comune', {
+      COMUNE: `%${trimmed}%`
+    })
 
-    return allComuni.filter(comune =>
-      comune.nome.toLowerCase().includes(searchLower)
-    )
+    return response.map(item => ({
+      codiceBelfiore: item.CODICE,
+      nome: item.COMUNE,
+      cap: item.CAP || '',
+      provincia: item.PROVINCIA
+    }))
   }
 
   async getGruppiCausali(): Promise<GruppoCausale[]> {
     const response = await this.getList<GruppoCausaleResponse>('gruppocausale')
 
     return response.map(item => ({
-      codice: item.CODICE,
-      codiceGruppo: item.CODICE_GRUPPO,
-      abbreviazione: item.ABBR
+      codice: String(item.CODGRCAU),
+      descrizione: item.DESCRIZIONE
     }))
   }
 
@@ -157,9 +154,8 @@ class LookupService {
     if (!response) return null
 
     return {
-      codice: response.CODICE,
-      codiceGruppo: response.CODICE_GRUPPO,
-      abbreviazione: response.ABBR
+      codice: String(response.CODGRCAU),
+      descrizione: response.DESCRIZIONE
     }
   }
 }

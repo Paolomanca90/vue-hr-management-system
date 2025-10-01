@@ -137,7 +137,7 @@ const filiale = ref<FormFiliale>({
   descriz: '',
   address: {
     indirizzo: '',
-    codiceBelfiore: '',
+    codiceBelfiore: null,
     comune: '',
     cap: '',
     provincia: '',
@@ -292,7 +292,7 @@ const handleReset = () => {
       descriz: '',
       address: {
         indirizzo: '',
-        codiceBelfiore: '',
+        codiceBelfiore: null,
         comune: '',
         cap: '',
         provincia: '',

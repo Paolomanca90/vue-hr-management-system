@@ -49,6 +49,7 @@ const emit = defineEmits<{
 const errorMessage = ref('')
 const datepickerRef = ref()
 let lastInputValue = ''
+let isSelectingFromCalendar = false
 
 const dateValue = computed({
   get() {
@@ -71,7 +72,10 @@ const dateValue = computed({
     }
 
     // Converte da Date object a ISO string
-    const isoValue = value.toISOString().split('T')[0] + 'T00:00:00'
+    const year = value.getFullYear()
+    const month = String(value.getMonth() + 1).padStart(2, '0')
+    const day = String(value.getDate()).padStart(2, '0')
+    const isoValue = `${year}-${month}-${day}T00:00:00`
     console.log('DateValue SET - emitting:', isoValue)
     emit('update:modelValue', isoValue)
   }
@@ -163,10 +167,17 @@ interface BlurEvent {
 }
 
 const handleBlur = async (event: BlurEvent) => {
+  if (isSelectingFromCalendar) {
+    isSelectingFromCalendar = false
+    return
+  }
+
   const inputValue = lastInputValue || event.target?.value || event.inputValue || ''
 
   if (!inputValue.trim()) {
-    emit('update:modelValue', null)
+    if (!props.modelValue) {
+      emit('update:modelValue', null)
+    }
     errorMessage.value = ''
     return
   }
@@ -192,6 +203,7 @@ const handleFocus = () => {
 }
 
 const handleDateSelect = () => {
+  isSelectingFromCalendar = true
   errorMessage.value = ''
 }
 

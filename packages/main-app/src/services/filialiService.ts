@@ -15,7 +15,7 @@ export interface FilialeDettaglio extends CompositeKeyEntity {
   indirizzo: string
   numCivico: string
   localita: string
-  codComune: string
+  codComune: string | null
   cap: string
   provincia: string
 }
@@ -32,7 +32,7 @@ interface FilialeDettaglioServer extends CrudEntity {
   indirizzo: string
   numCivico: string
   localita: string
-  codComune: string
+  codComune: string | null
   cap: string
   provincia: string
 }

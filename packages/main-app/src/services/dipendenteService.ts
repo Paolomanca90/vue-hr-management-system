@@ -76,7 +76,7 @@ export interface DatiPersonali {
   viaRes: string
   numRes: string
   comRes: string
-  codComRes: string
+  codComRes: string | null
   capRes: number
   proRes: string
   telefono: string

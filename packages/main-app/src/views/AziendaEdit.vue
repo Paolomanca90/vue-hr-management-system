@@ -43,7 +43,7 @@
         :data="azienda as any"
         :anagrafica-fields="anagraficaFields"
         :saving="saving"
-        :show-presenze-tab="isEditMode || !!route.query.duplicate"
+        :show-presenze-tab="true"
         @update:data="azienda = $event as unknown as FormAzienda"
         @tab-changed="handleTabChanged"
       >
@@ -133,6 +133,7 @@ import DetailTabSelector from '@/components/DetailTabSelector.vue'
 import AddressInput, { type AddressData } from '@/components/AddressInput.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { aziendeService, type AziendaDettaglio } from '@/services/aziendeService'
+import { lookupService } from '@/services/lookupService'
 import type { AnagraficaField } from '@/components/DetailTabSelector.vue'
 
 const route = useRoute()
@@ -144,14 +145,18 @@ interface FormAzienda {
   ragSoc: string
   sigla: string
   codFisc: string
+  codice1: string
   codGrCau1: string
-  abbreviazione1: string
+  abbreviazione1: string | null
+  codice2: string
   codGrCau2: string
-  abbreviazione2: string
+  abbreviazione2: string | null
+  codice3: string
   codGrCau3: string
-  abbreviazione3: string
+  abbreviazione3: string | null
+  codice4: string
   codGrCau4: string
-  abbreviazione4: string
+  abbreviazione4: string | null
   address: AddressData
 }
 
@@ -160,17 +165,21 @@ const azienda = ref<FormAzienda>({
   ragSoc: '',
   sigla: '',
   codFisc: '',
+  codice1: '',
   codGrCau1: '',
-  abbreviazione1: '',
+  abbreviazione1: null,
+  codice2: '',
   codGrCau2: '',
-  abbreviazione2: '',
+  abbreviazione2: null,
+  codice3: '',
   codGrCau3: '',
-  abbreviazione3: '',
+  abbreviazione3: null,
+  codice4: '',
   codGrCau4: '',
-  abbreviazione4: '',
+  abbreviazione4: null,
   address: {
     indirizzo: '',
-    codiceBelfiore: '',
+    codiceBelfiore: null,
     comune: '',
     cap: '',
     provincia: '',
@@ -204,6 +213,26 @@ const aziendaNavigationConfig = {
 
 const anagraficaFields: AnagraficaField[] = []
 
+let gruppiCausaliCache: Map<string, string> | null = null
+
+const loadGruppiCausali = async (): Promise<Map<string, string>> => {
+  if (gruppiCausaliCache) return gruppiCausaliCache
+
+  try {
+    const gruppi = await lookupService.getGruppiCausali()
+    gruppiCausaliCache = new Map(gruppi.map(g => [g.codice, g.descrizione]))
+    return gruppiCausaliCache
+  } catch (error) {
+    console.error('Errore nel caricamento gruppi causali:', error)
+    return new Map()
+  }
+}
+
+const getDescrizioneGruppo = (codice: number | null, gruppiMap: Map<string, string>): string => {
+  if (!codice || codice === 0) return ''
+  return gruppiMap.get(String(codice)) || ''
+}
+
 // Methods
 const loadAzienda = async () => {
   if (!isEditMode.value) return
@@ -214,18 +243,29 @@ const loadAzienda = async () => {
   try {
     const response = await aziendeService.getAzienda(id)
     if (response) {
+      const gruppiMap = await loadGruppiCausali()
+
+      const desc1 = getDescrizioneGruppo(response.codGrCau1, gruppiMap)
+      const desc2 = getDescrizioneGruppo(response.codGrCau2, gruppiMap)
+      const desc3 = getDescrizioneGruppo(response.codGrCau3, gruppiMap)
+      const desc4 = getDescrizioneGruppo(response.codGrCau4, gruppiMap)
+
       azienda.value = {
         codAzi: String(response.codAzi),
         ragSoc: response.ragSoc,
         sigla: response.sigla,
         codFisc: response.codFisc,
-        codGrCau1: String(response.codGrCau1),
+        codice1: response.codGrCau1 && response.codGrCau1 !== 0 ? String(response.codGrCau1) : '',
+        codGrCau1: desc1,
         abbreviazione1: response.abbreviazione1,
-        codGrCau2: String(response.codGrCau2),
+        codice2: response.codGrCau2 && response.codGrCau2 !== 0 ? String(response.codGrCau2) : '',
+        codGrCau2: desc2,
         abbreviazione2: response.abbreviazione2,
-        codGrCau3: String(response.codGrCau3),
+        codice3: response.codGrCau3 && response.codGrCau3 !== 0 ? String(response.codGrCau3) : '',
+        codGrCau3: desc3,
         abbreviazione3: response.abbreviazione3,
-        codGrCau4: String(response.codGrCau4),
+        codice4: response.codGrCau4 && response.codGrCau4 !== 0 ? String(response.codGrCau4) : '',
+        codGrCau4: desc4,
         abbreviazione4: response.abbreviazione4,
         address: {
           indirizzo: response.indirSede,
@@ -250,6 +290,16 @@ const handleSave = async () => {
 
   saving.value = true
   try {
+    const toNumberOrNull = (value: string | number): number | null => {
+      const num = Number(value)
+      return num > 0 ? num : null
+    }
+
+    const toStringOrNull = (value: string | null | undefined): string | null => {
+      if (!value) return null
+      return value.trim() ? value.trim() : null
+    }
+
     const aziendaToSave: AziendaDettaglio = {
       codAzi: Number(azienda.value.codAzi),
       ragSoc: azienda.value.ragSoc,
@@ -260,14 +310,14 @@ const handleSave = async () => {
       comuSede: azienda.value.address.comune,
       provSede: azienda.value.address.provincia,
       codFisc: azienda.value.codFisc,
-      codGrCau1: Number(azienda.value.codGrCau1) || 0,
-      abbreviazione1: azienda.value.abbreviazione1 || '',
-      codGrCau2: Number(azienda.value.codGrCau2) || 0,
-      abbreviazione2: azienda.value.abbreviazione2 || '',
-      codGrCau3: Number(azienda.value.codGrCau3) || 0,
-      abbreviazione3: azienda.value.abbreviazione3 || '',
-      codGrCau4: Number(azienda.value.codGrCau4) || 0,
-      abbreviazione4: azienda.value.abbreviazione4 || ''
+      codGrCau1: toNumberOrNull(azienda.value.codice1),
+      abbreviazione1: toStringOrNull(azienda.value.abbreviazione1),
+      codGrCau2: toNumberOrNull(azienda.value.codice2),
+      abbreviazione2: toStringOrNull(azienda.value.abbreviazione2),
+      codGrCau3: toNumberOrNull(azienda.value.codice3),
+      abbreviazione3: toStringOrNull(azienda.value.abbreviazione3),
+      codGrCau4: toNumberOrNull(azienda.value.codice4),
+      abbreviazione4: toStringOrNull(azienda.value.abbreviazione4)
     }
 
     if (isEditMode.value) {
@@ -304,18 +354,29 @@ const handleDuplicateMode = async () => {
     try {
       const response = await aziendeService.getAzienda(duplicateId)
       if (response) {
+        const gruppiMap = await loadGruppiCausali()
+
+        const desc1 = getDescrizioneGruppo(response.codGrCau1, gruppiMap)
+        const desc2 = getDescrizioneGruppo(response.codGrCau2, gruppiMap)
+        const desc3 = getDescrizioneGruppo(response.codGrCau3, gruppiMap)
+        const desc4 = getDescrizioneGruppo(response.codGrCau4, gruppiMap)
+
         azienda.value = {
           codAzi: '', // Codice vuoto per il nuovo record
           ragSoc: response.ragSoc,
           sigla: response.sigla,
           codFisc: response.codFisc,
-          codGrCau1: String(response.codGrCau1),
+          codice1: response.codGrCau1 && response.codGrCau1 !== 0 ? String(response.codGrCau1) : '',
+          codGrCau1: desc1,
           abbreviazione1: response.abbreviazione1,
-          codGrCau2: String(response.codGrCau2),
+          codice2: response.codGrCau2 && response.codGrCau2 !== 0 ? String(response.codGrCau2) : '',
+          codGrCau2: desc2,
           abbreviazione2: response.abbreviazione2,
-          codGrCau3: String(response.codGrCau3),
+          codice3: response.codGrCau3 && response.codGrCau3 !== 0 ? String(response.codGrCau3) : '',
+          codGrCau3: desc3,
           abbreviazione3: response.abbreviazione3,
-          codGrCau4: String(response.codGrCau4),
+          codice4: response.codGrCau4 && response.codGrCau4 !== 0 ? String(response.codGrCau4) : '',
+          codGrCau4: desc4,
           abbreviazione4: response.abbreviazione4,
           address: {
             indirizzo: response.indirSede,
@@ -345,17 +406,21 @@ const handleReset = async() => {
       ragSoc: '',
       sigla: '',
       codFisc: '',
+      codice1: '',
       codGrCau1: '',
-      abbreviazione1: '',
+      abbreviazione1: null,
+      codice2: '',
       codGrCau2: '',
-      abbreviazione2: '',
+      abbreviazione2: null,
+      codice3: '',
       codGrCau3: '',
-      abbreviazione3: '',
+      abbreviazione3: null,
+      codice4: '',
       codGrCau4: '',
-      abbreviazione4: '',
+      abbreviazione4: null,
       address: {
         indirizzo: '',
-        codiceBelfiore: '',
+        codiceBelfiore: null,
         comune: '',
         cap: '',
         provincia: '',

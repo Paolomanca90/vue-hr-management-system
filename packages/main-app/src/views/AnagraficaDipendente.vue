@@ -52,6 +52,14 @@
         >
           <!-- Custom toolbar -->
           <template #toolbar>
+            <button
+              v-if="hasSearched"
+              class="max-md:w-full max-md:block btn btn-primary btn-sm"
+              @click="goToNew"
+            >
+              <FaIcon icon="plus" class="mr-2"/>
+              Nuovo Dipendente
+            </button>
             <div class="dropdown dropdown-end">
               <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm">
                 <FaIcon icon="cog" class="mr-1" />
@@ -87,6 +95,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
 import FilterComponent from '@/components/FilterComponent.vue'
@@ -94,6 +103,8 @@ import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import DataTableManager from '@/components/DataTableManager.vue'
 import { type Dipendente } from '@/services/dipendenteService'
 import type { FlexibleCrudService } from '@/composables/useCrudView'
+
+const router = useRouter()
 
 const dipendenti = ref<Dipendente[]>([])
 const loading = ref(false)
@@ -163,6 +174,10 @@ const dipendentiSettings = (): void => {
 
 const exportDipendenti = (): void => {
   console.log('Esporta dipendenti')
+}
+
+const goToNew = (): void => {
+  router.push('/app/anagrafica-dipendente/new')
 }
 
 onMounted(() => {

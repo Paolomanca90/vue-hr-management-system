@@ -17,14 +17,14 @@ export interface AziendaDettaglio extends CrudEntity {
   comuSede: string,
   provSede: string,
   codFisc: string,
-  codGrCau1: number,
-  abbreviazione1: string,
-  codGrCau2: number,
-  abbreviazione2: string,
-  codGrCau3: number,
-  abbreviazione3: string,
-  codGrCau4: number,
-  abbreviazione4: string
+  codGrCau1: number | null,
+  abbreviazione1: string | null,
+  codGrCau2: number | null,
+  abbreviazione2: string | null,
+  codGrCau3: number | null,
+  abbreviazione3: string | null,
+  codGrCau4: number | null,
+  abbreviazione4: string | null
 }
 
 const config = getApiConfig()

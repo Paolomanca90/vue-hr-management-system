@@ -1,4 +1,4 @@
-import { formatCap, type Comune, type GruppoCausale } from '@/services/lookupService'
+import { formatCap, type Comune } from '@/services/lookupService'
 import type { LookupInputConfig } from '@/components/GenericLookupInput.vue'
 
 // Configurazione per Comuni (AddressInput)
@@ -79,14 +79,14 @@ export const gruppiCausaliLookupConfig: LookupInputConfig = {
       key: 'codice',
       label: 'Codice',
       editable: true,
-      colSpan: 4
+      colSpan: 2
     },
     {
       key: 'codiceGruppo',
-      label: 'Codice Gruppo',
+      label: 'Descrizione',
       editable: false,
       hasLookup: true,
-      colSpan: 4
+      colSpan: 6
     },
     {
       key: 'abbreviazione',
@@ -107,10 +107,9 @@ export const gruppiCausaliLookupConfig: LookupInputConfig = {
     loadingMessage: 'Caricamento gruppi causali...'
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mapper: (item: any): Partial<GruppoCausale> => ({
+  mapper: (item: any) => ({
     codice: item.CODGRCAU || '',
-    codiceGruppo: item.DESCRIZIONE || '',
-    abbreviazione: ''
+    codiceGruppo: item.DESCRIZIONE || ''
   })
 }
 
