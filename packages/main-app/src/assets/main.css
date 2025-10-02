@@ -40,3 +40,61 @@ html, body {
 * {
   transition: color 0.3s ease, background-color 0.3s ease;
 }
+
+.input-bordered,
+.select-bordered,
+.select-sm,
+input[type="text"]:not(.p-inputtext),
+input[type="email"]:not(.p-inputtext),
+input[type="password"]:not(.p-inputtext),
+input[type="number"]:not(.p-inputtext),
+select:not(.p-dropdown),
+textarea:not(.p-inputtextarea) {
+  min-height: 2.5rem !important;
+  height: 2.5rem !important;
+  padding: 0.5rem 0.75rem !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.375rem !important;
+  line-height: 1.5rem !important;
+}
+
+select:not(.p-dropdown),
+.select-bordered,
+.select-sm {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.dark .input-bordered,
+.dark .select-bordered,
+.dark .select-sm,
+.dark input[type="text"]:not(.p-inputtext),
+.dark input[type="email"]:not(.p-inputtext),
+.dark input[type="password"]:not(.p-inputtext),
+.dark input[type="number"]:not(.p-inputtext),
+.dark select:not(.p-dropdown),
+.dark textarea:not(.p-inputtextarea) {
+  border-color: #4b5563 !important;
+}
+
+.label-text,
+.label {
+  white-space: nowrap !important;
+}
+
+textarea {
+  height: auto !important;
+  min-height: 4rem !important;
+}
+
+.btn-sm {
+  min-height: 2.5rem !important;
+  height: 2.5rem !important;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+input[type="text"].pl-10,
+input[type="text"].pl-12 {
+  padding-left: 2.5rem !important;
+}

@@ -2,7 +2,7 @@
   <div class="space-y-4">
     <!-- Sezione Azienda -->
     <div class="flex items-center gap-4">
-      <label class="text-sm font-medium dark:text-gray-300 w-20">Azienda:</label>
+      <label class="text-sm font-medium dark:text-gray-300 w-32">Azienda:</label>
       <div v-if="isEditMode" class="text-sm font-medium dark:text-gray-200">
         {{ companyDisplayText }}
       </div>
@@ -21,7 +21,7 @@
     <div class="space-y-3">
       <!-- Campo 1 (sempre presente) -->
       <div class="flex items-center gap-4">
-        <label :for="field1Id" class="text-sm font-medium text-gray-700 dark:text-gray-300 w-20">
+        <label :for="field1Id" class="text-sm font-medium text-gray-700 dark:text-gray-300 w-32 flex-shrink-0">
           {{ field1Label }}
         </label>
         <input
@@ -37,7 +37,7 @@
 
       <!-- Campo 2 (condizionale) -->
       <div v-if="showField2" class="flex items-center gap-4">
-        <label :for="field2Id" class="text-sm font-medium text-gray-700 dark:text-gray-300 w-20">
+        <label :for="field2Id" class="text-sm font-medium text-gray-700 dark:text-gray-300 w-32 flex-shrink-0">
           {{ field2Label }}
         </label>
         <input
@@ -53,7 +53,7 @@
 
       <!-- Campo 3 (condizionale) -->
       <div v-if="showField3" class="flex items-center gap-4">
-        <label :for="field3Id" class="text-sm font-medium text-gray-700 dark:text-gray-300 w-20">
+        <label :for="field3Id" class="text-sm font-medium text-gray-700 dark:text-gray-300 w-32 flex-shrink-0">
           {{ field3Label }}
         </label>
         <input

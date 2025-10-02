@@ -43,7 +43,7 @@
             type="button"
             @click="openModal"
             :disabled="disabled"
-            class="btn btn-outline rounded-l-none h-12"
+            class="btn btn-outline btn-sm rounded-l-none"
           >
             <FaIcon icon="search" class="w-4 h-4" />
           </button>
@@ -64,7 +64,7 @@
             type="button"
             @click="openModal"
             :disabled="disabled"
-            class="btn btn-outline rounded-l-none h-12"
+            class="btn btn-outline btn-sm rounded-l-none"
           >
             <FaIcon icon="search" class="w-4 h-4" />
           </button>

@@ -626,6 +626,146 @@
               </div>
             </div>
           </div>
+
+          <!-- Codici Utente -->
+          <div v-if="activeTab === 'codiciUtente'" class="space-y-6">
+            <form @submit.prevent="handleSave" class="space-y-6">
+              <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Codici Utente</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium dark:text-gray-200">Codice Utente 1</span>
+                    </label>
+                    <input
+                      v-model="dipendente.codUte.codUtente1"
+                      type="text"
+                      class="input input-bordered"
+                      :disabled="saving"
+                      placeholder="Inserisci codice utente 1"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium dark:text-gray-200">Codice Utente 2</span>
+                    </label>
+                    <input
+                      v-model="dipendente.codUte.codUtente2"
+                      type="text"
+                      class="input input-bordered"
+                      :disabled="saving"
+                      placeholder="Inserisci codice utente 2"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium dark:text-gray-200">Codice Utente 3</span>
+                    </label>
+                    <input
+                      v-model="dipendente.codUte.codUtente3"
+                      type="text"
+                      class="input input-bordered"
+                      :disabled="saving"
+                      placeholder="Inserisci codice utente 3"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium dark:text-gray-200">Codice Utente 4</span>
+                    </label>
+                    <input
+                      v-model="dipendente.codUte.codUtente4"
+                      type="text"
+                      class="input input-bordered"
+                      :disabled="saving"
+                      placeholder="Inserisci codice utente 4"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium dark:text-gray-200">Codice Utente 5</span>
+                    </label>
+                    <input
+                      v-model="dipendente.codUte.codUtente5"
+                      type="text"
+                      class="input input-bordered"
+                      :disabled="saving"
+                      placeholder="Inserisci codice utente 5"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium dark:text-gray-200">Codice Utente 6</span>
+                    </label>
+                    <input
+                      v-model="dipendente.codUte.codUtente6"
+                      type="text"
+                      class="input input-bordered"
+                      :disabled="saving"
+                      placeholder="Inserisci codice utente 6"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium dark:text-gray-200">Codice Utente 7</span>
+                    </label>
+                    <input
+                      v-model="dipendente.codUte.codUtente7"
+                      type="text"
+                      class="input input-bordered"
+                      :disabled="saving"
+                      placeholder="Inserisci codice utente 7"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium dark:text-gray-200">Codice Utente 8</span>
+                    </label>
+                    <input
+                      v-model="dipendente.codUte.codUtente8"
+                      type="text"
+                      class="input input-bordered"
+                      :disabled="saving"
+                      placeholder="Inserisci codice utente 8"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium dark:text-gray-200">Codice Utente 9</span>
+                    </label>
+                    <input
+                      v-model="dipendente.codUte.codUtente9"
+                      type="text"
+                      class="input input-bordered"
+                      :disabled="saving"
+                      placeholder="Inserisci codice utente 9"
+                    />
+                  </div>
+
+                  <div class="form-control">
+                    <label class="label">
+                      <span class="label-text font-medium dark:text-gray-200">Codice Utente 10</span>
+                    </label>
+                    <input
+                      v-model="dipendente.codUte.codUtente10"
+                      type="text"
+                      class="input input-bordered"
+                      :disabled="saving"
+                      placeholder="Inserisci codice utente 10"
+                    />
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -975,7 +1115,8 @@ const availableTabs = computed(() => [
   { key: 'personali', title: 'Dati Personali', icon: 'user' },
   { key: 'badge', title: 'Badge', icon: 'id-card' },
   { key: 'pat', title: 'P.A.T.', icon: 'clipboard-list' },
-  { key: 'familiari', title: 'Familiari', icon: 'users' }
+  { key: 'familiari', title: 'Familiari', icon: 'users' },
+  { key: 'codiciUtente', title: 'Codici Utente', icon: 'key' }
 ])
 
 const isEditMode = computed(() => {
@@ -1315,6 +1456,12 @@ const handleSave = async () => {
       return date
     }
 
+    // Helper function per convertire stringhe vuote in null
+    const cleanString = (value: string | null | undefined): string | null => {
+      if (!value || value.trim() === '') return null
+      return value
+    }
+
     const dipendenteToSave = {
       ...dipendente.value,
       datiAzi: {
@@ -1340,6 +1487,18 @@ const handleSave = async () => {
       datiPers: {
         ...dipendente.value.datiPers,
         dataNas: cleanDateString(dipendente.value.datiPers.dataNas)
+      },
+      codUte: {
+        codUtente1: cleanString(dipendente.value.codUte.codUtente1),
+        codUtente2: cleanString(dipendente.value.codUte.codUtente2),
+        codUtente3: cleanString(dipendente.value.codUte.codUtente3),
+        codUtente4: cleanString(dipendente.value.codUte.codUtente4),
+        codUtente5: cleanString(dipendente.value.codUte.codUtente5),
+        codUtente6: cleanString(dipendente.value.codUte.codUtente6),
+        codUtente7: cleanString(dipendente.value.codUte.codUtente7),
+        codUtente8: cleanString(dipendente.value.codUte.codUtente8),
+        codUtente9: cleanString(dipendente.value.codUte.codUtente9),
+        codUtente10: cleanString(dipendente.value.codUte.codUtente10)
       }
     } as DettaglioDipendente
 

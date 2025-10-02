@@ -8,6 +8,14 @@
     >
       <template #actions>
         <button
+          v-if="hasSearched"
+          class="max-md:w-full max-md:block btn btn-primary btn-sm text-white"
+          @click="goToNew"
+        >
+          <FaIcon icon="plus" class="mr-2"/>
+          Nuovo Dipendente
+        </button>
+        <button
           class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm"
           @click="showFilters = !showFilters"
         >
@@ -52,14 +60,6 @@
         >
           <!-- Custom toolbar -->
           <template #toolbar>
-            <button
-              v-if="hasSearched"
-              class="max-md:w-full max-md:block btn btn-primary btn-sm"
-              @click="goToNew"
-            >
-              <FaIcon icon="plus" class="mr-2"/>
-              Nuovo Dipendente
-            </button>
             <div class="dropdown dropdown-end">
               <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm">
                 <FaIcon icon="cog" class="mr-1" />
