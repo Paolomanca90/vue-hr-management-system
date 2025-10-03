@@ -18,6 +18,8 @@ import Accessi from '@/views/Accessi.vue'
 import AccessoEdit from '@/views/AccessoEdit.vue'
 import Filtri from '@/views/Filtri.vue'
 import FiltroEdit from '@/views/FiltroEdit.vue'
+import GruppiConfig from '@/views/GruppiConfig.vue'
+import GruppoConfigEdit from '@/views/GruppoConfigEdit.vue'
 import Aziende from '@/views/Aziende.vue'
 import AziendaEdit from '@/views/AziendaEdit.vue'
 import Sedi from '@/views/Sedi.vue'
@@ -182,6 +184,37 @@ const appRoutes: RouteRecordRaw[] = [
       // Verifica che l'ID sia valido
       if (to.params.id === 'new') {
         next('/app/filtri/new')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: 'gruppi-config',
+    name: 'GruppiConfig',
+    component: GruppiConfig,
+  },
+  {
+    path: 'gruppi-config/new',
+    name: 'GruppoConfigNew',
+    component: GruppoConfigEdit,
+    meta: {
+      title: 'Nuovo Gruppo di Configurazione',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'gruppi-config/:id/edit',
+    name: 'GruppoConfigEdit',
+    component: GruppoConfigEdit,
+    meta: {
+      title: 'Modifica Gruppo di Configurazione',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      // Verifica che l'ID sia valido
+      if (to.params.id === 'new') {
+        next('/app/gruppi-config/new')
       } else {
         next()
       }

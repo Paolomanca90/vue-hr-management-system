@@ -41,6 +41,10 @@ export const API_CONFIG = {
     filtriSelect: '/api/filtri/select',
     deleteFiltri: '/api/filtri/by-key?codice=', //DELETE
 
+    // Gruppi Config
+    gruppiConfig: '/api/gruppiconfig', //GET,POST,PUT
+    deleteGruppiConfig: '/api/gruppiconfig/', //DELETE
+
     // Aziende
     aziende: '/api/azienda', //GET,POST,PUT
 
