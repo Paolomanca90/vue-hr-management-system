@@ -161,6 +161,44 @@ export const filterModalConfigs = {
   }
 }
 
+// Configurazione per Causali (senza abbreviazione)
+export const causaliLookupConfig: LookupInputConfig = {
+  lookupType: 'gruppocausale',
+  autoCompleteField: 'codice',
+  keyField: 'CODGRCAU',
+  fields: [
+    {
+      key: 'codice',
+      label: 'Codice',
+      editable: true,
+      colSpan: 3
+    },
+    {
+      key: 'descrizione',
+      label: 'Descrizione',
+      editable: false,
+      hasLookup: true,
+      colSpan: 9
+    }
+  ],
+  modalConfig: {
+    title: 'Seleziona Causale',
+    searchPlaceholder: 'Cerca per codice o descrizione...',
+    columns: [
+      { key: 'CODGRCAU', label: 'Codice', primary: true },
+      { key: 'DESCRIZIONE', label: 'Descrizione' }
+    ],
+    searchFields: ['CODGRCAU', 'DESCRIZIONE'],
+    keyField: 'CODGRCAU',
+    loadingMessage: 'Caricamento causali...'
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mapper: (item: any) => ({
+    codice: item.CODGRCAU || '',
+    descrizione: item.DESCRIZIONE || ''
+  })
+}
+
 // Funzione helper per creare configurazioni personalizzate
 export function createLookupConfig(
   lookupType: string,

@@ -42,6 +42,7 @@
       <DetailTabSelector
         :data="azienda as any"
         :anagrafica-fields="anagraficaFields"
+        :custom-tabs="customTabs"
         :saving="saving"
         :show-presenze-tab="true"
         @update:data="azienda = $event as unknown as FormAzienda"
@@ -118,6 +119,54 @@
           </div>
 
         </template>
+
+        <!-- Tab Configurazioni -->
+        <template #configurazioni>
+          <div class="grid grid-cols-1 gap-6">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Configurazioni Aziendali</h3>
+
+            <!-- Santo Patrono -->
+            <div class="space-y-2">
+              <label for="santoPatrono" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Giorno Santo Patrono
+              </label>
+              <input
+                id="santoPatrono"
+                v-model="azienda.santoPatrono"
+                type="text"
+                placeholder="gg/MM (es. 15/08)"
+                :disabled="saving"
+                maxlength="5"
+                class="block w-full lg:w-1/2 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
+              />
+              <p class="text-xs text-gray-500 dark:text-gray-400">Formato: gg/MM (es. 15/08 per 15 Agosto)</p>
+            </div>
+
+            <!-- Codice Causale Lavoro -->
+            <div class="space-y-2">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Codice Causale Lavoro
+              </label>
+              <GenericLookupInput
+                v-model="azienda.causLav"
+                :config="causaliLookupConfig"
+                :disabled="saving"
+              />
+            </div>
+
+            <!-- Codice Causale Riposo -->
+            <div class="space-y-2">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Codice Causale Riposo
+              </label>
+              <GenericLookupInput
+                v-model="azienda.causRip"
+                :config="causaliLookupConfig"
+                :disabled="saving"
+              />
+            </div>
+          </div>
+        </template>
       </DetailTabSelector>
     </form>
   </div>
@@ -129,15 +178,23 @@ import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
-import DetailTabSelector from '@/components/DetailTabSelector.vue'
+import DetailTabSelector, { type CustomTab } from '@/components/DetailTabSelector.vue'
 import AddressInput, { type AddressData } from '@/components/AddressInput.vue'
+import GenericLookupInput from '@/components/GenericLookupInput.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { aziendeService, type AziendaDettaglio } from '@/services/aziendeService'
 import { lookupService } from '@/services/lookupService'
 import type { AnagraficaField } from '@/components/DetailTabSelector.vue'
+import { causaliLookupConfig } from '@/config/lookupConfigs'
 
 const route = useRoute()
 const router = useRouter()
+
+// Type per causali
+interface CausaleData {
+  codice: string
+  descrizione: string
+}
 
 // State per il form (tutti i campi come stringhe per l'input)
 interface FormAzienda {
@@ -145,6 +202,9 @@ interface FormAzienda {
   ragSoc: string
   sigla: string
   codFisc: string
+  santoPatrono: string // formato gg/MM
+  causLav: CausaleData
+  causRip: CausaleData
   codice1: string
   codGrCau1: string
   abbreviazione1: string | null
@@ -165,6 +225,9 @@ const azienda = ref<FormAzienda>({
   ragSoc: '',
   sigla: '',
   codFisc: '',
+  santoPatrono: '',
+  causLav: { codice: '', descrizione: '' },
+  causRip: { codice: '', descrizione: '' },
   codice1: '',
   codGrCau1: '',
   abbreviazione1: null,
@@ -213,6 +276,10 @@ const aziendaNavigationConfig = {
 
 const anagraficaFields: AnagraficaField[] = []
 
+const customTabs: CustomTab[] = [
+  { key: 'configurazioni', title: 'Configurazioni', icon: 'cog' }
+]
+
 let gruppiCausaliCache: Map<string, string> | null = null
 
 const loadGruppiCausali = async (): Promise<Map<string, string>> => {
@@ -250,11 +317,25 @@ const loadAzienda = async () => {
       const desc3 = getDescrizioneGruppo(response.codGrCau3, gruppiMap)
       const desc4 = getDescrizioneGruppo(response.codGrCau4, gruppiMap)
 
+      // Formatta santo patrono come gg/MM
+      const santoPatrono = response.ggSanto && response.mmSanto
+        ? `${String(response.ggSanto).padStart(2, '0')}/${String(response.mmSanto).padStart(2, '0')}`
+        : ''
+
       azienda.value = {
         codAzi: String(response.codAzi),
         ragSoc: response.ragSoc,
         sigla: response.sigla,
         codFisc: response.codFisc,
+        santoPatrono,
+        causLav: {
+          codice: response.codCauLav ? String(response.codCauLav) : '',
+          descrizione: '' // Verrà popolato automaticamente dal GenericLookupInput
+        },
+        causRip: {
+          codice: response.codCauRip ? String(response.codCauRip) : '',
+          descrizione: '' // Verrà popolato automaticamente dal GenericLookupInput
+        },
         codice1: response.codGrCau1 && response.codGrCau1 !== 0 ? String(response.codGrCau1) : '',
         codGrCau1: desc1,
         abbreviazione1: response.abbreviazione1,
@@ -300,6 +381,16 @@ const handleSave = async () => {
       return value.trim() ? value.trim() : null
     }
 
+    // Parsea santo patrono da formato gg/MM
+    const parseSantoPatrono = (value: string): { gg: number | null; mm: number | null } => {
+      if (!value || !value.includes('/')) return { gg: null, mm: null }
+      const [gg, mm] = value.split('/').map(Number)
+      if (!gg || !mm) return { gg: null, mm: null }
+      return { gg, mm }
+    }
+
+    const santoPatrono = parseSantoPatrono(azienda.value.santoPatrono)
+
     const aziendaToSave: AziendaDettaglio = {
       codAzi: Number(azienda.value.codAzi),
       ragSoc: azienda.value.ragSoc,
@@ -310,6 +401,8 @@ const handleSave = async () => {
       comuSede: azienda.value.address.comune,
       provSede: azienda.value.address.provincia,
       codFisc: azienda.value.codFisc,
+      ggSanto: santoPatrono.gg,
+      mmSanto: santoPatrono.mm,
       codGrCau1: toNumberOrNull(azienda.value.codice1),
       abbreviazione1: toStringOrNull(azienda.value.abbreviazione1),
       codGrCau2: toNumberOrNull(azienda.value.codice2),
@@ -317,7 +410,9 @@ const handleSave = async () => {
       codGrCau3: toNumberOrNull(azienda.value.codice3),
       abbreviazione3: toStringOrNull(azienda.value.abbreviazione3),
       codGrCau4: toNumberOrNull(azienda.value.codice4),
-      abbreviazione4: toStringOrNull(azienda.value.abbreviazione4)
+      abbreviazione4: toStringOrNull(azienda.value.abbreviazione4),
+      codCauLav: toNumberOrNull(azienda.value.causLav.codice),
+      codCauRip: toNumberOrNull(azienda.value.causRip.codice)
     }
 
     if (isEditMode.value) {
@@ -361,11 +456,25 @@ const handleDuplicateMode = async () => {
         const desc3 = getDescrizioneGruppo(response.codGrCau3, gruppiMap)
         const desc4 = getDescrizioneGruppo(response.codGrCau4, gruppiMap)
 
+        // Formatta santo patrono come gg/MM
+        const santoPatrono = response.ggSanto && response.mmSanto
+          ? `${String(response.ggSanto).padStart(2, '0')}/${String(response.mmSanto).padStart(2, '0')}`
+          : ''
+
         azienda.value = {
           codAzi: '', // Codice vuoto per il nuovo record
           ragSoc: response.ragSoc,
           sigla: response.sigla,
           codFisc: response.codFisc,
+          santoPatrono,
+          causLav: {
+            codice: response.codCauLav ? String(response.codCauLav) : '',
+            descrizione: ''
+          },
+          causRip: {
+            codice: response.codCauRip ? String(response.codCauRip) : '',
+            descrizione: ''
+          },
           codice1: response.codGrCau1 && response.codGrCau1 !== 0 ? String(response.codGrCau1) : '',
           codGrCau1: desc1,
           abbreviazione1: response.abbreviazione1,
@@ -406,6 +515,9 @@ const handleReset = async() => {
       ragSoc: '',
       sigla: '',
       codFisc: '',
+      santoPatrono: '',
+      causLav: { codice: '', descrizione: '' },
+      causRip: { codice: '', descrizione: '' },
       codice1: '',
       codGrCau1: '',
       abbreviazione1: null,
