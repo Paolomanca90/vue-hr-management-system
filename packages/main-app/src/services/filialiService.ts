@@ -18,6 +18,10 @@ export interface FilialeDettaglio extends CompositeKeyEntity {
   codComune: string | null
   cap: string
   provincia: string
+  ggSanto: number | null
+  mmSanto: number | null
+  codCauLav: number | null
+  codCauRip: number | null
 }
 interface FilialeServer extends CrudEntity {
     codAzi: number,
@@ -35,6 +39,10 @@ interface FilialeDettaglioServer extends CrudEntity {
   codComune: string | null
   cap: string
   provincia: string
+  ggSanto: number | null
+  mmSanto: number | null
+  codCauLav: number | null
+  codCauRip: number | null
 }
 
 const config = getApiConfig()

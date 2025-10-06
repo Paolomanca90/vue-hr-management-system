@@ -45,6 +45,7 @@
         :anagrafica-fields="anagraficaFields"
         :saving="saving"
         :show-presenze-tab="false"
+        :custom-tabs="customTabs"
         @update:data="filiale = $event as unknown as FormFiliale"
         @tab-changed="handleTabChanged"
       >
@@ -103,6 +104,51 @@
           </div>
 
         </template>
+
+        <!-- Configurazioni Tab -->
+        <template #configurazioni>
+          <div class="grid grid-cols-1 gap-6">
+            <!-- Santo Patrono -->
+            <div class="space-y-2">
+              <label for="santoPatrono" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Santo Patrono (gg/MM)
+              </label>
+              <input
+                id="santoPatrono"
+                v-model="filiale.santoPatrono"
+                type="text"
+                placeholder="01/01"
+                maxlength="5"
+                :disabled="saving"
+                class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
+              />
+            </div>
+
+            <!-- Causale Lavoro -->
+            <div class="space-y-2">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Causale Lavoro
+              </label>
+              <GenericLookupInput
+                v-model="filiale.causLav"
+                :config="causaliLookupConfig"
+                :disabled="saving"
+              />
+            </div>
+
+            <!-- Causale Riposo -->
+            <div class="space-y-2">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Causale Riposo
+              </label>
+              <GenericLookupInput
+                v-model="filiale.causRip"
+                :config="causaliLookupConfig"
+                :disabled="saving"
+              />
+            </div>
+          </div>
+        </template>
       </DetailTabSelector>
     </form>
   </div>
@@ -116,12 +162,19 @@ import PageHeader from '@/components/PageHeader.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import DetailTabSelector from '@/components/DetailTabSelector.vue'
 import AddressInput, { type AddressData } from '@/components/AddressInput.vue'
+import GenericLookupInput from '@/components/GenericLookupInput.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { filialiService, type FilialeDettaglio } from '@/services/filialiService'
 import type { AnagraficaField } from '@/components/DetailTabSelector.vue'
+import { causaliLookupConfig } from '@/config/lookupConfigs'
 
 const route = useRoute()
 const router = useRouter()
+
+interface CausaleData extends Record<string, unknown> {
+  codice: string
+  descrizione: string
+}
 
 // State per il form (tutti i campi come stringhe per l'input)
 interface FormFiliale {
@@ -129,6 +182,9 @@ interface FormFiliale {
   codCant: string
   descriz: string
   address: AddressData
+  santoPatrono: string
+  causLav: CausaleData
+  causRip: CausaleData
 }
 
 const filiale = ref<FormFiliale>({
@@ -142,7 +198,10 @@ const filiale = ref<FormFiliale>({
     cap: '',
     provincia: '',
     civico: ''
-  }
+  },
+  santoPatrono: '',
+  causLav: { codice: '', descrizione: '' },
+  causRip: { codice: '', descrizione: '' }
 })
 
 const saving = ref(false)
@@ -172,7 +231,33 @@ const filialeNavigationConfig = {
 
 const anagraficaFields: AnagraficaField[] = []
 
+const customTabs = [
+  {
+    key: 'configurazioni',
+    title: 'Configurazioni',
+    icon: 'cog'
+  }
+]
+
 // Methods
+const formatSantoPatrono = (gg: number | null, mm: number | null): string => {
+  if (!gg || !mm) return ''
+  return `${String(gg).padStart(2, '0')}/${String(mm).padStart(2, '0')}`
+}
+
+const parseSantoPatrono = (value: string): { gg: number | null; mm: number | null } => {
+  if (!value || !value.includes('/')) return { gg: null, mm: null }
+  const [gg, mm] = value.split('/').map(Number)
+  if (!gg || !mm) return { gg: null, mm: null }
+  return { gg, mm }
+}
+
+const toNumberOrNull = (value: string | number | null | undefined): number | null => {
+  if (value === null || value === undefined || value === '') return null
+  const num = Number(value)
+  return isNaN(num) || num === 0 ? null : num
+}
+
 const loadFiliale = async () => {
   if (!isEditMode.value) return
 
@@ -193,6 +278,15 @@ const loadFiliale = async () => {
           cap: response.cap,
           provincia: response.provincia,
           civico: response.numCivico
+        },
+        santoPatrono: formatSantoPatrono(response.ggSanto, response.mmSanto),
+        causLav: {
+          codice: response.codCauLav ? String(response.codCauLav) : '',
+          descrizione: ''
+        },
+        causRip: {
+          codice: response.codCauRip ? String(response.codCauRip) : '',
+          descrizione: ''
         }
       }
     }
@@ -221,6 +315,15 @@ const loadFilialeForDuplication = async (duplicateId: string) => {
           cap: response.cap,
           provincia: response.provincia,
           civico: response.numCivico
+        },
+        santoPatrono: formatSantoPatrono(response.ggSanto, response.mmSanto),
+        causLav: {
+          codice: response.codCauLav ? String(response.codCauLav) : '',
+          descrizione: ''
+        },
+        causRip: {
+          codice: response.codCauRip ? String(response.codCauRip) : '',
+          descrizione: ''
         }
       }
       // Forza il re-render del DetailTabSelector
@@ -240,6 +343,8 @@ const handleSave = async () => {
 
   saving.value = true
   try {
+    const { gg, mm } = parseSantoPatrono(filiale.value.santoPatrono)
+
     const filialeToSave: FilialeDettaglio = {
       id: `${filiale.value.codAzi}-${filiale.value.codCant}`,
       codAzi: Number(filiale.value.codAzi),
@@ -250,7 +355,11 @@ const handleSave = async () => {
       localita: filiale.value.address.comune,
       codComune: filiale.value.address.codiceBelfiore,
       cap: filiale.value.address.cap,
-      provincia: filiale.value.address.provincia
+      provincia: filiale.value.address.provincia,
+      ggSanto: gg,
+      mmSanto: mm,
+      codCauLav: toNumberOrNull(filiale.value.causLav.codice),
+      codCauRip: toNumberOrNull(filiale.value.causRip.codice)
     }
 
     if (isEditMode.value) {
@@ -297,7 +406,10 @@ const handleReset = () => {
         cap: '',
         provincia: '',
         civico: ''
-      }
+      },
+      santoPatrono: '',
+      causLav: { codice: '', descrizione: '' },
+      causRip: { codice: '', descrizione: '' }
     }
   }
 }

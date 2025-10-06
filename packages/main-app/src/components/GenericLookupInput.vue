@@ -18,7 +18,7 @@
         <input
           v-if="field.editable && !field.hasLookup"
           :id="field.key"
-          :value="modelValue[field.key]"
+          :value="localValues[field.key] !== undefined ? localValues[field.key] : modelValue[field.key]"
           @input="updateField(field.key, ($event.target as HTMLInputElement).value)"
           @blur="handleFieldBlur(field.key)"
           :type="field.type || 'text'"
@@ -31,7 +31,7 @@
         <div v-else-if="field.editable && field.hasLookup" class="flex">
           <input
             :id="field.key"
-            :value="modelValue[field.key]"
+            :value="localValues[field.key] !== undefined ? localValues[field.key] : modelValue[field.key]"
             @input="updateField(field.key, ($event.target as HTMLInputElement).value)"
             @blur="handleFieldBlur(field.key)"
             :type="field.type || 'text'"
@@ -53,6 +53,7 @@
         <div v-else-if="!field.editable && field.hasLookup" class="flex">
           <input
             :id="field.key"
+            :key="`${field.key}-${componentKey}`"
             :value="modelValue[field.key] === null || modelValue[field.key] === undefined || modelValue[field.key] === 'null' ? '' : String(modelValue[field.key])"
             :type="field.type || 'text'"
             :placeholder="field.placeholder"
@@ -74,6 +75,7 @@
         <input
           v-else
           :id="field.key"
+          :key="`${field.key}-${componentKey}`"
           :value="modelValue[field.key] === null || modelValue[field.key] === undefined || modelValue[field.key] === 'null' ? '' : String(modelValue[field.key])"
           :type="field.type || 'text'"
           :placeholder="field.placeholder"
@@ -95,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick, watch } from 'vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import GenericModal, { type ModalConfig } from './GenericModal.vue'
 import { lookupService, formatCap } from '@/services/lookupService'
@@ -126,10 +128,12 @@ interface Props {
   modelValue: Record<string, unknown>
   config: LookupInputConfig
   disabled?: boolean
+  lookupData?: Array<Record<string, unknown>>
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  disabled: false
+  disabled: false,
+  lookupData: undefined
 })
 
 const emit = defineEmits<{
@@ -139,6 +143,7 @@ const emit = defineEmits<{
 const isModalVisible = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
+const componentKey = ref(0)
 
 useMessageAlerts(errorMessage, successMessage)
 
@@ -174,6 +179,10 @@ const modalConfig = computed<ModalConfig>(() => ({
   ...props.config.modalConfig,
   enableDynamicSearch: props.config.lookupType === 'comune',
   loadData: async (searchTerm?: string) => {
+    if (props.lookupData && props.lookupData.length > 0) {
+      return props.lookupData
+    }
+
     if (props.config.lookupType === 'comune') {
       const result = await lookupService.searchComuni(searchTerm || '')
       return result.map(comune => ({
@@ -187,6 +196,8 @@ const modalConfig = computed<ModalConfig>(() => ({
     return lookupService.getList(props.config.lookupType, props.config.searchFilter)
   }
 }))
+
+const localValues = ref<Record<string, unknown>>({})
 
 const updateField = (field: string, value: unknown) => {
   let processedValue = value
@@ -202,20 +213,21 @@ const updateField = (field: string, value: unknown) => {
     }
   }
 
-  const newValue = { ...props.modelValue, [field]: processedValue }
-  emit('update:modelValue', newValue)
+  // Salva il valore localmente invece di emettere immediatamente
+  localValues.value[field] = processedValue
 }
 
 const handleFieldBlur = (fieldKey: string) => {
-  if (fieldKey === 'cap') {
-    const currentValue = props.modelValue[fieldKey]
-    if (typeof currentValue === 'string') {
-      const formattedValue = formatCap(currentValue)
-      if (formattedValue !== currentValue) {
-        const newValue = { ...props.modelValue, [fieldKey]: formattedValue }
-        emit('update:modelValue', newValue)
-      }
+  // Emetti il valore locale al blur
+  if (localValues.value[fieldKey] !== undefined) {
+    let valueToEmit = localValues.value[fieldKey]
+
+    if (fieldKey === 'cap' && typeof valueToEmit === 'string') {
+      valueToEmit = formatCap(valueToEmit)
     }
+
+    const newValue = { ...props.modelValue, [fieldKey]: valueToEmit }
+    emit('update:modelValue', newValue)
   }
 
   if (fieldKey === props.config.autoCompleteField) {
@@ -232,6 +244,36 @@ const handleLookupBlur = async () => {
 
   try {
     let result = null
+
+    if (props.lookupData && props.lookupData.length > 0) {
+      const keyField = props.config.keyField || 'CODICE'
+      const numericValue = Number(lookupValue)
+      const searchValue = isNaN(numericValue) ? lookupValue : numericValue
+
+      result = props.lookupData.find(item => {
+        const itemValue = item[keyField]
+        return itemValue === searchValue || String(itemValue) === String(searchValue)
+      })
+
+      if (result) {
+        const mappedData = props.config.mapper ? props.config.mapper(result) : result
+        const newValue = { ...props.modelValue, ...mappedData }
+        emit('update:modelValue', newValue)
+        nextTick(() => {
+          componentKey.value++
+        })
+      } else {
+        errorMessage.value = `${props.config.modalConfig.title} non trovato. Utilizza il pulsante di ricerca per selezionare un elemento.`
+
+        const resetFields = props.config.fields
+          .filter(field => !field.editable)
+          .reduce((acc, field) => ({ ...acc, [field.key]: '' }), {})
+
+        const newValue = { ...props.modelValue, ...resetFields }
+        emit('update:modelValue', newValue)
+      }
+      return
+    }
 
     // Per i comuni, usa la logica originale di AddressInput
     if (props.config.lookupType === 'comune' && props.config.autoCompleteField === 'codiceBelfiore') {
@@ -321,6 +363,9 @@ const handleItemSelected = (item: Record<string, unknown>) => {
     const newValue = { ...props.modelValue, ...mappedData }
     emit('update:modelValue', newValue)
   }
+  nextTick(() => {
+    componentKey.value++
+  })
   closeModal()
 }
 
@@ -342,6 +387,10 @@ const getColumnClass = (colSpan?: number): string => {
     default: return 'lg:col-span-4'
   }
 }
+
+watch(() => props.modelValue, () => {
+  localValues.value = {}
+}, { deep: true })
 </script>
 
 <style scoped>

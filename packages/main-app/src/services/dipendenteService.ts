@@ -44,6 +44,14 @@ export interface PAT {
   al: string
 }
 
+export interface GruppoConfigDipendente {
+  codAzi: number
+  codDip: number
+  codGruppo: number
+  dal: string
+  al: string
+}
+
 export interface DatiAziendali {
   codDip: number
   codAzi: number
@@ -63,6 +71,7 @@ export interface DatiAziendali {
   tipoRappor: string
   listaBadge: Badge[]
   listaPAT: PAT[]
+  listaGrpConfig: GruppoConfigDipendente[]
 }
 
 export interface DatiPersonali {

@@ -14,6 +14,7 @@
       @focus="handleFocus"
       @date-select="handleDateSelect"
       @clear-click="handleClear"
+      :key="componentKey"
       ref="datepickerRef"
     />
     <div v-if="showError && errorMessage" class="text-red-500 text-xs mt-1">
@@ -23,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 
 interface Props {
   modelValue?: string | null
@@ -48,6 +49,7 @@ const emit = defineEmits<{
 
 const errorMessage = ref('')
 const datepickerRef = ref()
+const componentKey = ref(0)
 let lastInputValue = ''
 let isSelectingFromCalendar = false
 
@@ -193,6 +195,9 @@ const handleBlur = async (event: BlurEvent) => {
   if (parsedDate) {
     dateValue.value = parsedDate
     errorMessage.value = ''
+    nextTick(() => {
+      componentKey.value++
+    })
   } else {
     errorMessage.value = 'Formato data non valido. Utilizzare dd/mm/yyyy o inserire solo giorno/mese'
   }

@@ -404,10 +404,10 @@
                 <div
                   v-for="(badge, index) in badgeList"
                   :key="index"
-                  class="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 bg-base-100 border border-gray-200 dark:border-gray-700 rounded-lg"
+                  class="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-base-100 border border-gray-200 dark:border-gray-700 rounded-lg"
                 >
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cod. Azienda</label>
+                  <div class="md:col-span-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Cod. Azi</label>
                     <input
                       v-model.number="badge.codAzi"
                       type="number"
@@ -415,8 +415,8 @@
                       disabled
                     />
                   </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cod. Dipendente</label>
+                  <div class="md:col-span-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Cod. Dip</label>
                     <input
                       v-model.number="badge.codDip"
                       type="number"
@@ -424,8 +424,8 @@
                       disabled
                     />
                   </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Numero Badge</label>
+                  <div class="md:col-span-4">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Numero Badge</label>
                     <input
                       v-model.number="badge.codBadge"
                       type="number"
@@ -433,29 +433,39 @@
                       placeholder="Numero Badge"
                     />
                   </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Dal</label>
+                  <div class="md:col-span-3">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Data Dal</label>
                     <DateInput
-                      v-model="badge.dal"
+                      :model-value="badge.dal"
+                      @update:model-value="(val) => {
+                        if (dipendente) {
+                          dipendente.datiAzi.listaBadge[index].dal = val || ''
+                        }
+                      }"
                       format="european"
                       :input-class="'input input-bordered input-sm w-full'"
                       placeholder="dd/mm/yyyy"
                     />
                   </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Al</label>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Data Al</label>
                     <DateInput
-                      v-model="badge.al"
+                      :model-value="badge.al"
+                      @update:model-value="(val) => {
+                        if (dipendente) {
+                          dipendente.datiAzi.listaBadge[index].al = val || ''
+                        }
+                      }"
                       format="european"
                       :input-class="'input input-bordered input-sm w-full'"
                       placeholder="dd/mm/yyyy"
                     />
                   </div>
-                  <div class="flex items-end gap-2">
+                  <div class="md:col-span-1 flex items-end">
                     <button
                       v-if="badgeList.length > 1 || (badgeList.length === 1 && badge.codBadge > 0)"
                       @click="removeBadge(index)"
-                      class="btn btn-sm btn-error btn-outline"
+                      class="btn btn-sm btn-error btn-outline w-full"
                       title="Elimina badge"
                     >
                       <FaIcon icon="trash" />
@@ -484,10 +494,10 @@
                 <div
                   v-for="(pat, index) in patList"
                   :key="index"
-                  class="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 bg-base-100 border border-gray-200 dark:border-gray-700 rounded-lg"
+                  class="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-base-100 border border-gray-200 dark:border-gray-700 rounded-lg"
                 >
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cod. Azienda</label>
+                  <div class="md:col-span-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Cod. Azi</label>
                     <input
                       v-model.number="pat.codAzi"
                       type="number"
@@ -495,8 +505,8 @@
                       disabled
                     />
                   </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cod. Dipendente</label>
+                  <div class="md:col-span-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Cod. Dip</label>
                     <input
                       v-model.number="pat.codDip"
                       type="number"
@@ -504,39 +514,153 @@
                       disabled
                     />
                   </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Codice P.A.T.</label>
-                    <input
-                      v-model.number="pat.codPat"
-                      type="number"
-                      class="input input-bordered input-sm w-full"
-                      placeholder="Codice P.A.T."
+                  <div class="md:col-span-4">
+                    <GenericLookupInput
+                      :model-value="{
+                        codice: pat.codPat || '',
+                        descrizione: getPATDescription(pat.codPat)
+                      }"
+                      @update:model-value="(val) => {
+                        if (dipendente) {
+                          dipendente.datiAzi.listaPAT[index].codPat = val.codice ? Number(val.codice) : 0
+                        }
+                      }"
+                      :config="patLookupConfig"
+                      :lookup-data="allPAT"
+                      :input-class="'input input-bordered input-sm w-full'"
                     />
                   </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Dal</label>
+                  <div class="md:col-span-3">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Data Dal</label>
                     <DateInput
-                      v-model="pat.dal"
+                      :model-value="pat.dal"
+                      @update:model-value="(val) => {
+                        if (dipendente) {
+                          dipendente.datiAzi.listaPAT[index].dal = val || ''
+                        }
+                      }"
                       format="european"
                       :input-class="'input input-bordered input-sm w-full'"
                       placeholder="dd/mm/yyyy"
                     />
                   </div>
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Al</label>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Data Al</label>
                     <DateInput
-                      v-model="pat.al"
+                      :model-value="pat.al"
+                      @update:model-value="(val) => {
+                        if (dipendente) {
+                          dipendente.datiAzi.listaPAT[index].al = val || ''
+                        }
+                      }"
                       format="european"
                       :input-class="'input input-bordered input-sm w-full'"
                       placeholder="dd/mm/yyyy"
                     />
                   </div>
-                  <div class="flex items-end gap-2">
+                  <div class="md:col-span-1 flex items-end">
                     <button
                       v-if="patList.length > 1 || (patList.length === 1 && pat.codPat > 0)"
                       @click="removePat(index)"
                       class="btn btn-sm btn-error btn-outline"
                       title="Elimina P.A.T."
+                    >
+                      <FaIcon icon="trash" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gruppi Configurazione -->
+          <div v-if="activeTab === 'gruppiConfig'" class="space-y-6">
+            <div class="space-y-4">
+              <div class="flex justify-between items-center">
+                <h3 class="text-lg font-medium dark:text-gray-100">Elenco Gruppi Configurazione</h3>
+                <button
+                  @click="addNewGruppoConfig"
+                  class="btn btn-primary btn-sm text-white"
+                >
+                  <FaIcon icon="plus" class="mr-2" />
+                  Aggiungi Gruppo Configurazione
+                </button>
+              </div>
+
+              <div class="space-y-3">
+                <div
+                  v-for="(gruppo, index) in gruppiConfigList"
+                  :key="index"
+                  class="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-base-100 border border-gray-200 dark:border-gray-700 rounded-lg"
+                >
+                  <div class="md:col-span-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Cod. Azi</label>
+                    <input
+                      v-model.number="gruppo.codAzi"
+                      type="number"
+                      class="input input-bordered input-sm w-full"
+                      disabled
+                    />
+                  </div>
+                  <div class="md:col-span-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Cod. Dip</label>
+                    <input
+                      v-model.number="gruppo.codDip"
+                      type="number"
+                      class="input input-bordered input-sm w-full"
+                      disabled
+                    />
+                  </div>
+                  <div class="md:col-span-4">
+                    <GenericLookupInput
+                      :model-value="{
+                        codice: gruppo.codGruppo || '',
+                        descrizione: getGruppoConfigDescription(gruppo.codGruppo)
+                      }"
+                      @update:model-value="(val) => {
+                        if (dipendente) {
+                          dipendente.datiAzi.listaGrpConfig[index].codGruppo = val.codice ? Number(val.codice) : 0
+                        }
+                      }"
+                      :config="gruppiConfigLookupConfig"
+                      :lookup-data="allGruppiConfig"
+                      :input-class="'input input-bordered input-sm w-full'"
+                    />
+                  </div>
+                  <div class="md:col-span-3">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Data Dal</label>
+                    <DateInput
+                      :model-value="gruppo.dal"
+                      @update:model-value="(val) => {
+                        if (dipendente) {
+                          dipendente.datiAzi.listaGrpConfig[index].dal = val || ''
+                        }
+                      }"
+                      format="european"
+                      :input-class="'input input-bordered input-sm w-full'"
+                      placeholder="dd/mm/yyyy"
+                    />
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Data Al</label>
+                    <DateInput
+                      :model-value="gruppo.al"
+                      @update:model-value="(val) => {
+                        if (dipendente) {
+                          dipendente.datiAzi.listaGrpConfig[index].al = val || ''
+                        }
+                      }"
+                      format="european"
+                      :input-class="'input input-bordered input-sm w-full'"
+                      placeholder="dd/mm/yyyy"
+                    />
+                  </div>
+                  <div class="md:col-span-1 flex items-end">
+                    <button
+                      v-if="gruppiConfigList.length > 1 || (gruppiConfigList.length === 1 && gruppo.codGruppo > 0)"
+                      @click="removeGruppoConfig(index)"
+                      class="btn btn-sm btn-error btn-outline"
+                      title="Elimina Gruppo Configurazione"
                     >
                       <FaIcon icon="trash" />
                     </button>
@@ -567,7 +691,7 @@
                   class="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-base-100 border border-gray-200 dark:border-gray-700 rounded-lg"
                 >
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Codice</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Codice</label>
                     <input
                       v-model.number="familiare.codice"
                       type="number"
@@ -576,7 +700,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cognome</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cognome</label>
                     <input
                       v-model="familiare.cognome"
                       type="text"
@@ -585,7 +709,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome</label>
                     <input
                       v-model="familiare.nome"
                       type="text"
@@ -594,7 +718,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Codice Fiscale</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Codice Fiscale</label>
                     <input
                       v-model="familiare.codFisc"
                       type="text"
@@ -797,14 +921,21 @@ import SimpleConfirmDialog from '@/components/SimpleConfirmDialog.vue'
 import GenericLookupInput, { type LookupInputConfig } from '@/components/GenericLookupInput.vue'
 import AddressInput, { type AddressData } from '@/components/AddressInput.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
-import { dipendenteService, type DettaglioDipendente, type Familiare, type Badge, type PAT } from '@/services/dipendenteService'
+import { dipendenteService, type DettaglioDipendente, type Familiare, type Badge, type PAT, type GruppoConfigDipendente } from '@/services/dipendenteService'
 import { lookupService, formatCap } from '@/services/lookupService'
+import { gruppiConfigService, type GruppoConfig } from '@/services/gruppiConfigService'
+import { patService, type Pat } from '@/services/patService'
+import { gruppiConfigLookupConfig, patLookupConfig } from '@/config/lookupConfigs'
 
 type BadgeWithPlaceholder = Badge & {
   _isPlaceholder?: boolean
 }
 
 type PatWithPlaceholder = PAT & {
+  _isPlaceholder?: boolean
+}
+
+type GruppoConfigWithPlaceholder = GruppoConfigDipendente & {
   _isPlaceholder?: boolean
 }
 
@@ -1115,6 +1246,7 @@ const availableTabs = computed(() => [
   { key: 'personali', title: 'Dati Personali', icon: 'user' },
   { key: 'badge', title: 'Badge', icon: 'id-card' },
   { key: 'pat', title: 'P.A.T.', icon: 'clipboard-list' },
+  { key: 'gruppiConfig', title: 'Gruppi Configurazione', icon: 'cog' },
   { key: 'familiari', title: 'Familiari', icon: 'users' },
   { key: 'codiciUtente', title: 'Codici Utente', icon: 'key' }
 ])
@@ -1160,6 +1292,17 @@ const patList = computed((): PatWithPlaceholder[] => {
   return dipendente.value.datiAzi.listaPAT.map(pat => ({ ...pat, _isPlaceholder: false }))
 })
 
+const gruppiConfigList = computed((): GruppoConfigWithPlaceholder[] => {
+  if (!dipendente.value) return []
+  if (!dipendente.value.datiAzi.listaGrpConfig) {
+    return []
+  }
+  return dipendente.value.datiAzi.listaGrpConfig.map(grp => ({ ...grp, _isPlaceholder: false }))
+})
+
+const allGruppiConfig = ref<GruppoConfig[]>([])
+const allPAT = ref<Pat[]>([])
+
 const ensureBadgesInitialized = () => {
   if (!dipendente.value) return
 
@@ -1195,6 +1338,25 @@ const ensurePatsInitialized = () => {
       al: ''
     }
     dipendente.value.datiAzi.listaPAT.push(emptyPat)
+  }
+}
+
+const ensureGruppiConfigInitialized = () => {
+  if (!dipendente.value) return
+
+  if (!dipendente.value.datiAzi.listaGrpConfig) {
+    dipendente.value.datiAzi.listaGrpConfig = []
+  }
+
+  if (dipendente.value.datiAzi.listaGrpConfig.length === 0) {
+    const emptyGruppoConfig: GruppoConfigDipendente = {
+      codAzi: dipendente.value.codAzi,
+      codDip: dipendente.value.codDip,
+      codGruppo: 0,
+      dal: '',
+      al: ''
+    }
+    dipendente.value.datiAzi.listaGrpConfig.push(emptyGruppoConfig)
   }
 }
 
@@ -1238,7 +1400,8 @@ const loadDipendenteForDuplication = async (duplicateId: string) => {
         ...originalDipendente.datiAzi,
         codDip: 0,
         listaBadge: [],
-        listaPAT: []
+        listaPAT: [],
+        listaGrpConfig: []
       },
       datiPers: {
         ...originalDipendente.datiPers,
@@ -1254,6 +1417,7 @@ const loadDipendenteForDuplication = async (duplicateId: string) => {
     normalizeSelectValues()
     ensureBadgesInitialized()
     ensurePatsInitialized()
+    ensureGruppiConfigInitialized()
   } catch (error) {
     console.error('Errore nel caricamento del dipendente per duplicazione:', error)
     errorMessage.value = 'Errore nel caricamento dei dati per la duplicazione'
@@ -1271,6 +1435,7 @@ const initializeEmptyDipendente = async () => {
       normalizeSelectValues()
       ensureBadgesInitialized()
       ensurePatsInitialized()
+      ensureGruppiConfigInitialized()
       return
     } catch (error) {
       console.error('Errore nel parsing dei dati duplicati:', error)
@@ -1301,7 +1466,8 @@ const initializeEmptyDipendente = async () => {
       percenpt: 100,
       tipoRappor: '2',
       listaBadge: [],
-      listaPAT: []
+      listaPAT: [],
+      listaGrpConfig: []
     },
     datiPers: {
       codDip: dipendenteId.value || 0,
@@ -1339,6 +1505,7 @@ const initializeEmptyDipendente = async () => {
   }
   ensureBadgesInitialized()
   ensurePatsInitialized()
+  ensureGruppiConfigInitialized()
 }
 
 const normalizeSelectValues = () => {
@@ -1399,6 +1566,8 @@ const loadDipendente = async () => {
 
       normalizeSelectValues()
       ensureBadgesInitialized()
+      ensurePatsInitialized()
+      ensureGruppiConfigInitialized()
     }
   } catch (error) {
     console.error('Errore nel caricamento dipendente:', error)
@@ -1482,6 +1651,14 @@ const handleSave = async () => {
             ...pat,
             dal: cleanDateString(pat.dal),
             al: cleanDateString(pat.al)
+          })),
+        listaGrpConfig: (dipendente.value.datiAzi.listaGrpConfig || [])
+          .filter(grp => grp.codGruppo && grp.codGruppo > 0)
+          .map(grp => ({
+            ...grp,
+            codGruppo: grp.codGruppo || null,
+            dal: cleanDateString(grp.dal),
+            al: cleanDateString(grp.al)
           }))
       },
       datiPers: {
@@ -1703,6 +1880,56 @@ const removePat = (index: number) => {
   }
 }
 
+const addNewGruppoConfig = () => {
+  if (!dipendente.value) return
+
+  if (!dipendente.value.datiAzi.listaGrpConfig) {
+    dipendente.value.datiAzi.listaGrpConfig = []
+  }
+
+  const newGruppoConfig: GruppoConfigDipendente = {
+    codAzi: dipendente.value.codAzi,
+    codDip: dipendente.value.codDip,
+    codGruppo: 0,
+    dal: '',
+    al: ''
+  }
+
+  dipendente.value.datiAzi.listaGrpConfig.push(newGruppoConfig)
+}
+
+const removeGruppoConfig = (index: number) => {
+  if (!dipendente.value) return
+
+  if (dipendente.value.datiAzi.listaGrpConfig.length > 0) {
+    const gruppo = dipendente.value.datiAzi.listaGrpConfig[index]
+    const gruppoDesc = allGruppiConfig.value.find(g => g.codgruppo === gruppo.codGruppo)
+    const displayName = gruppoDesc
+      ? `il gruppo ${gruppoDesc.codgruppo} - ${gruppoDesc.descrizione}`
+      : 'questo gruppo configurazione'
+
+    showConfirmation(
+      'Elimina Gruppo Configurazione',
+      `Sei sicuro di voler eliminare ${displayName}?`,
+      () => {
+        if (!dipendente.value) return
+        dipendente.value.datiAzi.listaGrpConfig.splice(index, 1)
+        successMessage.value = 'Gruppo configurazione eliminato con successo'
+      }
+    )
+  }
+}
+
+const getGruppoConfigDescription = (codGruppo: number): string => {
+  const gruppo = allGruppiConfig.value.find(g => g.codgruppo === codGruppo)
+  return gruppo ? gruppo.descrizione : ''
+}
+
+const getPATDescription = (codPat: number): string => {
+  const pat = allPAT.value.find(p => p.codicePat === codPat)
+  return pat ? pat.pat : ''
+}
+
 const handleDuplicate = () => {
   if (!dipendente.value) return
 
@@ -1715,7 +1942,8 @@ const handleDuplicate = () => {
       ...dipendente.value.datiAzi,
       codDip: 0,
       listaBadge: [],
-      listaPAT: []
+      listaPAT: [],
+      listaGrpConfig: []
     },
     datiPers: {
       ...dipendente.value.datiPers,
@@ -1977,6 +2205,7 @@ watch(() => dipendente.value, async () => {
   if (dipendente.value) {
     ensureBadgesInitialized()
     ensurePatsInitialized()
+    ensureGruppiConfigInitialized()
     syncDipendenteToLookupData()
     await loadAndCacheLookupData()
   }
@@ -1997,6 +2226,18 @@ watch(() => route.params.id, (newId, oldId) => {
 }, { immediate: false })
 
 onMounted(async () => {
+  try {
+    allGruppiConfig.value = await gruppiConfigService.getAll()
+  } catch (error) {
+    console.error('Errore nel caricamento gruppi configurazione:', error)
+  }
+
+  try {
+    allPAT.value = await patService.getPat()
+  } catch (error) {
+    console.error('Errore nel caricamento P.A.T.:', error)
+  }
+
   if (isEditMode.value) {
     loadDipendente()
   } else {

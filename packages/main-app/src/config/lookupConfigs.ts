@@ -199,6 +199,82 @@ export const causaliLookupConfig: LookupInputConfig = {
   })
 }
 
+// Configurazione per P.A.T.
+export const patLookupConfig: LookupInputConfig = {
+  lookupType: 'pat',
+  autoCompleteField: 'codice',
+  keyField: 'codicePat',
+  fields: [
+    {
+      key: 'codice',
+      label: 'Codice',
+      editable: true,
+      colSpan: 3
+    },
+    {
+      key: 'descrizione',
+      label: 'Descrizione',
+      editable: false,
+      hasLookup: true,
+      colSpan: 9
+    }
+  ],
+  modalConfig: {
+    title: 'Seleziona P.A.T.',
+    searchPlaceholder: 'Cerca per codice o descrizione...',
+    columns: [
+      { key: 'codicePat', label: 'Codice', primary: true },
+      { key: 'pat', label: 'Descrizione' }
+    ],
+    searchFields: ['codicePat', 'pat'],
+    keyField: 'codicePat',
+    loadingMessage: 'Caricamento P.A.T....'
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mapper: (item: any) => ({
+    codice: item.codicePat || '',
+    descrizione: item.pat || ''
+  })
+}
+
+// Configurazione per Gruppi Configurazione
+export const gruppiConfigLookupConfig: LookupInputConfig = {
+  lookupType: 'gruppiconfig',
+  autoCompleteField: 'codice',
+  keyField: 'codgruppo',
+  fields: [
+    {
+      key: 'codice',
+      label: 'Codice',
+      editable: true,
+      colSpan: 3
+    },
+    {
+      key: 'descrizione',
+      label: 'Descrizione',
+      editable: false,
+      hasLookup: true,
+      colSpan: 9
+    }
+  ],
+  modalConfig: {
+    title: 'Seleziona Gruppo Configurazione',
+    searchPlaceholder: 'Cerca per codice o descrizione...',
+    columns: [
+      { key: 'codgruppo', label: 'Codice', primary: true },
+      { key: 'descrizione', label: 'Descrizione' }
+    ],
+    searchFields: ['codgruppo', 'descrizione'],
+    keyField: 'codgruppo',
+    loadingMessage: 'Caricamento gruppi configurazione...'
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mapper: (item: any) => ({
+    codice: item.codgruppo || '',
+    descrizione: item.descrizione || ''
+  })
+}
+
 // Funzione helper per creare configurazioni personalizzate
 export function createLookupConfig(
   lookupType: string,
