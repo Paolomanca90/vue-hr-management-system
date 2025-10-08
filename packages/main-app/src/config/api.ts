@@ -66,6 +66,10 @@ export const API_CONFIG = {
     // Posizioni INPS
     posizioneInps: '/api/posizioneinps', //GET,POST,PUT,DELETE
 
+    // Terminali Config
+    terminaliConfig: '/api/terminaliconfig', //GET,POST,PUT
+    deleteTerminaliConfig: '/api/terminaliconfig/by-key?codter=', //DELETE
+
     // Dipendente
     getCampiDipendente: '/api/dipendente/GetCampiDipendente',
     getValoriCampo: '/api/dipendente/GetValoriCampo',

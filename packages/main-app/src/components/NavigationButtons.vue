@@ -101,7 +101,13 @@ const navigatePrevious = () => {
   if (hasPrevious.value && props.navigationConfig) {
     const prevEntity = allEntities.value[currentIndex.value - 1]
     const prevId = props.navigationConfig.getEntityId(prevEntity)
-    router.push(`${props.navigationConfig.basePath}/${prevId}/edit`)
+
+    const entityStateName = `${props.entityName.toLowerCase()}Data`
+
+    router.push({
+      path: `${props.navigationConfig.basePath}/${prevId}/edit`,
+      state: { [entityStateName]: JSON.parse(JSON.stringify(prevEntity)) }
+    })
   }
 }
 
@@ -109,7 +115,13 @@ const navigateNext = () => {
   if (hasNext.value && props.navigationConfig) {
     const nextEntity = allEntities.value[currentIndex.value + 1]
     const nextId = props.navigationConfig.getEntityId(nextEntity)
-    router.push(`${props.navigationConfig.basePath}/${nextId}/edit`)
+
+    const entityStateName = `${props.entityName.toLowerCase()}Data`
+
+    router.push({
+      path: `${props.navigationConfig.basePath}/${nextId}/edit`,
+      state: { [entityStateName]: JSON.parse(JSON.stringify(nextEntity)) }
+    })
   }
 }
 

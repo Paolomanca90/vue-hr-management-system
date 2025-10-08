@@ -34,6 +34,8 @@ import Pat from '@/views/Pat.vue'
 import PatEdit from '@/views/PatEdit.vue'
 import PosizioniInps from '@/views/PosizioniInps.vue'
 import PosizioneInpsEdit from '@/views/PosizioneInpsEdit.vue'
+import TerminaliConfig from '@/views/TerminaliConfig.vue'
+import TerminaleConfigEdit from '@/views/TerminaleConfigEdit.vue'
 import AnagraficaDipendente from '@/views/AnagraficaDipendente.vue'
 import AnagraficaDipendenteEdit from '@/views/AnagraficaDipendenteEdit.vue'
 
@@ -432,6 +434,37 @@ const appRoutes: RouteRecordRaw[] = [
       // Verifica che l'ID sia valido
       if (to.params.id === 'new') {
         next('/app/posizioni-inps/new')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: 'terminali-config',
+    name: 'TerminaliConfig',
+    component: TerminaliConfig,
+  },
+  {
+    path: 'terminali-config/new',
+    name: 'TerminaleConfigNew',
+    component: TerminaleConfigEdit,
+    meta: {
+      title: 'Nuovo Terminale',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'terminali-config/:id/edit',
+    name: 'TerminaleConfigEdit',
+    component: TerminaleConfigEdit,
+    meta: {
+      title: 'Modifica Terminale',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      // Verifica che l'ID sia valido
+      if (to.params.id === 'new') {
+        next('/app/terminali-config/new')
       } else {
         next()
       }
