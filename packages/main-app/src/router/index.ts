@@ -36,6 +36,8 @@ import PosizioniInps from '@/views/PosizioniInps.vue'
 import PosizioneInpsEdit from '@/views/PosizioneInpsEdit.vue'
 import TerminaliConfig from '@/views/TerminaliConfig.vue'
 import TerminaleConfigEdit from '@/views/TerminaleConfigEdit.vue'
+import Festi from '@/views/Festi.vue'
+import FestiEdit from '@/views/FestiEdit.vue'
 import AnagraficaDipendente from '@/views/AnagraficaDipendente.vue'
 import AnagraficaDipendenteEdit from '@/views/AnagraficaDipendenteEdit.vue'
 
@@ -465,6 +467,36 @@ const appRoutes: RouteRecordRaw[] = [
       // Verifica che l'ID sia valido
       if (to.params.id === 'new') {
         next('/app/terminali-config/new')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: 'festi',
+    name: 'Festi',
+    component: Festi,
+  },
+  {
+    path: 'festi/new',
+    name: 'FestiNew',
+    component: FestiEdit,
+    meta: {
+      title: 'Nuovo Anno Festività',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'festi/:id/edit',
+    name: 'FestiEdit',
+    component: FestiEdit,
+    meta: {
+      title: 'Modifica Festività Anno',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      if (to.params.id === 'new') {
+        next('/app/festi/new')
       } else {
         next()
       }

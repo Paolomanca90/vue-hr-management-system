@@ -218,7 +218,11 @@ const updateField = (field: string, value: unknown) => {
 }
 
 const handleFieldBlur = (fieldKey: string) => {
-  // Emetti il valore locale al blur
+  if (fieldKey === props.config.autoCompleteField) {
+    handleLookupBlur()
+    return
+  }
+
   if (localValues.value[fieldKey] !== undefined) {
     let valueToEmit = localValues.value[fieldKey]
 
@@ -229,16 +233,19 @@ const handleFieldBlur = (fieldKey: string) => {
     const newValue = { ...props.modelValue, [fieldKey]: valueToEmit }
     emit('update:modelValue', newValue)
   }
-
-  if (fieldKey === props.config.autoCompleteField) {
-    handleLookupBlur()
-  }
 }
 
 const handleLookupBlur = async () => {
-  const lookupValue = String(props.modelValue[props.config.autoCompleteField] || '').trim()
+  const localValue = localValues.value[props.config.autoCompleteField]
+  const lookupValue = String(localValue !== undefined ? localValue : props.modelValue[props.config.autoCompleteField] || '').trim()
 
   if (!lookupValue) {
+    const resetFields = props.config.fields
+      .filter(field => !field.editable)
+      .reduce((acc, field) => ({ ...acc, [field.key]: '' }), {})
+
+    const newValue = { ...props.modelValue, ...resetFields }
+    emit('update:modelValue', newValue)
     return
   }
 
@@ -258,6 +265,9 @@ const handleLookupBlur = async () => {
       if (result) {
         const mappedData = props.config.mapper ? props.config.mapper(result) : result
         const newValue = { ...props.modelValue, ...mappedData }
+
+        localValues.value = {}
+
         emit('update:modelValue', newValue)
         nextTick(() => {
           componentKey.value++
@@ -270,6 +280,9 @@ const handleLookupBlur = async () => {
           .reduce((acc, field) => ({ ...acc, [field.key]: '' }), {})
 
         const newValue = { ...props.modelValue, ...resetFields }
+
+        localValues.value = {}
+
         emit('update:modelValue', newValue)
       }
       return
@@ -289,6 +302,9 @@ const handleLookupBlur = async () => {
           cap: formatCap(result.cap),
           provincia: result.provincia
         }
+
+        localValues.value = {}
+
         emit('update:modelValue', newValue)
       } else {
         // Codice belfiore non trovato
@@ -301,6 +317,9 @@ const handleLookupBlur = async () => {
           cap: '',
           provincia: ''
         }
+
+        localValues.value = {}
+
         emit('update:modelValue', newValue)
       }
       return
@@ -317,6 +336,9 @@ const handleLookupBlur = async () => {
     if (result) {
       const mappedData = props.config.mapper ? props.config.mapper(result) : result
       const newValue = { ...props.modelValue, ...mappedData }
+
+      localValues.value = {}
+
       emit('update:modelValue', newValue)
     } else {
       // Codice non trovato
@@ -328,6 +350,9 @@ const handleLookupBlur = async () => {
         .reduce((acc, field) => ({ ...acc, [field.key]: '' }), {})
 
       const newValue = { ...props.modelValue, ...resetFields }
+
+      localValues.value = {}
+
       emit('update:modelValue', newValue)
     }
   } catch (error) {
@@ -347,6 +372,8 @@ const closeModal = () => {
 }
 
 const handleItemSelected = (item: Record<string, unknown>) => {
+  localValues.value = {}
+
   // Per i comuni, usa la logica originale di AddressInput
   if (props.config.lookupType === 'comune') {
     const newValue = {

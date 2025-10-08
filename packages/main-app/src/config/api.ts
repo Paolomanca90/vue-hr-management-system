@@ -70,6 +70,11 @@ export const API_CONFIG = {
     terminaliConfig: '/api/terminaliconfig', //GET,POST,PUT
     deleteTerminaliConfig: '/api/terminaliconfig/by-key?codter=', //DELETE
 
+    // Festività
+    festi: '/api/festi', //GET,POST,PUT
+    getFestiAnno: '/api/festi/getfestianno', //GET
+    deleteFesti: '/api/festi/', //DELETE
+
     // Dipendente
     getCampiDipendente: '/api/dipendente/GetCampiDipendente',
     getValoriCampo: '/api/dipendente/GetValoriCampo',
