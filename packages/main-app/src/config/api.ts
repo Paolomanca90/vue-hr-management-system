@@ -75,6 +75,10 @@ export const API_CONFIG = {
     getFestiAnno: '/api/festi/getfestianno', //GET
     deleteFesti: '/api/festi/', //DELETE
 
+    // Zone
+    zone: '/api/zone', //GET,POST,PUT,DELETE
+    getDettZona: '/api/zone/getdettzona', //GET
+
     // Dipendente
     getCampiDipendente: '/api/dipendente/GetCampiDipendente',
     getValoriCampo: '/api/dipendente/GetValoriCampo',

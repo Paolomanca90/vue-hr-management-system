@@ -38,6 +38,8 @@ import TerminaliConfig from '@/views/TerminaliConfig.vue'
 import TerminaleConfigEdit from '@/views/TerminaleConfigEdit.vue'
 import Festi from '@/views/Festi.vue'
 import FestiEdit from '@/views/FestiEdit.vue'
+import Zone from '@/views/Zone.vue'
+import ZoneEdit from '@/views/ZoneEdit.vue'
 import AnagraficaDipendente from '@/views/AnagraficaDipendente.vue'
 import AnagraficaDipendenteEdit from '@/views/AnagraficaDipendenteEdit.vue'
 
@@ -497,6 +499,36 @@ const appRoutes: RouteRecordRaw[] = [
     beforeEnter: (to, from, next) => {
       if (to.params.id === 'new') {
         next('/app/festi/new')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: 'zone',
+    name: 'Zone',
+    component: Zone,
+  },
+  {
+    path: 'zone/new',
+    name: 'ZonaNew',
+    component: ZoneEdit,
+    meta: {
+      title: 'Nuova Zona',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'zone/:id/edit',
+    name: 'ZonaEdit',
+    component: ZoneEdit,
+    meta: {
+      title: 'Modifica Zona',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      if (to.params.id === 'new') {
+        next('/app/zone/new')
       } else {
         next()
       }
