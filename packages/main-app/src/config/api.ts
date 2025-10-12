@@ -79,6 +79,10 @@ export const API_CONFIG = {
     zone: '/api/zone', //GET,POST,PUT,DELETE
     getDettZona: '/api/zone/getdettzona', //GET
 
+    // Festività CCNL
+    festiCcnl: '/api/festiccnl', //GET,POST,PUT,DELETE
+    festiCcnlDettaglio: '/api/festiccnl/getdettaglio', //GET
+
     // Dipendente
     getCampiDipendente: '/api/dipendente/GetCampiDipendente',
     getValoriCampo: '/api/dipendente/GetValoriCampo',

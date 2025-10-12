@@ -275,6 +275,83 @@ export const gruppiConfigLookupConfig: LookupInputConfig = {
   })
 }
 
+// Configurazione per Province
+export const provinciaLookupConfig: LookupInputConfig = {
+  lookupType: 'provincia',
+  autoCompleteField: 'codice',
+  keyField: 'PROVINCIA',
+  fields: [
+    {
+      key: 'codice',
+      label: 'Sigla Prov.',
+      editable: true,
+      colSpan: 3
+    },
+    {
+      key: 'descrizione',
+      label: 'Nome',
+      editable: false,
+      hasLookup: true,
+      colSpan: 9
+    }
+  ],
+  modalConfig: {
+    title: 'Seleziona Provincia',
+    searchPlaceholder: 'Cerca per sigla o nome...',
+    columns: [
+      { key: 'PROVINCIA', label: 'Sigla', primary: true },
+      { key: 'DESCRIZ', label: 'Nome' },
+      { key: 'REGIONE', label: 'Regione' }
+    ],
+    searchFields: ['PROVINCIA', 'DESCRIZ', 'REGIONE'],
+    keyField: 'PROVINCIA',
+    loadingMessage: 'Caricamento province...'
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mapper: (item: any) => ({
+    codice: item.PROVINCIA || '',
+    descrizione: item.DESCRIZ || ''
+  })
+}
+
+// Configurazione per Contratti CCNL
+export const contrattoLookupConfig: LookupInputConfig = {
+  lookupType: 'contratto',
+  autoCompleteField: 'codice',
+  keyField: 'CODCCNL',
+  fields: [
+    {
+      key: 'codice',
+      label: 'Codice CCNL',
+      editable: true,
+      colSpan: 3
+    },
+    {
+      key: 'descrizione',
+      label: 'Descrizione',
+      editable: false,
+      hasLookup: true,
+      colSpan: 9
+    }
+  ],
+  modalConfig: {
+    title: 'Seleziona Contratto CCNL',
+    searchPlaceholder: 'Cerca per codice o descrizione...',
+    columns: [
+      { key: 'CODCCNL', label: 'Codice', primary: true },
+      { key: 'DESCRIZ', label: 'Descrizione' }
+    ],
+    searchFields: ['CODCCNL', 'DESCRIZ'],
+    keyField: 'CODCCNL',
+    loadingMessage: 'Caricamento contratti...'
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mapper: (item: any) => ({
+    codice: item.CODCCNL || '',
+    descrizione: item.DESCRIZ || ''
+  })
+}
+
 // Funzione helper per creare configurazioni personalizzate
 export function createLookupConfig(
   lookupType: string,

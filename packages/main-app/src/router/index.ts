@@ -40,6 +40,8 @@ import Festi from '@/views/Festi.vue'
 import FestiEdit from '@/views/FestiEdit.vue'
 import Zone from '@/views/Zone.vue'
 import ZoneEdit from '@/views/ZoneEdit.vue'
+import FestiCcnl from '@/views/FestiCcnl.vue'
+import FestiCcnlEdit from '@/views/FestiCcnlEdit.vue'
 import AnagraficaDipendente from '@/views/AnagraficaDipendente.vue'
 import AnagraficaDipendenteEdit from '@/views/AnagraficaDipendenteEdit.vue'
 
@@ -529,6 +531,36 @@ const appRoutes: RouteRecordRaw[] = [
     beforeEnter: (to, from, next) => {
       if (to.params.id === 'new') {
         next('/app/zone/new')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: 'festi-ccnl',
+    name: 'FestiCcnl',
+    component: FestiCcnl,
+  },
+  {
+    path: 'festi-ccnl/new',
+    name: 'FestiCcnlNew',
+    component: FestiCcnlEdit,
+    meta: {
+      title: 'Nuova Festività CCNL',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'festi-ccnl/:id/edit',
+    name: 'FestiCcnlEdit',
+    component: FestiCcnlEdit,
+    meta: {
+      title: 'Modifica Festività CCNL',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      if (to.params.id === 'new') {
+        next('/app/festi-ccnl/new')
       } else {
         next()
       }
