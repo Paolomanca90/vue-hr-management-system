@@ -71,119 +71,14 @@
       <!-- Festività Rows -->
       <div class="card bg-base-100 shadow-sm">
         <div class="card-body">
-          <h2 class="card-title mb-6 dark:text-gray-100">Festività (15 righe disponibili)</h2>
-
-          <div class="space-y-4">
-            <div v-for="(festivita, index) in festiForm.festivita" :key="index" class="p-3 border border-base-300 rounded">
-              <!-- Prima riga: dati base -->
-              <div class="flex items-start mb-3">
-                <!-- Numero Riga -->
-                <div class="text-xs font-medium pt-6 flex-shrink-0" style="min-width: 24px;">
-                  {{ index + 1 }}.
-                </div>
-
-                <div class="grid grid-cols-12 gap-5 flex-grow">
-                  <!-- Giorno -->
-                  <div class="form-control col-span-1">
-                    <label class="label">
-                      <span class="label-text font-medium dark:text-gray-200">GG</span>
-                    </label>
-                    <input
-                      v-model.number="festivita.giorno"
-                      type="number"
-                      placeholder="GG"
-                      class="input input-bordered w-full"
-                      :disabled="saving"
-                      min="1"
-                      max="31"
-                    />
-                  </div>
-
-                  <!-- Mese -->
-                  <div class="form-control col-span-2">
-                    <label class="label">
-                      <span class="label-text font-medium dark:text-gray-200">Mese</span>
-                    </label>
-                    <select
-                      v-model.number="festivita.mese"
-                      class="select select-bordered w-full"
-                      :disabled="saving"
-                    >
-                      <option :value="0">-</option>
-                      <option :value="1">1 - Gennaio</option>
-                      <option :value="2">2 - Febbraio</option>
-                      <option :value="3">3 - Marzo</option>
-                      <option :value="4">4 - Aprile</option>
-                      <option :value="5">5 - Maggio</option>
-                      <option :value="6">6 - Giugno</option>
-                      <option :value="7">7 - Luglio</option>
-                      <option :value="8">8 - Agosto</option>
-                      <option :value="9">9 - Settembre</option>
-                      <option :value="10">10 - Ottobre</option>
-                      <option :value="11">11 - Novembre</option>
-                      <option :value="12">12 - Dicembre</option>
-                    </select>
-                  </div>
-
-                  <!-- Tipo Festa -->
-                  <div class="form-control col-span-2">
-                    <label class="label">
-                      <span class="label-text font-medium dark:text-gray-200">Tipo</span>
-                    </label>
-                    <select
-                      v-model.number="festivita.tipoFesta"
-                      class="select select-bordered w-full"
-                      :disabled="saving"
-                    >
-                      <option :value="0">-</option>
-                      <option :value="1">1 - Festivo</option>
-                      <option :value="2">2 - Semifestivo</option>
-                    </select>
-                  </div>
-
-                  <!-- Descrizione -->
-                  <div class="form-control col-span-7">
-                    <label class="label">
-                      <span class="label-text font-medium dark:text-gray-200">Descrizione</span>
-                    </label>
-                    <input
-                      v-model="festivita.descrizione"
-                      type="text"
-                      placeholder="Descrizione festività"
-                      class="input input-bordered w-full"
-                      :disabled="saving"
-                      maxlength="100"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <!-- Seconda riga: causali -->
-              <div class="flex gap-5 items-start pl-6">
-                <!-- Causale Lavoro (Lookup) -->
-                <div>
-                  <GenericLookupInput
-                    v-model="festivita.causLav"
-                    :config="causaliLookupConfig"
-                    :lookup-data="causaliData"
-                    :disabled="saving"
-                    size="xs"
-                  />
-                </div>
-
-                <!-- Causale Riposo (Lookup) -->
-                <div>
-                  <GenericLookupInput
-                    v-model="festivita.causRip"
-                    :config="causaliLookupConfig"
-                    :lookup-data="causaliData"
-                    :disabled="saving"
-                    size="xs"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+          <EditableDataGrid
+            v-model="festiForm.festivita"
+            :columns="festivitaColumns"
+            title="Festività"
+            addButtonLabel="Aggiungi Festività"
+            :disabled="saving"
+            :emptyRowTemplate="createEmptyFestivita"
+          />
         </div>
       </div>
     </form>
@@ -197,7 +92,7 @@ import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
 import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
-import GenericLookupInput from '@/components/GenericLookupInput.vue'
+import EditableDataGrid, { type GridColumn } from '@/components/EditableDataGrid.vue'
 import { festiService, type FestiDettaglio } from '@/services/festiService'
 import { useCrudView } from '@/composables/useCrudView'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
@@ -246,6 +141,7 @@ interface CausaleData {
 
 // Type esteso per le festività nel form (include oggetti causali)
 interface FestivitaForm {
+  [key: string]: string | number | CausaleData
   anno: number
   mese: number
   giorno: number
@@ -255,18 +151,15 @@ interface FestivitaForm {
   causRip: CausaleData
 }
 
-// Crea 15 righe vuote per le festività
-const createEmptyFestivitaRows = (anno: number = 0): FestivitaForm[] => {
-  return Array.from({ length: 15 }, () => ({
-    anno,
-    mese: 0,
-    giorno: 0,
-    tipoFesta: 0,
-    descrizione: '',
-    causLav: { codice: '', descrizione: '' },
-    causRip: { codice: '', descrizione: '' }
-  }))
-}
+const createEmptyFestivita = (): FestivitaForm => ({
+  anno: festiForm.value.anno || new Date().getFullYear(),
+  mese: 0,
+  giorno: 0,
+  tipoFesta: 0,
+  descrizione: '',
+  causLav: { codice: '', descrizione: '' },
+  causRip: { codice: '', descrizione: '' }
+})
 
 // Interface per il form (estende FestiDettaglio con causali come oggetti)
 interface FestiFormDettaglio {
@@ -277,11 +170,58 @@ interface FestiFormDettaglio {
 // State per il form
 const festiForm = ref<FestiFormDettaglio>({
   anno: 0,
-  festivita: createEmptyFestivitaRows()
+  festivita: []
 })
 
 const loading = ref(false)
 const saving = ref(false)
+
+// Configurazione colonne per EditableDataGrid
+const festivitaColumns = computed<GridColumn[]>(() => {
+  const causaliArray = causaliData.value || []
+
+  return [
+    {
+      field: 'data',
+      header: 'Data',
+      type: 'date',
+      width: '120px'
+    },
+    {
+      field: 'descrizione',
+      header: 'Descrizione',
+      type: 'text',
+      width: '300px'
+    },
+    {
+      field: 'tipoFesta',
+      header: 'Tipo',
+      type: 'dropdown',
+      width: '150px',
+      dropdownOptions: [
+        { value: 0, label: '-' },
+        { value: 1, label: '1 - Festivo' },
+        { value: 2, label: '2 - Semifestivo' }
+      ]
+    },
+    {
+      field: 'causLav',
+      header: 'Causale Lavoro',
+      type: 'lookup',
+      width: '200px',
+      lookupConfig: causaliLookupConfig,
+      lookupData: causaliArray
+    },
+    {
+      field: 'causRip',
+      header: 'Causale Riposo',
+      type: 'lookup',
+      width: '200px',
+      lookupConfig: causaliLookupConfig,
+      lookupData: causaliArray
+    }
+  ]
+})
 
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
@@ -309,76 +249,39 @@ const loadFesti = async () => {
   loading.value = true
 
   try {
-    // Prova a recuperare dai dati del router state
-    const routerState = window.history.state?.annoData
+    // Carica le festività per questo anno
+    const festivitaData = await festiService.getFestiAnno(anno)
 
-    if (routerState && routerState.anno === anno) {
-      // Carica le festività per questo anno
-      const festivitaData = await festiService.getFestiAnno(anno)
+    const festivitaRows: FestivitaForm[] = []
+    for (const fest of festivitaData) {
+      const [causLavData, causRipData] = await Promise.all([
+        fest.codCauLav ? lookupService.getGruppoCausaleByCode(String(fest.codCauLav)) : null,
+        fest.codCauRip ? lookupService.getGruppoCausaleByCode(String(fest.codCauRip)) : null
+      ])
 
-      // Crea 15 righe, riempiendo quelle disponibili e lasciando vuote le altre
-      const festivitaRows = createEmptyFestivitaRows(anno)
-      // Carica le descrizioni delle causali per i dati esistenti
-      for (let index = 0; index < Math.min(festivitaData.length, 15); index++) {
-        const fest = festivitaData[index]
-        const [causLavData, causRipData] = await Promise.all([
-          fest.codCauLav ? lookupService.getGruppoCausaleByCode(String(fest.codCauLav)) : null,
-          fest.codCauRip ? lookupService.getGruppoCausaleByCode(String(fest.codCauRip)) : null
-        ])
-
-        festivitaRows[index] = {
-          ...fest,
-          causLav: {
-            codice: fest.codCauLav ? String(fest.codCauLav) : '',
-            descrizione: causLavData?.descrizione || ''
-          },
-          causRip: {
-            codice: fest.codCauRip ? String(fest.codCauRip) : '',
-            descrizione: causRipData?.descrizione || ''
-          }
+      festivitaRows.push({
+        ...fest,
+        causLav: {
+          codice: fest.codCauLav ? String(fest.codCauLav) : '',
+          descrizione: causLavData?.descrizione || ''
+        },
+        causRip: {
+          codice: fest.codCauRip ? String(fest.codCauRip) : '',
+          descrizione: causRipData?.descrizione || ''
         }
-      }
+      })
+    }
 
-      festiForm.value = {
-        anno: anno,
-        festivita: festivitaRows
-      }
-    } else {
-      // Fallback: carica comunque i dati
-      const festivitaData = await festiService.getFestiAnno(anno)
-      const festivitaRows = createEmptyFestivitaRows(anno)
-      // Carica le descrizioni delle causali per i dati esistenti
-      for (let index = 0; index < Math.min(festivitaData.length, 15); index++) {
-        const fest = festivitaData[index]
-        const [causLavData, causRipData] = await Promise.all([
-          fest.codCauLav ? lookupService.getGruppoCausaleByCode(String(fest.codCauLav)) : null,
-          fest.codCauRip ? lookupService.getGruppoCausaleByCode(String(fest.codCauRip)) : null
-        ])
-
-        festivitaRows[index] = {
-          ...fest,
-          causLav: {
-            codice: fest.codCauLav ? String(fest.codCauLav) : '',
-            descrizione: causLavData?.descrizione || ''
-          },
-          causRip: {
-            codice: fest.codCauRip ? String(fest.codCauRip) : '',
-            descrizione: causRipData?.descrizione || ''
-          }
-        }
-      }
-
-      festiForm.value = {
-        anno: anno,
-        festivita: festivitaRows
-      }
+    festiForm.value = {
+      anno: anno,
+      festivita: festivitaRows
     }
   } catch (error) {
     console.error('Errore nel caricamento festività:', error)
     errorMessage.value = 'Errore nel caricamento dei dati festività. Riprova più tardi.'
     festiForm.value = {
       anno: anno,
-      festivita: createEmptyFestivitaRows(anno)
+      festivita: []
     }
   } finally {
     loading.value = false
@@ -466,7 +369,7 @@ const handleReset = () => {
   } else {
     festiForm.value = {
       anno: 0,
-      festivita: createEmptyFestivitaRows()
+      festivita: []
     }
   }
 }
@@ -506,7 +409,7 @@ watch(() => route.params.id, async () => {
     } else {
       festiForm.value = {
         anno: 0,
-        festivita: createEmptyFestivitaRows()
+        festivita: []
       }
     }
   }

@@ -99,116 +99,16 @@
       <!-- Festività -->
       <div class="card bg-base-100 shadow-sm">
         <div class="card-body">
-          <div class="flex items-center justify-between mb-6">
-            <h2 class="card-title dark:text-gray-100">Festività</h2>
-            <button
-              type="button"
-              class="btn btn-sm btn-primary text-white"
-              @click="addFestivita"
-              :disabled="saving"
-            >
-              <FaIcon icon="plus" class="mr-2" />
-              Aggiungi Festività
-            </button>
-          </div>
-
-          <div class="space-y-4">
-            <div v-for="(festivita, index) in festiForm.festivita" :key="index" class="p-4 border border-base-300 rounded relative">
-              <button
-                type="button"
-                class="btn btn-circle btn-ghost btn-xs absolute top-2 right-2"
-                @click="removeFestivita(index)"
-                :disabled="saving"
-                title="Rimuovi festività"
-              >
-                <FaIcon icon="times" />
-              </button>
-
-              <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <!-- Data -->
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium dark:text-gray-200">Data</span>
-                  </label>
-                  <input
-                    v-model="festivita.data"
-                    type="date"
-                    class="input input-bordered w-full"
-                    :disabled="saving"
-                  />
-                </div>
-
-                <!-- Descrizione -->
-                <div class="form-control md:col-span-3">
-                  <label class="label">
-                    <span class="label-text font-medium dark:text-gray-200">Descrizione</span>
-                  </label>
-                  <input
-                    v-model="festivita.descriz"
-                    type="text"
-                    placeholder="Descrizione festività"
-                    class="input input-bordered w-full"
-                    :disabled="saving"
-                    maxlength="100"
-                  />
-                </div>
-
-                <!-- Tipo Festa -->
-                <div class="form-control">
-                  <label class="label">
-                    <span class="label-text font-medium dark:text-gray-200">Tipo</span>
-                  </label>
-                  <select
-                    v-model.number="festivita.tipoFesta"
-                    class="select select-bordered w-full"
-                    :disabled="saving"
-                  >
-                    <option :value="0">-</option>
-                    <option :value="1">1 - Festivo</option>
-                    <option :value="2">2 - Semifestivo</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Causali -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div>
-                  <GenericLookupInput
-                    v-model="festivita.causLav"
-                    :config="causaliLookupConfig"
-                    :lookup-data="causaliData"
-                    :disabled="saving"
-                    size="xs"
-                  />
-                </div>
-                <div>
-                  <GenericLookupInput
-                    v-model="festivita.causRip"
-                    :config="causaliLookupConfig"
-                    :lookup-data="causaliData"
-                    :disabled="saving"
-                    size="xs"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div v-if="festiForm.festivita.length === 0" class="text-center py-8 text-base-content/60">
-              <FaIcon icon="calendar-plus" class="text-4xl mb-2" />
-              <p>Nessuna festività aggiunta. Clicca sul pulsante "Aggiungi Festività" per iniziare.</p>
-            </div>
-          </div>
+          <EditableDataGrid
+            v-model="festiForm.festivita"
+            :columns="festivitaColumns"
+            title="Festività"
+            addButtonLabel="Aggiungi Festività"
+            :disabled="saving"
+            :emptyRowTemplate="createEmptyFestivita"
+          />
         </div>
       </div>
-
-      <SimpleConfirmDialog
-        :visible="showConfirmDialog"
-        :title="confirmDialogTitle"
-        :message="confirmDialogMessage"
-        type="danger"
-        @confirm="handleConfirmRemove"
-        @cancel="handleCancelRemove"
-      />
     </form>
   </div>
 </template>
@@ -217,11 +117,11 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
-import SimpleConfirmDialog from '@/components/SimpleConfirmDialog.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import GenericLookupInput from '@/components/GenericLookupInput.vue'
+import EditableDataGrid, { type GridColumn } from '@/components/EditableDataGrid.vue'
 import { festiCcnlService } from '@/services/festiCcnlService'
 import { useCrudView } from '@/composables/useCrudView'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
@@ -289,6 +189,7 @@ interface CausaleData {
 
 // Type per festività nel form
 interface FestivitaForm {
+  [key: string]: string | number | CausaleData
   data: string
   descriz: string
   tipoFesta: number
@@ -319,11 +220,61 @@ const festiForm = ref<FestiCcnlForm>({
 const loading = ref(false)
 const saving = ref(false)
 
-// Dialog state
-const showConfirmDialog = ref(false)
-const confirmDialogTitle = ref('')
-const confirmDialogMessage = ref('')
-const festiToRemoveIndex = ref(-1)
+// Configurazione colonne per EditableDataGrid
+const festivitaColumns = computed<GridColumn[]>(() => {
+  const causaliArray = causaliData.value || []
+
+  return [
+    {
+      field: 'data',
+      header: 'Data',
+      type: 'date',
+      width: '120px'
+    },
+    {
+      field: 'descriz',
+      header: 'Descrizione',
+      type: 'text',
+      width: '300px'
+    },
+    {
+      field: 'tipoFesta',
+      header: 'Tipo',
+      type: 'dropdown',
+      width: '150px',
+      dropdownOptions: [
+        { value: 0, label: '-' },
+        { value: 1, label: '1 - Festivo' },
+        { value: 2, label: '2 - Semifestivo' }
+      ]
+    },
+    {
+      field: 'causLav',
+      header: 'Causale Lavoro',
+      type: 'lookup',
+      width: '200px',
+      lookupConfig: causaliLookupConfig,
+      lookupData: causaliArray
+    },
+    {
+      field: 'causRip',
+      header: 'Causale Riposo',
+      type: 'lookup',
+      width: '200px',
+      lookupConfig: causaliLookupConfig,
+      lookupData: causaliArray
+    }
+  ]
+})
+
+// Funzione per creare riga vuota
+const createEmptyFestivita = (): FestivitaForm => ({
+  data: '',
+  descriz: '',
+  tipoFesta: 0,
+  causLav: { codice: '', descrizione: '' },
+  causRip: { codice: '', descrizione: '' }
+})
 
 // Computed
 const isEditMode = computed(() => {
@@ -347,37 +298,6 @@ watch(() => festiForm.value.provinciaLookup.codice, (newVal) => {
 })
 
 // Methods
-const addFestivita = () => {
-  festiForm.value.festivita.push({
-    data: '',
-    descriz: '',
-    tipoFesta: 0,
-    causLav: { codice: '', descrizione: '' },
-    causRip: { codice: '', descrizione: '' }
-  })
-}
-
-const removeFestivita = (index: number) => {
-  const festData = festiForm.value.festivita[index]
-  festiToRemoveIndex.value = index
-  confirmDialogTitle.value = 'Conferma rimozione'
-  confirmDialogMessage.value = `Sei sicuro di voler rimuovere la festività "${festData.descriz || 'senza descrizione'}" del ${festData.data || 'data non impostata'}"?`
-  showConfirmDialog.value = true
-}
-
-const handleConfirmRemove = () => {
-  if (festiToRemoveIndex.value !== -1) {
-    festiForm.value.festivita.splice(festiToRemoveIndex.value, 1)
-    festiToRemoveIndex.value = -1
-  }
-  showConfirmDialog.value = false
-}
-
-const handleCancelRemove = () => {
-  festiToRemoveIndex.value = -1
-  showConfirmDialog.value = false
-}
-
 const loadFesti = async () => {
   if (!isEditMode.value) return
 
@@ -478,13 +398,28 @@ const handleSave = async () => {
   try {
     const festivitaValide = festiForm.value.festivita
       .filter(f => f.data && f.descriz)
-      .map(f => ({
-        data: new Date(f.data).toISOString(),
-        descriz: f.descriz,
-        tipoFesta: f.tipoFesta,
-        codCauLav: f.causLav.codice ? Number(f.causLav.codice) : 0,
-        codCauRip: f.causRip.codice ? Number(f.causRip.codice) : 0
-      }))
+      .map(f => {
+        // Se la data è in formato gg/MM, converte in yyyy-MM-dd
+        let dataFormatted = f.data
+        if (f.data.includes('/')) {
+          const [gg, mm] = f.data.split('/')
+          const anno = festiForm.value.anno
+          dataFormatted = `${anno}-${mm.padStart(2, '0')}-${gg.padStart(2, '0')}`
+        }
+
+        // Assicura che sia in formato ISO datetime
+        const dataISO = dataFormatted.includes('T')
+          ? dataFormatted
+          : `${dataFormatted}T00:00:00.000Z`
+
+        return {
+          data: dataISO,
+          descriz: f.descriz,
+          tipoFesta: f.tipoFesta,
+          codCauLav: f.causLav.codice ? Number(f.causLav.codice) : 0,
+          codCauRip: f.causRip.codice ? Number(f.causRip.codice) : 0
+        }
+      })
 
     const festiToSave = {
       anno: festiForm.value.anno,
