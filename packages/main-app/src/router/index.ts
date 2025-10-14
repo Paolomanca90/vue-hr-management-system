@@ -42,6 +42,10 @@ import Zone from '@/views/Zone.vue'
 import ZoneEdit from '@/views/ZoneEdit.vue'
 import FestiCcnl from '@/views/FestiCcnl.vue'
 import FestiCcnlEdit from '@/views/FestiCcnlEdit.vue'
+import GruppiCausali from '@/views/GruppiCausali.vue'
+import GruppiCausaliEdit from '@/views/GruppiCausaliEdit.vue'
+import Tolleranze from '@/views/Tolleranze.vue'
+import TolleranzaEdit from '@/views/TolleranzaEdit.vue'
 import AnagraficaDipendente from '@/views/AnagraficaDipendente.vue'
 import AnagraficaDipendenteEdit from '@/views/AnagraficaDipendenteEdit.vue'
 
@@ -561,6 +565,66 @@ const appRoutes: RouteRecordRaw[] = [
     beforeEnter: (to, from, next) => {
       if (to.params.id === 'new') {
         next('/app/festi-ccnl/new')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: 'gruppi-causali',
+    name: 'GruppiCausali',
+    component: GruppiCausali,
+  },
+  {
+    path: 'gruppi-causali/new',
+    name: 'GruppoCausaleNew',
+    component: GruppiCausaliEdit,
+    meta: {
+      title: 'Nuovo Gruppo Causale',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'gruppi-causali/:id/edit',
+    name: 'GruppoCausaleEdit',
+    component: GruppiCausaliEdit,
+    meta: {
+      title: 'Modifica Gruppo Causale',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      if (to.params.id === 'new') {
+        next('/app/gruppi-causali/new')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: 'tolleranze',
+    name: 'Tolleranze',
+    component: Tolleranze,
+  },
+  {
+    path: 'tolleranze/new',
+    name: 'TolleranzaNew',
+    component: TolleranzaEdit,
+    meta: {
+      title: 'Nuova Tolleranza',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'tolleranze/:id/edit',
+    name: 'TolleranzaEdit',
+    component: TolleranzaEdit,
+    meta: {
+      title: 'Modifica Tolleranza',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      if (to.params.id === 'new') {
+        next('/app/tolleranze/new')
       } else {
         next()
       }

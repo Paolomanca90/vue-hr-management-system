@@ -161,7 +161,7 @@ export const filterModalConfigs = {
   }
 }
 
-// Configurazione per Causali (senza abbreviazione)
+// Configurazione per Gruppi Causali (senza abbreviazione)
 export const causaliLookupConfig: LookupInputConfig = {
   lookupType: 'gruppocausale',
   autoCompleteField: 'codice',
@@ -182,7 +182,7 @@ export const causaliLookupConfig: LookupInputConfig = {
     }
   ],
   modalConfig: {
-    title: 'Seleziona Causale',
+    title: 'Seleziona Gruppo Causale',
     searchPlaceholder: 'Cerca per codice o descrizione...',
     columns: [
       { key: 'CODGRCAU', label: 'Codice', primary: true },
@@ -190,11 +190,49 @@ export const causaliLookupConfig: LookupInputConfig = {
     ],
     searchFields: ['CODGRCAU', 'DESCRIZIONE'],
     keyField: 'CODGRCAU',
-    loadingMessage: 'Caricamento causali...'
+    loadingMessage: 'Caricamento gruppi causali...'
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mapper: (item: any) => ({
     codice: item.CODGRCAU || '',
+    descrizione: item.DESCRIZIONE || ''
+  })
+}
+
+// Configurazione per Causali singole
+export const causaleLookupConfig: LookupInputConfig = {
+  lookupType: 'causale',
+  autoCompleteField: 'codice',
+  keyField: 'CODCAU',
+  fields: [
+    {
+      key: 'codice',
+      label: 'Codice',
+      editable: true,
+      colSpan: 3
+    },
+    {
+      key: 'descrizione',
+      label: 'Descrizione',
+      editable: false,
+      hasLookup: true,
+      colSpan: 9
+    }
+  ],
+  modalConfig: {
+    title: 'Seleziona Causale',
+    searchPlaceholder: 'Cerca per codice o descrizione...',
+    columns: [
+      { key: 'CODCAU', label: 'Codice', primary: true },
+      { key: 'DESCRIZIONE', label: 'Descrizione' }
+    ],
+    searchFields: ['CODCAU', 'DESCRIZIONE'],
+    keyField: 'CODCAU',
+    loadingMessage: 'Caricamento causali...'
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mapper: (item: any) => ({
+    codice: String(item.CODCAU || ''),
     descrizione: item.DESCRIZIONE || ''
   })
 }

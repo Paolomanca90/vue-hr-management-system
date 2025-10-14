@@ -58,6 +58,8 @@ import {
   faCode,
   faCogs,
   faClipboardList,
+  faLayerGroup,
+  faSlidersH,
   // Dashboard e HR
   faTachometerAlt,
   faChartBar,
@@ -192,6 +194,8 @@ library.add(
   faCode,
   faCogs,
   faClipboardList,
+  faLayerGroup,
+  faSlidersH,
   faExternalLinkAlt,
   faArrowLeft,
   faArrowRight,

@@ -83,6 +83,15 @@ export const API_CONFIG = {
     festiCcnl: '/api/festiccnl', //GET,POST,PUT,DELETE
     festiCcnlDettaglio: '/api/festiccnl/getdettaglio', //GET
 
+    // Gruppi Causali
+    gruppiCausali: '/api/grpcausali', //GET,POST,PUT
+    deleteGruppoCausale: '/api/grpcausali', //DELETE
+    getDettaglioGruppoCausale: '/api/grpcausali/getdett', //GET
+
+    // Tolleranze
+    tolleranze: '/api/tolleranze', //GET,POST,PUT
+    deleteTolleranza: '/api/tolleranze/by-key?codtoll=', //DELETE
+
     // Dipendente
     getCampiDipendente: '/api/dipendente/GetCampiDipendente',
     getValoriCampo: '/api/dipendente/GetValoriCampo',
