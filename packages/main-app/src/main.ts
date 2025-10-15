@@ -21,6 +21,9 @@ import {
   type LocaleMessages
 } from '@presenze-in-web-frontend/core-lib'
 
+// Import della configurazione API
+import { loadRuntimeConfig } from './config/api'
+
 // Import CSS di PrimeVue
 import 'primeicons/primeicons.css'
 
@@ -129,38 +132,49 @@ const appMessages: LocaleMessages = {
   }
 }
 
-const app = createApp(App)
+// Funzione asincrona per inizializzare l'app
+async function initializeApp() {
+  // Carica la configurazione runtime prima di tutto
+  await loadRuntimeConfig()
 
-app.use(createPinia())
-app.use(router)
+  const app = createApp(App)
 
-// Installa PrimeVue
-installPrimeVue(app)
+  app.use(createPinia())
+  app.use(router)
 
-// Installa FontAwesome
-installFontAwesome(app)
+  // Installa PrimeVue
+  installPrimeVue(app)
 
-// Installa i18n con traduzioni personalizzate
-const i18n = installI18n(app, {
-  locale: getStoredLocale(),
-  fallbackLocale: 'en',
-  messages: appMessages
-})
+  // Installa FontAwesome
+  installFontAwesome(app)
 
-// Inizializza gli store
-const authStore = useAuthStore()
-const themeStore = useThemeStore()
-const menuStore = useMenuStore()
-const i18nStore = useI18nStore()
-
-// Inizializza la lingua dopo aver creato l'app
-i18nStore.initializeLocale()
-
-// Inizializza il menu se l'utente è autenticato
-if (authStore.isAuthenticated) {
-  menuStore.initialize().catch((error) => {
-    console.warn('Errore inizializzazione menu:', error)
+  // Installa i18n con traduzioni personalizzate
+  const i18n = installI18n(app, {
+    locale: getStoredLocale(),
+    fallbackLocale: 'en',
+    messages: appMessages
   })
+
+  // Inizializza gli store
+  const authStore = useAuthStore()
+  const themeStore = useThemeStore()
+  const menuStore = useMenuStore()
+  const i18nStore = useI18nStore()
+
+  // Inizializza la lingua dopo aver creato l'app
+  i18nStore.initializeLocale()
+
+  // Inizializza il menu se l'utente è autenticato
+  if (authStore.isAuthenticated) {
+    menuStore.initialize().catch((error) => {
+      console.warn('Errore inizializzazione menu:', error)
+    })
+  }
+
+  app.mount('#app')
 }
 
-app.mount('#app')
+// Avvia l'applicazione
+initializeApp().catch(error => {
+  console.error('Errore durante l\'inizializzazione dell\'app:', error)
+})

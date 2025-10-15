@@ -1,6 +1,24 @@
+// Variabile per memorizzare la base URL caricata da config.json
+let configBaseUrl: string = ''
+
+// Funzione per caricare la configurazione dal file config.json
+export const loadRuntimeConfig = async (): Promise<void> => {
+  try {
+    const response = await fetch('/config.json')
+    if (response.ok) {
+      const config = await response.json()
+      if (config.apiBaseUrl) {
+        configBaseUrl = config.apiBaseUrl
+      }
+    }
+  } catch (error) {
+    console.warn('Impossibile caricare config.json, verrà usato il valore di default', error)
+  }
+}
+
 export const API_CONFIG = {
   // URL base dell'API
-  baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://localhost:7255',
+  baseUrl: configBaseUrl || import.meta.env.VITE_API_BASE_URL || 'https://localhost:7255',
 
   // Endpoints
   endpoints: {
@@ -127,25 +145,5 @@ export const API_CONFIG = {
 
 // Configurazione per i diversi ambienti
 export const getApiConfig = () => {
-  const env = import.meta.env.MODE
-
-  switch (env) {
-    case 'development':
-      return {
-        ...API_CONFIG,
-        baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://localhost:7255',
-      }
-    case 'production':
-      return {
-        ...API_CONFIG,
-        baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://production-url.com',
-      }
-    case 'staging':
-      return {
-        ...API_CONFIG,
-        baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://staging-url.com',
-      }
-    default:
-      return API_CONFIG
-  }
+  return API_CONFIG
 }
