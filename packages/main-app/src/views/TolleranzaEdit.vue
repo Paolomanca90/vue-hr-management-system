@@ -359,6 +359,16 @@ watch(causaleAnticipo, (newVal) => {
 }, { deep: true })
 
 // Methods
+const getCausaleDescrizione = (codcau: number | null | undefined): string => {
+  if (!codcau || codcau === 0) return ''
+
+  const causale = causaliDisponibili.value.find(c =>
+    Number(c.CODCAU) === Number(codcau)
+  )
+
+  return causale ? String(causale.DESCRIZIONE || '') : ''
+}
+
 const loadCausaliDisponibili = async () => {
   try {
     const result = await lookupService.getList('causale')
@@ -394,14 +404,14 @@ const loadTolleranza = async () => {
         obbligousc: routerState.obbligousc || ''
       }
 
-      // Inizializza le causali
+      // Inizializza le causali con la descrizione dal lookup
       causaleRitardo.value = {
         codice: routerState.codcaurit ? String(routerState.codcaurit) : '',
-        descrizione: ''
+        descrizione: getCausaleDescrizione(routerState.codcaurit)
       }
       causaleAnticipo.value = {
         codice: routerState.codcauant ? String(routerState.codcauant) : '',
-        descrizione: ''
+        descrizione: getCausaleDescrizione(routerState.codcauant)
       }
     } else {
       // Fallback semplice
@@ -450,29 +460,32 @@ const handleDuplicateMode = () => {
   const duplicateCodtoll = route.query.duplicate as string
 
   if (duplicateCodtoll && !isEditMode.value) {
+    const codcaurit = Number(route.query.sourceCodcaurit) || 0
+    const codcauant = Number(route.query.sourceCodcauant) || 0
+
     tolleranzaForm.value = {
       codtoll: 0,
       descrizione: route.query.sourceDescrizione as string || '',
       minentrprima: Number(route.query.sourceMinentrprima) || 0,
       minentrdopo: Number(route.query.sourceMinentrdopo) || 0,
       minrit: Number(route.query.sourceMinrit) || 0,
-      codcaurit: Number(route.query.sourceCodcaurit) || 0,
+      codcaurit: codcaurit,
       obbligoent: route.query.sourceObbligoent as string || '',
       minuscprima: Number(route.query.sourceMinuscprima) || 0,
       minuscdopo: Number(route.query.sourceMinuscdopo) || 0,
       minant: Number(route.query.sourceMinant) || 0,
-      codcauant: Number(route.query.sourceCodcauant) || 0,
+      codcauant: codcauant,
       obbligousc: route.query.sourceObbligousc as string || ''
     }
 
-    // Inizializza le causali
+    // Inizializza le causali con la descrizione dal lookup
     causaleRitardo.value = {
-      codice: route.query.sourceCodcaurit ? String(route.query.sourceCodcaurit) : '',
-      descrizione: ''
+      codice: codcaurit ? String(codcaurit) : '',
+      descrizione: getCausaleDescrizione(codcaurit)
     }
     causaleAnticipo.value = {
-      codice: route.query.sourceCodcauant ? String(route.query.sourceCodcauant) : '',
-      descrizione: ''
+      codice: codcauant ? String(codcauant) : '',
+      descrizione: getCausaleDescrizione(codcauant)
     }
   }
 }
@@ -606,6 +619,11 @@ onMounted(async () => {
 watch(() => route.params.id, async () => {
   if (route.params.id) {
     clearMessages()
+
+    if (causaliDisponibili.value.length === 0) {
+      await loadCausaliDisponibili()
+    }
+
     if (isEditMode.value) {
       await loadTolleranza()
     } else {
