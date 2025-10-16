@@ -3,7 +3,7 @@
   <div class="space-y-6">
     <!-- Header -->
     <PageHeader
-      title="Gestione Terminali Config"
+      title="Gestione Terminali"
       :description="`Gestisci i Terminali - Totale: ${terminaliConfig.length} terminali`"
     >
       <template #actions>
@@ -27,12 +27,12 @@
           entity-name="Terminale"
           entity-name-plural="Terminali"
           id-field="codter"
-          list-route="/app/terminali-config"
-          edit-route="/app/terminali-config"
-          new-route="/app/terminali-config/new"
+          list-route="/app/terminali"
+          edit-route="/app/terminali"
+          new-route="/app/terminali/new"
           :global-filter-fields="['codter', 'descrizione']"
           search-placeholder="Cerca per codice o descrizione..."
-          export-filename="terminali-config-sistema"
+          export-filename="terminali-sistema"
           data-key="codter"
           filter-display="menu"
           scroll-height="600px"
@@ -106,9 +106,9 @@ const {
   entityName: 'Terminale',
   entityNamePlural: 'Terminali',
   idField: 'codter',
-  listRoute: '/app/terminali-config',
-  editRoute: '/app/terminali-config',
-  newRoute: '/app/terminali-config/new',
+  listRoute: '/app/terminali',
+  editRoute: '/app/terminali',
+  newRoute: '/app/terminali/new',
   deleteConfirmation: {
     title: 'Conferma eliminazione',
     message: (terminaleConfig) => `Sei sicuro di voler eliminare il Terminale \"${terminaleConfig.codter}\" - ${terminaleConfig.descrizione}?`,
@@ -143,7 +143,7 @@ const refreshTerminaliConfig = (): void => {
 }
 
 const addNewTerminaleConfig = (): void => {
-  router.push('/app/terminali-config/new')
+  router.push('/app/terminali/new')
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

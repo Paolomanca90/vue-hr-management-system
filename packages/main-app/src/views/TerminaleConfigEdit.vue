@@ -173,9 +173,9 @@ const {
 } = useCrudView<TerminaleConfig>(terminaleConfigService, {
   entityName: 'Terminale',
   idField: 'codter',
-  listRoute: '/app/terminali-config',
-  editRoute: '/app/terminali-config',
-  newRoute: '/app/terminali-config/new'
+  listRoute: '/app/terminali',
+  editRoute: '/app/terminali',
+  newRoute: '/app/terminali/new'
 })
 
 useMessageAlerts(errorMessage, successMessage)
@@ -222,7 +222,7 @@ const terminaleConfigNavigationConfig = {
   fetchAll: () => terminaleConfigService.getTerminaliConfig(),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getEntityId: (entity: any) => entity.codter,
-  basePath: '/app/terminali-config',
+  basePath: '/app/terminali',
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sortFn: (a: any, b: any) => a.codter.localeCompare(b.codter)
 }
@@ -312,7 +312,7 @@ const handleDuplicateMode = () => {
 }
 
 const goBack = () => {
-  router.push('/app/terminali-config')
+  router.push('/app/terminali')
 }
 
 const handleSave = async () => {
@@ -341,7 +341,7 @@ const handleSave = async () => {
 
       // Reindirizza alla modalità edit dopo la creazione
       setTimeout(() => {
-        router.push(`/app/terminali-config/${terminaleToSave.codter}/edit`)
+        router.push(`/app/terminali/${terminaleToSave.codter}/edit`)
       }, 1500)
     }
 
@@ -368,7 +368,7 @@ const handleDelete = async () => {
     successMessage.value = 'Terminale eliminato con successo'
 
     setTimeout(() => {
-      router.push('/app/terminali-config')
+      router.push('/app/terminali')
     }, 1500)
 
   } catch (error) {

@@ -450,12 +450,12 @@ const appRoutes: RouteRecordRaw[] = [
     }
   },
   {
-    path: 'terminali-config',
+    path: 'terminali',
     name: 'TerminaliConfig',
     component: TerminaliConfig,
   },
   {
-    path: 'terminali-config/new',
+    path: 'terminali/new',
     name: 'TerminaleConfigNew',
     component: TerminaleConfigEdit,
     meta: {
@@ -464,7 +464,7 @@ const appRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: 'terminali-config/:id/edit',
+    path: 'terminali/:id/edit',
     name: 'TerminaleConfigEdit',
     component: TerminaleConfigEdit,
     meta: {
@@ -474,7 +474,7 @@ const appRoutes: RouteRecordRaw[] = [
     beforeEnter: (to, from, next) => {
       // Verifica che l'ID sia valido
       if (to.params.id === 'new') {
-        next('/app/terminali-config/new')
+        next('/app/terminali/new')
       } else {
         next()
       }
