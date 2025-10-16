@@ -85,8 +85,8 @@ export const API_CONFIG = {
     posizioneInps: '/api/posizioneinps', //GET,POST,PUT,DELETE
 
     // Terminali Config
-    terminaliConfig: '/api/terminaliconfig', //GET,POST,PUT
-    deleteTerminaliConfig: '/api/terminaliconfig/by-key?codter=', //DELETE
+    terminaliConfig: '/api/terminali', //GET,POST,PUT
+    deleteTerminaliConfig: '/api/terminali/by-key?codter=', //DELETE
 
     // Festività
     festi: '/api/festi', //GET,POST,PUT
