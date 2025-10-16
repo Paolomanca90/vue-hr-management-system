@@ -173,8 +173,9 @@ const gruppiCausaliNavigationConfig = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getEntityId: (entity: any) => String(entity.codGrCau),
   basePath: '/app/gruppi-causali',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sortFn: (a: any, b: any) => a.codGrCau - b.codGrCau
+  entityType: 'gruppo-causale',
+  defaultSortField: 'codGrCau',
+  defaultSortOrder: 1
 }
 
 // Configurazione colonne per EditableDataGrid

@@ -337,8 +337,9 @@ const tolleranzaNavigationConfig = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getEntityId: (entity: any) => String(entity.codtoll),
   basePath: '/app/tolleranze',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sortFn: (a: any, b: any) => a.codtoll - b.codtoll
+  entityType: 'tolleranza',
+  defaultSortField: 'codtoll',
+  defaultSortOrder: 1
 }
 
 // Watch per sincronizzare le causali con il form

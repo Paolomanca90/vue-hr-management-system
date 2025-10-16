@@ -25,6 +25,7 @@
 import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
+import { useTableSort } from '@/composables/useTableSort'
 
 interface EntityItem {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,6 +36,9 @@ interface NavigationConfig {
   fetchAll: () => Promise<EntityItem[]>
   getEntityId: (entity: EntityItem) => string
   basePath: string
+  entityType?: string
+  defaultSortField?: string
+  defaultSortOrder?: number
   sortFn?: (a: EntityItem, b: EntityItem) => number
 }
 
@@ -81,9 +85,18 @@ const loadEntities = async () => {
     if (allEntities.value.length === 0) {
       const response = await props.navigationConfig.fetchAll()
       if (response && response.length > 0) {
-        if (props.navigationConfig.sortFn) {
+        if (props.navigationConfig.entityType) {
+          const { createSortFunction } = useTableSort(props.navigationConfig.entityType)
+          const sortFn = createSortFunction(
+            props.navigationConfig.defaultSortField || 'id',
+            props.navigationConfig.defaultSortOrder || 1
+          )
+          allEntities.value = response.sort(sortFn)
+        }
+        else if (props.navigationConfig.sortFn) {
           allEntities.value = response.sort(props.navigationConfig.sortFn)
-        } else {
+        }
+        else {
           allEntities.value = response.sort((a, b) =>
             props.navigationConfig!.getEntityId(a).localeCompare(props.navigationConfig!.getEntityId(b))
           )

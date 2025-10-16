@@ -22,6 +22,7 @@
       <div class="card-body max-md:p-3">
         <!-- Data Table Manager -->
         <DataTableManager
+          entity-type="user"
           :service="userService as unknown as FlexibleCrudService"
           :columns="tableColumns"
           entity-name="Utente"

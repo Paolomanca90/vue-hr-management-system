@@ -100,8 +100,9 @@ const centroCostoNavigationConfig = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getEntityId: (centroCosto: any) => centroCosto.id,
   basePath: '/app/centri-costo',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-  sortFn: (_a: any, _b: any) => 0
+  entityType: 'centro-costo',
+  defaultSortField: 'codCenco',
+  defaultSortOrder: 1
 }
 
 // Methods

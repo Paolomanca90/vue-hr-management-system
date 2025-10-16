@@ -143,8 +143,9 @@ const patNavigationConfig = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getEntityId: (entity: any) => entity.id,
   basePath: '/app/pat',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sortFn: (a: any, b: any) => a.codicePat - b.codicePat
+  entityType: 'pat',
+  defaultSortField: 'codicePat',
+  defaultSortOrder: 1
 }
 
 // Methods

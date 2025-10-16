@@ -166,8 +166,9 @@ const sedeNavigationConfig = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getEntityId: (sede: any) => sede.id,
   basePath: '/app/sedi',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-  sortFn: (_a: any, _b: any) => 0
+  entityType: 'sede',
+  defaultSortField: 'codSedeAz',
+  defaultSortOrder: 1
 }
 
 const anagraficaFields: AnagraficaField[] = []

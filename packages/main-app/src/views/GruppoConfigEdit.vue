@@ -184,7 +184,10 @@ const isFormValid = computed(() => {
 const gruppoNavigationConfig = {
   fetchAll: () => gruppiConfigService.getTabGruppiConfig(),
   getEntityId: (gruppo: unknown) => (gruppo as GruppoConfig).codgruppo.toString(),
-  basePath: '/app/gruppi-config'
+  basePath: '/app/gruppi-config',
+  entityType: 'gruppo-config',
+  defaultSortField: 'codgruppo',
+  defaultSortOrder: 1
 }
 
 // Methods

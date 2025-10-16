@@ -54,7 +54,10 @@ const navigationConfig = {
     return await accessiService.getTabAccessi()
   },
   getEntityId: (entity: unknown) => (entity as Accesso).codice,
-  basePath: '/app/accessi'
+  basePath: '/app/accessi',
+  entityType: 'accesso',
+  defaultSortField: 'codice',
+  defaultSortOrder: 1
 }
 
 // Methods

@@ -46,6 +46,7 @@
           :columns="columns"
           entity-name="Dipendente"
           entity-name-plural="Dipendenti"
+          entity-type="dipendente"
           id-field="id"
           list-route="/app/anagrafica-dipendente"
           edit-route="/app/anagrafica-dipendente"

@@ -159,8 +159,9 @@ const festiCcnlNavigationConfig = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getEntityId: (entity: any) => String(entity.id),
   basePath: '/app/festi-ccnl',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sortFn: (a: any, b: any) => a.anno - b.anno
+  entityType: 'festi-ccnl',
+  defaultSortField: 'anno',
+  defaultSortOrder: 1
 }
 
 const loadLookupData = async () => {

@@ -134,8 +134,9 @@ const posizioneInpsNavigationConfig = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getEntityId: (entity: any) => entity.id,
   basePath: '/app/posizioni-inps',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sortFn: (a: any, b: any) => a.posInps - b.posInps
+  entityType: 'posizione-inps',
+  defaultSortField: 'posInps',
+  defaultSortOrder: 1
 }
 
 // Methods

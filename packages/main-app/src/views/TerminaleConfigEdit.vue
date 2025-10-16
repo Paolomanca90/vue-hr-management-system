@@ -223,8 +223,9 @@ const terminaleConfigNavigationConfig = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getEntityId: (entity: any) => entity.codter,
   basePath: '/app/terminali',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sortFn: (a: any, b: any) => a.codter.localeCompare(b.codter)
+  entityType: 'terminale-config',
+  defaultSortField: 'codter',
+  defaultSortOrder: 1
 }
 
 // Methods

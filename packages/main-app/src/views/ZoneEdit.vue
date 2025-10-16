@@ -164,8 +164,9 @@ const zoneNavigationConfig = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getEntityId: (entity: any) => String(entity.codZona),
   basePath: '/app/zone',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sortFn: (a: any, b: any) => a.codZona - b.codZona
+  entityType: 'zona',
+  defaultSortField: 'codZona',
+  defaultSortOrder: 1
 }
 
 // Methods

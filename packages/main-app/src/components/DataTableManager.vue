@@ -29,6 +29,7 @@
       :rows="rows"
       :rowsPerPageOptions="rowsPerPageOptions"
       actionColumnWidth="140px"
+      @sort="onSort"
     >
       <!-- Slot per colonne personalizzate -->
       <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
@@ -87,6 +88,7 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { PrimeDataTable, FaIcon } from '@presenze-in-web-frontend/core-lib'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { useCrudView, type FlexibleCrudService, type CrudEntity, type CrudViewOptions } from '@/composables/useCrudView'
+import { useTableSort } from '@/composables/useTableSort'
 import SimpleConfirmDialog from './SimpleConfirmDialog.vue'
 
 export interface TableColumn {
@@ -104,6 +106,7 @@ interface Props {
   columns: TableColumn[]
   entityName: string
   entityNamePlural?: string
+  entityType?: string // Used for storing sort settings (default: lowercase entityName)
   idField?: keyof CrudEntity
   listRoute?: string
   editRoute?: string
@@ -148,6 +151,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   entityNamePlural: undefined,
+  entityType: undefined,
   idField: 'id' as keyof CrudEntity,
   selectionMode: 'single',
   dataKey: 'id',
@@ -178,7 +182,18 @@ const emit = defineEmits<{
   'edit': [entity: CrudEntity]
   'delete': [entity: CrudEntity]
   'duplicate': [entity: CrudEntity]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  'sort': [event: any]
 }>()
+
+const entityTypeValue = computed(() => props.entityType || props.entityName.toLowerCase())
+const { handleSortEvent } = useTableSort(entityTypeValue.value)
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const onSort = (event: any) => {
+  handleSortEvent(event)
+  emit('sort', event)
+}
 
 const crudOptions: CrudViewOptions<CrudEntity> = {
   entityName: props.entityName,

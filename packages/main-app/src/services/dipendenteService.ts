@@ -112,9 +112,14 @@ export interface Familiare {
   codAzi: number
   codDip: number
   codice: number
-  codFisc: string
-  cognome: string
-  nome: string
+  codFisc: string | null
+  cognome: string | null
+  nome: string | null
+  sesso: string | null
+  dataNasc: string | null
+  comNasc: string | null
+  provNasc: string | null
+  codComune: string | null
 }
 
 export interface DettaglioDipendente {

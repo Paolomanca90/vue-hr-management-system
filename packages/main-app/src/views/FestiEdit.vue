@@ -236,8 +236,9 @@ const festiNavigationConfig = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getEntityId: (entity: any) => String(entity.anno),
   basePath: '/app/festi',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sortFn: (a: any, b: any) => a.anno - b.anno
+  entityType: 'festi',
+  defaultSortField: 'anno',
+  defaultSortOrder: 1
 }
 
 

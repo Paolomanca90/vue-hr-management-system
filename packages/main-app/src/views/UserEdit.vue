@@ -363,7 +363,10 @@ const userNavigationConfig = {
   fetchAll: () => userService.getUsers(),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getEntityId: (user: any) => user.username,
-  basePath: '/app/users'
+  basePath: '/app/users',
+  entityType: 'user',
+  defaultSortField: 'username',
+  defaultSortOrder: 1
 }
 
 const isFormValid = computed(() => {

@@ -22,6 +22,7 @@
       <div class="card-body max-md:p-3">
         <!-- Data Table Manager -->
         <DataTableManager
+          entity-type="centro-costo"
           :service="centriCostoService as unknown as FlexibleCrudService"
           :columns="tableColumns"
           entity-name="Centro di Costo"

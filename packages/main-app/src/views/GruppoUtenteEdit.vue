@@ -222,7 +222,10 @@ const gruppoNavigationConfig = {
     return response || []
   },
   getEntityId: (gruppo: unknown) => (gruppo as { codice: string }).codice,
-  basePath: '/app/gruppi-utente'
+  basePath: '/app/gruppi-utente',
+  entityType: 'gruppo-utente',
+  defaultSortField: 'codice',
+  defaultSortOrder: 1
 }
 
 const isFormValid = computed(() => {

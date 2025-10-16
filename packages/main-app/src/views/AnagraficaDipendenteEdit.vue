@@ -1272,8 +1272,9 @@ const dipendenteNavigationConfig = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getEntityId: (dipendente: any) => `${aziendaId.value}-${dipendente.codDip}`,
   basePath: '/app/anagrafica-dipendente',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sortFn: (a: any, b: any) => a.codDip - b.codDip
+  entityType: 'dipendente',
+  defaultSortField: 'codDip',
+  defaultSortOrder: 1
 }
 
 const badgeList = computed((): BadgeWithPlaceholder[] => {
@@ -1564,6 +1565,32 @@ const loadDipendente = async () => {
         dipendente.value.datiAzi.listaBadge = []
       }
 
+      if (!dipendente.value.codUte) {
+        dipendente.value.codUte = {
+          codUtente1: '',
+          codUtente2: '',
+          codUtente3: '',
+          codUtente4: '',
+          codUtente5: '',
+          codUtente6: '',
+          codUtente7: '',
+          codUtente8: '',
+          codUtente9: '',
+          codUtente10: ''
+        }
+      } else {
+        dipendente.value.codUte.codUtente1 = dipendente.value.codUte.codUtente1 || ''
+        dipendente.value.codUte.codUtente2 = dipendente.value.codUte.codUtente2 || ''
+        dipendente.value.codUte.codUtente3 = dipendente.value.codUte.codUtente3 || ''
+        dipendente.value.codUte.codUtente4 = dipendente.value.codUte.codUtente4 || ''
+        dipendente.value.codUte.codUtente5 = dipendente.value.codUte.codUtente5 || ''
+        dipendente.value.codUte.codUtente6 = dipendente.value.codUte.codUtente6 || ''
+        dipendente.value.codUte.codUtente7 = dipendente.value.codUte.codUtente7 || ''
+        dipendente.value.codUte.codUtente8 = dipendente.value.codUte.codUtente8 || ''
+        dipendente.value.codUte.codUtente9 = dipendente.value.codUte.codUtente9 || ''
+        dipendente.value.codUte.codUtente10 = dipendente.value.codUte.codUtente10 || ''
+      }
+
       normalizeSelectValues()
       ensureBadgesInitialized()
       ensurePatsInitialized()
@@ -1619,64 +1646,78 @@ const handleSave = async () => {
 
   saving.value = true
   try {
-    // Helper function per convertire stringhe vuote in null per le date
-    const cleanDateString = (date: string | null | undefined): string | null => {
+    // Helper function per normalizzare date in formato ISO
+    const normalizeDate = (date: string | null | undefined): string | null => {
       if (!date || date.trim() === '') return null
-      return date
-    }
 
-    // Helper function per convertire stringhe vuote in null
-    const cleanString = (value: string | null | undefined): string | null => {
-      if (!value || value.trim() === '') return null
-      return value
+      try {
+        // Se è in formato europeo dd/MM/yyyy, convertiamo in ISO
+        if (date.includes('/')) {
+          const [day, month, year] = date.split('/')
+          const dateObj = new Date(`${year}-${month}-${day}`)
+          if (isNaN(dateObj.getTime())) return null
+          return dateObj.toISOString()
+        }
+
+        // Se è già in formato ISO o altro formato riconoscibile
+        const dateObj = new Date(date)
+        if (isNaN(dateObj.getTime())) return null
+        return dateObj.toISOString()
+      } catch {
+        return null
+      }
     }
 
     const dipendenteToSave = {
       ...dipendente.value,
       datiAzi: {
         ...dipendente.value.datiAzi,
-        dataAssunz: cleanDateString(dipendente.value.datiAzi.dataAssunz),
-        dataAssunzioneConvenzionale: cleanDateString(dipendente.value.datiAzi.dataAssunzioneConvenzionale),
-        dataCessazione: cleanDateString(dipendente.value.datiAzi.dataCessazione),
+        dataAssunz: normalizeDate(dipendente.value.datiAzi.dataAssunz),
+        dataAssunzioneConvenzionale: normalizeDate(dipendente.value.datiAzi.dataAssunzioneConvenzionale),
+        dataCessazione: normalizeDate(dipendente.value.datiAzi.dataCessazione),
         listaBadge: dipendente.value.datiAzi.listaBadge
           .filter(badge => badge.codBadge > 0)
           .map(badge => ({
             ...badge,
-            dal: cleanDateString(badge.dal),
-            al: cleanDateString(badge.al)
+            dal: normalizeDate(badge.dal),
+            al: normalizeDate(badge.al)
           })),
         listaPAT: dipendente.value.datiAzi.listaPAT
           .filter(pat => pat.codPat > 0)
           .map(pat => ({
             ...pat,
-            dal: cleanDateString(pat.dal),
-            al: cleanDateString(pat.al)
+            dal: normalizeDate(pat.dal),
+            al: normalizeDate(pat.al)
           })),
         listaGrpConfig: (dipendente.value.datiAzi.listaGrpConfig || [])
           .filter(grp => grp.codGruppo && grp.codGruppo > 0)
           .map(grp => ({
             ...grp,
             codGruppo: grp.codGruppo || null,
-            dal: cleanDateString(grp.dal),
-            al: cleanDateString(grp.al)
+            dal: normalizeDate(grp.dal),
+            al: normalizeDate(grp.al)
           }))
       },
       datiPers: {
         ...dipendente.value.datiPers,
-        dataNas: cleanDateString(dipendente.value.datiPers.dataNas)
+        dataNas: normalizeDate(dipendente.value.datiPers.dataNas)
       },
       codUte: {
-        codUtente1: cleanString(dipendente.value.codUte.codUtente1),
-        codUtente2: cleanString(dipendente.value.codUte.codUtente2),
-        codUtente3: cleanString(dipendente.value.codUte.codUtente3),
-        codUtente4: cleanString(dipendente.value.codUte.codUtente4),
-        codUtente5: cleanString(dipendente.value.codUte.codUtente5),
-        codUtente6: cleanString(dipendente.value.codUte.codUtente6),
-        codUtente7: cleanString(dipendente.value.codUte.codUtente7),
-        codUtente8: cleanString(dipendente.value.codUte.codUtente8),
-        codUtente9: cleanString(dipendente.value.codUte.codUtente9),
-        codUtente10: cleanString(dipendente.value.codUte.codUtente10)
-      }
+        codUtente1: dipendente.value.codUte.codUtente1 || null,
+        codUtente2: dipendente.value.codUte.codUtente2 || null,
+        codUtente3: dipendente.value.codUte.codUtente3 || null,
+        codUtente4: dipendente.value.codUte.codUtente4 || null,
+        codUtente5: dipendente.value.codUte.codUtente5 || null,
+        codUtente6: dipendente.value.codUte.codUtente6 || null,
+        codUtente7: dipendente.value.codUte.codUtente7 || null,
+        codUtente8: dipendente.value.codUte.codUtente8 || null,
+        codUtente9: dipendente.value.codUte.codUtente9 || null,
+        codUtente10: dipendente.value.codUte.codUtente10 || null
+      },
+      familiari: (dipendente.value.familiari || []).map(familiare => ({
+        ...familiare,
+        dataNasc: normalizeDate(familiare.dataNasc)
+      }))
     } as DettaglioDipendente
 
     if (isEditMode.value) {
@@ -1752,9 +1793,14 @@ const addNewFamiliare = () => {
     codAzi: dipendente.value.codAzi,
     codDip: dipendente.value.codDip,
     codice: dipendente.value.familiari.length + 1,
-    codFisc: '',
-    cognome: '',
-    nome: ''
+    codFisc: null,
+    cognome: null,
+    nome: null,
+    sesso: null,
+    dataNasc: null,
+    comNasc: null,
+    provNasc: null,
+    codComune: null
   }
 
   dipendente.value.familiari.push(newFamiliare)

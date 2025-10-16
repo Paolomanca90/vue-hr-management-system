@@ -225,8 +225,9 @@ const filialeNavigationConfig = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getEntityId: (filiale: any) => filiale.id,
   basePath: '/app/filiali',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-  sortFn: (_a: any, _b: any) => 0
+  entityType: 'filiale',
+  defaultSortField: 'codCant',
+  defaultSortOrder: 1
 }
 
 const anagraficaFields: AnagraficaField[] = []

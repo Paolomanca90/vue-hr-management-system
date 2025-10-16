@@ -270,8 +270,9 @@ const aziendaNavigationConfig = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getEntityId: (azienda: any) => String(azienda.codAzi),
   basePath: '/app/aziende',
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-  sortFn: (_a: any, _b: any) => 0
+  entityType: 'azienda',
+  defaultSortField: 'codAzi',
+  defaultSortOrder: 1
 }
 
 const anagraficaFields: AnagraficaField[] = []

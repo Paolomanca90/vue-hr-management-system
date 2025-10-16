@@ -51,7 +51,10 @@ const filtroId = computed(() => route.params.id as string)
 const filtroNavigationConfig = {
   fetchAll: () => filtriService.getTabFiltri(),
   getEntityId: (filtro: unknown) => (filtro as { codice: string }).codice,
-  basePath: '/app/filtri'
+  basePath: '/app/filtri',
+  entityType: 'filtro',
+  defaultSortField: 'codice',
+  defaultSortOrder: 1
 }
 
 // Methods

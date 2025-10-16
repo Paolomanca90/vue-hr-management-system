@@ -22,6 +22,7 @@
       <div class="card-body max-md:p-3">
         <!-- Data Table Manager -->
         <DataTableManager
+          entity-type="tolleranza"
           :service="tolleranzeService as unknown as FlexibleCrudService"
           :columns="tableColumns"
           entity-name="Tolleranza"
