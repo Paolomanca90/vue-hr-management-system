@@ -89,6 +89,7 @@ import { PrimeDataTable, FaIcon } from '@presenze-in-web-frontend/core-lib'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { useCrudView, type FlexibleCrudService, type CrudEntity, type CrudViewOptions } from '@/composables/useCrudView'
 import { useTableSort } from '@/composables/useTableSort'
+import { useTableFilter } from '@/composables/useTableFilter'
 import SimpleConfirmDialog from './SimpleConfirmDialog.vue'
 
 export interface TableColumn {
@@ -188,6 +189,7 @@ const emit = defineEmits<{
 
 const entityTypeValue = computed(() => props.entityType || props.entityName.toLowerCase())
 const { handleSortEvent } = useTableSort(entityTypeValue.value)
+const { getFilterSettings, handleFilterEvent } = useTableFilter(entityTypeValue.value)
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const onSort = (event: any) => {
@@ -270,6 +272,15 @@ const initializeFilters = () => {
     }
   })
 
+  const savedFilters = getFilterSettings()
+  if (savedFilters) {
+    Object.entries(savedFilters).forEach(([field, savedFilter]) => {
+      if (initialFilters[field]) {
+        initialFilters[field] = savedFilter
+      }
+    })
+  }
+
   filters.value = initialFilters
 }
 
@@ -280,6 +291,12 @@ onMounted(async () => {
 
 watch(() => props.service, async () => {
   await loadData()
+}, { deep: true })
+
+watch(filters, (newFilters) => {
+  if (newFilters && Object.keys(newFilters).length > 0) {
+    handleFilterEvent({ filters: newFilters })
+  }
 }, { deep: true })
 
 defineExpose({

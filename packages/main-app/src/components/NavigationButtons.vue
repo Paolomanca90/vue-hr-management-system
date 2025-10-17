@@ -26,6 +26,7 @@ import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import { useTableSort } from '@/composables/useTableSort'
+import { useTableFilter } from '@/composables/useTableFilter'
 
 interface EntityItem {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -82,29 +83,40 @@ const loadEntities = async () => {
 
   loading.value = true
   try {
-    if (allEntities.value.length === 0) {
-      const response = await props.navigationConfig.fetchAll()
-      if (response && response.length > 0) {
-        if (props.navigationConfig.entityType) {
-          const { createSortFunction } = useTableSort(props.navigationConfig.entityType)
-          const sortFn = createSortFunction(
-            props.navigationConfig.defaultSortField || 'id',
-            props.navigationConfig.defaultSortOrder || 1
-          )
-          allEntities.value = response.sort(sortFn)
-        }
-        else if (props.navigationConfig.sortFn) {
-          allEntities.value = response.sort(props.navigationConfig.sortFn)
-        }
-        else {
-          allEntities.value = response.sort((a, b) =>
-            props.navigationConfig!.getEntityId(a).localeCompare(props.navigationConfig!.getEntityId(b))
-          )
+    let response = await props.navigationConfig.fetchAll()
+
+    if (response && response.length > 0) {
+      if (props.navigationConfig.entityType) {
+        const { getFilterSettings, applyFilters } = useTableFilter(props.navigationConfig.entityType)
+        const savedFilters = getFilterSettings()
+
+        if (savedFilters) {
+          response = applyFilters(response, savedFilters)
         }
       }
+
+      if (props.navigationConfig.entityType) {
+        const { createSortFunction } = useTableSort(props.navigationConfig.entityType)
+        const sortFn = createSortFunction(
+          props.navigationConfig.defaultSortField || 'id',
+          props.navigationConfig.defaultSortOrder || 1
+        )
+        allEntities.value = response.sort(sortFn)
+      }
+      else if (props.navigationConfig.sortFn) {
+        allEntities.value = response.sort(props.navigationConfig.sortFn)
+      }
+      else {
+        allEntities.value = response.sort((a, b) =>
+          props.navigationConfig!.getEntityId(a).localeCompare(props.navigationConfig!.getEntityId(b))
+        )
+      }
+    } else {
+      allEntities.value = []
     }
   } catch (error) {
     console.error('Error loading entities for navigation:', error)
+    allEntities.value = []
   } finally {
     loading.value = false
   }
