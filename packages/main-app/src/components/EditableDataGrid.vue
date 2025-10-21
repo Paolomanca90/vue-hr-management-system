@@ -89,6 +89,19 @@
             />
           </template>
 
+          <template v-else-if="col.type === 'time'">
+            <!-- Time (HH:MM con conversione automatica) -->
+            <input
+              :value="slotProps.data[col.field]"
+              @input="(e: Event) => updateValue(slotProps.data, col.field, (e.target as HTMLInputElement).value)"
+              @blur="(e: Event) => handleTimeBlur(slotProps.data, col.field, (e.target as HTMLInputElement).value)"
+              type="text"
+              placeholder="HH:MM"
+              class="input input-bordered input-sm w-full"
+              :disabled="disabled"
+            />
+          </template>
+
           <template v-else>
             <!-- Text -->
             <input
@@ -99,9 +112,6 @@
               :disabled="disabled"
             />
           </template>
-
-
-
 
         </template>
       </Column>
@@ -206,7 +216,7 @@ export interface GridRow {
 export interface GridColumn {
   field: string
   header: string
-  type: 'text' | 'number' | 'date' | 'dropdown' | 'lookup'
+  type: 'text' | 'number' | 'date' | 'dropdown' | 'lookup' | 'time'
   width?: string
   editable?: boolean
   dropdownOptions?: Array<{ value: number | string; label: string }>
@@ -581,6 +591,55 @@ const updateValue = (row: GridRow, field: string, value: string | number) => {
     ]
     emitChanges()
   }
+}
+
+// Funzione per gestire il blur sui campi time con conversione intelligente
+const handleTimeBlur = (row: GridRow, field: string, value: string) => {
+  if (!value || !value.trim()) {
+    updateValue(row, field, '')
+    return
+  }
+
+  const timeStr = String(value).trim()
+
+  // Se contiene già ':', controlla il formato
+  if (timeStr.includes(':')) {
+    const [hours, minutes] = timeStr.split(':').map(part => parseInt(part) || 0)
+    const formatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+    updateValue(row, field, formatted)
+    return
+  }
+
+  // Altrimenti applica logica intelligente
+  const numStr = timeStr.replace(/[^0-9]/g, '')
+  if (!numStr) {
+    updateValue(row, field, '')
+    return
+  }
+
+  const num = parseInt(numStr)
+
+  // Se il numero è tra 0 e 23, è un'ora (es: 12 -> 12:00)
+  if (num >= 0 && num <= 23) {
+    updateValue(row, field, `${String(num).padStart(2, '0')}:00`)
+    return
+  }
+
+  // Se il numero è tra 100 e 2359, è nel formato HHMM (es: 745 -> 07:45)
+  if (num >= 100 && num <= 2359) {
+    const hours = Math.floor(num / 100)
+    const minutes = num % 100
+    if (minutes < 60) {
+      updateValue(row, field, `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`)
+    } else {
+      // Minuti non validi, lascia il valore originale
+      updateValue(row, field, timeStr)
+    }
+    return
+  }
+
+  // Altrimenti lascia il valore come è (potrebbe essere minuti o altro)
+  updateValue(row, field, timeStr)
 }
 
 const stopEditing = () => {

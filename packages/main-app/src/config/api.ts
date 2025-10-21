@@ -110,6 +110,10 @@ export const API_CONFIG = {
     tolleranze: '/api/tolleranze', //GET,POST,PUT
     deleteTolleranza: '/api/tolleranze/by-key?codtoll=', //DELETE
 
+    // Cambio Orario
+    cambiOrario: '/api/cambioorario', //GET,DELETE
+    getCambioOrarioDettaglio: '/api/cambioorario/getdett', //GET
+
     // Dipendente
     getCampiDipendente: '/api/dipendente/GetCampiDipendente',
     getValoriCampo: '/api/dipendente/GetValoriCampo',

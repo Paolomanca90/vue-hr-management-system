@@ -390,6 +390,44 @@ export const contrattoLookupConfig: LookupInputConfig = {
   })
 }
 
+// Configurazione per Orari
+export const orarioLookupConfig: LookupInputConfig = {
+  lookupType: 'orario',
+  autoCompleteField: 'codice',
+  keyField: 'CODORA',
+  fields: [
+    {
+      key: 'codice',
+      label: 'Codice',
+      editable: true,
+      colSpan: 3
+    },
+    {
+      key: 'descrizione',
+      label: 'Descrizione',
+      editable: false,
+      hasLookup: true,
+      colSpan: 9
+    }
+  ],
+  modalConfig: {
+    title: 'Seleziona Orario',
+    searchPlaceholder: 'Cerca per codice o descrizione...',
+    columns: [
+      { key: 'CODORA', label: 'Codice', primary: true },
+      { key: 'DESCRIZIONE', label: 'Descrizione' }
+    ],
+    searchFields: ['CODORA', 'DESCRIZIONE'],
+    keyField: 'CODORA',
+    loadingMessage: 'Caricamento orari...'
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mapper: (item: any) => ({
+    codice: String(item.CODORA || ''),
+    descrizione: item.DESCRIZIONE || ''
+  })
+}
+
 // Funzione helper per creare configurazioni personalizzate
 export function createLookupConfig(
   lookupType: string,

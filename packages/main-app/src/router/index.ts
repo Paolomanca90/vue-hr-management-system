@@ -46,6 +46,8 @@ import GruppiCausali from '@/views/GruppiCausali.vue'
 import GruppiCausaliEdit from '@/views/GruppiCausaliEdit.vue'
 import Tolleranze from '@/views/Tolleranze.vue'
 import TolleranzaEdit from '@/views/TolleranzaEdit.vue'
+import CambiOrario from '@/views/CambiOrario.vue'
+import CambioOrarioEdit from '@/views/CambioOrarioEdit.vue'
 import AnagraficaDipendente from '@/views/AnagraficaDipendente.vue'
 import AnagraficaDipendenteEdit from '@/views/AnagraficaDipendenteEdit.vue'
 
@@ -625,6 +627,36 @@ const appRoutes: RouteRecordRaw[] = [
     beforeEnter: (to, from, next) => {
       if (to.params.id === 'new') {
         next('/app/tolleranze/new')
+      } else {
+        next()
+      }
+    }
+  },
+  {
+    path: 'cambio-orario',
+    name: 'CambiOrario',
+    component: CambiOrario,
+  },
+  {
+    path: 'cambio-orario/new',
+    name: 'CambioOrarioNew',
+    component: CambioOrarioEdit,
+    meta: {
+      title: 'Nuovo Cambio Orario',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: 'cambio-orario/:id/edit',
+    name: 'CambioOrarioEdit',
+    component: CambioOrarioEdit,
+    meta: {
+      title: 'Modifica Cambio Orario',
+      requiresAuth: true,
+    },
+    beforeEnter: (to, from, next) => {
+      if (to.params.id === 'new') {
+        next('/app/cambio-orario/new')
       } else {
         next()
       }
