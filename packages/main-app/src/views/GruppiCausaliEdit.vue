@@ -3,7 +3,6 @@
     <!-- Page Header -->
     <PageHeader
       :title="isEditMode ? `Modifica Gruppo Causale: ${gruppoCausaleForm.descrizione}` : 'Nuovo Gruppo Causale'"
-      :description="isEditMode ? 'Modifica i dati del gruppo causale e le causali associate' : 'Crea un nuovo gruppo causale con le relative causali'"
     >
       <template #actions>
         <button

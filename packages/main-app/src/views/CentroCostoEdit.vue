@@ -3,7 +3,6 @@
     <!-- Page Header -->
     <PageHeader
       :title="isEditMode ? `Modifica Centro di Costo: ${centroCosto.codCenco}` : 'Nuovo Centro di Costo'"
-      :description="isEditMode ? 'Modifica i dettagli del centro di costo selezionato' : 'Crea un nuovo centro di costo nel sistema'"
     >
       <template #actions>
         <button

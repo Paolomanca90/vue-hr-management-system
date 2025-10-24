@@ -3,7 +3,6 @@
     <!-- Page Header -->
     <PageHeader
       :title="isEditMode ? `Modifica Tolleranza: ${tolleranzaForm.codtoll}` : 'Nuova Tolleranza'"
-      :description="isEditMode ? 'Modifica i dettagli della Tolleranza selezionata' : 'Crea una nuova Tolleranza nel sistema'"
     >
       <template #actions>
         <button

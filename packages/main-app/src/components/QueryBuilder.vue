@@ -3,7 +3,6 @@
     <!-- Header -->
     <PageHeader
       :title="isEditMode ? `Modifica ${entityName}` : `Nuovo ${entityName}`"
-      :description="isEditMode ? `Modifica i dati del ${entityName.toLowerCase()}: ${formData.codice}` : `Inserisci i dati del nuovo ${entityName.toLowerCase()}`"
     >
       <template #actions>
         <button

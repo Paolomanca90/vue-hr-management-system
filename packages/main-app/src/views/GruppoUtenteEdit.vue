@@ -4,7 +4,6 @@
     <!-- Header con breadcrumb -->
     <PageHeader
       :title="isEditMode ? 'Modifica Gruppo Utente' : 'Nuovo Gruppo Utente'"
-      :description="isEditMode ? `Modifica i dati del gruppo: ${gruppoForm.codice}` : 'Inserisci i dati del nuovo gruppo utente'"
     >
       <template #actions>
         <button

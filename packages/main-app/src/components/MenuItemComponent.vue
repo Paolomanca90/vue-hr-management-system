@@ -16,7 +16,7 @@
           :icon="menuService.convertCssIconToFontAwesome(item.icon)"
           class="text-sm mr-3"
         />
-        <span class="font-medium flex-1" v-html="highlightSearchTerm(item.label)"></span>
+        <span class="text-sm flex-1" v-html="highlightSearchTerm(item.label)"></span>
       </div>
 
       <!-- Sottomenu (visibile solo quando expanded è true) -->
@@ -49,7 +49,7 @@
         :icon="menuService.convertCssIconToFontAwesome(item.icon)"
         class="text-sm mr-3"
       />
-      <span class="font-medium flex-1" v-html="highlightSearchTerm(item.label)"></span>
+      <span class="text-sm flex-1" v-html="highlightSearchTerm(item.label)"></span>
 
       <!-- Stellina per preferiti (solo per le foglie) -->
       <button
@@ -87,7 +87,7 @@
         :icon="menuService.convertCssIconToFontAwesome(item.icon)"
         class="text-sm mr-3"
       />
-      <span class="font-medium flex-1" v-html="highlightSearchTerm(item.label)"></span>
+      <span class="text-sm flex-1" v-html="highlightSearchTerm(item.label)"></span>
 
       <!-- Stellina per preferiti (anche per foglie senza route) -->
       <button

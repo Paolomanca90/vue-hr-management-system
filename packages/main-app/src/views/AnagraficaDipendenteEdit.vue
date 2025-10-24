@@ -3,7 +3,6 @@
     <!-- Page Header -->
     <PageHeader
       :title="`Anagrafica Dipendente: ${dipendente?.cognome || ''} ${dipendente?.nome || ''}`"
-      :description="`Gestione completa dell'anagrafica dipendente - Codice: ${dipendente?.codDip || ''}`"
     >
       <template #actions>
         <button

@@ -3,7 +3,6 @@
     <!-- Page Header -->
     <PageHeader
       :title="isEditMode ? `Modifica Zona: ${zonaForm.descrizione}` : 'Nuova Zona'"
-      :description="isEditMode ? 'Modifica i dati della zona e i terminali associati' : 'Crea una nuova zona con i relativi terminali'"
     >
       <template #actions>
         <button

@@ -14,34 +14,16 @@
         }"
       >
         <!-- Header della sidebar -->
-        <div class="p-4 border-b border-base-300">
-          <div class="flex items-center mb-4">
-            <div class="mr-3">
+        <div class="p-2 border-b border-base-300">
+          <div class="flex items-center mb-1" :class="sidenavOpened ? '' : 'justify-center'">
+            <div :class="sidenavOpened ? 'mr-3' : ''">
               <img src="@/assets/logo.svg" alt="logo" class="w-8 h-8 mx-2" />
             </div>
             <div v-if="sidenavOpened" class="text-base-content">
-              <h2 class="text-lg font-bold">HR System</h2>
-              <p class="text-base-content/70 text-sm">
-                {{ authStore.isCompanyUser ? 'Gestione Aziendale' : 'Portale Dipendente' }}
+              <h2 class="text-md font-bold">HR System</h2>
+              <p v-if="authStore.currentUser" class="text-base-content/70 text-sm">
+                {{ authStore.currentUser.company }}
               </p>
-            </div>
-          </div>
-
-          <!-- Info utente -->
-          <div v-if="authStore.currentUser && sidenavOpened" class="bg-base-200 rounded-lg p-3">
-            <div class="flex items-center">
-              <div class="avatar placeholder mr-3">
-                <div class="bg-primary text-primary-content rounded-full w-8">
-                  <FaIcon icon="user" class="text-lg" />
-                </div>
-              </div>
-              <div class="text-base-content flex-1 min-w-0">
-                <div class="font-medium truncate">{{ authStore.currentUser.username }}</div>
-                <div class="text-base-content/70 text-sm truncate">
-                  {{ authStore.currentUser.company }}
-                </div>
-                <div class="text-xs text-primary capitalize">{{ authStore.currentUser.role }}</div>
-              </div>
             </div>
           </div>
         </div>
@@ -318,19 +300,19 @@
       <!-- Navbar -->
       <div class="navbar bg-base-100 shadow-sm border-b border-base-300">
         <div class="flex-none lg:hidden">
-          <label for="drawer-toggle" class="btn btn-square btn-ghost">
+          <label for="drawer-toggle" class="btn btn-square btn-ghost btn-sm">
             <FaIcon icon="bars" class="text-lg" />
           </label>
         </div>
 
         <div class="flex-none hidden lg:block">
           <button class="btn btn-square btn-ghost" @click="toggleSidenav">
-            <FaIcon icon="bars" class="text-lg" />
+            <FaIcon icon="bars" class="text-md" />
           </button>
         </div>
 
         <div class="flex-1">
-          <span class="text-lg lg:text-xl font-semibold ml-2">
+          <span class="text-lg font-semibold">
             HR Management System
             <span class="text-sm text-base-content/60">
               - {{ authStore.isCompanyUser ? 'Pannello Aziendale' : 'Portale Dipendente' }}

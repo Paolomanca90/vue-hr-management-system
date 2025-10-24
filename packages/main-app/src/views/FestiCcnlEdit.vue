@@ -3,7 +3,6 @@
     <!-- Page Header -->
     <PageHeader
       :title="isEditMode ? `Modifica Festività CCNL Anno: ${festiForm.anno}` : 'Nuova Festività CCNL'"
-      :description="isEditMode ? 'Modifica le festività CCNL per l\'anno selezionato' : 'Crea nuove festività CCNL per un anno'"
     >
       <template #actions>
         <button

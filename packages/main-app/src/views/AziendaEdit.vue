@@ -3,7 +3,6 @@
     <!-- Page Header -->
     <PageHeader
       :title="isEditMode ? `Modifica Azienda: ${azienda?.ragSoc || azienda?.codAzi}` : 'Nuova Azienda'"
-      :description="isEditMode ? 'Modifica i dettagli dell\'azienda selezionata' : 'Crea una nuova azienda nel sistema'"
     >
       <template #actions>
         <button

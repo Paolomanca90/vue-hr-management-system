@@ -3,7 +3,6 @@
     <!-- Page Header -->
     <PageHeader
       :title="isEditMode ? `Modifica Reparto: ${reparto.codReparto}` : 'Nuovo Reparto'"
-      :description="isEditMode ? 'Modifica i dettagli del reparto selezionato' : 'Crea un nuovo reparto nel sistema'"
     >
       <template #actions>
         <button

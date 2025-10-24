@@ -1,10 +1,9 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div class="space-y-6">
-    <!-- Header con breadcrumb -->
+    <!-- Header -->
     <PageHeader
       :title="isEditMode ? 'Modifica Utente' : 'Nuovo Utente'"
-      :description="isEditMode ? `Modifica i dati dell'utente: ${userForm.username}` : 'Inserisci i dati del nuovo utente'"
     >
       <template #actions>
         <button

@@ -3,7 +3,6 @@
     <!-- Page Header -->
     <PageHeader
       :title="isEditMode ? `Modifica Festività Anno: ${festiForm.anno}` : 'Nuovo Anno Festività'"
-      :description="isEditMode ? 'Modifica le festività dell\'anno selezionato' : 'Crea un nuovo anno con le relative festività'"
     >
       <template #actions>
         <button

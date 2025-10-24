@@ -3,7 +3,6 @@
     <!-- Page Header -->
     <PageHeader
       :title="isEditMode ? `Modifica PAT: ${patForm.pat}` : 'Nuova PAT'"
-      :description="isEditMode ? 'Modifica i dettagli della PAT selezionata' : 'Crea una nuova PAT nel sistema'"
     >
       <template #actions>
         <button

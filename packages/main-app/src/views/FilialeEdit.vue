@@ -3,7 +3,6 @@
     <!-- Page Header -->
     <PageHeader
       :title="isEditMode ? `Modifica Filiale: ${filiale?.descriz}` : 'Nuova Filiale'"
-      :description="isEditMode ? 'Modifica i dettagli della filiale selezionata' : 'Crea una nuova filiale nel sistema'"
     >
       <template #actions>
         <button

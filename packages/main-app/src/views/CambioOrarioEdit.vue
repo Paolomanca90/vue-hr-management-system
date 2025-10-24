@@ -4,7 +4,6 @@
     <!-- Page Header -->
     <PageHeader
       :title="isEditMode ? `Modifica Cambio Orario: ${cambioForm.codCambio}` : 'Nuovo Cambio Orario'"
-      :description="isEditMode ? 'Modifica i dettagli del Cambio Orario.' : 'Crea un nuovo Cambio Orario nel sistema'"
     >
       <template #actions>
         <button

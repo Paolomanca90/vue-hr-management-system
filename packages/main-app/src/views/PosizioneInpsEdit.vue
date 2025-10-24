@@ -3,7 +3,6 @@
     <!-- Page Header -->
     <PageHeader
       :title="isEditMode ? `Modifica Posizione INPS: ${posizioneInpsForm.posInps}` : 'Nuova Posizione INPS'"
-      :description="isEditMode ? 'Modifica i dettagli della Posizione INPS selezionata' : 'Crea una nuova Posizione INPS nel sistema'"
     >
       <template #actions>
         <button

@@ -4,7 +4,6 @@
     <!-- Header -->
     <PageHeader
       :title="isEditMode ? 'Modifica Gruppo di Configurazione' : 'Nuovo Gruppo di Configurazione'"
-      :description="isEditMode ? `Modifica i dati del gruppo: ${gruppoForm.codgruppo}` : 'Inserisci i dati del nuovo gruppo di configurazione'"
     >
       <template #actions>
         <button

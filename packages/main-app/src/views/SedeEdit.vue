@@ -3,7 +3,6 @@
     <!-- Page Header -->
     <PageHeader
       :title="isEditMode ? `Modifica Sede: ${sede?.descriz}` : 'Nuova Sede'"
-      :description="isEditMode ? 'Modifica i dettagli della sede selezionata' : 'Crea una nuova sede nel sistema'"
     >
       <template #actions>
         <button

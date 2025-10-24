@@ -3,7 +3,6 @@
     <!-- Page Header -->
     <PageHeader
       :title="isEditMode ? `Modifica Terminale: ${terminaleConfigForm.codter}` : 'Nuovo Terminale'"
-      :description="isEditMode ? 'Modifica i dettagli del Terminale selezionato' : 'Crea un nuovo Terminale nel sistema'"
     >
       <template #actions>
         <button
