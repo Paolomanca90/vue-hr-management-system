@@ -13,7 +13,7 @@
       <!-- Azioni principali -->
       <button
         type="submit"
-        class="btn btn-primary btn-sm text-white"
+        class="btn btn-primary btn-sm text-sm text-white"
         :class="{ 'loading': saving }"
         :disabled="saving || !isFormValid"
       >
@@ -30,7 +30,7 @@
       <button
         v-if="isEditMode && showDuplicate"
         type="button"
-        class="btn btn-primary btn-outline btn-sm"
+        class="btn btn-primary btn-outline btn-sm text-sm"
         @click="$emit('duplicate')"
         :disabled="saving"
       >
@@ -41,7 +41,7 @@
       <button
         v-if="isEditMode && showDelete"
         type="button"
-        class="btn btn-error btn-outline btn-sm"
+        class="btn btn-error btn-outline btn-sm text-sm"
         @click="showDeleteConfirm"
         :disabled="saving || deleting"
       >
@@ -54,7 +54,7 @@
       <button
         v-if="showReset"
         type="button"
-        class="max-md:block max-md:w-full btn btn-ghost btn-sm"
+        class="max-md:block max-md:w-full btn btn-ghost btn-sm text-sm"
         @click="$emit('reset')"
         :disabled="saving"
       >

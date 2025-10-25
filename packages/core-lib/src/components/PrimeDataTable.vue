@@ -39,38 +39,11 @@
       ref="dataTable"
     >
       <template #header>
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:p-4">
-          <div class="flex flex-col lg:flex-row lg:items-center gap-3 flex-1 text-[oklch(var(--bc))]">
-            <!-- Clear -->
-            <button
-              v-if="showClearFilters"
-              @click="clearAllFilters"
-              class="btn btn-ghost btn-sm"
-              :disabled="!hasActiveFilters"
-            >
-              <FaIcon icon="times" class="mr-1" />
-              Pulisci Filtri
-            </button>
-            
-            <!-- Search -->
-            <div v-if="showGlobalSearch" class="relative flex-1 lg:max-w-md">
-              <input
-                type="text"
-                v-model="globalSearchValue"
-                :placeholder="searchPlaceholder"
-                class="input input-bordered input-sm pl-10 w-full"
-              />
-              <FaIcon 
-                icon="search" 
-                class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" 
-              />
-            </div>
-          </div>
-
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-end gap-4 lg:p-2">
           <div class="flex flex-col lg:flex-row lg:items-center gap-2 text-[oklch(var(--bc))]">
             <!-- Column Toggle -->
             <div v-if="showColumnToggle" class="dropdown dropdown-end">
-              <div tabindex="0" role="button" class="max-md:block max-md:w-full btn btn-ghost max-md:p-[0.5em] btn-sm">
+              <div tabindex="0" role="button" class="max-md:block max-md:w-full btn btn-ghost max-md:p-[0.5em] btn-sm text-xs">
                 <FaIcon icon="columns" class="mr-1" />
                 Colonne
               </div>
@@ -99,11 +72,11 @@
 
             <!-- Export Dropdown -->
             <div v-if="showExport" class="dropdown dropdown-end">
-              <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm">
+              <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm text-xs">
                 <FaIcon icon="download" class="mr-1" />
                 Esporta
               </div>
-              <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-[100]">
+              <ul tabindex="0"  class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-60 z-[100]">
                 <li><a @click="exportToCSV"><FaIcon icon="file-csv" class="mr-2" />CSV</a></li>
                 <li><a @click="exportToExcel"><FaIcon icon="file-excel" class="mr-2" />Excel</a></li>
                 <li><a @click="exportToPDF"><FaIcon icon="file-pdf" class="mr-2" />PDF</a></li>
@@ -115,22 +88,6 @@
           </div>
         </div>
       </template>
-
-      <!-- Actions Column - SEMPRE PRIMA e SEMPRE FROZEN -->
-      <PColumn 
-        header="Azioni" 
-        :exportable="false" 
-        frozen 
-        :style="getActionColumnStyle()"
-      >
-        <template #body="slotProps">
-          <slot 
-            name="actions" 
-            :data="slotProps.data"
-            :index="slotProps.index"
-          ></slot>
-        </template>
-      </PColumn>
 
       <!-- Dynamic Columns -->
       <PColumn 
@@ -212,6 +169,21 @@
         <!-- Default column -->
         <template #body="slotProps" v-else>
           {{ getColumnValue(slotProps.data, column.field || column.key) }}
+        </template>
+      </PColumn>
+
+      <!-- Actions Column - SEMPRE DOPO e SEMPRE FROZEN -->
+      <PColumn 
+        :exportable="false" 
+        frozen 
+        :style="getActionColumnStyle()"
+      >
+        <template #body="slotProps">
+          <slot 
+            name="actions" 
+            :data="slotProps.data"
+            :index="slotProps.index"
+          ></slot>
         </template>
       </PColumn>
 
@@ -662,7 +634,7 @@ watch(() => toggleableColumns.value, () => {
 :deep(.p-datatable .p-datatable-header) {
   background: var(--surface-0);
   border: 1px solid var(--surface-200);
-  padding: 1rem;
+  padding: 0;
 }
 
 :deep(.p-datatable .p-datatable-thead > tr > th) {
@@ -693,7 +665,7 @@ watch(() => toggleableColumns.value, () => {
 }
 
 :deep(.p-datatable .p-datatable-tbody > tr > td) {
-  padding: 0.75rem;
+  padding: 0.3rem 0.75rem;
   white-space: nowrap;
   overflow: visible;
   text-overflow: ellipsis;

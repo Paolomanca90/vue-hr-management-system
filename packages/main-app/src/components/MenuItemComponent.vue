@@ -11,6 +11,11 @@
           'bg-primary/5': isHighlighted,
         }"
       >
+        <!-- Chevron per indicare espandibilità -->
+        <FaIcon
+          icon="chevron-right"
+          :class="`text-xs mr-2 transition-transform duration-200 ${item.expanded ? 'rotate-90' : ''}`"
+        />
         <!-- FaIcon wrapper -->
         <FaIcon
           :icon="menuService.convertCssIconToFontAwesome(item.icon)"

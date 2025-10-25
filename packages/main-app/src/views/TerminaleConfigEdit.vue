@@ -1,18 +1,21 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `Modifica Terminale: ${terminaleConfigForm.codter}` : 'Nuovo Terminale'"
+      :title="isEditMode ? `${terminaleConfigForm.descrizione} (${terminaleConfigForm.codter})` : 'Nuovo Terminale Config'"
+      :breadcrumbItems="[
+        { label: 'Home', to: '/app' },
+        { label: 'Terminali Config', to: '/app/terminali' },
+        { label: isEditMode ? 'Modifica' : 'Nuovo' }
+      ]"
     >
-      <template #actions>
-        <button
-          class="btn btn-ghost btn-sm"
-          @click="goBack"
-          :disabled="saving"
-        >
-          <FaIcon icon="arrow-left" class="mr-2"/>
-          Indietro
+      <template #backButton>
+        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+          <FaIcon icon="arrow-left" />
         </button>
+      </template>
+      <template #actions>
+        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
       </template>
     </PageHeader>
 
@@ -21,24 +24,21 @@
 
     <!-- Form Container -->
     <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <ActionButtons
-            entity-name="Terminale"
-            :is-edit-mode="isEditMode"
-            :saving="saving"
-            :is-form-valid="isFormValid"
-            :show-duplicate="true"
-            :show-delete="isEditMode"
-            :show-reset="true"
-            :show-navigation="isEditMode"
-            :navigation-config="terminaleConfigNavigationConfig"
-            @duplicate="handleDuplicate"
-            @delete="handleDelete"
-            @reset="handleReset"
-          />
-        </div>
-      </div>
+
+      <ActionButtons
+        entity-name="Terminale"
+        :is-edit-mode="isEditMode"
+        :saving="saving"
+        :is-form-valid="isFormValid"
+        :show-duplicate="true"
+        :show-delete="isEditMode"
+        :show-reset="true"
+        :show-navigation="isEditMode"
+        :navigation-config="terminaleConfigNavigationConfig"
+        @duplicate="handleDuplicate"
+        @delete="handleDelete"
+        @reset="handleReset"
+      />
 
       <!-- Form Fields -->
       <div class="card bg-base-100 shadow-sm">
@@ -161,6 +161,8 @@ import ActionButtons from '@/components/ActionButtons.vue'
 import { terminaleConfigService, type TerminaleConfig } from '@/services/terminaleConfigService'
 import { useCrudView } from '@/composables/useCrudView'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
+import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -198,6 +200,11 @@ const formCheckboxes = ref({
 
 const loading = ref(false)
 const saving = ref(false)
+const originalData = ref<TerminaleConfig | null>(null)
+
+const { isDirty, touchedFields, updateOriginalData } = useFormDirtyState(terminaleConfigForm, originalData, {
+  confirmMessage: 'Ci sono modifiche non salvate al Terminale Config. Sei sicuro di voler lasciare questa pagina?'
+})
 
 // Helper functions per conversione S/N ↔ boolean
 const stringToBoolean = (value: string | undefined): boolean => {
@@ -251,6 +258,8 @@ const loadTerminaleConfig = async () => {
       formCheckboxes.value.tmrtp = stringToBoolean(routerState.tmrtp)
       formCheckboxes.value.tmmensa = stringToBoolean(routerState.tmmensa)
       formCheckboxes.value.tmcommesse = stringToBoolean(routerState.tmcommesse)
+
+      updateOriginalData(terminaleConfigForm.value)
     } else {
       // Fallback semplice
       terminaleConfigForm.value = {
@@ -265,6 +274,8 @@ const loadTerminaleConfig = async () => {
       formCheckboxes.value.tmrtp = false
       formCheckboxes.value.tmmensa = false
       formCheckboxes.value.tmcommesse = false
+
+      updateOriginalData(terminaleConfigForm.value)
     }
   } catch (error) {
     console.error('Errore nel caricamento Terminale:', error)
@@ -281,6 +292,8 @@ const loadTerminaleConfig = async () => {
     formCheckboxes.value.tmrtp = false
     formCheckboxes.value.tmmensa = false
     formCheckboxes.value.tmcommesse = false
+
+    updateOriginalData(terminaleConfigForm.value)
   } finally {
     loading.value = false
   }
@@ -335,6 +348,7 @@ const handleSave = async () => {
     if (isEditMode.value) {
       await terminaleConfigService.editTerminaleConfig(terminaleToSave)
       successMessage.value = 'Terminale aggiornato con successo'
+      updateOriginalData(terminaleConfigForm.value)
     } else {
       await terminaleConfigService.addTerminaleConfig(terminaleToSave)
       successMessage.value = 'Nuovo Terminale creato con successo'
@@ -408,6 +422,7 @@ const handleReset = () => {
     formCheckboxes.value.tmmensa = false
     formCheckboxes.value.tmcommesse = false
     handleDuplicateMode()
+    updateOriginalData(terminaleConfigForm.value)
   }
 }
 

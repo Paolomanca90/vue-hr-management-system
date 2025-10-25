@@ -1,19 +1,22 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="space-y-6">
+  <div class="space-y-1">
     <!-- Header con breadcrumb -->
     <PageHeader
-      :title="isEditMode ? 'Modifica Gruppo Utente' : 'Nuovo Gruppo Utente'"
+      :title="isEditMode ? `${gruppoForm.descrizione} (${gruppoForm.codice})` : 'Nuovo Gruppo Utente'"
+      :breadcrumbItems="[
+        { label: 'Home', to: '/app' },
+        { label: 'Gruppi Utente', to: '/app/gruppi-utente' },
+        { label: isEditMode ? 'Modifica' : 'Nuovo' }
+      ]"
     >
-      <template #actions>
-        <button
-          class="btn btn-ghost btn-sm"
-          @click="goBack"
-          :disabled="saving"
-        >
-          <FaIcon icon="arrow-left" class="mr-2"/>
-          Indietro
+      <template #backButton>
+        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+          <FaIcon icon="arrow-left" />
         </button>
+      </template>
+      <template #actions>
+        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
       </template>
     </PageHeader>
 
@@ -23,26 +26,20 @@
     <!-- Form principale -->
     <form v-if="!loading" @submit.prevent="handleSubmit" class="space-y-6">
 
-      <!-- Azioni -->
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <!-- Azioni principali con navigazione integrata -->
-          <ActionButtons
-            entity-name="Gruppo"
-            :is-edit-mode="isEditMode"
-            :saving="saving"
-            :is-form-valid="isFormValid"
-            :show-duplicate="true"
-            :show-delete="isEditMode"
-            :show-reset="true"
-            :show-navigation="isEditMode"
-            :navigation-config="gruppoNavigationConfig"
-            @duplicate="duplicateCurrentGruppo"
-            @delete="deleteCurrentGruppo"
-            @reset="resetForm"
-          />
-        </div>
-      </div>
+      <ActionButtons
+        entity-name="Gruppo"
+        :is-edit-mode="isEditMode"
+        :saving="saving"
+        :is-form-valid="isFormValid"
+        :show-duplicate="true"
+        :show-delete="isEditMode"
+        :show-reset="true"
+        :show-navigation="isEditMode"
+        :navigation-config="gruppoNavigationConfig"
+        @duplicate="duplicateCurrentGruppo"
+        @delete="deleteCurrentGruppo"
+        @reset="resetForm"
+      />
 
       <!-- Sezione Informazioni Base -->
       <SectionCard
@@ -170,9 +167,11 @@ import MenuPermissionsManager from '@/components/MenuPermissionsManager.vue'
 import { menuService } from '@/services/menuService'
 import PageHeader from '@/components/PageHeader.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
 import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import SectionCard from '@/components/SectionCard.vue'
+import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
 
 // Interfaccia per il form del gruppo
 interface GruppoForm {
@@ -195,9 +194,13 @@ const saving = ref(false)
 const submitted = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
-
+const originalData = ref<GruppoForm | null>(null)
 
 useMessageAlerts(errorMessage, successMessage)
+
+const { isDirty, touchedFields, updateOriginalData } = useFormDirtyState(gruppoForm, originalData, {
+  confirmMessage: 'Ci sono modifiche non salvate al Gruppo Utente. Sei sicuro di voler lasciare questa pagina?'
+})
 
 // Gestione eliminazione
 const showDeleteModal = ref(false)
@@ -316,6 +319,8 @@ const loadGruppoData = async () => {
     }
 
     await loadGruppoPermissions()
+
+    updateOriginalData(gruppoForm.value)
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
@@ -477,6 +482,7 @@ const handleSubmit = async () => {
         await gruppiUtenteService.aggiornaAbilitazioniGruppoUtente(abilitazioni, gruppoData.codice)
       }
 
+      updateOriginalData(gruppoForm.value)
       successMessage.value = 'Gruppo aggiornato con successo'
     } else {
       // Crea nuovo gruppo

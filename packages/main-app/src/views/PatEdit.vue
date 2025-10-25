@@ -1,18 +1,17 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `Modifica PAT: ${patForm.pat}` : 'Nuova PAT'"
+      :title="pageTitle"
+      :breadcrumbItems="breadcrumbs"
     >
-      <template #actions>
-        <button
-          class="btn btn-ghost btn-sm"
-          @click="goBack"
-          :disabled="saving"
-        >
-          <FaIcon icon="arrow-left" class="mr-2"/>
-          Indietro
+      <template #backButton>
+        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+          <FaIcon icon="arrow-left" />
         </button>
+      </template>
+      <template #actions>
+        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
       </template>
     </PageHeader>
 
@@ -21,23 +20,20 @@
 
     <!-- Form Container -->
     <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <ActionButtons
-            entity-name="PAT"
-            :is-edit-mode="isEditMode"
-            :saving="saving"
-            :is-form-valid="isFormValid"
-            :show-duplicate="true"
-            :show-delete="isEditMode"
-            :show-reset="true"
-            :show-navigation="isEditMode"
-            :navigation-config="patNavigationConfig"
-            @duplicate="handleDuplicate"
-            @reset="handleReset"
-          />
-        </div>
-      </div>
+
+      <ActionButtons
+        entity-name="PAT"
+        :is-edit-mode="isEditMode"
+        :saving="saving"
+        :is-form-valid="isFormValid"
+        :show-duplicate="true"
+        :show-delete="isEditMode"
+        :show-reset="true"
+        :show-navigation="isEditMode"
+        :navigation-config="patNavigationConfig"
+        @duplicate="handleDuplicate"
+        @reset="handleReset"
+      />
 
       <!-- Form Fields -->
       <div class="card bg-base-100 shadow-sm">
@@ -93,6 +89,8 @@ import { patService, type Pat } from '@/services/patService'
 import { aziendeService, type Azienda } from '@/services/aziendeService'
 import { useCrudView } from '@/composables/useCrudView'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
+import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -118,9 +116,15 @@ const patForm = ref<EntityFormData>({
   codCont: ''
 })
 
+const originalData = ref<EntityFormData | null>(null)
+
 const selectedCompany = ref<Azienda | null>(null)
 const loading = ref(false)
 const saving = ref(false)
+
+const { isDirty, touchedFields, updateOriginalData } = useFormDirtyState(patForm, originalData, {
+  confirmMessage: 'Ci sono modifiche non salvate alla PAT. Sei sicuro di voler lasciare questa pagina?'
+})
 
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
@@ -135,6 +139,19 @@ const selectedCompanyDisplay = computed(() => {
   if (!selectedCompany.value) return ''
   return `${selectedCompany.value.codAzi} ${selectedCompany.value.ragSoc}`
 })
+
+const pageTitle = computed(() => {
+  if (isEditMode.value && patForm.value.pat && patForm.value.codicePat) {
+    return `${patForm.value.pat} (${patForm.value.codicePat})`
+  }
+  return isEditMode.value ? 'Modifica PAT' : 'Nuova PAT'
+})
+
+const breadcrumbs = computed(() => [
+  { label: 'Home', to: '/app' },
+  { label: 'PAT', to: '/app/pat' },
+  { label: isEditMode.value ? 'Modifica' : 'Nuovo' }
+])
 
 // Navigation configuration
 const patNavigationConfig = {
@@ -168,6 +185,8 @@ const loadPat = async () => {
       const aziende = await aziendeService.getAziende()
       selectedCompany.value = aziende.find(a => a.codAzi === response.codAzi) || null
     }
+
+    updateOriginalData(patForm.value)
   } catch (error) {
     console.error('Errore nel caricamento PAT:', error)
     errorMessage.value = 'Errore nel caricamento dei dati PAT. Riprova più tardi.'
@@ -210,6 +229,7 @@ const handleSave = async () => {
 
     if (isEditMode.value) {
       await patService.editPat(patToSave)
+      updateOriginalData(patForm.value)
       successMessage.value = 'PAT aggiornata con successo!'
     } else {
       await patService.addPat(patToSave)

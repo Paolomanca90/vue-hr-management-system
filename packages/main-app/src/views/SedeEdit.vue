@@ -1,41 +1,40 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `Modifica Sede: ${sede?.descriz}` : 'Nuova Sede'"
+      :title="isEditMode ? `${sede.descriz} (${sede.codSedeAz})` : 'Nuova Sede'"
+      :breadcrumbItems="[
+        { label: 'Home', to: '/app' },
+        { label: 'Sedi', to: '/app/sedi' },
+        { label: isEditMode ? 'Modifica' : 'Nuova' }
+      ]"
     >
-      <template #actions>
-        <button
-          class="btn btn-ghost btn-sm"
-          @click="goBack"
-          :disabled="saving"
-        >
-          <FaIcon icon="arrow-left" class="mr-2"/>
-          Indietro
+      <template #backButton>
+        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+          <FaIcon icon="arrow-left" />
         </button>
+      </template>
+      <template #actions>
+        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
       </template>
     </PageHeader>
 
     <!-- Form Container -->
     <form @submit.prevent="handleSave" class="space-y-6">
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <!-- Azioni principali con navigazione integrata -->
-          <ActionButtons
-            entity-name="Sede"
-            :is-edit-mode="isEditMode"
-            :saving="saving"
-            :is-form-valid="isFormValid"
-            :show-duplicate="true"
-            :show-delete="isEditMode"
-            :show-reset="true"
-            :show-navigation="isEditMode"
-            :navigation-config="sedeNavigationConfig"
-            @duplicate="handleDuplicate"
-            @reset="handleReset"
-          />
-        </div>
-      </div>
+
+      <ActionButtons
+        entity-name="Sede"
+        :is-edit-mode="isEditMode"
+        :saving="saving"
+        :is-form-valid="isFormValid"
+        :show-duplicate="true"
+        :show-delete="isEditMode"
+        :show-reset="true"
+        :show-navigation="isEditMode"
+        :navigation-config="sedeNavigationConfig"
+        @duplicate="handleDuplicate"
+        @reset="handleReset"
+      />
 
       <!-- Tab Selector -->
       <DetailTabSelector
@@ -116,7 +115,9 @@ import ActionButtons from '@/components/ActionButtons.vue'
 import DetailTabSelector from '@/components/DetailTabSelector.vue'
 import AddressInput, { type AddressData } from '@/components/AddressInput.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
 import { sediService, type SedeDettaglio } from '@/services/sediService'
+import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
 import type { AnagraficaField } from '@/components/DetailTabSelector.vue'
 
 const route = useRoute()
@@ -149,8 +150,13 @@ const loading = ref(false)
 const componentKey = ref(0)
 const errorMessage = ref('')
 const successMessage = ref('')
+const originalData = ref<FormSede | null>(null)
 
 useMessageAlerts(errorMessage, successMessage)
+
+const { isDirty, touchedFields, updateOriginalData } = useFormDirtyState(sede, originalData, {
+  confirmMessage: 'Ci sono modifiche non salvate alla Sede. Sei sicuro di voler lasciare questa pagina?'
+})
 
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
@@ -195,6 +201,7 @@ const loadSede = async () => {
           civico: response.numCivico
         }
       }
+      updateOriginalData(sede.value)
     }
   } catch (error) {
     console.error('Errore nel caricamento sede:', error)
@@ -255,6 +262,7 @@ const handleSave = async () => {
 
     if (isEditMode.value) {
       await sediService.editSede(sedeToSave)
+      updateOriginalData(sede.value)
     } else {
       await sediService.addSede(sedeToSave)
     }

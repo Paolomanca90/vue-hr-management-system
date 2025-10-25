@@ -1,17 +1,21 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="space-y-6">
+  <div class="space-y-3">
     <!-- Header -->
     <PageHeader
       title="Gestione Posizioni INPS"
       :description="`Gestisci le Posizioni INPS - Totale: ${posizioniInps.length} posizioni`"
+      :breadcrumbItems="[
+        { label: 'Home', to: '/app' },
+        { label: 'Posizioni INPS' }
+      ]"
     >
       <template #actions>
-        <button class="max-md:w-full max-md:block btn btn-primary btn-sm text-white" @click="addNewPosizioneInps">
+        <button class="max-md:w-full max-md:block btn btn-primary btn-sm text-xs text-white" @click="addNewPosizioneInps">
           <FaIcon icon="plus" class="mr-2"/>
           Nuova Posizione INPS
         </button>
-        <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm" @click="refreshPosizioniInps">
+        <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm text-xs" @click="refreshPosizioniInps">
           <FaIcon icon="refresh" class="mr-2"/>
           Aggiorna
         </button>
@@ -19,7 +23,7 @@
     </PageHeader>
 
     <div class="card bg-base-100 shadow-sm">
-      <div class="card-body max-md:p-3">
+      <div class="card-body py-2 px-4">
         <!-- Data Table Manager -->
         <DataTableManager
           entity-type="posizione-inps"
@@ -43,13 +47,13 @@
           <!-- Custom toolbar -->
           <template #toolbar>
             <div class="dropdown dropdown-end">
-              <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm">
+              <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm text-xs">
                 <FaIcon icon="cog" class="mr-1" />
                 Opzioni
               </div>
-              <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-[100]">
-                <li><a @click="bulkActions"><FaIcon icon="check-circle" class="mr-2" />Azioni Multiple</a></li>
-                <li><a @click="importPosizioniInps"><FaIcon icon="upload" class="mr-2" />Importa Posizioni INPS</a></li>
+              <ul tabindex="0"  class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-60 z-[100]">
+                <li><a @click="bulkActions"><FaIcon icon="check-circle" class="mr-2 text-xs" />Azioni Multiple</a></li>
+                <li><a @click="importPosizioniInps"><FaIcon icon="upload" class="mr-2 text-xs" />Importa Posizioni INPS</a></li>
               </ul>
             </div>
           </template>

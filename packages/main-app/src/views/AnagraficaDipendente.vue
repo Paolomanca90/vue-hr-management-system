@@ -1,22 +1,26 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="space-y-6">
+  <div class="space-y-3">
     <!-- Header -->
     <PageHeader
       title="Anagrafica Dipendente"
       :description="`Lista dipendenti filtrata - Totale: ${dipendenti.length} dipendenti`"
+      :breadcrumbItems="[
+        { label: 'Home', to: '/app' },
+        { label: 'Anagrafica Dipendenti' }
+      ]"
     >
       <template #actions>
         <button
           v-if="hasSearched"
-          class="max-md:w-full max-md:block btn btn-primary btn-sm text-white"
+          class="max-md:w-full max-md:block btn btn-primary btn-sm text-xs text-white"
           @click="goToNew"
         >
           <FaIcon icon="plus" class="mr-2"/>
           Nuovo Dipendente
         </button>
         <button
-          class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm"
+          class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm text-xs"
           @click="showFilters = !showFilters"
         >
           <FaIcon icon="filter" class="mr-2"/>
@@ -40,7 +44,7 @@
     </div>
 
     <div v-else-if="dipendenti.length > 0" class="card bg-base-100 shadow-sm">
-      <div class="card-body max-md:p-3">
+      <div class="card-body py-2 px-4">
         <DataTableManager
           :service="mockDipendentiService"
           :columns="columns"
@@ -62,12 +66,12 @@
           <!-- Custom toolbar -->
           <template #toolbar>
             <div class="dropdown dropdown-end">
-              <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm">
+              <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm text-xs">
                 <FaIcon icon="cog" class="mr-1" />
                 Opzioni
               </div>
-              <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-[100]">
-                <li><a @click="bulkActions"><FaIcon icon="check-circle" class="mr-2" />Azioni Multiple</a></li>
+              <ul tabindex="0"  class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-60 z-[100]">
+                <li><a @click="bulkActions"><FaIcon icon="check-circle" class="mr-2 text-xs" />Azioni Multiple</a></li>
                 <li><a @click="dipendentiSettings"><FaIcon icon="cog" class="mr-2" />Impostazioni</a></li>
                 <li><a @click="exportDipendenti"><FaIcon icon="download" class="mr-2" />Esporta Dipendenti</a></li>
               </ul>

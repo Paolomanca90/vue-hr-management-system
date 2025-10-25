@@ -1,41 +1,37 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `Modifica Reparto: ${reparto.codReparto}` : 'Nuovo Reparto'"
+      :title="pageTitle"
+      :breadcrumbItems="breadcrumbs"
     >
-      <template #actions>
-        <button
-          class="btn btn-ghost btn-sm"
-          @click="goBack"
-          :disabled="saving"
-        >
-          <FaIcon icon="arrow-left" class="mr-2"/>
-          Indietro
+      <template #backButton>
+        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+          <FaIcon icon="arrow-left" />
         </button>
+      </template>
+      <template #actions>
+        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
       </template>
     </PageHeader>
 
     <!-- Form Container -->
     <form @submit.prevent="handleSave" class="space-y-6">
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <ActionButtons
-            entity-name="Reparto"
-            :is-edit-mode="isEditMode"
-            :saving="saving"
-            :is-form-valid="isFormValid"
-            :show-duplicate="true"
-            :show-delete="isEditMode"
-            :show-reset="true"
-            :show-navigation="isEditMode"
-            :navigation-config="repartoNavigationConfig"
-            @duplicate="handleDuplicate"
-            @delete="handleDelete"
-            @reset="handleReset"
-          />
-        </div>
-      </div>
+
+      <ActionButtons
+        entity-name="Reparto"
+        :is-edit-mode="isEditMode"
+        :saving="saving"
+        :is-form-valid="isFormValid"
+        :show-duplicate="true"
+        :show-delete="isEditMode"
+        :show-reset="true"
+        :show-navigation="isEditMode"
+        :navigation-config="repartoNavigationConfig"
+        @duplicate="handleDuplicate"
+        @delete="handleDelete"
+        @reset="handleReset"
+      />
 
       <!-- Form Content con componente riutilizzabile -->
       <CodiceDescrizioneEdit
@@ -57,7 +53,9 @@ import PageHeader from '@/components/PageHeader.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import CodiceDescrizioneEdit from '@/components/CodiceDescrizioneEdit.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
 import { repartiService, type Reparto } from '@/services/repartiService'
+import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -79,8 +77,13 @@ const saving = ref(false)
 const loading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
+const originalData = ref<FormReparto | null>(null)
 
 useMessageAlerts(errorMessage, successMessage)
+
+const { isDirty, touchedFields, updateOriginalData } = useFormDirtyState(reparto, originalData, {
+  confirmMessage: 'Ci sono modifiche non salvate al Reparto. Sei sicuro di voler lasciare questa pagina?'
+})
 
 // Computed
 const isEditMode = computed(() => {
@@ -93,6 +96,19 @@ const isFormValid = computed(() => {
          reparto.value.codReparto.trim() !== '' &&
          reparto.value.descriz.trim() !== ''
 })
+
+const pageTitle = computed(() => {
+  if (isEditMode.value && reparto.value.descriz && reparto.value.codReparto) {
+    return `${reparto.value.descriz} (${reparto.value.codReparto})`
+  }
+  return isEditMode.value ? 'Modifica Reparto' : 'Nuovo Reparto'
+})
+
+const breadcrumbs = computed(() => [
+  { label: 'Home', to: '/app' },
+  { label: 'Reparti', to: '/app/reparti' },
+  { label: isEditMode.value ? 'Modifica' : 'Nuovo' }
+])
 
 // Navigation configuration
 const repartoNavigationConfig = {
@@ -120,6 +136,7 @@ const loadReparto = async () => {
         codReparto: response.codReparto,
         descriz: response.descriz
       }
+      updateOriginalData(reparto.value)
     }
   } catch (error) {
     console.error('Errore nel caricamento reparto:', error)
@@ -143,6 +160,7 @@ const handleSave = async () => {
 
     if (isEditMode.value) {
       await repartiService.editReparto(repartoToSave)
+      updateOriginalData(reparto.value)
     } else {
       await repartiService.addReparto(repartoToSave)
     }

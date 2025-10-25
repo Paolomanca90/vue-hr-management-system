@@ -1,18 +1,26 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `Modifica Tolleranza: ${tolleranzaForm.codtoll}` : 'Nuova Tolleranza'"
+      :title="isEditMode ? `${tolleranzaForm.descrizione} (${tolleranzaForm.codtoll})` : 'Nuova Tolleranza'"
+      :breadcrumbItems="[
+        { label: 'Home', to: '/app' },
+        { label: 'Tolleranze', to: '/app/tolleranze' },
+        { label: isEditMode ? 'Modifica' : 'Nuova' }
+      ]"
     >
-      <template #actions>
+      <template #backButton>
         <button
-          class="btn btn-ghost btn-sm"
+          class="btn btn-ghost btn-circle btn-xs"
           @click="goBack"
           :disabled="saving"
+          title="Indietro"
         >
-          <FaIcon icon="arrow-left" class="mr-2"/>
-          Indietro
+          <FaIcon icon="arrow-left" />
         </button>
+      </template>
+      <template #actions>
+        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
       </template>
     </PageHeader>
 
@@ -21,24 +29,21 @@
 
     <!-- Form Container -->
     <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <ActionButtons
-            entity-name="Tolleranza"
-            :is-edit-mode="isEditMode"
-            :saving="saving"
-            :is-form-valid="isFormValid"
-            :show-duplicate="true"
-            :show-delete="isEditMode"
-            :show-reset="true"
-            :show-navigation="isEditMode"
-            :navigation-config="tolleranzaNavigationConfig"
-            @duplicate="handleDuplicate"
-            @delete="handleDelete"
-            @reset="handleReset"
-          />
-        </div>
-      </div>
+
+      <ActionButtons
+        entity-name="Tolleranza"
+        :is-edit-mode="isEditMode"
+        :saving="saving"
+        :is-form-valid="isFormValid"
+        :show-duplicate="true"
+        :show-delete="isEditMode"
+        :show-reset="true"
+        :show-navigation="isEditMode"
+        :navigation-config="tolleranzaNavigationConfig"
+        @duplicate="handleDuplicate"
+        @delete="handleDelete"
+        @reset="handleReset"
+      />
 
       <!-- Dati Principali -->
       <div class="card bg-base-100 shadow-sm">
@@ -265,6 +270,8 @@ import { lookupService } from '@/services/lookupService'
 import { useCrudView } from '@/composables/useCrudView'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { causaleLookupConfig } from '@/config/lookupConfigs'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
+import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -305,8 +312,14 @@ const tolleranzaForm = ref<Tolleranza>({
   obbligousc: ''
 })
 
+const originalData = ref<Tolleranza | null>(null)
+
 const loading = ref(false)
 const saving = ref(false)
+
+const { isDirty, touchedFields, updateOriginalData } = useFormDirtyState(tolleranzaForm, originalData, {
+  confirmMessage: 'Ci sono modifiche non salvate alla Tolleranza. Sei sicuro di voler lasciare questa pagina?'
+})
 
 // State per le causali
 const causaleRitardo = ref<CausaleData>({ codice: '', descrizione: '' })
@@ -432,6 +445,8 @@ const loadTolleranza = async () => {
       causaleRitardo.value = { codice: '', descrizione: '' }
       causaleAnticipo.value = { codice: '', descrizione: '' }
     }
+
+    updateOriginalData(tolleranzaForm.value)
   } catch (error) {
     console.error('Errore nel caricamento Tolleranza:', error)
     errorMessage.value = 'I dati della Tolleranza verranno caricati dalla lista'
@@ -518,6 +533,7 @@ const handleSave = async () => {
 
     if (isEditMode.value) {
       await tolleranzeService.editTolleranza(tolleranzaToSave)
+      updateOriginalData(tolleranzaForm.value)
       successMessage.value = 'Tolleranza aggiornata con successo'
     } else {
       await tolleranzeService.addTolleranza(tolleranzaToSave)

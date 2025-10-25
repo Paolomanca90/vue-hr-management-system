@@ -2,17 +2,16 @@
   <div class="space-y-6">
     <!-- Header -->
     <PageHeader
-      :title="isEditMode ? `Modifica ${entityName}` : `Nuovo ${entityName}`"
+      :title="pageTitle"
+      :breadcrumbItems="breadcrumbItems"
     >
-      <template #actions>
-        <button
-          class="btn btn-ghost btn-sm"
-          @click="$emit('go-back')"
-          :disabled="saving"
-        >
-          <FaIcon icon="arrow-left" class="mr-2"/>
-          Indietro
+      <template #backButton>
+        <button class="btn btn-ghost btn-circle btn-xs" @click="$emit('go-back')" :disabled="saving" title="Indietro">
+          <FaIcon icon="arrow-left" />
         </button>
+      </template>
+      <template #actions>
+        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
       </template>
     </PageHeader>
 
@@ -22,26 +21,20 @@
     <!-- Form principale -->
     <form v-if="!loading" @submit.prevent="handleSubmit" class="space-y-6">
 
-      <!-- Azioni -->
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <!-- Azioni principali con navigazione integrata -->
-          <ActionButtons
-            :entity-name="entityName"
-            :is-edit-mode="isEditMode"
-            :saving="saving"
-            :is-form-valid="isFormValid"
-            :show-duplicate="true"
-            :show-delete="isEditMode"
-            :show-reset="true"
-            :show-navigation="isEditMode"
-            :navigation-config="navigationConfig"
-            @duplicate="duplicateCurrent"
-            @delete="deleteCurrent"
-            @reset="resetForm"
-          />
-        </div>
-      </div>
+      <ActionButtons
+        :entity-name="entityName"
+        :is-edit-mode="isEditMode"
+        :saving="saving"
+        :is-form-valid="isFormValid"
+        :show-duplicate="true"
+        :show-delete="isEditMode"
+        :show-reset="true"
+        :show-navigation="isEditMode"
+        :navigation-config="navigationConfig"
+        @duplicate="duplicateCurrent"
+        @delete="deleteCurrent"
+        @reset="resetForm"
+      />
 
       <!-- Sezione Informazioni Base -->
       <SectionCard
@@ -376,6 +369,7 @@ import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import LoadingIndicator from './LoadingIndicator.vue'
 import ActionButtons from './ActionButtons.vue'
 import SectionCard from './SectionCard.vue'
+import FormStatusIndicator from './FormStatusIndicator.vue'
 import { dipendenteService, type CampoDipendente } from '../services/dipendenteService'
 
 // Navigation config types importati da ActionButtons
@@ -396,6 +390,10 @@ interface Props {
   // Navigation configuration
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   navigationConfig?: any
+  breadcrumbItems?: { label: string; to?: string }[]
+  pageTitle?: string
+  isDirty?: boolean
+  touchedFields?: Set<string>
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -407,7 +405,11 @@ const props = withDefaults(defineProps<Props>(), {
     codice: '',
     descrizione: '',
     formula: ''
-  })
+  }),
+  breadcrumbItems: () => [],
+  pageTitle: '',
+  isDirty: false,
+  touchedFields: () => new Set<string>()
 })
 
 // Emits

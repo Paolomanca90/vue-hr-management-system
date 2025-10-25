@@ -1,18 +1,21 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `Modifica Zona: ${zonaForm.descrizione}` : 'Nuova Zona'"
+      :title="isEditMode ? `${zonaForm.descrizione} (${zonaForm.codZona})` : 'Nuova Zona'"
+      :breadcrumbItems="[
+        { label: 'Home', to: '/app' },
+        { label: 'Zone', to: '/app/zone' },
+        { label: isEditMode ? 'Modifica' : 'Nuova' }
+      ]"
     >
-      <template #actions>
-        <button
-          class="btn btn-ghost btn-sm"
-          @click="goBack"
-          :disabled="saving"
-        >
-          <FaIcon icon="arrow-left" class="mr-2"/>
-          Indietro
+      <template #backButton>
+        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+          <FaIcon icon="arrow-left" />
         </button>
+      </template>
+      <template #actions>
+        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
       </template>
     </PageHeader>
 
@@ -21,24 +24,21 @@
 
     <!-- Form Container -->
     <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <ActionButtons
-            entity-name="Zona"
-            :is-edit-mode="isEditMode"
-            :saving="saving"
-            :is-form-valid="isFormValid"
-            :show-duplicate="isEditMode"
-            :show-delete="isEditMode"
-            :show-reset="true"
-            :show-navigation="isEditMode"
-            :navigation-config="zoneNavigationConfig"
-            @delete="handleDelete"
-            @reset="handleReset"
-            @duplicate="handleDuplicate"
-          />
-        </div>
-      </div>
+
+      <ActionButtons
+        entity-name="Zona"
+        :is-edit-mode="isEditMode"
+        :saving="saving"
+        :is-form-valid="isFormValid"
+        :show-duplicate="isEditMode"
+        :show-delete="isEditMode"
+        :show-reset="true"
+        :show-navigation="isEditMode"
+        :navigation-config="zoneNavigationConfig"
+        @delete="handleDelete"
+        @reset="handleReset"
+        @duplicate="handleDuplicate"
+      />
 
       <!-- Dati Zona -->
       <div class="card bg-base-100 shadow-sm">
@@ -118,6 +118,8 @@ import { zoneService, type ZonaDettaglio, type Terminale } from '@/services/zone
 import { terminaleConfigService } from '@/services/terminaleConfigService'
 import { useCrudView } from '@/composables/useCrudView'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
+import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -146,9 +148,18 @@ const zonaForm = ref<ZonaDettaglio>({
 
 const loading = ref(false)
 const saving = ref(false)
+const originalData = ref<ZonaDettaglio | null>(null)
 
 // Lista di tutti i terminali disponibili (usiamo Terminale invece di TerminaleConfig per compatibilità con null)
 const availableTerminali = ref<Terminale[]>([])
+
+const {
+  isDirty,
+  touchedFields,
+  updateOriginalData
+} = useFormDirtyState(zonaForm, originalData, {
+  confirmMessage: 'Ci sono modifiche non salvate alla Zona. Sei sicuro di voler lasciare questa pagina?'
+})
 
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
@@ -206,6 +217,7 @@ const loadZona = async () => {
         codtermalt: t.codtermalt || ''
       }))
     }
+    updateOriginalData(zonaForm.value)
   } catch (error) {
     console.error('Errore nel caricamento zona:', error)
     errorMessage.value = 'Errore nel caricamento dei dati zona. Riprova più tardi.'
@@ -242,6 +254,7 @@ const handleSave = async () => {
     if (isEditMode.value) {
       await zoneService.updateZona(zonaToSave)
       successMessage.value = 'Zona aggiornata con successo'
+      updateOriginalData(zonaForm.value)
     } else {
       await zoneService.createZona(zonaToSave)
       successMessage.value = 'Nuova zona creata con successo'

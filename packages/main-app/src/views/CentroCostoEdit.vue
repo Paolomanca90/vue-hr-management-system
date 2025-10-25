@@ -1,41 +1,41 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `Modifica Centro di Costo: ${centroCosto.codCenco}` : 'Nuovo Centro di Costo'"
+      :title="isEditMode ? `${centroCosto.descriz} (${centroCosto.codCenco})` : 'Nuovo Centro di Costo'"
+      :breadcrumbItems="[
+        { label: 'Home', to: '/app' },
+        { label: 'Centri Costo', to: '/app/centri-costo' },
+        { label: isEditMode ? 'Modifica' : 'Nuovo' }
+      ]"
     >
-      <template #actions>
-        <button
-          class="btn btn-ghost btn-sm"
-          @click="goBack"
-          :disabled="saving"
-        >
-          <FaIcon icon="arrow-left" class="mr-2"/>
-          Indietro
+      <template #backButton>
+        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+          <FaIcon icon="arrow-left" />
         </button>
+      </template>
+      <template #actions>
+        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
       </template>
     </PageHeader>
 
     <!-- Form Container -->
     <form @submit.prevent="handleSave" class="space-y-6">
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <ActionButtons
-            entity-name="Centro di Costo"
-            :is-edit-mode="isEditMode"
-            :saving="saving"
-            :is-form-valid="isFormValid"
-            :show-duplicate="true"
-            :show-delete="isEditMode"
-            :show-reset="true"
-            :show-navigation="isEditMode"
-            :navigation-config="centroCostoNavigationConfig"
-            @duplicate="handleDuplicate"
-            @delete="handleDelete"
-            @reset="handleReset"
-          />
-        </div>
-      </div>
+
+      <ActionButtons
+        entity-name="Centro di Costo"
+        :is-edit-mode="isEditMode"
+        :saving="saving"
+        :is-form-valid="isFormValid"
+        :show-duplicate="true"
+        :show-delete="isEditMode"
+        :show-reset="true"
+        :show-navigation="isEditMode"
+        :navigation-config="centroCostoNavigationConfig"
+        @duplicate="handleDuplicate"
+        @delete="handleDelete"
+        @reset="handleReset"
+      />
 
       <!-- Form Content con componente riutilizzabile -->
       <CodiceDescrizioneEdit
@@ -57,7 +57,9 @@ import PageHeader from '@/components/PageHeader.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import CodiceDescrizioneEdit from '@/components/CodiceDescrizioneEdit.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
 import { centriCostoService, type CentroCosto } from '@/services/centriCostoService'
+import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -79,8 +81,13 @@ const saving = ref(false)
 const loading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
+const originalData = ref<FormCentroCosto | null>(null)
 
 useMessageAlerts(errorMessage, successMessage)
+
+const { isDirty, touchedFields, updateOriginalData } = useFormDirtyState(centroCosto, originalData, {
+  confirmMessage: 'Ci sono modifiche non salvate al Centro di Costo. Sei sicuro di voler lasciare questa pagina?'
+})
 
 // Computed
 const isEditMode = computed(() => {
@@ -119,6 +126,7 @@ const loadCentroCosto = async () => {
         codCenco: response.codCenco,
         descriz: response.descriz
       }
+      updateOriginalData(centroCosto.value)
     }
   } catch (error) {
     console.error('Errore nel caricamento centro di costo:', error)
@@ -142,6 +150,7 @@ const handleSave = async () => {
 
     if (isEditMode.value) {
       await centriCostoService.editCentroCosto(centroCostoToSave)
+      updateOriginalData(centroCosto.value)
     } else {
       await centriCostoService.addCentroCosto(centroCostoToSave)
     }

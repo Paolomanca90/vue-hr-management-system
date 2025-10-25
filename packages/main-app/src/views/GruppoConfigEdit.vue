@@ -1,19 +1,22 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="space-y-6">
+  <div class="space-y-1">
     <!-- Header -->
     <PageHeader
-      :title="isEditMode ? 'Modifica Gruppo di Configurazione' : 'Nuovo Gruppo di Configurazione'"
+      :title="isEditMode ? `${gruppoForm.descrizione} (${gruppoForm.codgruppo})` : 'Nuovo Gruppo di Configurazione'"
+      :breadcrumbItems="[
+        { label: 'Home', to: '/app' },
+        { label: 'Gruppi Config', to: '/app/gruppi-config' },
+        { label: isEditMode ? 'Modifica' : 'Nuovo' }
+      ]"
     >
-      <template #actions>
-        <button
-          class="btn btn-ghost btn-sm"
-          @click="goBack"
-          :disabled="saving"
-        >
-          <FaIcon icon="arrow-left" class="mr-2"/>
-          Indietro
+      <template #backButton>
+        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+          <FaIcon icon="arrow-left" />
         </button>
+      </template>
+      <template #actions>
+        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
       </template>
     </PageHeader>
 
@@ -23,26 +26,20 @@
     <!-- Form principale -->
     <form v-if="!loading" @submit.prevent="handleSubmit" class="space-y-6">
 
-      <!-- Azioni -->
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <!-- Azioni principali con navigazione integrata -->
-          <ActionButtons
-            entity-name="Gruppo Config"
-            :is-edit-mode="isEditMode"
-            :saving="saving"
-            :is-form-valid="isFormValid"
-            :show-duplicate="true"
-            :show-delete="isEditMode"
-            :show-reset="true"
-            :show-navigation="isEditMode"
-            :navigation-config="gruppoNavigationConfig"
-            @duplicate="duplicateCurrentGruppo"
-            @delete="deleteCurrentGruppo"
-            @reset="resetForm"
-          />
-        </div>
-      </div>
+      <ActionButtons
+        entity-name="Gruppo Config"
+        :is-edit-mode="isEditMode"
+        :saving="saving"
+        :is-form-valid="isFormValid"
+        :show-duplicate="true"
+        :show-delete="isEditMode"
+        :show-reset="true"
+        :show-navigation="isEditMode"
+        :navigation-config="gruppoNavigationConfig"
+        @duplicate="duplicateCurrentGruppo"
+        @delete="deleteCurrentGruppo"
+        @reset="resetForm"
+      />
 
       <!-- Sezione Informazioni Base -->
       <SectionCard
@@ -149,6 +146,8 @@ import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import SectionCard from '@/components/SectionCard.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
+import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
 import { gruppiConfigService, type GruppoConfig } from '@/services/gruppiConfigService'
 
 const router = useRouter()
@@ -169,6 +168,16 @@ const gruppoForm = ref<GruppoConfig>({
   codgruppo: 0,
   descrizione: ''
 })
+
+const originalGruppoData = ref<GruppoConfig | null>(null)
+
+const { isDirty, touchedFields, updateOriginalData, resetDirtyState } = useFormDirtyState(
+  gruppoForm,
+  originalGruppoData,
+  {
+    confirmMessage: 'Ci sono modifiche non salvate al Gruppo Config. Sei sicuro di voler lasciare questa pagina?'
+  }
+)
 
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
@@ -214,6 +223,8 @@ const loadGruppoData = async () => {
         descrizione: `Gruppo ${gruppoId.value}`
       }
     }
+
+    originalGruppoData.value = JSON.parse(JSON.stringify(gruppoForm.value))
   } catch (error) {
     console.error('Errore nel caricamento del gruppo:', error)
     errorMessage.value = 'I dati del gruppo verranno caricati dalla lista'
@@ -221,6 +232,7 @@ const loadGruppoData = async () => {
       codgruppo: gruppoId.value,
       descrizione: `Gruppo ${gruppoId.value}`
     }
+    originalGruppoData.value = JSON.parse(JSON.stringify(gruppoForm.value))
   } finally {
     loading.value = false
   }
@@ -257,9 +269,11 @@ const handleSubmit = async () => {
     if (isEditMode.value) {
       await gruppiConfigService.editGruppoConfig(gruppoForm.value)
       successMessage.value = 'Gruppo aggiornato con successo'
+      updateOriginalData(gruppoForm.value)
     } else {
       await gruppiConfigService.addGruppoConfig(gruppoForm.value)
       successMessage.value = 'Nuovo gruppo creato con successo'
+      updateOriginalData(gruppoForm.value)
 
       setTimeout(() => {
         router.push(`/app/gruppi-config/${gruppoForm.value.codgruppo}/edit`)
@@ -295,6 +309,8 @@ const confirmDelete = async () => {
   try {
     await gruppiConfigService.deleteGruppoConfig(gruppoId.value)
     successMessage.value = 'Gruppo eliminato con successo'
+
+    resetDirtyState()
 
     setTimeout(() => {
       router.push('/app/gruppi-config')
@@ -332,6 +348,8 @@ const resetForm = () => {
     }
     handleDuplicateMode()
   }
+
+  resetDirtyState()
 }
 
 // Lifecycle

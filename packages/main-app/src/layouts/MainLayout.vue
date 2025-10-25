@@ -76,72 +76,7 @@
           </div>
 
           <!-- Menu esteso quando la sidebar è aperta -->
-          <div class="p-2 space-y-1" v-if="sidenavOpened && (displayedMenuItems.length > 0 || menuStore.hasFavorites)">
-
-            <div v-if="menuStore.hasFavorites" class="mb-4">
-              <!-- Header Preferiti Collassabile -->
-              <div
-                class="px-2 py-3 mb-2 cursor-pointer hover:bg-base-200 rounded-lg transition-all duration-200"
-                @click="toggleFavoritesSection"
-              >
-                <div class="flex items-center text-sm font-semibold text-base-content/70 uppercase tracking-wide">
-                  <FaIcon
-                    icon="chevron-right"
-                    :class="`mr-2 text-xs transition-transform duration-200 ${favoritesExpanded ? 'rotate-90' : ''}`"
-                  />
-                  <FaIcon icon="star" class="text-yellow-500 mr-2 text-sm" />
-                  <span>Preferiti</span>
-                  <span class="ml-auto bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 rounded-full px-2 py-0.5 text-xs font-medium">
-                    {{ menuStore.favoriteItems.length }}
-                  </span>
-                </div>
-              </div>
-
-              <!-- Lista Preferiti Collassabile -->
-              <div
-                v-show="favoritesExpanded"
-                class="space-y-1 mb-4 overflow-auto transition-all duration-300 ease-in-out"
-                :class="{
-                  'max-h-96 opacity-100': favoritesExpanded,
-                  'max-h-0 opacity-0': !favoritesExpanded
-                }"
-              >
-                <RouterLink
-                  v-for="favoriteItem in menuStore.favoriteItems"
-                  :key="`favorite-${favoriteItem.id}`"
-                  :to="{ path: String(favoriteItem.route) }"
-                  class="flex items-center p-2 rounded-lg hover:bg-base-200 transition-all duration-200 w-full group bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200/50 dark:border-yellow-700/20"
-                  :class="{ 'text-primary bg-yellow-100 dark:bg-yellow-900/20': isActive(String(favoriteItem.route)) }"
-                  @click="handleMenuNavigation"
-                >
-                  <!-- Icona del menu -->
-                  <FaIcon
-                    :icon="favoriteItem.icon || 'folder'"
-                    class="text-sm mr-3 text-yellow-600"
-                  />
-
-                  <!-- Label del menu -->
-                  <span class="font-medium flex-1 text-sm">{{ favoriteItem.label }}</span>
-
-                  <!-- Stellina sempre visibile e colorata per i preferiti -->
-                  <button
-                    type="button"
-                    class="btn btn-ghost btn-xs btn-circle ml-2 text-yellow-500 hover:text-yellow-600 hover:scale-110 transition-all duration-200 flex-shrink-0"
-                    @click.prevent.stop="toggleFavorite(favoriteItem.id)"
-                    :disabled="menuStore.savingFavorite"
-                    title="Rimuovi dai preferiti"
-                  >
-                    <FaIcon icon="star" class="text-xs" />
-                  </button>
-                </RouterLink>
-              </div>
-
-              <!-- Divisore -->
-              <div class="divider divider-start text-xs text-base-content/50 my-3 px-2">
-                <FaIcon icon="list" class="mr-1" />
-                Menu Completo
-              </div>
-            </div>
+          <div class="p-2 space-y-1" v-if="sidenavOpened && displayedMenuItems.length > 0">
 
             <!-- Breadcrumb per la ricerca -->
             <div v-if="isSearchActive && searchQuery" class="mb-3 p-2 bg-primary/10 rounded-lg">
@@ -320,7 +255,45 @@
           </span>
         </div>
 
-        <div class="flex-none">
+        <div class="flex-none gap-2">
+          <!-- Preferiti -->
+          <div v-if="menuStore.hasFavorites" class="dropdown dropdown-end">
+            <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+              <div class="indicator">
+                <FaIcon icon="star" class="text-lg text-yellow-500" />
+                <span class="badge badge-sm badge-warning indicator-item">{{ menuStore.favoriteItems.length }}</span>
+              </div>
+            </div>
+            <div
+              tabindex="0"
+              class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-72 z-[1000] max-h-96 overflow-auto"
+            >
+              <ul class="p-0">
+                <li v-for="favoriteItem in menuStore.favoriteItems" :key="`fav-${favoriteItem.id}`">
+                  <RouterLink
+                    :to="{ path: String(favoriteItem.route) }"
+                    class="flex items-center justify-between py-2"
+                    @click="handleMenuNavigation"
+                  >
+                    <div class="flex items-center flex-1">
+                      <FaIcon :icon="favoriteItem.icon || 'folder'" class="text-sm mr-3 text-yellow-600" />
+                      <span class="text-sm">{{ favoriteItem.label }}</span>
+                    </div>
+                    <button
+                      type="button"
+                      class="btn btn-ghost btn-xs btn-circle text-yellow-500 hover:text-yellow-600"
+                      @click.prevent.stop="toggleFavorite(favoriteItem.id)"
+                      :disabled="menuStore.savingFavorite"
+                      title="Rimuovi dai preferiti"
+                    >
+                      <FaIcon icon="star" class="text-xs" />
+                    </button>
+                  </RouterLink>
+                </li>
+              </ul>
+            </div>
+          </div>
+
           <!-- Notifiche -->
           <div class="dropdown dropdown-end">
             <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
@@ -382,7 +355,7 @@
       </div>
 
       <!-- Area del contenuto -->
-      <main class="flex-1 p-6 bg-base-200">
+      <main class="flex-1 px-6 py-2 bg-gradient-to-br from-base-200 to-base-300">
         <RouterView />
       </main>
     </div>
@@ -413,11 +386,6 @@ const searchResults = ref<MenuItem[]>([])
 const showTooltip = ref(false)
 const tooltipText = ref('')
 const tooltipTarget = ref<HTMLElement | null>(null)
-const favoritesExpanded = ref(false)
-
-const toggleFavoritesSection = () => {
-  favoritesExpanded.value = !favoritesExpanded.value
-}
 
 const handleMouseEnter = (event: MouseEvent, text: string) => {
   tooltipTarget.value = event.currentTarget as HTMLElement

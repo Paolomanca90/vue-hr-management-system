@@ -1,17 +1,21 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="space-y-6">
+  <div class="space-y-3">
     <!-- Header -->
     <PageHeader
       title="Gestione Festività"
       :description="`Gestisci le festività per anno - Totale: ${festi.length} anni`"
+      :breadcrumbItems="[
+        { label: 'Home', to: '/app' },
+        { label: 'Festività' }
+      ]"
     >
       <template #actions>
-        <button class="max-md:w-full max-md:block btn btn-primary btn-sm text-white" @click="addNewAnno">
+        <button class="max-md:w-full max-md:block btn btn-primary btn-sm text-xs text-white" @click="addNewAnno">
           <FaIcon icon="plus" class="mr-2"/>
           Nuovo Anno
         </button>
-        <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm" @click="refreshFesti">
+        <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm text-xs" @click="refreshFesti">
           <FaIcon icon="refresh" class="mr-2"/>
           Aggiorna
         </button>
@@ -19,7 +23,7 @@
     </PageHeader>
 
     <div class="card bg-base-100 shadow-sm">
-      <div class="card-body max-md:p-3">
+      <div class="card-body py-2 px-4">
         <!-- Data Table Manager -->
         <DataTableManager
           entity-type="festi"
@@ -40,6 +44,21 @@
           :virtual-scroller-options="{ itemSize: 40 }"
           @row-select="onRowSelect"
         >
+
+          <!-- Custom toolbar -->
+          <template #toolbar>
+            <div class="dropdown dropdown-end">
+              <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm text-xs">
+                <FaIcon icon="cog" class="mr-1" />
+                Opzioni
+              </div>
+              <ul tabindex="0"  class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-60 z-[100]">
+                <li><a><FaIcon icon="check-circle" class="mr-2 text-xs" />Azioni Multiple</a></li>
+                <li><a><FaIcon icon="upload" class="mr-2 text-xs" />Importa Centri di Costo</a></li>
+              </ul>
+            </div>
+          </template>
+
           <!-- Slot personalizzato per la colonna anno -->
           <template #column-anno="{ value }">
             <span class="text-sm font-medium">{{ value }}</span>

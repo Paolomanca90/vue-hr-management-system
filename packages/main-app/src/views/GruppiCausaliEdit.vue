@@ -1,18 +1,21 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `Modifica Gruppo Causale: ${gruppoCausaleForm.descrizione}` : 'Nuovo Gruppo Causale'"
+      :title="isEditMode ? `${gruppoCausaleForm.descrizione} (${gruppoCausaleForm.codGrCau})` : 'Nuovo Gruppo Causale'"
+      :breadcrumbItems="[
+        { label: 'Home', to: '/app' },
+        { label: 'Gruppi Causali', to: '/app/gruppi-causali' },
+        { label: isEditMode ? 'Modifica' : 'Nuovo' }
+      ]"
     >
-      <template #actions>
-        <button
-          class="btn btn-ghost btn-sm"
-          @click="goBack"
-          :disabled="saving"
-        >
-          <FaIcon icon="arrow-left" class="mr-2"/>
-          Indietro
+      <template #backButton>
+        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+          <FaIcon icon="arrow-left" />
         </button>
+      </template>
+      <template #actions>
+        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
       </template>
     </PageHeader>
 
@@ -21,24 +24,21 @@
 
     <!-- Form Container -->
     <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <ActionButtons
-            entity-name="Gruppo Causale"
-            :is-edit-mode="isEditMode"
-            :saving="saving"
-            :is-form-valid="isFormValid"
-            :show-duplicate="isEditMode"
-            :show-delete="isEditMode"
-            :show-reset="true"
-            :show-navigation="isEditMode"
-            :navigation-config="gruppiCausaliNavigationConfig"
-            @delete="handleDelete"
-            @reset="handleReset"
-            @duplicate="handleDuplicate"
-          />
-        </div>
-      </div>
+
+      <ActionButtons
+        entity-name="Gruppo Causale"
+        :is-edit-mode="isEditMode"
+        :saving="saving"
+        :is-form-valid="isFormValid"
+        :show-duplicate="isEditMode"
+        :show-delete="isEditMode"
+        :show-reset="true"
+        :show-navigation="isEditMode"
+        :navigation-config="gruppiCausaliNavigationConfig"
+        @delete="handleDelete"
+        @reset="handleReset"
+        @duplicate="handleDuplicate"
+      />
 
       <!-- Dati Gruppo Causale -->
       <div class="card bg-base-100 shadow-sm">
@@ -113,7 +113,9 @@ import EditableDataGrid, { type GridRow, type LookupValue } from '@/components/E
 import { gruppiCausaliService, type GruppoCausaleDettaglio, type CausaleConSegno } from '@/services/gruppiCausaliService'
 import { useCrudView } from '@/composables/useCrudView'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
 import { lookupService } from '@/services/lookupService'
+import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -155,9 +157,14 @@ const gruppoCausaleForm = ref<GruppoCausaleForm>({
 
 const loading = ref(false)
 const saving = ref(false)
+const originalData = ref<GruppoCausaleForm | null>(null)
 
 // Lista di tutte le causali disponibili per la lookup
 const causaliDisponibili = ref<Record<string, unknown>[]>([])
+
+const { isDirty, touchedFields, updateOriginalData } = useFormDirtyState(gruppoCausaleForm, originalData, {
+  confirmMessage: 'Ci sono modifiche non salvate al Gruppo Causale. Sei sicuro di voler lasciare questa pagina?'
+})
 
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
@@ -264,6 +271,8 @@ const loadGruppoCausale = async () => {
       listaCausali: causaliGrid,
       totCau: gruppoData.totCau
     }
+
+    updateOriginalData(gruppoCausaleForm.value)
   } catch (error) {
     console.error('Errore nel caricamento gruppo causale:', error)
     errorMessage.value = 'Errore nel caricamento del gruppo causale'
@@ -302,6 +311,7 @@ const handleSave = async () => {
 
     if (isEditMode.value) {
       await gruppiCausaliService.updateGruppoCausale(dataToSave)
+      updateOriginalData(gruppoCausaleForm.value)
       successMessage.value = 'Gruppo causale aggiornato con successo'
     } else {
       await gruppiCausaliService.createGruppoCausale(dataToSave)

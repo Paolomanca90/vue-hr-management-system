@@ -1,30 +1,78 @@
 <template>
-  <div v-if="showNavigation" class="flex items-center max-md:justify-center space-x-2">
+  <div v-if="showNavigation && hasEntities" class="flex items-center max-md:justify-center space-x-2">
     <button
       type="button"
-      class="btn btn-primary btn-outline btn-sm"
+      class="btn btn-primary btn-outline btn-sm text-sm"
       @click="navigatePrevious"
-      :disabled="disabled || !hasPrevious"
+      :disabled="disabled"
       :title="`${entityName} precedente`"
     >
       <FaIcon icon="chevron-left" />
     </button>
+
+    <!-- Bottone per aprire drawer -->
     <button
       type="button"
-      class="btn btn-primary btn-outline btn-sm"
+      class="btn btn-primary btn-outline btn-sm text-sm"
+      @click="drawerVisible = true"
+      :title="`Vai a ${entityName}`"
+    >
+      <FaIcon icon="list" />
+    </button>
+
+    <button
+      type="button"
+      class="btn btn-primary btn-outline btn-sm text-sm"
       @click="navigateNext"
-      :disabled="disabled || !hasNext"
+      :disabled="disabled"
       :title="`${entityName} successivo`"
     >
       <FaIcon icon="chevron-right" />
     </button>
   </div>
+
+  <!-- Drawer con lista completa entità -->
+  <Drawer
+    v-model:visible="drawerVisible"
+    position="right"
+    :header="`Seleziona ${entityName}`"
+    class="w-96"
+  >
+    <div class="space-y-2">
+      <div class="text-sm text-base-content/70 mb-4">
+        Totale: {{ allEntities.length }} elementi
+      </div>
+
+      <div
+        v-for="(entity, index) in allEntities"
+        :key="navigationConfig?.getEntityId(entity)"
+        class="p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-base-200"
+        :class="{
+          'bg-primary/10 border border-primary/30': index === currentIndex,
+          'hover:bg-base-200': index !== currentIndex
+        }"
+        @click="navigateToEntity(entity); drawerVisible = false"
+      >
+        <div class="flex items-center justify-between">
+          <span class="text-sm font-medium">
+            {{ getEntityLabel(entity) }}
+          </span>
+          <FaIcon
+            v-if="index === currentIndex"
+            icon="check"
+            class="text-primary"
+          />
+        </div>
+      </div>
+    </div>
+  </Drawer>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
+import Drawer from 'primevue/drawer'
 import { useTableSort } from '@/composables/useTableSort'
 import { useTableFilter } from '@/composables/useTableFilter'
 
@@ -62,6 +110,7 @@ const route = useRoute()
 // State
 const allEntities = ref<EntityItem[]>([])
 const loading = ref(false)
+const drawerVisible = ref(false)
 
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
@@ -74,6 +123,7 @@ const currentIndex = computed(() => {
   )
 })
 
+const hasEntities = computed(() => allEntities.value.length > 1)
 const hasPrevious = computed(() => currentIndex.value > 0)
 const hasNext = computed(() => currentIndex.value < allEntities.value.length - 1 && currentIndex.value !== -1)
 
@@ -148,6 +198,34 @@ const navigateNext = () => {
       state: { [entityStateName]: JSON.parse(JSON.stringify(nextEntity)) }
     })
   }
+}
+
+const navigateToEntity = (entity: EntityItem) => {
+  if (props.navigationConfig) {
+    const entityId = props.navigationConfig.getEntityId(entity)
+    const entityStateName = `${props.entityName.toLowerCase()}Data`
+
+    router.push({
+      path: `${props.navigationConfig.basePath}/${entityId}/edit`,
+      state: { [entityStateName]: JSON.parse(JSON.stringify(entity)) }
+    })
+  }
+}
+
+const getEntityLabel = (entity: EntityItem): string => {
+  if (!props.navigationConfig) return ''
+
+  // Prova a costruire una label leggibile dall'entità
+  const id = props.navigationConfig.getEntityId(entity)
+
+  // Cerca campi comuni per descrizione/nome
+  const description = entity.descrizione || entity.description || entity.nome || entity.name || entity.label
+
+  if (description) {
+    return `${description} (${id})`
+  }
+
+  return id
 }
 
 watch(() => route.params.id, loadEntities, { immediate: true })

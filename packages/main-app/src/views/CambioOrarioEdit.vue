@@ -1,19 +1,31 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="space-y-6">
+  <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `Modifica Cambio Orario: ${cambioForm.codCambio}` : 'Nuovo Cambio Orario'"
+      :title="isEditMode ? `${cambioForm.descrizione} (${cambioForm.codCambio})` : 'Nuovo Cambio Orario'"
+      :breadcrumbItems="[
+        { label: 'Home', to: '/app' },
+        { label: 'Cambi Orario', to: '/app/cambio-orario' },
+        { label: isEditMode ? 'Modifica' : 'Nuovo' }
+      ]"
     >
-      <template #actions>
+      <template #backButton>
         <button
-          class="btn btn-ghost btn-sm"
+          class="btn btn-ghost btn-circle btn-xs"
           @click="goBack"
           :disabled="saving"
+          title="Indietro"
         >
-          <FaIcon icon="arrow-left" class="mr-2"/>
-          Indietro
+          <FaIcon icon="arrow-left" />
         </button>
+      </template>
+      <template #actions>
+        <FormStatusIndicator
+          :isDirty="isDirty"
+          :touchedFields="touchedFields"
+          :showSavedIndicator="isEditMode"
+        />
       </template>
     </PageHeader>
 
@@ -22,24 +34,21 @@
 
     <!-- Form Container -->
     <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <ActionButtons
-            entity-name="Cambio Orario"
-            :is-edit-mode="isEditMode"
-            :saving="saving"
-            :is-form-valid="isFormValid"
-            :show-duplicate="true"
-            :show-delete="isEditMode"
-            :show-reset="true"
-            :show-navigation="isEditMode"
-            :navigation-config="cambioOrarioNavigationConfig"
-            @duplicate="handleDuplicate"
-            @delete="handleDelete"
-            @reset="handleReset"
-          />
-        </div>
-      </div>
+
+      <ActionButtons
+        entity-name="Cambio Orario"
+        :is-edit-mode="isEditMode"
+        :saving="saving"
+        :is-form-valid="isFormValid"
+        :show-duplicate="true"
+        :show-delete="isEditMode"
+        :show-reset="true"
+        :show-navigation="isEditMode"
+        :navigation-config="cambioOrarioNavigationConfig"
+        @duplicate="handleDuplicate"
+        @delete="handleDelete"
+        @reset="handleReset"
+      />
 
       <!-- Dati Principali -->
       <div class="card bg-base-100 shadow-sm">
@@ -143,8 +152,10 @@ import EditableDataGrid, { type GridColumn } from '@/components/EditableDataGrid
 import { cambioOrarioService, type CambioOrario, type CambioOrarioListItem } from '@/services/cambioOrarioService'
 import { useCrudView, type CrudService } from '@/composables/useCrudView'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
 import { orarioLookupConfig } from '@/config/lookupConfigs'
 import { lookupService } from '@/services/lookupService'
+import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -194,6 +205,14 @@ const cambioForm = ref<CambioOrarioForm>({
 })
 
 const originalData = ref<CambioOrarioForm | null>(null)
+
+const {
+  isDirty,
+  touchedFields,
+  updateOriginalData
+} = useFormDirtyState(cambioForm, originalData, {
+  confirmMessage: 'Ci sono modifiche non salvate al Cambio Orario. Sei sicuro di voler lasciare questa pagina?'
+})
 
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
@@ -592,6 +611,7 @@ const handleSave = async () => {
       successMessage.value = 'Cambio Orario aggiornato con successo'
       // Ricarica i dati aggiornati
       await loadCambioOrario()
+      updateOriginalData(cambioForm.value)
     } else {
       const created = await cambioOrarioService.createCambioOrario(dataToSave)
       successMessage.value = 'Cambio Orario creato con successo'

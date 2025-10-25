@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-4">
+  <div class="flex flex-col flex-1 space-y-4 h-full overflow-hidden">
 
     <!-- Table -->
     <PrimeDataTable
@@ -28,7 +28,7 @@
       :paginator="paginator"
       :rows="rows"
       :rowsPerPageOptions="rowsPerPageOptions"
-      actionColumnWidth="140px"
+      actionColumnWidth="60px"
       @sort="onSort"
     >
       <!-- Slot per colonne personalizzate -->
@@ -38,31 +38,31 @@
 
       <!-- Slot azioni centralizzato -->
       <template #actions="{ data }">
-        <div class="flex items-center space-x-1" style="width: max-content; white-space: nowrap;">
-          <div v-if="actionsConfig.editAction" class="tooltip tooltip-right relative z-[10000]" data-tip="Modifica">
-            <button
-              class="btn btn-sm btn-primary btn-outline relative z-[100]"
-              @click="actionsConfig.editAction(data)"
-            >
-              <FaIcon icon="edit" />
-            </button>
+        <div class="dropdown dropdown-end">
+          <div tabindex="0" role="button" class="btn btn-ghost btn-xs btn-circle">
+            <FaIcon icon="ellipsis-v" class="text-xs"/>
           </div>
-          <div v-if="actionsConfig.duplicateAction" class="tooltip tooltip-right relative z-[10000]" data-tip="Duplica">
-            <button
-              class="btn btn-sm btn-primary btn-outline relative z-[100]"
-              @click="actionsConfig.duplicateAction(data)"
-            >
-              <FaIcon icon="copy" />
-            </button>
-          </div>
-          <div v-if="actionsConfig.deleteAction" class="tooltip tooltip-right relative z-[10000]" data-tip="Elimina">
-            <button
-              class="btn btn-sm btn-error btn-outline relative z-[100]"
-              @click="actionsConfig.deleteAction(data)"
-            >
-              <FaIcon icon="trash" />
-            </button>
-          </div>
+          <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-[10000]">
+            <li v-if="actionsConfig.editAction">
+              <a @click="actionsConfig.editAction(data)" class="text-xs">
+                <FaIcon icon="edit" class="mr-2" />
+                Modifica
+              </a>
+            </li>
+            <li v-if="actionsConfig.duplicateAction">
+              <a @click="actionsConfig.duplicateAction(data)" class="text-xs">
+                <FaIcon icon="copy" class="mr-2" />
+                Duplica
+              </a>
+            </li>
+            <li v-if="actionsConfig.deleteAction" class="divider my-1"></li>
+            <li v-if="actionsConfig.deleteAction">
+              <a @click="actionsConfig.deleteAction(data)" class="text-error text-xs">
+                <FaIcon icon="trash" class="mr-2" />
+                Elimina
+              </a>
+            </li>
+          </ul>
         </div>
       </template>
     </PrimeDataTable>
@@ -156,7 +156,7 @@ const props = withDefaults(defineProps<Props>(), {
   idField: 'id' as keyof CrudEntity,
   selectionMode: 'single',
   dataKey: 'id',
-  showGlobalSearch: true,
+  showGlobalSearch: false,
   showColumnFilters: true,
   showExport: true,
   showColumnToggle: true,
@@ -164,7 +164,7 @@ const props = withDefaults(defineProps<Props>(), {
   searchPlaceholder: 'Cerca...',
   exportFilename: 'export',
   scrollable: true,
-  scrollHeight: '600px',
+  scrollHeight: 'flex',
   virtualScrollerOptions: () => ({ itemSize: 40 }),
   resizableColumns: true,
   reorderableColumns: false,

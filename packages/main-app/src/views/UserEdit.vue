@@ -1,19 +1,18 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="space-y-6">
+  <div class="space-y-1">
     <!-- Header -->
     <PageHeader
-      :title="isEditMode ? 'Modifica Utente' : 'Nuovo Utente'"
+      :title="pageTitle"
+      :breadcrumbItems="breadcrumbItems"
     >
-      <template #actions>
-        <button
-          class="btn btn-ghost btn-sm"
-          @click="goBack"
-          :disabled="saving"
-        >
-          <FaIcon icon="arrow-left" class="mr-2"/>
-          Indietro
+      <template #backButton>
+        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+          <FaIcon icon="arrow-left" />
         </button>
+      </template>
+      <template #actions>
+        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
       </template>
     </PageHeader>
 
@@ -23,26 +22,20 @@
     <!-- Form principale -->
     <form v-if="!loading" @submit.prevent="handleSubmit" class="space-y-6">
 
-      <!-- Azioni -->
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <!-- Azioni principali con navigazione integrata -->
-          <ActionButtons
-            entity-name="Utente"
-            :is-edit-mode="isEditMode"
-            :saving="saving"
-            :is-form-valid="isFormValid"
-            :show-duplicate="true"
-            :show-delete="isEditMode"
-            :show-reset="true"
-            :show-navigation="isEditMode"
-            :navigation-config="userNavigationConfig"
-            @duplicate="duplicateCurrentUser"
-            @delete="deleteCurrentUser"
-            @reset="resetForm"
-          />
-        </div>
-      </div>
+      <ActionButtons
+        entity-name="Utente"
+        :is-edit-mode="isEditMode"
+        :saving="saving"
+        :is-form-valid="isFormValid"
+        :show-duplicate="true"
+        :show-delete="isEditMode"
+        :show-reset="true"
+        :show-navigation="isEditMode"
+        :navigation-config="userNavigationConfig"
+        @duplicate="duplicateCurrentUser"
+        @delete="deleteCurrentUser"
+        @reset="resetForm"
+      />
 
       <!-- Sezione Informazioni Base -->
       <SectionCard
@@ -263,6 +256,8 @@ import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import SectionCard from '@/components/SectionCard.vue'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
+import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
 
 // Interfaccia per il form dell'utente
 interface UserForm {
@@ -304,6 +299,8 @@ const userForm = ref<UserForm>({
   iD_INTER: 0
 })
 
+const originalData = ref<UserForm | null>(null)
+
 const {
   loading,
   saving,
@@ -319,6 +316,10 @@ const {
 
 
 useMessageAlerts(errorMessage, successMessage)
+
+const { isDirty, touchedFields, updateOriginalData } = useFormDirtyState(userForm, originalData, {
+  confirmMessage: 'Ci sono modifiche non salvate all\'Utente. Sei sicuro di voler lasciare questa pagina?'
+})
 
 const submitted = ref(false)
 
@@ -373,6 +374,31 @@ const isFormValid = computed(() => {
          userForm.value.nomecompleto.trim() !== '' &&
          userForm.value.iD_LINGUA > 0 &&
          userForm.value.iD_INTER > 0
+})
+
+const breadcrumbItems = computed<{ label: string; to?: string }[]>(() => {
+  const items: { label: string; to?: string }[] = [
+    { label: 'Home', to: '/app' },
+    { label: 'Utenti', to: '/app/users' }
+  ]
+
+  if (isEditMode.value) {
+    items.push({ label: 'Modifica' })
+  } else {
+    items.push({ label: 'Nuovo' })
+  }
+
+  return items
+})
+
+const pageTitle = computed(() => {
+  if (isEditMode.value && userForm.value.nomecompleto && userForm.value.username) {
+    return `${userForm.value.nomecompleto} (${userForm.value.username})`
+  } else if (isEditMode.value) {
+    return 'Modifica Utente'
+  } else {
+    return 'Nuovo Utente'
+  }
 })
 
 // Funzione per trovare tutti i match e i loro percorsi nella gerarchia
@@ -657,6 +683,8 @@ const loadUserData = async () => {
 
 
     await loadUserPermissions()
+
+    updateOriginalData(userForm.value)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     errorMessage.value = 'Errore nel caricamento dei dati utente'
@@ -862,6 +890,7 @@ const handleSubmit = async () => {
         await menuService.updateMenuUtente(abilitazioni, userData.username)
       }
 
+      updateOriginalData(userForm.value)
       successMessage.value = 'Utente aggiornato con successo'
     } else {
       // Crea nuovo utente

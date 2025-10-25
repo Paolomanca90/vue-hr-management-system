@@ -1,41 +1,41 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `Modifica Filiale: ${filiale?.descriz}` : 'Nuova Filiale'"
+      :title="isEditMode ? `${filiale.descriz} (${filiale.codAzi}-${filiale.codCant})` : 'Nuova Filiale'"
+      :breadcrumbItems="[
+        { label: 'Home', to: '/app' },
+        { label: 'Filiali', to: '/app/filiali' },
+        { label: isEditMode ? 'Modifica' : 'Nuova' }
+      ]"
     >
-      <template #actions>
-        <button
-          class="btn btn-ghost btn-sm"
-          @click="goBack"
-          :disabled="saving"
-        >
-          <FaIcon icon="arrow-left" class="mr-2"/>
-          Indietro
+      <template #backButton>
+        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+          <FaIcon icon="arrow-left" />
         </button>
+      </template>
+      <template #actions>
+        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
       </template>
     </PageHeader>
 
     <!-- Form Container -->
     <form @submit.prevent="handleSave" class="space-y-6">
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <!-- Azioni principali con navigazione integrata -->
-          <ActionButtons
-            entity-name="Filiale"
-            :is-edit-mode="isEditMode"
-            :saving="saving"
-            :is-form-valid="isFormValid"
-            :show-duplicate="true"
-            :show-delete="isEditMode"
-            :show-reset="true"
-            :show-navigation="isEditMode"
-            :navigation-config="filialeNavigationConfig"
-            @duplicate="handleDuplicate"
-            @reset="handleReset"
-          />
-        </div>
-      </div>
+
+      <!-- Azioni principali con navigazione integrata -->
+      <ActionButtons
+        entity-name="Filiale"
+        :is-edit-mode="isEditMode"
+        :saving="saving"
+        :is-form-valid="isFormValid"
+        :show-duplicate="true"
+        :show-delete="isEditMode"
+        :show-reset="true"
+        :show-navigation="isEditMode"
+        :navigation-config="filialeNavigationConfig"
+        @duplicate="handleDuplicate"
+        @reset="handleReset"
+      />
 
       <!-- Tab Selector -->
       <DetailTabSelector
@@ -163,7 +163,9 @@ import DetailTabSelector from '@/components/DetailTabSelector.vue'
 import AddressInput, { type AddressData } from '@/components/AddressInput.vue'
 import GenericLookupInput from '@/components/GenericLookupInput.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
 import { filialiService, type FilialeDettaglio } from '@/services/filialiService'
+import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
 import type { AnagraficaField } from '@/components/DetailTabSelector.vue'
 import { causaliLookupConfig } from '@/config/lookupConfigs'
 
@@ -208,8 +210,13 @@ const loading = ref(false)
 const componentKey = ref(0)
 const errorMessage = ref('')
 const successMessage = ref('')
+const originalData = ref<FormFiliale | null>(null)
 
 useMessageAlerts(errorMessage, successMessage)
+
+const { isDirty, touchedFields, updateOriginalData } = useFormDirtyState(filiale, originalData, {
+  confirmMessage: 'Ci sono modifiche non salvate alla Filiale. Sei sicuro di voler lasciare questa pagina?'
+})
 
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
@@ -289,6 +296,7 @@ const loadFiliale = async () => {
           descrizione: ''
         }
       }
+      updateOriginalData(filiale.value)
     }
   } catch (error) {
     console.error('Errore nel caricamento filiale:', error)
@@ -364,6 +372,7 @@ const handleSave = async () => {
 
     if (isEditMode.value) {
       await filialiService.editFiliale(filialeToSave)
+      updateOriginalData(filiale.value)
     } else {
       await filialiService.addFiliale(filialeToSave)
     }

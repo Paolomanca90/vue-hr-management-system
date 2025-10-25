@@ -1,18 +1,21 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `Modifica Posizione INPS: ${posizioneInpsForm.posInps}` : 'Nuova Posizione INPS'"
+      :title="isEditMode ? `${posizioneInpsForm.matrInps || 'Posizione INPS'} (${posizioneInpsForm.posInps})` : 'Nuova Posizione INPS'"
+      :breadcrumbItems="[
+        { label: 'Home', to: '/app' },
+        { label: 'Posizioni INPS', to: '/app/posizioni-inps' },
+        { label: isEditMode ? 'Modifica' : 'Nuova' }
+      ]"
     >
-      <template #actions>
-        <button
-          class="btn btn-ghost btn-sm"
-          @click="goBack"
-          :disabled="saving"
-        >
-          <FaIcon icon="arrow-left" class="mr-2"/>
-          Indietro
+      <template #backButton>
+        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+          <FaIcon icon="arrow-left" />
         </button>
+      </template>
+      <template #actions>
+        <FormStatusIndicator :is-dirty="isDirty" :touched-fields="touchedFields" />
       </template>
     </PageHeader>
 
@@ -21,24 +24,21 @@
 
     <!-- Form Container -->
     <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <ActionButtons
-            entity-name="Posizione INPS"
-            :is-edit-mode="isEditMode"
-            :saving="saving"
-            :is-form-valid="isFormValid"
-            :show-duplicate="true"
-            :show-delete="isEditMode"
-            :show-reset="true"
-            :show-navigation="isEditMode"
-            :navigation-config="posizioneInpsNavigationConfig"
-            @duplicate="handleDuplicate"
-            @delete="handleDelete"
-            @reset="handleReset"
-          />
-        </div>
-      </div>
+
+      <ActionButtons
+        entity-name="Posizione INPS"
+        :is-edit-mode="isEditMode"
+        :saving="saving"
+        :is-form-valid="isFormValid"
+        :show-duplicate="true"
+        :show-delete="isEditMode"
+        :show-reset="true"
+        :show-navigation="isEditMode"
+        :navigation-config="posizioneInpsNavigationConfig"
+        @duplicate="handleDuplicate"
+        @delete="handleDelete"
+        @reset="handleReset"
+      />
 
       <!-- Form Fields -->
       <div class="card bg-base-100 shadow-sm">
@@ -86,6 +86,8 @@ import { posizioneInpsService, type PosizioneInps } from '@/services/posizioneIn
 import { aziendeService, type Azienda } from '@/services/aziendeService'
 import { useCrudView } from '@/composables/useCrudView'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
+import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -109,10 +111,15 @@ const posizioneInpsForm = ref<EntityFormData>({
   posInps: null,
   matrInps: ''
 })
+const originalData = ref<EntityFormData | null>(null)
 
 const selectedCompany = ref<Azienda | null>(null)
 const loading = ref(false)
 const saving = ref(false)
+
+const { isDirty, touchedFields, updateOriginalData } = useFormDirtyState(posizioneInpsForm, originalData, {
+  confirmMessage: 'Ci sono modifiche non salvate alla Posizione INPS. Sei sicuro di voler lasciare questa pagina?'
+})
 
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
@@ -158,6 +165,8 @@ const loadPosizioneInps = async () => {
       const aziende = await aziendeService.getAziende()
       selectedCompany.value = aziende.find(a => a.codAzi === response.codAzi) || null
     }
+
+    updateOriginalData(posizioneInpsForm.value)
   } catch (error) {
     console.error('Errore nel caricamento Posizione INPS:', error)
     errorMessage.value = 'Errore nel caricamento dei dati Posizione INPS. Riprova più tardi.'
@@ -199,6 +208,7 @@ const handleSave = async () => {
     if (isEditMode.value) {
       await posizioneInpsService.editPosizioneInps(posizioneInpsToSave)
       successMessage.value = 'Posizione INPS aggiornata con successo!'
+      updateOriginalData(posizioneInpsForm.value)
     } else {
       await posizioneInpsService.addPosizioneInps(posizioneInpsToSave)
       successMessage.value = 'Posizione INPS creata con successo!'

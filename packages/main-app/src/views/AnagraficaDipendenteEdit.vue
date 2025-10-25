@@ -1,41 +1,42 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="`Anagrafica Dipendente: ${dipendente?.cognome || ''} ${dipendente?.nome || ''}`"
+      :title="isEditMode ? `${dipendente?.cognome || ''} ${dipendente?.nome || ''} (${dipendente?.codDip || ''})` : 'Nuovo Dipendente'"
+      :breadcrumbItems="[
+        { label: 'Home', to: '/app' },
+        { label: 'Anagrafica Dipendenti', to: '/app/anagrafica-dipendente' },
+        { label: isEditMode ? 'Modifica' : 'Nuovo' }
+      ]"
     >
-      <template #actions>
-        <button
-          class="btn btn-ghost btn-sm"
-          @click="goBack"
-          :disabled="saving"
-        >
-          <FaIcon icon="arrow-left" class="mr-2"/>
-          Indietro
+      <template #backButton>
+        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+          <FaIcon icon="arrow-left" />
         </button>
+      </template>
+      <template #actions>
+        <FormStatusIndicator :is-dirty="isDirty" :touched-fields="touchedFields" />
       </template>
     </PageHeader>
 
     <!-- Action Buttons -->
     <form @submit.prevent="handleSave" class="space-y-6">
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <ActionButtons
-            entity-name="Dipendente"
-            :is-edit-mode="isEditMode"
-            :saving="saving"
-            :is-form-valid="isFormValid"
-            :show-duplicate="isEditMode"
-            :show-delete="isEditMode"
-            :show-reset="true"
-            :show-navigation="isEditMode"
-            :navigation-config="dipendenteNavigationConfig"
-            @delete="handleDelete"
-            @duplicate="handleDuplicate"
-            @reset="handleReset"
-          />
-        </div>
-      </div>
+
+      <ActionButtons
+        entity-name="Dipendente"
+        :is-edit-mode="isEditMode"
+        :saving="saving"
+        :is-form-valid="isFormValid"
+        :show-duplicate="isEditMode"
+        :show-delete="isEditMode"
+        :show-reset="true"
+        :show-navigation="isEditMode"
+        :navigation-config="dipendenteNavigationConfig"
+        @delete="handleDelete"
+        @duplicate="handleDuplicate"
+        @reset="handleReset"
+      />
+
     </form>
 
     <!-- Loading indicator -->
@@ -915,11 +916,13 @@ import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
 import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
+import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
 import DateInput from '@/components/DateInput.vue'
 import SimpleConfirmDialog from '@/components/SimpleConfirmDialog.vue'
 import GenericLookupInput, { type LookupInputConfig } from '@/components/GenericLookupInput.vue'
 import AddressInput, { type AddressData } from '@/components/AddressInput.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
 import { dipendenteService, type DettaglioDipendente, type Familiare, type Badge, type PAT, type GruppoConfigDipendente } from '@/services/dipendenteService'
 import { lookupService, formatCap } from '@/services/lookupService'
 import { gruppiConfigService, type GruppoConfig } from '@/services/gruppiConfigService'
@@ -945,6 +948,7 @@ const router = useRouter()
 const loading = ref(false)
 const saving = ref(false)
 const dipendente = ref<DettaglioDipendente | null>(null)
+const originalData = ref<DettaglioDipendente | null>(null)
 
 const showConfirmDialog = ref(false)
 const confirmDialogTitle = ref('')
@@ -955,6 +959,15 @@ const errorMessage = ref('')
 const successMessage = ref('')
 
 useMessageAlerts(errorMessage, successMessage)
+
+const {
+  isDirty,
+  touchedFields,
+  updateOriginalData
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+} = useFormDirtyState(dipendente as any, originalData as any, {
+  confirmMessage: 'Ci sono modifiche non salvate all\'Anagrafica Dipendente. Sei sicuro di voler lasciare questa pagina?'
+})
 
 const sedeData = ref<Record<string, unknown>>({
   codSedeAz: 0,
@@ -1594,6 +1607,7 @@ const loadDipendente = async () => {
       ensureBadgesInitialized()
       ensurePatsInitialized()
       ensureGruppiConfigInitialized()
+      updateOriginalData(dipendente.value)
     }
   } catch (error) {
     console.error('Errore nel caricamento dipendente:', error)
@@ -1722,6 +1736,7 @@ const handleSave = async () => {
     if (isEditMode.value) {
       await dipendenteService.updateDipendente(dipendenteToSave)
       successMessage.value = 'Dipendente aggiornato con successo'
+      updateOriginalData(dipendente.value)
     } else {
       await dipendenteService.createDipendente(dipendenteToSave)
       successMessage.value = 'Dipendente creato con successo'

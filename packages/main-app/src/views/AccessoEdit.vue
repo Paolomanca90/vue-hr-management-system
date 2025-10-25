@@ -10,6 +10,14 @@
     :error-message="errorMessage"
     :initial-data="initialData"
     :navigation-config="navigationConfig"
+    :page-title="isEditMode ? `${initialData.descrizione} (${initialData.codice})` : 'Nuovo Accesso'"
+    :breadcrumb-items="[
+      { label: 'Home', to: '/app' },
+      { label: 'Accessi', to: '/app/accessi' },
+      { label: isEditMode ? 'Modifica' : 'Nuovo' }
+    ]"
+    :is-dirty="isDirty"
+    :touched-fields="touchedFields"
     @go-back="goBack"
     @save="handleSave"
     @delete="handleDelete"
@@ -24,6 +32,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import QueryBuilder from '@/components/QueryBuilder.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
 import { accessiService, type Accesso } from '@/services/accessiService'
 
 const router = useRouter()
@@ -42,6 +51,16 @@ const initialData = ref({
   descrizione: '',
   formula: ''
 })
+
+const originalData = ref<typeof initialData.value | null>(null)
+
+const { isDirty, touchedFields, updateOriginalData, resetDirtyState } = useFormDirtyState(
+  initialData,
+  originalData,
+  {
+    confirmMessage: 'Ci sono modifiche non salvate all\'Accesso. Sei sicuro di voler lasciare questa pagina?'
+  }
+)
 
 // Navigation state
 // Computed
@@ -90,6 +109,8 @@ const loadAccessoData = async () => {
       }
     }
 
+    originalData.value = JSON.parse(JSON.stringify(initialData.value))
+
   } catch (error) {
     console.error('Errore nel caricamento dell\'accesso:', error)
     errorMessage.value = 'I dati dell\'accesso verranno caricati dalla lista'
@@ -98,6 +119,7 @@ const loadAccessoData = async () => {
       descrizione: `Accesso ${accessoId.value}`,
       formula: ''
     }
+    originalData.value = JSON.parse(JSON.stringify(initialData.value))
   } finally {
     loading.value = false
   }
@@ -137,9 +159,11 @@ const handleSave = async (data: any) => {
     if (isEditMode.value) {
       await accessiService.editAccesso(accessoData)
       successMessage.value = 'Accesso aggiornato con successo'
+      updateOriginalData(initialData.value)
     } else {
       await accessiService.addAccesso(accessoData)
       successMessage.value = 'Nuovo accesso creato con successo'
+      updateOriginalData(initialData.value)
 
       // Reindirizza alla modalità edit dopo la creazione
       setTimeout(() => {
@@ -192,6 +216,7 @@ const handleDuplicate = () => {
 
 const handleReset = () => {
   clearMessages()
+  resetDirtyState()
   if (isEditMode.value) {
     loadAccessoData()
   } else {

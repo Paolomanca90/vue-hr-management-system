@@ -1,18 +1,26 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `Modifica Festività CCNL Anno: ${festiForm.anno}` : 'Nuova Festività CCNL'"
+      :title="isEditMode ? `Festività CCNL Anno ${festiForm.anno} (${festiForm.anno})` : 'Nuova Festività CCNL'"
+      :breadcrumbItems="[
+        { label: 'Home', to: '/app' },
+        { label: 'Festività CCNL', to: '/app/festi-ccnl' },
+        { label: isEditMode ? 'Modifica' : 'Nuova' }
+      ]"
     >
-      <template #actions>
+      <template #backButton>
         <button
-          class="btn btn-ghost btn-sm"
+          class="btn btn-ghost btn-circle btn-xs"
           @click="goBack"
           :disabled="saving"
+          title="Indietro"
         >
-          <FaIcon icon="arrow-left" class="mr-2"/>
-          Indietro
+          <FaIcon icon="arrow-left" />
         </button>
+      </template>
+      <template #actions>
+        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
       </template>
     </PageHeader>
 
@@ -21,24 +29,21 @@
 
     <!-- Form Container -->
     <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <ActionButtons
-            entity-name="Festività CCNL"
-            :is-edit-mode="isEditMode"
-            :saving="saving"
-            :is-form-valid="isFormValid"
-            :show-duplicate="isEditMode"
-            :show-delete="isEditMode"
-            :show-reset="true"
-            :show-navigation="isEditMode"
-            :navigation-config="festiCcnlNavigationConfig"
-            @delete="handleDelete"
-            @reset="handleReset"
-            @duplicate="handleDuplicate"
-          />
-        </div>
-      </div>
+
+      <ActionButtons
+        entity-name="Festività CCNL"
+        :is-edit-mode="isEditMode"
+        :saving="saving"
+        :is-form-valid="isFormValid"
+        :show-duplicate="isEditMode"
+        :show-delete="isEditMode"
+        :show-reset="true"
+        :show-navigation="isEditMode"
+        :navigation-config="festiCcnlNavigationConfig"
+        @delete="handleDelete"
+        @reset="handleReset"
+        @duplicate="handleDuplicate"
+      />
 
       <!-- Dati Base -->
       <div class="card bg-base-100 shadow-sm">
@@ -126,6 +131,8 @@ import { useCrudView } from '@/composables/useCrudView'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { causaliLookupConfig, contrattoLookupConfig, provinciaLookupConfig } from '@/config/lookupConfigs'
 import { lookupService } from '@/services/lookupService'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
+import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -215,6 +222,12 @@ const festiForm = ref<FestiCcnlForm>({
   ccnl: { codice: '', descrizione: '' },
   provinciaLookup: { codice: '', descrizione: '' },
   festivita: []
+})
+
+const originalData = ref<FestiCcnlForm | null>(null)
+
+const { isDirty, touchedFields, updateOriginalData } = useFormDirtyState(festiForm, originalData, {
+  confirmMessage: 'Ci sono modifiche non salvate alle Festività CCNL. Sei sicuro di voler lasciare questa pagina?'
 })
 
 const loading = ref(false)
@@ -376,6 +389,8 @@ const loadFesti = async () => {
           }
         }))
       }
+
+      updateOriginalData(festiForm.value)
     }
   } catch (error) {
     console.error('Errore nel caricamento festività CCNL:', error)
@@ -431,6 +446,7 @@ const handleSave = async () => {
     if (isEditMode.value) {
       await festiCcnlService.updateFestiCcnl(festiToSave)
       successMessage.value = 'Festività CCNL aggiornate con successo'
+      updateOriginalData(festiForm.value)
     } else {
       await festiCcnlService.createFestiCcnl(festiToSave)
       successMessage.value = 'Nuove festività CCNL create con successo'

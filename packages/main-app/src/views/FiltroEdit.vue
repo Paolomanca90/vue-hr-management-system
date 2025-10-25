@@ -10,6 +10,14 @@
     :error-message="errorMessage"
     :initial-data="initialData"
     :navigation-config="filtroNavigationConfig"
+    :page-title="isEditMode ? `${initialData.descrizione} (${initialData.codice})` : 'Nuovo Filtro'"
+    :breadcrumb-items="[
+      { label: 'Home', to: '/app' },
+      { label: 'Filtri', to: '/app/filtri' },
+      { label: isEditMode ? 'Modifica' : 'Nuovo' }
+    ]"
+    :is-dirty="isDirty"
+    :touched-fields="touchedFields"
     @go-back="goBack"
     @save="handleSave"
     @delete="handleDelete"
@@ -25,6 +33,7 @@ import { useRouter, useRoute } from 'vue-router'
 import QueryBuilder from '@/components/QueryBuilder.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { filtriService, type Filtro } from '@/services/filtriService'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
 
 const router = useRouter()
 const route = useRoute()
@@ -43,9 +52,15 @@ const initialData = ref({
   formula: ''
 })
 
+const originalData = ref<typeof initialData.value | null>(null)
+
 // Computed
 const isEditMode = computed(() => route.params.id !== undefined && route.params.id !== 'new')
 const filtroId = computed(() => route.params.id as string)
+
+const { isDirty, touchedFields, updateOriginalData } = useFormDirtyState(initialData, originalData, {
+  confirmMessage: 'Ci sono modifiche non salvate al Filtro. Sei sicuro di voler lasciare questa pagina?'
+})
 
 // Navigation configuration
 const filtroNavigationConfig = {
@@ -86,6 +101,8 @@ const loadFiltroData = async () => {
         formula: ''
       }
     }
+
+    updateOriginalData(initialData.value)
 
   } catch (error) {
     console.error('Errore nel caricamento del filtro:', error)
@@ -133,6 +150,7 @@ const handleSave = async (data: any) => {
 
     if (isEditMode.value) {
       await filtriService.editFiltro(filtroData)
+      updateOriginalData(initialData.value)
       successMessage.value = 'Filtro aggiornato con successo'
     } else {
       await filtriService.addFiltro(filtroData)
@@ -210,7 +228,6 @@ onMounted(async () => {
   }
 })
 
-// Watch per cambiamenti di route
 watch(() => route.params.id, async () => {
   if (route.params.id) {
     clearMessages()

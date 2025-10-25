@@ -2,17 +2,20 @@
   <div class="space-y-6">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `Modifica Festività Anno: ${festiForm.anno}` : 'Nuovo Anno Festività'"
+      :title="isEditMode ? `Festività Anno ${festiForm.anno} (${festiForm.anno})` : 'Nuovo Anno Festività'"
+      :breadcrumbItems="[
+        { label: 'Home', to: '/app' },
+        { label: 'Festività', to: '/app/festi' },
+        { label: isEditMode ? 'Modifica' : 'Nuova' }
+      ]"
     >
-      <template #actions>
-        <button
-          class="btn btn-ghost btn-sm"
-          @click="goBack"
-          :disabled="saving"
-        >
-          <FaIcon icon="arrow-left" class="mr-2"/>
-          Indietro
+      <template #backButton>
+        <button class="btn btn-ghost btn-circle btn-sm" @click="goBack" :disabled="saving" title="Indietro">
+          <FaIcon icon="arrow-left" />
         </button>
+      </template>
+      <template #actions>
+        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
       </template>
     </PageHeader>
 
@@ -21,24 +24,21 @@
 
     <!-- Form Container -->
     <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <ActionButtons
-            entity-name="Anno"
-            :is-edit-mode="isEditMode"
-            :saving="saving"
-            :is-form-valid="isFormValid"
-            :show-duplicate="isEditMode"
-            :show-delete="isEditMode"
-            :show-reset="true"
-            :show-navigation="isEditMode"
-            :navigation-config="festiNavigationConfig"
-            @delete="handleDelete"
-            @reset="handleReset"
-            @duplicate="handleDuplicate"
-          />
-        </div>
-      </div>
+
+      <ActionButtons
+        entity-name="Anno"
+        :is-edit-mode="isEditMode"
+        :saving="saving"
+        :is-form-valid="isFormValid"
+        :show-duplicate="isEditMode"
+        :show-delete="isEditMode"
+        :show-reset="true"
+        :show-navigation="isEditMode"
+        :navigation-config="festiNavigationConfig"
+        @delete="handleDelete"
+        @reset="handleReset"
+        @duplicate="handleDuplicate"
+      />
 
       <!-- Anno Field -->
       <div class="card bg-base-100 shadow-sm">
@@ -97,6 +97,8 @@ import { useCrudView } from '@/composables/useCrudView'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { causaliLookupConfig } from '@/config/lookupConfigs'
 import { lookupService } from '@/services/lookupService'
+import { useFormDirtyState } from '@/composables/useFormDirtyState'
+import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -172,8 +174,14 @@ const festiForm = ref<FestiFormDettaglio>({
   festivita: []
 })
 
+const originalData = ref<FestiFormDettaglio | null>(null)
+
 const loading = ref(false)
 const saving = ref(false)
+
+const { isDirty, touchedFields, updateOriginalData } = useFormDirtyState(festiForm, originalData, {
+  confirmMessage: 'Ci sono modifiche non salvate alle Festività. Sei sicuro di voler lasciare questa pagina?'
+})
 
 // Configurazione colonne per EditableDataGrid
 const festivitaColumns = computed<GridColumn[]>(() => {
@@ -276,6 +284,8 @@ const loadFesti = async () => {
       anno: anno,
       festivita: festivitaRows
     }
+
+    updateOriginalData(festiForm.value)
   } catch (error) {
     console.error('Errore nel caricamento festività:', error)
     errorMessage.value = 'Errore nel caricamento dei dati festività. Riprova più tardi.'
@@ -319,6 +329,7 @@ const handleSave = async () => {
 
     if (isEditMode.value) {
       await festiService.updateAnnoFestivita(festiToSave)
+      updateOriginalData(festiForm.value)
       successMessage.value = 'Festività aggiornate con successo'
     } else {
       await festiService.createAnnoFestivita(festiToSave)
