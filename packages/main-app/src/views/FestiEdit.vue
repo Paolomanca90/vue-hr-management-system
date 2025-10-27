@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `Festività Anno ${festiForm.anno} (${festiForm.anno})` : 'Nuovo Anno Festività'"
+      :title="isEditMode ? `Modifica Festività Anno ${festiForm.anno} (${festiForm.anno})` : 'Nuovo Anno Festività'"
       :breadcrumbItems="[
         { label: 'Home', to: '/app' },
         { label: 'Festività', to: '/app/festi' },

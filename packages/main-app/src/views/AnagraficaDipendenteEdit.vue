@@ -2,7 +2,7 @@
   <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `${dipendente?.cognome || ''} ${dipendente?.nome || ''} (${dipendente?.codDip || ''})` : 'Nuovo Dipendente'"
+      :title="isEditMode ? `Modifica ${dipendente?.cognome || ''} ${dipendente?.nome || ''} (${dipendente?.codDip || ''})` : 'Nuovo Dipendente'"
       :breadcrumbItems="[
         { label: 'Home', to: '/app' },
         { label: 'Anagrafica Dipendenti', to: '/app/anagrafica-dipendente' },
@@ -894,18 +894,6 @@
       </div>
     </div>
 
-    <!-- Confirmation Dialog -->
-    <SimpleConfirmDialog
-      :visible="showConfirmDialog"
-      :title="confirmDialogTitle"
-      :message="confirmDialogMessage"
-      type="danger"
-      confirm-label="Elimina"
-      cancel-label="Annulla"
-      @confirm="handleConfirm"
-      @cancel="handleCancel"
-    />
-
   </div>
 </template>
 
@@ -918,11 +906,11 @@ import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
 import DateInput from '@/components/DateInput.vue'
-import SimpleConfirmDialog from '@/components/SimpleConfirmDialog.vue'
 import GenericLookupInput, { type LookupInputConfig } from '@/components/GenericLookupInput.vue'
 import AddressInput, { type AddressData } from '@/components/AddressInput.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { useFormDirtyState } from '@/composables/useFormDirtyState'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
 import { dipendenteService, type DettaglioDipendente, type Familiare, type Badge, type PAT, type GruppoConfigDipendente } from '@/services/dipendenteService'
 import { lookupService, formatCap } from '@/services/lookupService'
 import { gruppiConfigService, type GruppoConfig } from '@/services/gruppiConfigService'
@@ -950,15 +938,13 @@ const saving = ref(false)
 const dipendente = ref<DettaglioDipendente | null>(null)
 const originalData = ref<DettaglioDipendente | null>(null)
 
-const showConfirmDialog = ref(false)
-const confirmDialogTitle = ref('')
-const confirmDialogMessage = ref('')
-const confirmAction = ref<(() => void) | null>(null)
 const activeTab = ref('aziendali')
 const errorMessage = ref('')
 const successMessage = ref('')
 
 useMessageAlerts(errorMessage, successMessage)
+
+const { showConfirm } = useConfirmDialog()
 
 const {
   isDirty,
@@ -1373,25 +1359,6 @@ const ensureGruppiConfigInitialized = () => {
   }
 }
 
-const showConfirmation = (title: string, message: string, action: () => void) => {
-  confirmDialogTitle.value = title
-  confirmDialogMessage.value = message
-  confirmAction.value = action
-  showConfirmDialog.value = true
-}
-
-const handleConfirm = () => {
-  if (confirmAction.value) {
-    confirmAction.value()
-  }
-  showConfirmDialog.value = false
-  confirmAction.value = null
-}
-
-const handleCancel = () => {
-  showConfirmDialog.value = false
-  confirmAction.value = null
-}
 
 // Methods
 const loadDipendenteForDuplication = async (duplicateId: string) => {
@@ -1821,7 +1788,7 @@ const addNewFamiliare = () => {
 }
 
 
-const removeFamiliare = (index: number) => {
+const removeFamiliare = async (index: number) => {
   if (!dipendente.value) return
 
   const familiare = dipendente.value.familiari[index]
@@ -1829,15 +1796,18 @@ const removeFamiliare = (index: number) => {
     ? `${familiare.cognome} ${familiare.nome}`
     : 'questo familiare'
 
-  showConfirmation(
-    'Elimina Familiare',
-    `Sei sicuro di voler eliminare ${displayName}?`,
-    () => {
-      if (!dipendente.value) return
-      dipendente.value.familiari.splice(index, 1)
-      successMessage.value = 'Familiare eliminato con successo'
-    }
-  )
+  const confirmed = await showConfirm({
+    title: 'Elimina Familiare',
+    message: `Sei sicuro di voler eliminare ${displayName}?`,
+    type: 'danger',
+    confirmLabel: 'Elimina',
+    cancelLabel: 'Annulla'
+  })
+
+  if (!confirmed || !dipendente.value) return
+
+  dipendente.value.familiari.splice(index, 1)
+  successMessage.value = 'Familiare eliminato con successo'
 }
 
 const addNewBadge = () => {
@@ -1858,7 +1828,7 @@ const addNewBadge = () => {
   dipendente.value.datiAzi.listaBadge.push(newBadge)
 }
 
-const removeBadge = (index: number) => {
+const removeBadge = async (index: number) => {
   if (!dipendente.value) return
 
   // Se stiamo rimuovendo dall'array originale (quando ci sono badge reali)
@@ -1868,15 +1838,18 @@ const removeBadge = (index: number) => {
       ? `il badge ${badge.codBadge}`
       : 'questo badge'
 
-    showConfirmation(
-      'Elimina Badge',
-      `Sei sicuro di voler eliminare ${displayName}?`,
-      () => {
-        if (!dipendente.value) return
-        dipendente.value.datiAzi.listaBadge.splice(index, 1)
-        successMessage.value = 'Badge eliminato con successo'
-      }
-    )
+    const confirmed = await showConfirm({
+      title: 'Elimina Badge',
+      message: `Sei sicuro di voler eliminare ${displayName}?`,
+      type: 'danger',
+      confirmLabel: 'Elimina',
+      cancelLabel: 'Annulla'
+    })
+
+    if (!confirmed || !dipendente.value) return
+
+    dipendente.value.datiAzi.listaBadge.splice(index, 1)
+    successMessage.value = 'Badge eliminato con successo'
   }
 }
 
@@ -1918,7 +1891,7 @@ const addNewPat = () => {
   dipendente.value.datiAzi.listaPAT.push(newPat)
 }
 
-const removePat = (index: number) => {
+const removePat = async (index: number) => {
   if (!dipendente.value) return
 
   // Se stiamo rimuovendo dall'array originale (quando ci sono P.A.T. reali)
@@ -1928,15 +1901,18 @@ const removePat = (index: number) => {
       ? `il P.A.T. ${pat.codPat}`
       : 'questo P.A.T.'
 
-    showConfirmation(
-      'Elimina P.A.T.',
-      `Sei sicuro di voler eliminare ${displayName}?`,
-      () => {
-        if (!dipendente.value) return
-        dipendente.value.datiAzi.listaPAT.splice(index, 1)
-        successMessage.value = 'P.A.T. eliminato con successo'
-      }
-    )
+    const confirmed = await showConfirm({
+      title: 'Elimina P.A.T.',
+      message: `Sei sicuro di voler eliminare ${displayName}?`,
+      type: 'danger',
+      confirmLabel: 'Elimina',
+      cancelLabel: 'Annulla'
+    })
+
+    if (!confirmed || !dipendente.value) return
+
+    dipendente.value.datiAzi.listaPAT.splice(index, 1)
+    successMessage.value = 'P.A.T. eliminato con successo'
   }
 }
 
@@ -1958,7 +1934,7 @@ const addNewGruppoConfig = () => {
   dipendente.value.datiAzi.listaGrpConfig.push(newGruppoConfig)
 }
 
-const removeGruppoConfig = (index: number) => {
+const removeGruppoConfig = async (index: number) => {
   if (!dipendente.value) return
 
   if (dipendente.value.datiAzi.listaGrpConfig.length > 0) {
@@ -1968,15 +1944,18 @@ const removeGruppoConfig = (index: number) => {
       ? `il gruppo ${gruppoDesc.codgruppo} - ${gruppoDesc.descrizione}`
       : 'questo gruppo configurazione'
 
-    showConfirmation(
-      'Elimina Gruppo Configurazione',
-      `Sei sicuro di voler eliminare ${displayName}?`,
-      () => {
-        if (!dipendente.value) return
-        dipendente.value.datiAzi.listaGrpConfig.splice(index, 1)
-        successMessage.value = 'Gruppo configurazione eliminato con successo'
-      }
-    )
+    const confirmed = await showConfirm({
+      title: 'Elimina Gruppo Configurazione',
+      message: `Sei sicuro di voler eliminare ${displayName}?`,
+      type: 'danger',
+      confirmLabel: 'Elimina',
+      cancelLabel: 'Annulla'
+    })
+
+    if (!confirmed || !dipendente.value) return
+
+    dipendente.value.datiAzi.listaGrpConfig.splice(index, 1)
+    successMessage.value = 'Gruppo configurazione eliminato con successo'
   }
 }
 
@@ -2023,31 +2002,20 @@ const handleDuplicate = () => {
 const handleDelete = async () => {
   if (!dipendente.value) return
 
-  const displayName = dipendente.value.cognome && dipendente.value.nome
-    ? `${dipendente.value.cognome} ${dipendente.value.nome}`
-    : `il dipendente con codice ${dipendente.value.codDip}`
 
-  showConfirmation(
-    'Elimina Dipendente',
-    `Sei sicuro di voler eliminare ${displayName}? Questa operazione non può essere annullata.`,
-    async () => {
-      if (!dipendente.value) return
-
-      try {
-        saving.value = true
-        await dipendenteService.deleteDipendente(dipendente.value.codAzi, dipendente.value.codDip)
-        successMessage.value = 'Dipendente eliminato con successo'
-        setTimeout(() => {
-          router.push('/app/anagrafica-dipendente')
-        }, 1500)
-      } catch (error: unknown) {
-        console.error('Errore nell\'eliminazione:', error)
-        errorMessage.value = (error as Error)?.message || 'Errore nell\'eliminazione del dipendente'
-      } finally {
-        saving.value = false
-      }
-    }
-  )
+  try {
+    saving.value = true
+    await dipendenteService.deleteDipendente(dipendente.value.codAzi, dipendente.value.codDip)
+    successMessage.value = 'Dipendente eliminato con successo'
+    setTimeout(() => {
+      router.push('/app/anagrafica-dipendente')
+    }, 1500)
+  } catch (error: unknown) {
+    console.error('Errore nell\'eliminazione:', error)
+    errorMessage.value = (error as Error)?.message || 'Errore nell\'eliminazione del dipendente'
+  } finally {
+    saving.value = false
+  }
 }
 
 const handleReset = async () => {

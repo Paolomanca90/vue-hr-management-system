@@ -3,7 +3,7 @@
   <div class="space-y-1">
     <!-- Header con breadcrumb -->
     <PageHeader
-      :title="isEditMode ? `${gruppoForm.descrizione} (${gruppoForm.codice})` : 'Nuovo Gruppo Utente'"
+      :title="isEditMode ? `Modifica ${gruppoForm.descrizione} (${gruppoForm.codice})` : 'Nuovo Gruppo Utente'"
       :breadcrumbItems="[
         { label: 'Home', to: '/app' },
         { label: 'Gruppi Utente', to: '/app/gruppi-utente' },

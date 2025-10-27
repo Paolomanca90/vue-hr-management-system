@@ -10,7 +10,7 @@
     :error-message="errorMessage"
     :initial-data="initialData"
     :navigation-config="navigationConfig"
-    :page-title="isEditMode ? `${initialData.descrizione} (${initialData.codice})` : 'Nuovo Accesso'"
+    :page-title="isEditMode ? `Modifica ${initialData.descrizione} (${initialData.codice})` : 'Nuovo Accesso'"
     :breadcrumb-items="[
       { label: 'Home', to: '/app' },
       { label: 'Accessi', to: '/app/accessi' },

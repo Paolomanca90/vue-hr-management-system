@@ -2,7 +2,7 @@
   <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `${filiale.descriz} (${filiale.codAzi}-${filiale.codCant})` : 'Nuova Filiale'"
+      :title="isEditMode ? `Modifica ${filiale.descriz} (${filiale.codAzi}-${filiale.codCant})` : 'Nuova Filiale'"
       :breadcrumbItems="[
         { label: 'Home', to: '/app' },
         { label: 'Filiali', to: '/app/filiali' },

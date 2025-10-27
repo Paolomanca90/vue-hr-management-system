@@ -3,6 +3,19 @@
     <RouterView />
     <!-- Toast Container posizionato in basso a destra -->
     <PrimeToast position="bottom-right" />
+    <!-- Confirm Dialog globale -->
+    <SimpleConfirmDialog
+      :visible="dialogState.visible"
+      :title="dialogState.title"
+      :message="dialogState.message"
+      :description="dialogState.description"
+      :warning-text="dialogState.warningText"
+      :type="dialogState.type"
+      :confirm-label="dialogState.confirmLabel"
+      :cancel-label="dialogState.cancelLabel"
+      @confirm="handleConfirm"
+      @cancel="handleCancel"
+    />
   </div>
 </template>
 
@@ -11,8 +24,11 @@ import { RouterView } from 'vue-router'
 import { onMounted } from 'vue'
 import { useThemeStore } from '@/stores/theme'
 import { PrimeToast } from '@presenze-in-web-frontend/core-lib'
+import SimpleConfirmDialog from '@/components/SimpleConfirmDialog.vue'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
 
 const themeStore = useThemeStore()
+const { dialogState, handleConfirm, handleCancel } = useConfirmDialog()
 
 onMounted(() => {
   themeStore.initializeTheme()

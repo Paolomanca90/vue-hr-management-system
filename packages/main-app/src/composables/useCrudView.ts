@@ -1,5 +1,6 @@
 import { ref, computed, type Ref, type ComputedRef } from 'vue'
 import { useRouter } from 'vue-router'
+import { useConfirmDialog } from './useConfirmDialog'
 
 export interface CrudEntity {
   [key: string]: unknown
@@ -37,18 +38,6 @@ export interface CrudViewOptions<T extends CrudEntity> {
   }
 }
 
-export interface ConfirmDialogState {
-  visible: boolean
-  title: string
-  message: string
-  description?: string
-  warningText?: string
-  type: 'danger' | 'warning' | 'info' | 'success'
-  confirmLabel?: string
-  cancelLabel?: string
-  onConfirm?: () => void | Promise<void>
-}
-
 export function useCrudView<T extends CrudEntity>(
   service: CrudService<T>,
   options: CrudViewOptions<T>
@@ -62,7 +51,6 @@ export function useCrudView<T extends CrudEntity>(
   successMessage: Ref<string>
   selectedEntity: Ref<T | null>
   entityToDelete: Ref<T | null>
-  confirmDialog: Ref<ConfirmDialogState>
   hasData: ComputedRef<boolean>
   hasError: ComputedRef<boolean>
   hasSuccess: ComputedRef<boolean>
@@ -70,15 +58,14 @@ export function useCrudView<T extends CrudEntity>(
   loadData: (showLoading?: boolean) => Promise<void>
   createEntity: (entity: T) => Promise<T>
   updateEntity: (entity: T) => Promise<T>
-  showDeleteConfirmation: (entity: T) => void
-  confirmDelete: () => Promise<void>
-  cancelDelete: () => void
+  showDeleteConfirmation: (entity: T) => Promise<void>
   goToEdit: (entity: T) => void
   goToNew: () => void
   goToList: () => void
   duplicateEntity: (entity: T) => void
 } {
   const router = useRouter()
+  const { showConfirm } = useConfirmDialog()
 
   const data = ref<T[]>([]) as Ref<T[]>
   const loading = ref(false)
@@ -87,15 +74,6 @@ export function useCrudView<T extends CrudEntity>(
   const deleting = ref(false)
   const errorMessage = ref('')
   const successMessage = ref('')
-
-  const confirmDialog = ref<ConfirmDialogState>({
-    visible: false,
-    title: '',
-    message: '',
-    type: 'danger',
-    confirmLabel: 'Elimina',
-    cancelLabel: 'Annulla'
-  })
 
   const selectedEntity = ref<T | null>(null)
   const entityToDelete = ref<T | null>(null)
@@ -188,32 +166,24 @@ export function useCrudView<T extends CrudEntity>(
     }
   }
 
-  const showDeleteConfirmation = (entity: T) => {
-    entityToDelete.value = entity
-
+  const showDeleteConfirmation = async (entity: T) => {
     const idField = options.idField || 'id'
     const entityId = entity[idField as string]
+    const entityIdString = String(entityId)
     const defaultMessage = options.deleteConfirmation?.message
       ? options.deleteConfirmation.message(entity)
-      : `Sei sicuro di voler eliminare ${options.entityName.toLowerCase()} "${entityId}"?`
+      : `Sei sicuro di voler eliminare ${options.entityName.toLowerCase()} "${entityIdString}"?`
 
-    confirmDialog.value = {
-      visible: true,
+    const confirmed = await showConfirm({
       title: options.deleteConfirmation?.title || 'Conferma eliminazione',
       message: defaultMessage,
       warningText: options.deleteConfirmation?.warningText || 'Questa azione è irreversibile.',
       type: 'danger',
       confirmLabel: 'Elimina',
-      cancelLabel: 'Annulla',
-      onConfirm: confirmDelete
-    }
-  }
+      cancelLabel: 'Annulla'
+    })
 
-  const confirmDelete = async () => {
-    if (!entityToDelete.value) return
-
-    const idField = options.idField || 'id'
-    const entityId = entityToDelete.value[idField as string]
+    if (!confirmed) return
 
     deleting.value = true
     clearMessages()
@@ -222,7 +192,7 @@ export function useCrudView<T extends CrudEntity>(
       let success = false
 
       if (service.delete) {
-        success = await service.delete(entityId)
+        success = await service.delete(entityIdString)
       } else if (service.deleteWithBody) {
         const deleteBody: Record<string, unknown> = {}
         deleteBody[idField as string] = entityId
@@ -233,9 +203,7 @@ export function useCrudView<T extends CrudEntity>(
 
       if (success) {
         successMessage.value = `${options.entityName} eliminato con successo`
-
         await loadData(false)
-
         selectedEntity.value = null
       }
     } catch (error) {
@@ -245,15 +213,7 @@ export function useCrudView<T extends CrudEntity>(
         : `Errore nell'eliminazione di ${options.entityName}`
     } finally {
       deleting.value = false
-      confirmDialog.value.visible = false
-      entityToDelete.value = null
     }
-  }
-
-  const cancelDelete = () => {
-    confirmDialog.value.visible = false
-    entityToDelete.value = null
-    deleting.value = false
   }
 
   const goToEdit = (entity: T) => {
@@ -314,7 +274,6 @@ export function useCrudView<T extends CrudEntity>(
     successMessage,
     selectedEntity: selectedEntity as Ref<T | null>,
     entityToDelete: entityToDelete as Ref<T | null>,
-    confirmDialog,
 
     // Computed
     hasData,
@@ -327,8 +286,6 @@ export function useCrudView<T extends CrudEntity>(
     createEntity,
     updateEntity,
     showDeleteConfirmation,
-    confirmDelete,
-    cancelDelete,
     goToEdit,
     goToNew,
     goToList,

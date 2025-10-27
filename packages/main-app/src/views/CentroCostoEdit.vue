@@ -2,7 +2,7 @@
   <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `${centroCosto.descriz} (${centroCosto.codCenco})` : 'Nuovo Centro di Costo'"
+      :title="isEditMode ? `Modifica ${centroCosto.descriz} (${centroCosto.codCenco})` : 'Nuovo Centro di Costo'"
       :breadcrumbItems="[
         { label: 'Home', to: '/app' },
         { label: 'Centri Costo', to: '/app/centri-costo' },

@@ -2,7 +2,7 @@
   <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `Festività CCNL Anno ${festiForm.anno} (${festiForm.anno})` : 'Nuova Festività CCNL'"
+      :title="isEditMode ? `Modifica Festività CCNL Anno ${festiForm.anno} (${festiForm.anno})` : 'Nuova Festività CCNL'"
       :breadcrumbItems="[
         { label: 'Home', to: '/app' },
         { label: 'Festività CCNL', to: '/app/festi-ccnl' },

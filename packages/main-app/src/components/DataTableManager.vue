@@ -68,19 +68,6 @@
     </PrimeDataTable>
 
   </div>
-
-  <!-- Confirm Dialog -->
-  <SimpleConfirmDialog
-    :visible="confirmDialog.visible"
-    :title="confirmDialog.title"
-    :message="confirmDialog.message"
-    :warningText="confirmDialog.warningText"
-    :type="confirmDialog.type"
-    :confirmLabel="confirmDialog.confirmLabel"
-    :cancelLabel="confirmDialog.cancelLabel"
-    @confirm="confirmDialog.onConfirm"
-    @cancel="cancelDelete"
-  />
 </template>
 
 <script setup lang="ts">
@@ -90,7 +77,6 @@ import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import { useCrudView, type FlexibleCrudService, type CrudEntity, type CrudViewOptions } from '@/composables/useCrudView'
 import { useTableSort } from '@/composables/useTableSort'
 import { useTableFilter } from '@/composables/useTableFilter'
-import SimpleConfirmDialog from './SimpleConfirmDialog.vue'
 
 export interface TableColumn {
   field: string
@@ -213,10 +199,8 @@ const {
   errorMessage,
   successMessage,
   selectedEntity,
-  confirmDialog,
   loadData,
   showDeleteConfirmation,
-  cancelDelete,
   goToEdit,
   duplicateEntity
 } = useCrudView(props.service, crudOptions)

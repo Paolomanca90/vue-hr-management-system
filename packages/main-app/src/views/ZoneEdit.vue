@@ -2,7 +2,7 @@
   <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `${zonaForm.descrizione} (${zonaForm.codZona})` : 'Nuova Zona'"
+      :title="isEditMode ? `Modifica ${zonaForm.descrizione} (${zonaForm.codZona})` : 'Nuova Zona'"
       :breadcrumbItems="[
         { label: 'Home', to: '/app' },
         { label: 'Zone', to: '/app/zone' },

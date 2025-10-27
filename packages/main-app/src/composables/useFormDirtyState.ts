@@ -1,9 +1,11 @@
 import { ref, watch, onBeforeUnmount, type Ref } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
+import { useConfirmDialog } from './useConfirmDialog'
 
 export interface UseFormDirtyStateOptions {
   onLeaveConfirmed?: () => void
   confirmMessage?: string
+  confirmTitle?: string
 }
 
 export function useFormDirtyState<T extends Record<string, unknown>>(
@@ -13,15 +15,50 @@ export function useFormDirtyState<T extends Record<string, unknown>>(
 ) {
   const isDirty = ref(false)
   const touchedFields = ref<Set<string>>(new Set())
+  const { showConfirm } = useConfirmDialog()
 
   const checkDirty = () => {
     if (!originalData.value) {
       isDirty.value = false
+      touchedFields.value.clear()
       return
     }
 
-    const hasChanges = JSON.stringify(formData.value) !== JSON.stringify(originalData.value)
-    isDirty.value = hasChanges
+    // Confronta i valori campo per campo per identificare quali sono stati modificati
+    const changedFields = new Set<string>()
+
+    const compareObjects = (obj1: Record<string, unknown>, obj2: Record<string, unknown>, prefix = '') => {
+      const keys = new Set([...Object.keys(obj1), ...Object.keys(obj2)])
+
+      for (const key of keys) {
+        const fullKey = prefix ? `${prefix}.${key}` : key
+        const val1 = obj1[key]
+        const val2 = obj2[key]
+
+        // Se sono entrambi oggetti (ma non array o null), confronta ricorsivamente
+        if (
+          val1 !== null &&
+          val2 !== null &&
+          typeof val1 === 'object' &&
+          typeof val2 === 'object' &&
+          !Array.isArray(val1) &&
+          !Array.isArray(val2)
+        ) {
+          compareObjects(val1 as Record<string, unknown>, val2 as Record<string, unknown>, fullKey)
+        } else {
+          // Confronta i valori (inclusi array, null, primitivi)
+          if (JSON.stringify(val1) !== JSON.stringify(val2)) {
+            changedFields.add(fullKey)
+          }
+        }
+      }
+    }
+
+    compareObjects(formData.value, originalData.value)
+
+    // Aggiorna touchedFields con i campi effettivamente modificati
+    touchedFields.value = changedFields
+    isDirty.value = changedFields.size > 0
   }
 
   const markFieldAsTouched = (fieldName: string) => {
@@ -52,14 +89,18 @@ export function useFormDirtyState<T extends Record<string, unknown>>(
     { deep: true }
   )
 
-  // Intercetta la navigazione e mostra alert se ci sono modifiche non salvate
-  onBeforeRouteLeave((to, from, next) => {
+  // Intercetta la navigazione e mostra dialog se ci sono modifiche non salvate
+  onBeforeRouteLeave(async (to, from, next) => {
     if (isDirty.value) {
-      const message =
-        options.confirmMessage ||
-        'Ci sono modifiche non salvate. Sei sicuro di voler lasciare questa pagina?'
+      const confirmed = await showConfirm({
+        title: options.confirmTitle || 'Modifiche non salvate',
+        message: options.confirmMessage || 'Ci sono modifiche non salvate. Sei sicuro di voler lasciare questa pagina?',
+        type: 'warning',
+        confirmLabel: 'Lascia pagina',
+        cancelLabel: 'Rimani qui'
+      })
 
-      if (window.confirm(message)) {
+      if (confirmed) {
         if (options.onLeaveConfirmed) {
           options.onLeaveConfirmed()
         }

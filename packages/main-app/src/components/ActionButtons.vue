@@ -64,26 +64,13 @@
     </div>
 
   </div>
-
-  <!-- Confirm Dialog -->
-  <SimpleConfirmDialog
-    :visible="confirmDialog.visible"
-    :title="confirmDialog.title"
-    :message="confirmDialog.message"
-    :warningText="confirmDialog.warningText"
-    :type="confirmDialog.type"
-    :confirmLabel="confirmDialog.confirmLabel"
-    :cancelLabel="confirmDialog.cancelLabel"
-    @confirm="confirmDialog.onConfirm"
-    @cancel="cancelDelete"
-  />
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
-import SimpleConfirmDialog from './SimpleConfirmDialog.vue'
 import NavigationButtons from './NavigationButtons.vue'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
 
 interface EntityItem {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -127,36 +114,22 @@ const emit = defineEmits<{
   'reset': []
 }>()
 
+const { showConfirm } = useConfirmDialog()
 const deleting = ref(false)
-const confirmDialog = ref({
-  visible: false,
-  title: '',
-  message: '',
-  warningText: '',
-  type: 'danger' as const,
-  confirmLabel: 'Elimina',
-  cancelLabel: 'Annulla',
-  onConfirm: () => {}
-})
 
-const showDeleteConfirm = () => {
-  confirmDialog.value = {
-    visible: true,
+const showDeleteConfirm = async () => {
+  const confirmed = await showConfirm({
     title: `Elimina ${props.entityName}`,
     message: `Sei sicuro di voler eliminare questo ${props.entityName.toLowerCase()}?`,
     warningText: 'Questa azione è irreversibile.',
     type: 'danger',
     confirmLabel: 'Elimina',
-    cancelLabel: 'Annulla',
-    onConfirm: () => {
-      deleting.value = true
-      emit('delete')
-      confirmDialog.value.visible = false
-    }
-  }
-}
+    cancelLabel: 'Annulla'
+  })
 
-const cancelDelete = () => {
-  confirmDialog.value.visible = false
+  if (!confirmed) return
+
+  deleting.value = true
+  emit('delete')
 }
 </script>

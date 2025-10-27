@@ -2,7 +2,7 @@
   <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `${posizioneInpsForm.matrInps || 'Posizione INPS'} (${posizioneInpsForm.posInps})` : 'Nuova Posizione INPS'"
+      :title="isEditMode ? `Modifica ${posizioneInpsForm.matrInps || 'Posizione INPS'} (${posizioneInpsForm.posInps})` : 'Nuova Posizione INPS'"
       :breadcrumbItems="[
         { label: 'Home', to: '/app' },
         { label: 'Posizioni INPS', to: '/app/posizioni-inps' },

@@ -2,7 +2,7 @@
   <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `${tolleranzaForm.descrizione} (${tolleranzaForm.codtoll})` : 'Nuova Tolleranza'"
+      :title="isEditMode ? `Modifica ${tolleranzaForm.descrizione} (${tolleranzaForm.codtoll})` : 'Nuova Tolleranza'"
       :breadcrumbItems="[
         { label: 'Home', to: '/app' },
         { label: 'Tolleranze', to: '/app/tolleranze' },

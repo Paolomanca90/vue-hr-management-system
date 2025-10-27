@@ -3,7 +3,7 @@
   <div class="space-y-1">
     <!-- Header -->
     <PageHeader
-      :title="isEditMode ? `${gruppoForm.descrizione} (${gruppoForm.codgruppo})` : 'Nuovo Gruppo di Configurazione'"
+      :title="isEditMode ? `Modifica ${gruppoForm.descrizione} (${gruppoForm.codgruppo})` : 'Nuovo Gruppo di Configurazione'"
       :breadcrumbItems="[
         { label: 'Home', to: '/app' },
         { label: 'Gruppi Config', to: '/app/gruppi-config' },

@@ -2,7 +2,7 @@
   <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `${terminaleConfigForm.descrizione} (${terminaleConfigForm.codter})` : 'Nuovo Terminale Config'"
+      :title="isEditMode ? `Modifica ${terminaleConfigForm.descrizione} (${terminaleConfigForm.codter})` : 'Nuovo Terminale Config'"
       :breadcrumbItems="[
         { label: 'Home', to: '/app' },
         { label: 'Terminali Config', to: '/app/terminali' },

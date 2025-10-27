@@ -142,7 +142,7 @@ const selectedCompanyDisplay = computed(() => {
 
 const pageTitle = computed(() => {
   if (isEditMode.value && patForm.value.pat && patForm.value.codicePat) {
-    return `${patForm.value.pat} (${patForm.value.codicePat})`
+    return `Modifica ${patForm.value.pat} (${patForm.value.codicePat})`
   }
   return isEditMode.value ? 'Modifica PAT' : 'Nuova PAT'
 })

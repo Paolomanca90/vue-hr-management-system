@@ -2,7 +2,7 @@
   <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `${azienda.ragSoc} (${azienda.codAzi})` : 'Nuova Azienda'"
+      :title="isEditMode ? `Modifica ${azienda.ragSoc} (${azienda.codAzi})` : 'Nuova Azienda'"
       :breadcrumbItems="[
         { label: 'Home', to: '/app' },
         { label: 'Aziende', to: '/app/aziende' },

@@ -10,7 +10,7 @@
     :error-message="errorMessage"
     :initial-data="initialData"
     :navigation-config="filtroNavigationConfig"
-    :page-title="isEditMode ? `${initialData.descrizione} (${initialData.codice})` : 'Nuovo Filtro'"
+    :page-title="isEditMode ? `Modifica ${initialData.descrizione} (${initialData.codice})` : 'Nuovo Filtro'"
     :breadcrumb-items="[
       { label: 'Home', to: '/app' },
       { label: 'Filtri', to: '/app/filtri' },

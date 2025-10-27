@@ -2,7 +2,7 @@
   <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `${sede.descriz} (${sede.codSedeAz})` : 'Nuova Sede'"
+      :title="isEditMode ? `Modifica ${sede.descriz} (${sede.codSedeAz})` : 'Nuova Sede'"
       :breadcrumbItems="[
         { label: 'Home', to: '/app' },
         { label: 'Sedi', to: '/app/sedi' },

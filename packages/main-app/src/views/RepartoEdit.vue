@@ -99,7 +99,7 @@ const isFormValid = computed(() => {
 
 const pageTitle = computed(() => {
   if (isEditMode.value && reparto.value.descriz && reparto.value.codReparto) {
-    return `${reparto.value.descriz} (${reparto.value.codReparto})`
+    return `Modifica ${reparto.value.descriz} (${reparto.value.codReparto})`
   }
   return isEditMode.value ? 'Modifica Reparto' : 'Nuovo Reparto'
 })

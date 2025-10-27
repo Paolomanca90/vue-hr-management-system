@@ -3,7 +3,7 @@
   <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `${cambioForm.descrizione} (${cambioForm.codCambio})` : 'Nuovo Cambio Orario'"
+      :title="isEditMode ? `Modifica ${cambioForm.descrizione} (${cambioForm.codCambio})` : 'Nuovo Cambio Orario'"
       :breadcrumbItems="[
         { label: 'Home', to: '/app' },
         { label: 'Cambi Orario', to: '/app/cambio-orario' },

@@ -2,7 +2,7 @@
   <div class="space-y-1">
     <!-- Page Header -->
     <PageHeader
-      :title="isEditMode ? `${gruppoCausaleForm.descrizione} (${gruppoCausaleForm.codGrCau})` : 'Nuovo Gruppo Causale'"
+      :title="isEditMode ? `Modifica ${gruppoCausaleForm.descrizione} (${gruppoCausaleForm.codGrCau})` : 'Nuovo Gruppo Causale'"
       :breadcrumbItems="[
         { label: 'Home', to: '/app' },
         { label: 'Gruppi Causali', to: '/app/gruppi-causali' },
