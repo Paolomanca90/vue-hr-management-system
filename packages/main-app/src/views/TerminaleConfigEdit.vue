@@ -432,6 +432,7 @@ onMounted(async () => {
     await loadTerminaleConfig()
   } else {
     handleDuplicateMode()
+    updateOriginalData(terminaleConfigForm.value)
   }
 })
 
@@ -454,6 +455,7 @@ watch(() => route.params.id, async () => {
       formCheckboxes.value.tmmensa = false
       formCheckboxes.value.tmcommesse = false
       handleDuplicateMode()
+      updateOriginalData(terminaleConfigForm.value)
     }
   }
 }, { immediate: true })

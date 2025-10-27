@@ -271,6 +271,7 @@ const handleReset = () => {
       pat: '',
       codCont: ''
     }
+    updateOriginalData(patForm.value)
   }
 }
 
@@ -308,6 +309,7 @@ onMounted(async () => {
         sessionStorage.removeItem('duplicatedPatData')
       }
     }
+    updateOriginalData(patForm.value)
   }
 })
 </script>

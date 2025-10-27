@@ -348,6 +348,7 @@ const handleReset = () => {
       listaCausali: [],
       totCau: 0
     }
+    updateOriginalData(gruppoCausaleForm.value)
   }
   clearMessages()
 }
@@ -376,7 +377,11 @@ watch(() => route.params.id, async (newId, oldId) => {
 
 onMounted(async () => {
   await loadCausaliDisponibili()
-  await loadGruppoCausale()
+  if (isEditMode.value) {
+    await loadGruppoCausale()
+  } else {
+    updateOriginalData(gruppoCausaleForm.value)
+  }
 })
 </script>
 

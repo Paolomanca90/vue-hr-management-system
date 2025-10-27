@@ -618,6 +618,7 @@ const handleReset = () => {
     causaleRitardo.value = { codice: '', descrizione: '' }
     causaleAnticipo.value = { codice: '', descrizione: '' }
     handleDuplicateMode()
+    updateOriginalData(tolleranzaForm.value)
   }
 }
 
@@ -628,6 +629,7 @@ onMounted(async () => {
     await loadTolleranza()
   } else {
     handleDuplicateMode()
+    updateOriginalData(tolleranzaForm.value)
   }
 })
 
@@ -660,6 +662,7 @@ watch(() => route.params.id, async () => {
       causaleRitardo.value = { codice: '', descrizione: '' }
       causaleAnticipo.value = { codice: '', descrizione: '' }
       handleDuplicateMode()
+      updateOriginalData(tolleranzaForm.value)
     }
   }
 }, { immediate: true })

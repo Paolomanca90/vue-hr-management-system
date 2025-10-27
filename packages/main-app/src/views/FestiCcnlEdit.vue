@@ -506,6 +506,7 @@ const handleReset = () => {
       provinciaLookup: { codice: '', descrizione: '' },
       festivita: []
     }
+    updateOriginalData(festiForm.value)
   }
 }
 
@@ -522,6 +523,8 @@ onMounted(async () => {
 
   if (isEditMode.value) {
     await loadFesti()
+  } else {
+    updateOriginalData(festiForm.value)
   }
 })
 
@@ -540,6 +543,7 @@ watch(() => route.params.id, async () => {
         provinciaLookup: { codice: '', descrizione: '' },
         festivita: []
       }
+      updateOriginalData(festiForm.value)
     }
   }
 }, { immediate: true })

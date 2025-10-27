@@ -329,6 +329,8 @@ onMounted(async () => {
 
   if (isEditMode.value) {
     await loadZona()
+  } else {
+    updateOriginalData(zonaForm.value)
   }
 })
 
@@ -345,6 +347,7 @@ watch(() => route.params.id, async () => {
         listaTerminali: [],
         totTerm: 0
       }
+      updateOriginalData(zonaForm.value)
     }
   }
 }, { immediate: true })

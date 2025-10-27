@@ -382,6 +382,7 @@ const handleReset = () => {
       anno: 0,
       festivita: []
     }
+    updateOriginalData(festiForm.value)
   }
 }
 
@@ -408,6 +409,8 @@ onMounted(async () => {
 
   if (isEditMode.value) {
     await loadFesti()
+  } else {
+    updateOriginalData(festiForm.value)
   }
 })
 
@@ -422,6 +425,7 @@ watch(() => route.params.id, async () => {
         anno: 0,
         festivita: []
       }
+      updateOriginalData(festiForm.value)
     }
   }
 }, { immediate: true })

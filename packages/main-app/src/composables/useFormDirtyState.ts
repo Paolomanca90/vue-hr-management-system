@@ -1,5 +1,5 @@
-import { ref, watch, onBeforeUnmount, type Ref } from 'vue'
-import { onBeforeRouteLeave } from 'vue-router'
+import { ref, watch, onBeforeUnmount, onMounted, type Ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useConfirmDialog } from './useConfirmDialog'
 
 export interface UseFormDirtyStateOptions {
@@ -16,6 +16,9 @@ export function useFormDirtyState<T extends Record<string, unknown>>(
   const isDirty = ref(false)
   const touchedFields = ref<Set<string>>(new Set())
   const { showConfirm } = useConfirmDialog()
+
+  const router = useRouter()
+  let removeGuard: (() => void) | null = null
 
   const checkDirty = () => {
     if (!originalData.value) {
@@ -90,27 +93,37 @@ export function useFormDirtyState<T extends Record<string, unknown>>(
   )
 
   // Intercetta la navigazione e mostra dialog se ci sono modifiche non salvate
-  onBeforeRouteLeave(async (to, from, next) => {
-    if (isDirty.value) {
-      const confirmed = await showConfirm({
-        title: options.confirmTitle || 'Modifiche non salvate',
-        message: options.confirmMessage || 'Ci sono modifiche non salvate. Sei sicuro di voler lasciare questa pagina?',
-        type: 'warning',
-        confirmLabel: 'Lascia pagina',
-        cancelLabel: 'Rimani qui'
-      })
+  onMounted(() => {
+    const currentRoute = router.currentRoute.value
 
-      if (confirmed) {
-        if (options.onLeaveConfirmed) {
-          options.onLeaveConfirmed()
-        }
+    removeGuard = router.beforeEach((to, from, next) => {
+      // Controlla solo se stiamo lasciando la route corrente
+      if (from.path !== currentRoute.path) {
         next()
-      } else {
-        next(false)
+        return
       }
-    } else {
-      next()
-    }
+
+      if (isDirty.value) {
+        showConfirm({
+          title: options.confirmTitle || 'Modifiche non salvate',
+          message: options.confirmMessage || 'Ci sono modifiche non salvate. Sei sicuro di voler lasciare questa pagina?',
+          type: 'warning',
+          confirmLabel: 'Lascia pagina',
+          cancelLabel: 'Rimani qui'
+        }).then(confirmed => {
+          if (confirmed) {
+            if (options.onLeaveConfirmed) {
+              options.onLeaveConfirmed()
+            }
+            next()
+          } else {
+            next(false)
+          }
+        })
+      } else {
+        next()
+      }
+    })
   })
 
   // Intercetta la chiusura/refresh del browser
@@ -128,6 +141,9 @@ export function useFormDirtyState<T extends Record<string, unknown>>(
 
   // Rimuove listener quando il componente viene smontato
   onBeforeUnmount(() => {
+    if (removeGuard) {
+      removeGuard()
+    }
     if (typeof window !== 'undefined') {
       window.removeEventListener('beforeunload', beforeUnloadHandler)
     }

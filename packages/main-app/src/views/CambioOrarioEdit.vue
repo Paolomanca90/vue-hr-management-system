@@ -647,6 +647,17 @@ const handleReset = () => {
   if (originalData.value) {
     cambioForm.value = JSON.parse(JSON.stringify(originalData.value))
     successMessage.value = 'Dati ripristinati con successo'
+  } else {
+    cambioForm.value = {
+      codCambio: 0,
+      descrizione: '',
+      tipoCambio: '',
+      listaFasce: [],
+      listaTimbrature: [],
+      totCoFasce: 0,
+      totCoTimbr: 0
+    }
+    updateOriginalData(cambioForm.value)
   }
 }
 
@@ -689,6 +700,9 @@ onMounted(async () => {
   // Carica i dati del cambio orario se in edit mode
   if (isEditMode.value) {
     await loadCambioOrario()
+  } else {
+    // Inizializza originalData anche in modalità creazione
+    updateOriginalData(cambioForm.value)
   }
 })
 </script>

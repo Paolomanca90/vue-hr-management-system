@@ -4,8 +4,8 @@
       type="button"
       class="btn btn-primary btn-outline btn-sm text-sm"
       @click="navigatePrevious"
-      :disabled="disabled"
-      :title="`${entityName} precedente`"
+      :disabled="disabled || !hasPrevious"
+      :title="hasPrevious ? `${entityName} precedente` : 'Nessun elemento precedente'"
     >
       <FaIcon icon="chevron-left" />
     </button>
@@ -24,8 +24,8 @@
       type="button"
       class="btn btn-primary btn-outline btn-sm text-sm"
       @click="navigateNext"
-      :disabled="disabled"
-      :title="`${entityName} successivo`"
+      :disabled="disabled || !hasNext"
+      :title="hasNext ? `${entityName} successivo` : 'Nessun elemento successivo'"
     >
       <FaIcon icon="chevron-right" />
     </button>
