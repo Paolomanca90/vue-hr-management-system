@@ -6,7 +6,7 @@
     <div class="drawer-side z-[999] h-screen">
       <label for="drawer-toggle" aria-label="close sidebar" class="drawer-overlay"></label>
       <aside
-        class="min-h-full bg-base-100 dark:bg-base-300 flex flex-col"
+        class="h-screen bg-base-100 dark:bg-base-300 flex flex-col overflow-hidden"
         :class="{
           'w-80': sidenavOpened && authStore.isCompanyUser,
           'w-64': sidenavOpened && !authStore.isCompanyUser,
@@ -28,10 +28,8 @@
           </div>
         </div>
 
-        <!-- Menu di navigazione -->
-        <div class="flex-1 overflow-y-auto overflow-x-hidden">
-          <!-- Search Bar (solo quando sidebar è aperta) -->
-          <div v-if="sidenavOpened" class="p-2 pt-4">
+        <!-- Search Bar (fissa, fuori dallo scroll) -->
+        <div v-if="sidenavOpened" class="p-2 pt-4 border-b border-base-300">
             <div class="relative">
               <input
                 type="text"
@@ -54,8 +52,10 @@
                 </button>
               </div>
             </div>
-          </div>
+        </div>
 
+        <!-- Menu di navigazione (scrollabile) -->
+        <div class="flex-1 overflow-y-auto overflow-x-hidden">
           <!-- Indicatore di caricamento menu -->
           <div v-if="menuStore.loading" class="p-4 text-center">
             <span class="loading loading-spinner loading-sm"></span>
@@ -186,52 +186,11 @@
           </div>
         </div>
 
-        <!-- Footer della sidebar -->
-        <div class="p-4 border-t border-base-300 space-y-2" v-if="sidenavOpened">
-          <!-- Toggle Dark Mode -->
-          <div
-            class="flex items-center justify-center w-full btn btn-ghost btn-sm"
-            @click="toggleTheme"
-          >
-            <label class="swap swap-rotate">
-              <input type="checkbox" :checked="themeStore.isDarkMode" />
-              <FaIcon :icon="themeStore.themeIcon" class="text-lg" />
-            </label>
-            <span class="ml-2">{{ themeStore.themeLabel }}</span>
-          </div>
-
-          <button class="btn btn-error btn-sm w-full text-white" @click="authStore.logout">
-            <FaIcon icon="sign-out-alt" class="mr-2" />
-            <span>Logout</span>
-          </button>
-        </div>
-
-        <!-- Footer compatto -->
-        <div
-          class="flex flex-col items-center space-y-2 p-2 border-t border-base-300"
-          v-if="!sidenavOpened"
-        >
-          <div>
-            <label class="swap swap-rotate btn btn-ghost btn-sm w-12 h-12 btn-circle">
-              <input type="checkbox" :checked="themeStore.isDarkMode" @change="toggleTheme" />
-              <FaIcon :icon="themeStore.themeIcon" class="text-lg" />
-            </label>
-          </div>
-
-          <div>
-            <button
-              class="btn btn-error btn-sm w-12 h-12 btn-circle text-white"
-              @click="authStore.logout"
-            >
-              <FaIcon icon="sign-out-alt" class="text-lg" />
-            </button>
-          </div>
-        </div>
       </aside>
     </div>
 
     <!-- Contenuto principale -->
-    <div class="drawer-content flex flex-col">
+    <div class="drawer-content flex flex-col h-screen overflow-hidden">
       <!-- Navbar -->
       <div class="navbar bg-base-100 shadow-sm border-b border-base-300">
         <div class="flex-none lg:hidden">
@@ -330,18 +289,17 @@
               tabindex="0"
               class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-[1]"
             >
-              <li class="menu-title">
-                <span>{{ authStore.currentUser?.username }}</span>
-                <span class="text-xs">{{ authStore.currentUser?.company }}</span>
-                <span class="text-xs text-primary capitalize">{{
-                  authStore.currentUser?.role
-                }}</span>
-              </li>
               <li>
                 <a><FaIcon icon="user" class="mr-2"/> Profilo</a>
               </li>
               <li>
                 <a><FaIcon icon="cog" class="mr-2"/> Impostazioni</a>
+              </li>
+              <li>
+                <a @click="toggleTheme">
+                  <FaIcon :icon="themeStore.themeIcon" class="mr-2"/>
+                  {{ themeStore.themeLabel }}
+                </a>
               </li>
               <li class="divider"></li>
               <li>
@@ -355,7 +313,7 @@
       </div>
 
       <!-- Area del contenuto -->
-      <main class="flex-1 px-6 py-2 bg-gradient-to-br from-base-200 to-base-300">
+      <main class="flex-1 overflow-y-auto px-6 py-2 bg-gradient-to-br from-base-200 to-base-300">
         <RouterView />
       </main>
     </div>

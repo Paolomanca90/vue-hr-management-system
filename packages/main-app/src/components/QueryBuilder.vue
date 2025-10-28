@@ -1,27 +1,24 @@
 <template>
-  <div class="space-y-6">
-    <!-- Header -->
-    <PageHeader
-      :title="pageTitle"
-      :breadcrumbItems="breadcrumbItems"
-    >
-      <template #backButton>
-        <button class="btn btn-ghost btn-circle btn-xs" @click="$emit('go-back')" :disabled="saving" title="Indietro">
-          <FaIcon icon="arrow-left" />
-        </button>
-      </template>
-      <template #actions>
-        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
-      </template>
-    </PageHeader>
+  <EditViewLayout>
+    <template #header>
+      <PageHeader
+        :title="pageTitle"
+        :breadcrumbItems="breadcrumbItems"
+      >
+        <template #backButton>
+          <button class="btn btn-ghost btn-circle btn-xs" @click="$emit('go-back')" :disabled="saving" title="Indietro">
+            <FaIcon icon="arrow-left" />
+          </button>
+        </template>
+        <template #actions>
+          <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
+        </template>
+      </PageHeader>
+    </template>
 
-    <!-- Loading indicator -->
-    <LoadingIndicator :loading="loading" message="Caricamento dati..." />
-
-    <!-- Form principale -->
-    <form v-if="!loading" @submit.prevent="handleSubmit" class="space-y-6">
-
+    <template #actions>
       <ActionButtons
+        v-if="!loading"
         :entity-name="entityName"
         :is-edit-mode="isEditMode"
         :saving="saving"
@@ -35,6 +32,12 @@
         @delete="deleteCurrent"
         @reset="resetForm"
       />
+    </template>
+
+    <template #content>
+      <LoadingIndicator :loading="loading" message="Caricamento dati..." />
+
+      <form v-if="!loading" @submit.prevent="handleSubmit" class="space-y-6">
 
       <!-- Sezione Informazioni Base -->
       <SectionCard
@@ -325,46 +328,48 @@
             </div>
           </div>
       </SectionCard>
-    </form>
+      </form>
 
-    <!-- Modale di conferma eliminazione -->
-    <div v-if="showDeleteModal" class="modal modal-open">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg mb-4">Conferma eliminazione</h3>
-        <p class="mb-4">
-          Sei sicuro di voler eliminare {{ entityName.toLowerCase() }} <strong>{{ formData.codice }}</strong>?
-        </p>
-        <p class="text-sm text-base-content/70 mb-6">
-          Questa azione è irreversibile.
-        </p>
-        <div class="modal-action">
-          <button
-            class="btn btn-ghost"
-            @click="cancelDelete"
-            :disabled="deleting"
-          >
-            Annulla
-          </button>
-          <button
-            class="btn btn-error text-white"
-            @click="confirmDelete"
-            :disabled="deleting"
-            :class="{ 'loading': deleting }"
-          >
-            <span v-if="deleting" class="loading loading-spinner loading-sm"></span>
-            <span v-if="!deleting">Elimina</span>
-            <span v-if="deleting">Eliminazione...</span>
-          </button>
+      <!-- Modale di conferma eliminazione -->
+      <div v-if="showDeleteModal" class="modal modal-open">
+        <div class="modal-box">
+          <h3 class="font-bold text-lg mb-4">Conferma eliminazione</h3>
+          <p class="mb-4">
+            Sei sicuro di voler eliminare {{ entityName.toLowerCase() }} <strong>{{ formData.codice }}</strong>?
+          </p>
+          <p class="text-sm text-base-content/70 mb-6">
+            Questa azione è irreversibile.
+          </p>
+          <div class="modal-action">
+            <button
+              class="btn btn-ghost"
+              @click="cancelDelete"
+              :disabled="deleting"
+            >
+              Annulla
+            </button>
+            <button
+              class="btn btn-error text-white"
+              @click="confirmDelete"
+              :disabled="deleting"
+              :class="{ 'loading': deleting }"
+            >
+              <span v-if="deleting" class="loading loading-spinner loading-sm"></span>
+              <span v-if="!deleting">Elimina</span>
+              <span v-if="deleting">Eliminazione...</span>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
+    </template>
+  </EditViewLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from './PageHeader.vue'
+import EditViewLayout from './EditViewLayout.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
 import LoadingIndicator from './LoadingIndicator.vue'
 import ActionButtons from './ActionButtons.vue'

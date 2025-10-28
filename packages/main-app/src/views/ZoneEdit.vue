@@ -1,31 +1,28 @@
 <template>
-  <div class="space-y-1">
-    <!-- Page Header -->
-    <PageHeader
-      :title="isEditMode ? `Modifica ${zonaForm.descrizione} (${zonaForm.codZona})` : 'Nuova Zona'"
-      :breadcrumbItems="[
-        { label: 'Home', to: '/app' },
-        { label: 'Zone', to: '/app/zone' },
-        { label: isEditMode ? 'Modifica' : 'Nuova' }
-      ]"
-    >
-      <template #backButton>
-        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
-          <FaIcon icon="arrow-left" />
-        </button>
-      </template>
-      <template #actions>
-        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
-      </template>
-    </PageHeader>
+  <EditViewLayout>
+    <template #header>
+      <PageHeader
+        :title="isEditMode ? `Modifica ${zonaForm.descrizione} (${zonaForm.codZona})` : 'Nuova Zona'"
+        :breadcrumbItems="[
+          { label: 'Home', to: '/app' },
+          { label: 'Zone', to: '/app/zone' },
+          { label: isEditMode ? 'Modifica' : 'Nuova' }
+        ]"
+      >
+        <template #backButton>
+          <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+            <FaIcon icon="arrow-left" />
+          </button>
+        </template>
+        <template #actions>
+          <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
+        </template>
+      </PageHeader>
+    </template>
 
-    <!-- Loading indicator -->
-    <LoadingIndicator :loading="loading" message="Caricamento dati zona..." />
-
-    <!-- Form Container -->
-    <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
-
+    <template #actions>
       <ActionButtons
+        v-if="!loading"
         entity-name="Zona"
         :is-edit-mode="isEditMode"
         :saving="saving"
@@ -39,6 +36,12 @@
         @reset="handleReset"
         @duplicate="handleDuplicate"
       />
+    </template>
+
+    <template #content>
+      <LoadingIndicator :loading="loading" message="Caricamento dati zona..." />
+
+      <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
 
       <!-- Dati Zona -->
       <div class="card bg-base-100 shadow-sm">
@@ -102,8 +105,9 @@
           />
         </div>
       </div>
-    </form>
-  </div>
+      </form>
+    </template>
+  </EditViewLayout>
 </template>
 
 <script setup lang="ts">
@@ -111,6 +115,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
+import EditViewLayout from '@/components/EditViewLayout.vue'
 import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import MultiSelectList from '@/components/MultiSelectList.vue'

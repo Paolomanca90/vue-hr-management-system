@@ -90,8 +90,8 @@
       </template>
 
       <!-- Dynamic Columns -->
-      <PColumn 
-        v-for="column in visibleColumns" 
+      <PColumn
+        v-for="column in visibleColumns"
         :key="column.field || column.key"
         :field="column.field || column.key"
         :header="column.header || column.label"
@@ -101,29 +101,29 @@
         :frozen="column.frozen"
         :alignFrozen="column.alignFrozen"
         :exportable="column.exportable !== false"
-        :showFilterOperator="true"
-        :showFilterMenu="getFilterType(column) !== 'select'"
-        :showClearButton="true"
+        :showFilterOperator="!filtersCollapsed"
+        :showFilterMenu="!filtersCollapsed && getFilterType(column) !== 'select'"
+        :showClearButton="!filtersCollapsed"
         :showApplyButton="false"
-        :showFilterMatchModes="true"
+        :showFilterMatchModes="!filtersCollapsed"
         :filterField="column.filterField || column.field || column.key"
         :filterMatchMode="column.filterMatchMode || 'contains'"
         :dataType="column.dataType || 'text'"
       >
-        <template #filter="{ filterModel, filterCallback }" v-if="getFilterType(column) === 'text'">
-          <PInputText 
+        <template #filter="{ filterModel, filterCallback }" v-if="!filtersCollapsed && getFilterType(column) === 'text'">
+          <PInputText
             v-if="filterModel"
-            v-model="filterModel.value" 
-            type="text" 
+            v-model="filterModel.value"
+            type="text"
             :placeholder="`Cerca per ${(column.header || column.label).toLowerCase()}`"
             @input="filterCallback()"
             style="width: 100%"
           />
         </template>
 
-        <template #filter="{ filterModel, filterCallback }" v-else-if="getFilterType(column) === 'select'">
-          <PSelect 
-            v-model="filterModel.value" 
+        <template #filter="{ filterModel, filterCallback }" v-else-if="!filtersCollapsed && getFilterType(column) === 'select'">
+          <PSelect
+            v-model="filterModel.value"
             :options="column.filterOptions || []"
             optionLabel="label"
             optionValue="value"
@@ -134,9 +134,9 @@
           />
         </template>
 
-        <template #filter="{ filterModel, filterCallback }" v-else-if="getFilterType(column) === 'multiselect'">
-          <PMultiSelect 
-            v-model="filterModel.value" 
+        <template #filter="{ filterModel, filterCallback }" v-else-if="!filtersCollapsed && getFilterType(column) === 'multiselect'">
+          <PMultiSelect
+            v-model="filterModel.value"
             :options="column.filterOptions || []"
             optionLabel="label"
             optionValue="value"
@@ -147,9 +147,9 @@
           />
         </template>
 
-        <template #filter="{ filterModel, filterCallback }" v-else-if="getFilterType(column) === 'boolean'">
-          <PCheckbox 
-            v-model="filterModel.value" 
+        <template #filter="{ filterModel, filterCallback }" v-else-if="!filtersCollapsed && getFilterType(column) === 'boolean'">
+          <PCheckbox
+            v-model="filterModel.value"
             :indeterminate="filterModel.value === null"
             binary
             @change="filterCallback()"
@@ -172,15 +172,26 @@
         </template>
       </PColumn>
 
-      <!-- Actions Column - SEMPRE DOPO e SEMPRE FROZEN -->
-      <PColumn 
-        :exportable="false" 
-        frozen 
+      <!-- Actions Column - SEMPRE DOPO e SEMPRE FROZEN A DESTRA -->
+      <PColumn
+        :exportable="false"
+        frozen
+        alignFrozen="right"
         :style="getActionColumnStyle()"
       >
+        <template #header>
+          <button
+            v-if="showColumnFilters"
+            @click="filtersCollapsed = !filtersCollapsed"
+            class="btn btn-ghost btn-xs"
+            :title="filtersCollapsed ? 'Mostra filtri colonne' : 'Nascondi filtri colonne'"
+          >
+            <FaIcon :icon="filtersCollapsed ? 'chevron-down' : 'chevron-up'" />
+          </button>
+        </template>
         <template #body="slotProps">
-          <slot 
-            name="actions" 
+          <slot
+            name="actions"
             :data="slotProps.data"
             :index="slotProps.index"
           ></slot>
@@ -394,6 +405,7 @@ const emit = defineEmits([
 const dataTable = ref()
 const globalSearchValue = ref('')
 const slots = useSlots()
+const filtersCollapsed = ref(false)
 
 const internalFilters = ref({
   global: { value: null, matchMode: 'contains' }
@@ -440,7 +452,8 @@ const hasActiveFilters = computed(() => {
 })
 
 const computedTableStyle = computed(() => {
-  return `min-width: 100%; width: 100%;`
+  // Permette alla tabella di crescere in base al contenuto, ma con limiti
+  return `min-width: 100%; width: 100%; table-layout: auto;`
 })
 
 // Methods
@@ -461,7 +474,32 @@ const getFilterType = (column) => {
 }
 
 const getColumnStyle = (column) => {
-  return column.style || ''
+  // Se la colonna ha uno style personalizzato, usalo
+  if (column.style) return column.style
+
+  // Altrimenti applica autosize intelligente
+  const styles = []
+
+  // Min width: assicura leggibilità minima
+  const minWidth = column.minWidth || '100px'
+  styles.push(`min-width: ${minWidth}`)
+
+  // Max width: previene colonne troppo larghe
+  if (column.maxWidth) {
+    styles.push(`max-width: ${column.maxWidth}`)
+  } else {
+    // Default max-width per evitare colonne che occupano tutto lo spazio
+    styles.push(`max-width: 400px`)
+  }
+
+  // Width: auto per permettere al contenuto di determinare la larghezza
+  if (!column.width) {
+    styles.push(`width: auto`)
+  } else {
+    styles.push(`width: ${column.width}`)
+  }
+
+  return styles.join('; ')
 }
 
 const getActionColumnStyle = () => {
@@ -670,7 +708,6 @@ watch(() => toggleableColumns.value, () => {
   overflow: visible;
   text-overflow: ellipsis;
   position: relative;
-  background-color: oklch(var(--b1));
   color: oklch(var(--bc));
 }
 

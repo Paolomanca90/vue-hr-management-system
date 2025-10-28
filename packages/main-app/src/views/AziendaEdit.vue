@@ -1,28 +1,26 @@
 <template>
-  <div class="space-y-1">
-    <!-- Page Header -->
-    <PageHeader
-      :title="isEditMode ? `Modifica ${azienda.ragSoc} (${azienda.codAzi})` : 'Nuova Azienda'"
-      :breadcrumbItems="[
-        { label: 'Home', to: '/app' },
-        { label: 'Aziende', to: '/app/aziende' },
-        { label: isEditMode ? 'Modifica' : 'Nuova' }
-      ]"
-    >
-      <template #backButton>
-        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
-          <FaIcon icon="arrow-left" />
-        </button>
-      </template>
-      <template #actions>
-        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
-      </template>
-    </PageHeader>
+  <EditViewLayout>
+    <template #header>
+      <PageHeader
+        :title="isEditMode ? `Modifica ${azienda.ragSoc} (${azienda.codAzi})` : 'Nuova Azienda'"
+        :breadcrumbItems="[
+          { label: 'Home', to: '/app' },
+          { label: 'Aziende', to: '/app/aziende' },
+          { label: isEditMode ? 'Modifica' : 'Nuova' }
+        ]"
+      >
+        <template #backButton>
+          <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+            <FaIcon icon="arrow-left" />
+          </button>
+        </template>
+        <template #actions>
+          <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
+        </template>
+      </PageHeader>
+    </template>
 
-    <!-- Form Container -->
-    <form @submit.prevent="handleSave" class="space-y-6">
-
-      <!-- Azioni principali con navigazione integrata -->
+    <template #actions>
       <ActionButtons
         entity-name="Azienda"
         :is-edit-mode="isEditMode"
@@ -36,6 +34,10 @@
         @duplicate="handleDuplicate"
         @reset="handleReset"
       />
+    </template>
+
+    <template #content>
+      <form @submit.prevent="handleSave" class="space-y-6">
 
       <!-- Tab Selector -->
       <DetailTabSelector
@@ -167,8 +169,9 @@
           </div>
         </template>
       </DetailTabSelector>
-    </form>
-  </div>
+      </form>
+    </template>
+  </EditViewLayout>
 </template>
 
 <script setup lang="ts">
@@ -176,6 +179,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
+import EditViewLayout from '@/components/EditViewLayout.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import DetailTabSelector, { type CustomTab } from '@/components/DetailTabSelector.vue'
 import AddressInput, { type AddressData } from '@/components/AddressInput.vue'

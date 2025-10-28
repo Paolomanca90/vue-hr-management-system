@@ -1,32 +1,29 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="space-y-1">
-    <!-- Header con breadcrumb -->
-    <PageHeader
-      :title="isEditMode ? `Modifica ${gruppoForm.descrizione} (${gruppoForm.codice})` : 'Nuovo Gruppo Utente'"
-      :breadcrumbItems="[
-        { label: 'Home', to: '/app' },
-        { label: 'Gruppi Utente', to: '/app/gruppi-utente' },
-        { label: isEditMode ? 'Modifica' : 'Nuovo' }
-      ]"
-    >
-      <template #backButton>
-        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
-          <FaIcon icon="arrow-left" />
-        </button>
-      </template>
-      <template #actions>
-        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
-      </template>
-    </PageHeader>
+  <EditViewLayout>
+    <template #header>
+      <PageHeader
+        :title="isEditMode ? `Modifica ${gruppoForm.descrizione} (${gruppoForm.codice})` : 'Nuovo Gruppo Utente'"
+        :breadcrumbItems="[
+          { label: 'Home', to: '/app' },
+          { label: 'Gruppi Utente', to: '/app/gruppi-utente' },
+          { label: isEditMode ? 'Modifica' : 'Nuovo' }
+        ]"
+      >
+        <template #backButton>
+          <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+            <FaIcon icon="arrow-left" />
+          </button>
+        </template>
+        <template #actions>
+          <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
+        </template>
+      </PageHeader>
+    </template>
 
-    <!-- Loading indicator -->
-    <LoadingIndicator :loading="loading" message="Caricamento dati gruppo..." />
-
-    <!-- Form principale -->
-    <form v-if="!loading" @submit.prevent="handleSubmit" class="space-y-6">
-
+    <template #actions>
       <ActionButtons
+        v-if="!loading"
         entity-name="Gruppo"
         :is-edit-mode="isEditMode"
         :saving="saving"
@@ -40,6 +37,14 @@
         @delete="deleteCurrentGruppo"
         @reset="resetForm"
       />
+    </template>
+
+    <template #content>
+      <!-- Loading indicator -->
+      <LoadingIndicator :loading="loading" message="Caricamento dati gruppo..." />
+
+      <!-- Form principale -->
+      <form v-if="!loading" @submit.prevent="handleSubmit" class="space-y-6">
 
       <!-- Sezione Informazioni Base -->
       <SectionCard
@@ -118,9 +123,9 @@
         @permission-change="onPermissionChange"
       />
 
-    </form>
+      </form>
 
-    <!-- Modale di conferma eliminazione -->
+      <!-- Modale di conferma eliminazione -->
     <div v-if="showDeleteModal" class="modal modal-open">
       <div class="modal-box">
         <h3 class="font-bold text-lg mb-4">Conferma eliminazione</h3>
@@ -154,7 +159,8 @@
         </div>
       </div>
     </div>
-  </div>
+    </template>
+  </EditViewLayout>
 </template>
 
 <script setup lang="ts">
@@ -162,6 +168,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute} from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
+import EditViewLayout from '@/components/EditViewLayout.vue'
 import { gruppiUtenteService, type AggiornamentoAbilitazioniGruppo, type ApiMenuGruppoItem, type GruppoUtente } from '@/services/gruppiUtenteService'
 import MenuPermissionsManager from '@/components/MenuPermissionsManager.vue'
 import { menuService } from '@/services/menuService'

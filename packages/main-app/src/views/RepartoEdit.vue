@@ -1,23 +1,22 @@
 <template>
-  <div class="space-y-1">
-    <!-- Page Header -->
-    <PageHeader
-      :title="pageTitle"
-      :breadcrumbItems="breadcrumbs"
-    >
-      <template #backButton>
-        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
-          <FaIcon icon="arrow-left" />
-        </button>
-      </template>
-      <template #actions>
-        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
-      </template>
-    </PageHeader>
+  <EditViewLayout>
+    <template #header>
+      <PageHeader
+        :title="pageTitle"
+        :breadcrumbItems="breadcrumbs"
+      >
+        <template #backButton>
+          <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+            <FaIcon icon="arrow-left" />
+          </button>
+        </template>
+        <template #actions>
+          <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
+        </template>
+      </PageHeader>
+    </template>
 
-    <!-- Form Container -->
-    <form @submit.prevent="handleSave" class="space-y-6">
-
+    <template #actions>
       <ActionButtons
         entity-name="Reparto"
         :is-edit-mode="isEditMode"
@@ -32,17 +31,21 @@
         @delete="handleDelete"
         @reset="handleReset"
       />
+    </template>
 
-      <!-- Form Content con componente riutilizzabile -->
-      <CodiceDescrizioneEdit
-        v-model:data="reparto"
-        :saving="saving"
-        :is-edit-mode="isEditMode"
-        codice-field="codReparto"
-        codice-label="Codice Reparto"
-      />
-    </form>
-  </div>
+    <template #content>
+      <form @submit.prevent="handleSave" class="space-y-6">
+        <!-- Form Content con componente riutilizzabile -->
+        <CodiceDescrizioneEdit
+          v-model:data="reparto"
+          :saving="saving"
+          :is-edit-mode="isEditMode"
+          codice-field="codReparto"
+          codice-label="Codice Reparto"
+        />
+      </form>
+    </template>
+  </EditViewLayout>
 </template>
 
 <script setup lang="ts">
@@ -50,6 +53,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
+import EditViewLayout from '@/components/EditViewLayout.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import CodiceDescrizioneEdit from '@/components/CodiceDescrizioneEdit.vue'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'

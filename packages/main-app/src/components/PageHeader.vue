@@ -1,5 +1,5 @@
 <template>
-    <div class="sticky top-0 z-40 py-4 -mx-6 px-6 transition-all duration-300">
+    <div class="py-4 -mx-6 px-6">
       <!-- Breadcrumb -->
       <div v-if="breadcrumbItems && breadcrumbItems.length > 0" class="mb-3">
         <Breadcrumb :items="breadcrumbItems" />

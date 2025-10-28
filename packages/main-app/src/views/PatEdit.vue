@@ -1,27 +1,24 @@
 <template>
-  <div class="space-y-1">
-    <!-- Page Header -->
-    <PageHeader
-      :title="pageTitle"
-      :breadcrumbItems="breadcrumbs"
-    >
-      <template #backButton>
-        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
-          <FaIcon icon="arrow-left" />
-        </button>
-      </template>
-      <template #actions>
-        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
-      </template>
-    </PageHeader>
+  <EditViewLayout>
+    <template #header>
+      <PageHeader
+        :title="pageTitle"
+        :breadcrumbItems="breadcrumbs"
+      >
+        <template #backButton>
+          <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+            <FaIcon icon="arrow-left" />
+          </button>
+        </template>
+        <template #actions>
+          <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
+        </template>
+      </PageHeader>
+    </template>
 
-    <!-- Loading indicator -->
-    <LoadingIndicator :loading="loading" message="Caricamento dati PAT..." />
-
-    <!-- Form Container -->
-    <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
-
+    <template #actions>
       <ActionButtons
+        v-if="!loading"
         entity-name="PAT"
         :is-edit-mode="isEditMode"
         :saving="saving"
@@ -34,8 +31,13 @@
         @duplicate="handleDuplicate"
         @reset="handleReset"
       />
+    </template>
 
-      <!-- Form Fields -->
+    <template #content>
+      <LoadingIndicator :loading="loading" message="Caricamento dati PAT..." />
+
+      <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
+        <!-- Form Fields -->
       <div class="card bg-base-100 shadow-sm">
         <div class="card-body">
           <h2 class="card-title mb-6 dark:text-gray-100">Dati PAT</h2>
@@ -73,8 +75,9 @@
 
         </div>
       </div>
-    </form>
-  </div>
+      </form>
+    </template>
+  </EditViewLayout>
 </template>
 
 <script setup lang="ts">
@@ -82,6 +85,7 @@ import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
+import EditViewLayout from '@/components/EditViewLayout.vue'
 import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import CompanyEntityFormComponent, { type EntityFormData } from '@/components/CompanyEntityFormComponent.vue'

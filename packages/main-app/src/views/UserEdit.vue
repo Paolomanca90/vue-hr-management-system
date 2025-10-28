@@ -1,28 +1,27 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <div class="space-y-1">
-    <!-- Header -->
-    <PageHeader
-      :title="pageTitle"
-      :breadcrumbItems="breadcrumbItems"
-    >
-      <template #backButton>
-        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
-          <FaIcon icon="arrow-left" />
-        </button>
-      </template>
-      <template #actions>
-        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
-      </template>
-    </PageHeader>
+  <EditViewLayout>
+    <!-- Header fisso -->
+    <template #header>
+      <PageHeader
+        :title="pageTitle"
+        :breadcrumbItems="breadcrumbItems"
+      >
+        <template #backButton>
+          <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+            <FaIcon icon="arrow-left" />
+          </button>
+        </template>
+        <template #actions>
+          <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
+        </template>
+      </PageHeader>
+    </template>
 
-    <!-- Loading indicator -->
-    <LoadingIndicator :loading="loading" message="Caricamento dati utente..." />
-
-    <!-- Form principale -->
-    <form v-if="!loading" @submit.prevent="handleSubmit" class="space-y-6">
-
+    <!-- ActionButtons fissi -->
+    <template #actions>
       <ActionButtons
+        v-if="!loading"
         entity-name="Utente"
         :is-edit-mode="isEditMode"
         :saving="saving"
@@ -36,8 +35,17 @@
         @delete="deleteCurrentUser"
         @reset="resetForm"
       />
+    </template>
 
-      <!-- Sezione Informazioni Base -->
+    <!-- Contenuto scrollabile -->
+    <template #content>
+      <!-- Loading indicator -->
+      <LoadingIndicator :loading="loading" message="Caricamento dati utente..." />
+
+      <!-- Form principale -->
+      <form v-if="!loading" @submit.prevent="handleSubmit" class="space-y-6">
+
+        <!-- Sezione Informazioni Base -->
       <SectionCard
         title="Informazioni Base"
         description="Dati principali e configurazione dell'utente"
@@ -203,40 +211,41 @@
         @permission-change="onPermissionChange"
       />
 
-    </form>
-
-    <!-- Modale di conferma eliminazione -->
-    <div v-if="showDeleteModal" class="modal modal-open">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg mb-4">Conferma eliminazione</h3>
-        <p class="mb-4">
-          Sei sicuro di voler eliminare l'utente <strong>{{ userForm.username }}</strong>?
-        </p>
-        <p class="text-sm text-base-content/70 mb-6">
-          Questa azione è irreversibile e rimuoverà tutti i dati associati all'utente.
-        </p>
-        <div class="modal-action">
-          <button
-            class="btn btn-ghost"
-            @click="cancelDelete"
-            :disabled="deleting"
-          >
-            Annulla
-          </button>
-          <button
-            class="btn btn-error text-white"
-            @click="confirmDelete"
-            :disabled="deleting"
-            :class="{ 'loading': deleting }"
-          >
-            <span v-if="deleting" class="loading loading-spinner loading-sm"></span>
-            <span v-if="!deleting">Elimina</span>
-            <span v-if="deleting">Eliminazione...</span>
-          </button>
+        <!-- Modale di conferma eliminazione -->
+        <div v-if="showDeleteModal" class="modal modal-open">
+          <div class="modal-box">
+            <h3 class="font-bold text-lg mb-4">Conferma eliminazione</h3>
+            <p class="mb-4">
+              Sei sicuro di voler eliminare l'utente <strong>{{ userForm.username }}</strong>?
+            </p>
+            <p class="text-sm text-base-content/70 mb-6">
+              Questa azione è irreversibile e rimuoverà tutti i dati associati all'utente.
+            </p>
+            <div class="modal-action">
+              <button
+                class="btn btn-ghost"
+                @click="cancelDelete"
+                :disabled="deleting"
+              >
+                Annulla
+              </button>
+              <button
+                class="btn btn-error text-white"
+                @click="confirmDelete"
+                :disabled="deleting"
+                :class="{ 'loading': deleting }"
+              >
+                <span v-if="deleting" class="loading loading-spinner loading-sm"></span>
+                <span v-if="!deleting">Elimina</span>
+                <span v-if="deleting">Eliminazione...</span>
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
+
+      </form>
+    </template>
+  </EditViewLayout>
 </template>
 
 <script setup lang="ts">
@@ -258,6 +267,7 @@ import ActionButtons from '@/components/ActionButtons.vue'
 import SectionCard from '@/components/SectionCard.vue'
 import { useFormDirtyState } from '@/composables/useFormDirtyState'
 import FormStatusIndicator from '@/components/FormStatusIndicator.vue'
+import EditViewLayout from '@/components/EditViewLayout.vue'
 
 // Interfaccia per il form dell'utente
 interface UserForm {

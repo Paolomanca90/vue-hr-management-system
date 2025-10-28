@@ -1,28 +1,28 @@
 <template>
-  <div class="space-y-1">
-    <!-- Page Header -->
-    <PageHeader
-      :title="isEditMode ? `Modifica ${dipendente?.cognome || ''} ${dipendente?.nome || ''} (${dipendente?.codDip || ''})` : 'Nuovo Dipendente'"
-      :breadcrumbItems="[
-        { label: 'Home', to: '/app' },
-        { label: 'Anagrafica Dipendenti', to: '/app/anagrafica-dipendente' },
-        { label: isEditMode ? 'Modifica' : 'Nuovo' }
-      ]"
-    >
-      <template #backButton>
-        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
-          <FaIcon icon="arrow-left" />
-        </button>
-      </template>
-      <template #actions>
-        <FormStatusIndicator :is-dirty="isDirty" :touched-fields="touchedFields" />
-      </template>
-    </PageHeader>
+  <EditViewLayout>
+    <template #header>
+      <PageHeader
+        :title="isEditMode ? `Modifica ${dipendente?.cognome || ''} ${dipendente?.nome || ''} (${dipendente?.codDip || ''})` : 'Nuovo Dipendente'"
+        :breadcrumbItems="[
+          { label: 'Home', to: '/app' },
+          { label: 'Anagrafica Dipendenti', to: '/app/anagrafica-dipendente' },
+          { label: isEditMode ? 'Modifica' : 'Nuovo' }
+        ]"
+      >
+        <template #backButton>
+          <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+            <FaIcon icon="arrow-left" />
+          </button>
+        </template>
+        <template #actions>
+          <FormStatusIndicator :is-dirty="isDirty" :touched-fields="touchedFields" />
+        </template>
+      </PageHeader>
+    </template>
 
-    <!-- Action Buttons -->
-    <form @submit.prevent="handleSave" class="space-y-6">
-
+    <template #actions>
       <ActionButtons
+        v-if="!loading"
         entity-name="Dipendente"
         :is-edit-mode="isEditMode"
         :saving="saving"
@@ -36,13 +36,13 @@
         @duplicate="handleDuplicate"
         @reset="handleReset"
       />
+    </template>
 
-    </form>
+    <template #content>
+      <!-- Loading indicator -->
+      <LoadingIndicator :loading="loading" message="Caricamento dati dipendente..." />
 
-    <!-- Loading indicator -->
-    <LoadingIndicator :loading="loading" message="Caricamento dati dipendente..." />
-
-    <div v-if="!loading && dipendente" class="space-y-6">
+      <div v-if="!loading && dipendente" class="space-y-6">
       <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div class="form-control">
@@ -892,9 +892,9 @@
           </div>
         </div>
       </div>
-    </div>
-
-  </div>
+      </div>
+    </template>
+  </EditViewLayout>
 </template>
 
 <script setup lang="ts">
@@ -902,6 +902,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
+import EditViewLayout from '@/components/EditViewLayout.vue'
 import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import FormStatusIndicator from '@/components/FormStatusIndicator.vue'

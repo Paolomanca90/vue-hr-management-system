@@ -1,31 +1,28 @@
 <template>
-  <div class="space-y-6">
-    <!-- Page Header -->
-    <PageHeader
-      :title="isEditMode ? `Modifica Festività Anno ${festiForm.anno} (${festiForm.anno})` : 'Nuovo Anno Festività'"
-      :breadcrumbItems="[
-        { label: 'Home', to: '/app' },
-        { label: 'Festività', to: '/app/festi' },
-        { label: isEditMode ? 'Modifica' : 'Nuova' }
-      ]"
-    >
-      <template #backButton>
-        <button class="btn btn-ghost btn-circle btn-sm" @click="goBack" :disabled="saving" title="Indietro">
-          <FaIcon icon="arrow-left" />
-        </button>
-      </template>
-      <template #actions>
-        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
-      </template>
-    </PageHeader>
+  <EditViewLayout>
+    <template #header>
+      <PageHeader
+        :title="isEditMode ? `Modifica Festività Anno ${festiForm.anno} (${festiForm.anno})` : 'Nuovo Anno Festività'"
+        :breadcrumbItems="[
+          { label: 'Home', to: '/app' },
+          { label: 'Festività', to: '/app/festi' },
+          { label: isEditMode ? 'Modifica' : 'Nuova' }
+        ]"
+      >
+        <template #backButton>
+          <button class="btn btn-ghost btn-circle btn-sm" @click="goBack" :disabled="saving" title="Indietro">
+            <FaIcon icon="arrow-left" />
+          </button>
+        </template>
+        <template #actions>
+          <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
+        </template>
+      </PageHeader>
+    </template>
 
-    <!-- Loading indicator -->
-    <LoadingIndicator :loading="loading" message="Caricamento dati festività..." />
-
-    <!-- Form Container -->
-    <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
-
+    <template #actions>
       <ActionButtons
+        v-if="!loading"
         entity-name="Anno"
         :is-edit-mode="isEditMode"
         :saving="saving"
@@ -39,49 +36,57 @@
         @reset="handleReset"
         @duplicate="handleDuplicate"
       />
+    </template>
 
-      <!-- Anno Field -->
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <h2 class="card-title mb-6 dark:text-gray-100">Anno</h2>
+    <template #content>
+      <!-- Loading indicator -->
+      <LoadingIndicator :loading="loading" message="Caricamento dati festività..." />
 
-          <div class="form-control max-w-xs">
-            <label class="label">
-              <span class="label-text font-medium dark:text-gray-200">Anno <span class="text-black">*</span></span>
-            </label>
-            <input
-              v-model.number="festiForm.anno"
-              type="number"
-              :placeholder="isEditMode ? '' : 'Inserisci anno (es. 2025)'"
-              class="input input-bordered w-full"
-              :disabled="saving || isEditMode"
-              required
-              min="1900"
-              max="2100"
+      <!-- Form Container -->
+      <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
+        <!-- Anno Field -->
+        <div class="card bg-base-100 shadow-sm">
+          <div class="card-body">
+            <h2 class="card-title mb-6 dark:text-gray-100">Anno</h2>
+
+            <div class="form-control max-w-xs">
+              <label class="label">
+                <span class="label-text font-medium dark:text-gray-200">Anno <span class="text-black">*</span></span>
+              </label>
+              <input
+                v-model.number="festiForm.anno"
+                type="number"
+                :placeholder="isEditMode ? '' : 'Inserisci anno (es. 2025)'"
+                class="input input-bordered w-full"
+                :disabled="saving || isEditMode"
+                required
+                min="1900"
+                max="2100"
+              />
+            </div>
+
+            <div class="mt-4 text-sm text-base-content/70">
+              <span class="text-black">*</span> Campi obbligatori
+            </div>
+          </div>
+        </div>
+
+        <!-- Festività Rows -->
+        <div class="card bg-base-100 shadow-sm">
+          <div class="card-body">
+            <EditableDataGrid
+              v-model="festiForm.festivita"
+              :columns="festivitaColumns"
+              title="Festività"
+              addButtonLabel="Aggiungi Festività"
+              :disabled="saving"
+              :emptyRowTemplate="createEmptyFestivita"
             />
           </div>
-
-          <div class="mt-4 text-sm text-base-content/70">
-            <span class="text-black">*</span> Campi obbligatori
-          </div>
         </div>
-      </div>
-
-      <!-- Festività Rows -->
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <EditableDataGrid
-            v-model="festiForm.festivita"
-            :columns="festivitaColumns"
-            title="Festività"
-            addButtonLabel="Aggiungi Festività"
-            :disabled="saving"
-            :emptyRowTemplate="createEmptyFestivita"
-          />
-        </div>
-      </div>
-    </form>
-  </div>
+      </form>
+    </template>
+  </EditViewLayout>
 </template>
 
 <script setup lang="ts">
@@ -89,6 +94,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
+import EditViewLayout from '@/components/EditViewLayout.vue'
 import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import EditableDataGrid, { type GridColumn } from '@/components/EditableDataGrid.vue'

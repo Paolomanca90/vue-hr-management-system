@@ -1,27 +1,26 @@
 <template>
-  <div class="space-y-1">
-    <!-- Page Header -->
-    <PageHeader
-      :title="isEditMode ? `Modifica ${sede.descriz} (${sede.codSedeAz})` : 'Nuova Sede'"
-      :breadcrumbItems="[
-        { label: 'Home', to: '/app' },
-        { label: 'Sedi', to: '/app/sedi' },
-        { label: isEditMode ? 'Modifica' : 'Nuova' }
-      ]"
-    >
-      <template #backButton>
-        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
-          <FaIcon icon="arrow-left" />
-        </button>
-      </template>
-      <template #actions>
-        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
-      </template>
-    </PageHeader>
+  <EditViewLayout>
+    <template #header>
+      <PageHeader
+        :title="isEditMode ? `Modifica ${sede.descriz} (${sede.codSedeAz})` : 'Nuova Sede'"
+        :breadcrumbItems="[
+          { label: 'Home', to: '/app' },
+          { label: 'Sedi', to: '/app/sedi' },
+          { label: isEditMode ? 'Modifica' : 'Nuova' }
+        ]"
+      >
+        <template #backButton>
+          <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+            <FaIcon icon="arrow-left" />
+          </button>
+        </template>
+        <template #actions>
+          <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
+        </template>
+      </PageHeader>
+    </template>
 
-    <!-- Form Container -->
-    <form @submit.prevent="handleSave" class="space-y-6">
-
+    <template #actions>
       <ActionButtons
         entity-name="Sede"
         :is-edit-mode="isEditMode"
@@ -35,81 +34,87 @@
         @duplicate="handleDuplicate"
         @reset="handleReset"
       />
+    </template>
 
-      <!-- Tab Selector -->
-      <DetailTabSelector
-        :key="componentKey"
-        :data="sede as any"
-        :anagrafica-fields="anagraficaFields"
-        :saving="saving"
-        :show-presenze-tab="false"
-        @update:data="sede = $event as unknown as FormSede"
-        @tab-changed="handleTabChanged"
-      >
-        <!-- Anagrafica -->
-        <template #anagrafica>
-          <div class="grid grid-cols-1 gap-6">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <template #content>
+      <!-- Form Container -->
+      <form @submit.prevent="handleSave" class="space-y-6">
+        <!-- Tab Selector -->
+        <DetailTabSelector
+          :key="componentKey"
+          :data="sede as any"
+          :anagrafica-fields="anagraficaFields"
+          :saving="saving"
+          :show-presenze-tab="false"
+          @update:data="sede = $event as unknown as FormSede"
+          @tab-changed="handleTabChanged"
+        >
+          <!-- Anagrafica -->
+          <template #anagrafica>
+            <div class="grid grid-cols-1 gap-6">
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label for="codAzi" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Codice Azienda
+                  </label>
+                  <input
+                    id="codAzi"
+                    v-model="sede.codAzi"
+                    type="number"
+                    placeholder="Inserisci codice azienda"
+                    :disabled="saving || isEditMode"
+                    class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
+                  />
+                </div>
+
+                <div class="space-y-2">
+                  <label for="codSedeAz" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Codice Sede Azienda
+                  </label>
+                  <input
+                    id="codSedeAz"
+                    v-model="sede.codSedeAz"
+                    type="number"
+                    placeholder="Inserisci codice sede azienda"
+                    :disabled="saving || isEditMode"
+                    class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
+                  />
+                </div>
+              </div>
+
               <div class="space-y-2">
-                <label for="codAzi" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Codice Azienda
+                <label for="descriz" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Descrizione
                 </label>
                 <input
-                  id="codAzi"
-                  v-model="sede.codAzi"
-                  type="number"
-                  placeholder="Inserisci codice azienda"
-                  :disabled="saving || isEditMode"
+                  id="descriz"
+                  v-model="sede.descriz"
+                  type="text"
+                  placeholder="Inserisci descrizione sede"
+                  :disabled="saving"
                   class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
                 />
               </div>
 
-              <div class="space-y-2">
-                <label for="codSedeAz" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Codice Sede Azienda
-                </label>
-                <input
-                  id="codSedeAz"
-                  v-model="sede.codSedeAz"
-                  type="number"
-                  placeholder="Inserisci codice sede azienda"
-                  :disabled="saving || isEditMode"
-                  class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
-                />
-              </div>
-            </div>
-
-            <div class="space-y-2">
-              <label for="descriz" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Descrizione
-              </label>
-              <input
-                id="descriz"
-                v-model="sede.descriz"
-                type="text"
-                placeholder="Inserisci descrizione sede"
+              <!-- Componente Indirizzo -->
+              <AddressInput
+                v-model="sede.address"
                 :disabled="saving"
-                class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
               />
             </div>
 
-            <!-- Componente Indirizzo -->
-            <AddressInput
-              v-model="sede.address"
-              :disabled="saving"
-            />
-          </div>
-
-        </template>
-      </DetailTabSelector>
-    </form>
-  </div>
+          </template>
+        </DetailTabSelector>
+      </form>
+    </template>
+  </EditViewLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
+import EditViewLayout from '@/components/EditViewLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import DetailTabSelector from '@/components/DetailTabSelector.vue'

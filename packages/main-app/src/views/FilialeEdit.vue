@@ -1,27 +1,26 @@
 <template>
-  <div class="space-y-1">
-    <!-- Page Header -->
-    <PageHeader
-      :title="isEditMode ? `Modifica ${filiale.descriz} (${filiale.codAzi}-${filiale.codCant})` : 'Nuova Filiale'"
-      :breadcrumbItems="[
-        { label: 'Home', to: '/app' },
-        { label: 'Filiali', to: '/app/filiali' },
-        { label: isEditMode ? 'Modifica' : 'Nuova' }
-      ]"
-    >
-      <template #backButton>
-        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
-          <FaIcon icon="arrow-left" />
-        </button>
-      </template>
-      <template #actions>
-        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
-      </template>
-    </PageHeader>
+  <EditViewLayout>
+    <template #header>
+      <PageHeader
+        :title="isEditMode ? `Modifica ${filiale.descriz} (${filiale.codAzi}-${filiale.codCant})` : 'Nuova Filiale'"
+        :breadcrumbItems="[
+          { label: 'Home', to: '/app' },
+          { label: 'Filiali', to: '/app/filiali' },
+          { label: isEditMode ? 'Modifica' : 'Nuova' }
+        ]"
+      >
+        <template #backButton>
+          <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+            <FaIcon icon="arrow-left" />
+          </button>
+        </template>
+        <template #actions>
+          <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
+        </template>
+      </PageHeader>
+    </template>
 
-    <!-- Form Container -->
-    <form @submit.prevent="handleSave" class="space-y-6">
-
+    <template #actions>
       <!-- Azioni principali con navigazione integrata -->
       <ActionButtons
         entity-name="Filiale"
@@ -36,20 +35,24 @@
         @duplicate="handleDuplicate"
         @reset="handleReset"
       />
+    </template>
 
-      <!-- Tab Selector -->
-      <DetailTabSelector
-        :key="componentKey"
-        :data="filiale as any"
-        :anagrafica-fields="anagraficaFields"
-        :saving="saving"
-        :show-presenze-tab="false"
-        :custom-tabs="customTabs"
-        @update:data="filiale = $event as unknown as FormFiliale"
-        @tab-changed="handleTabChanged"
-      >
-        <!-- Anagrafica -->
-        <template #anagrafica>
+    <template #content>
+      <!-- Form Container -->
+      <form @submit.prevent="handleSave" class="space-y-6">
+        <!-- Tab Selector -->
+        <DetailTabSelector
+          :key="componentKey"
+          :data="filiale as any"
+          :anagrafica-fields="anagraficaFields"
+          :saving="saving"
+          :show-presenze-tab="false"
+          :custom-tabs="customTabs"
+          @update:data="filiale = $event as unknown as FormFiliale"
+          @tab-changed="handleTabChanged"
+        >
+          <!-- Anagrafica -->
+          <template #anagrafica>
           <div class="grid grid-cols-1 gap-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div class="space-y-2">
@@ -148,15 +151,17 @@
             </div>
           </div>
         </template>
-      </DetailTabSelector>
-    </form>
-  </div>
+        </DetailTabSelector>
+      </form>
+    </template>
+  </EditViewLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
+import EditViewLayout from '@/components/EditViewLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import DetailTabSelector from '@/components/DetailTabSelector.vue'

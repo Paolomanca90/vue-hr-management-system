@@ -1,31 +1,28 @@
 <template>
-  <div class="space-y-1">
-    <!-- Page Header -->
-    <PageHeader
-      :title="isEditMode ? `Modifica ${gruppoCausaleForm.descrizione} (${gruppoCausaleForm.codGrCau})` : 'Nuovo Gruppo Causale'"
-      :breadcrumbItems="[
-        { label: 'Home', to: '/app' },
-        { label: 'Gruppi Causali', to: '/app/gruppi-causali' },
-        { label: isEditMode ? 'Modifica' : 'Nuovo' }
-      ]"
-    >
-      <template #backButton>
-        <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
-          <FaIcon icon="arrow-left" />
-        </button>
-      </template>
-      <template #actions>
-        <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
-      </template>
-    </PageHeader>
+  <EditViewLayout>
+    <template #header>
+      <PageHeader
+        :title="isEditMode ? `Modifica ${gruppoCausaleForm.descrizione} (${gruppoCausaleForm.codGrCau})` : 'Nuovo Gruppo Causale'"
+        :breadcrumbItems="[
+          { label: 'Home', to: '/app' },
+          { label: 'Gruppi Causali', to: '/app/gruppi-causali' },
+          { label: isEditMode ? 'Modifica' : 'Nuovo' }
+        ]"
+      >
+        <template #backButton>
+          <button class="btn btn-ghost btn-circle btn-xs" @click="goBack" :disabled="saving" title="Indietro">
+            <FaIcon icon="arrow-left" />
+          </button>
+        </template>
+        <template #actions>
+          <FormStatusIndicator :isDirty="isDirty" :touchedFields="touchedFields" :showSavedIndicator="isEditMode" />
+        </template>
+      </PageHeader>
+    </template>
 
-    <!-- Loading indicator -->
-    <LoadingIndicator :loading="loading" message="Caricamento dati gruppo causale..." />
-
-    <!-- Form Container -->
-    <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
-
+    <template #actions>
       <ActionButtons
+        v-if="!loading"
         entity-name="Gruppo Causale"
         :is-edit-mode="isEditMode"
         :saving="saving"
@@ -39,67 +36,75 @@
         @reset="handleReset"
         @duplicate="handleDuplicate"
       />
+    </template>
 
-      <!-- Dati Gruppo Causale -->
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <h2 class="card-title mb-6 dark:text-gray-100">Dati Gruppo Causale</h2>
+    <template #content>
+      <!-- Loading indicator -->
+      <LoadingIndicator :loading="loading" message="Caricamento dati gruppo causale..." />
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Codice Gruppo Causale -->
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium dark:text-gray-200">Codice Gruppo *</span>
-              </label>
-              <input
-                v-model.number="gruppoCausaleForm.codGrCau"
-                type="number"
-                placeholder="Inserisci codice gruppo"
-                class="input input-bordered w-full"
-                :disabled="saving || isEditMode"
-                required
-                min="0"
-              />
+      <!-- Form Container -->
+      <form v-if="!loading" @submit.prevent="handleSave" class="space-y-6">
+        <!-- Dati Gruppo Causale -->
+        <div class="card bg-base-100 shadow-sm">
+          <div class="card-body">
+            <h2 class="card-title mb-6 dark:text-gray-100">Dati Gruppo Causale</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Codice Gruppo Causale -->
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-medium dark:text-gray-200">Codice Gruppo *</span>
+                </label>
+                <input
+                  v-model.number="gruppoCausaleForm.codGrCau"
+                  type="number"
+                  placeholder="Inserisci codice gruppo"
+                  class="input input-bordered w-full"
+                  :disabled="saving || isEditMode"
+                  required
+                  min="0"
+                />
+              </div>
+
+              <!-- Descrizione -->
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text font-medium dark:text-gray-200">Descrizione *</span>
+                </label>
+                <input
+                  v-model="gruppoCausaleForm.descrizione"
+                  type="text"
+                  placeholder="Inserisci descrizione gruppo"
+                  class="input input-bordered w-full"
+                  :disabled="saving"
+                  required
+                  maxlength="100"
+                />
+              </div>
             </div>
 
-            <!-- Descrizione -->
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text font-medium dark:text-gray-200">Descrizione *</span>
-              </label>
-              <input
-                v-model="gruppoCausaleForm.descrizione"
-                type="text"
-                placeholder="Inserisci descrizione gruppo"
-                class="input input-bordered w-full"
-                :disabled="saving"
-                required
-                maxlength="100"
-              />
+            <div class="mt-4 text-sm text-base-content/70">
+              * Campi obbligatori
             </div>
           </div>
+        </div>
 
-          <div class="mt-4 text-sm text-base-content/70">
-            * Campi obbligatori
+        <!-- Causali Associate -->
+        <div class="card bg-base-100 shadow-sm">
+          <div class="card-body">
+            <EditableDataGrid
+              v-model="gruppoCausaleForm.listaCausali"
+              :columns="causaliColumns"
+              title="Causali Associate"
+              add-button-label="Aggiungi Causale"
+              :disabled="saving"
+              :empty-row-template="createEmptyCausale"
+            />
           </div>
         </div>
-      </div>
-
-      <!-- Causali Associate -->
-      <div class="card bg-base-100 shadow-sm">
-        <div class="card-body">
-          <EditableDataGrid
-            v-model="gruppoCausaleForm.listaCausali"
-            :columns="causaliColumns"
-            title="Causali Associate"
-            add-button-label="Aggiungi Causale"
-            :disabled="saving"
-            :empty-row-template="createEmptyCausale"
-          />
-        </div>
-      </div>
-    </form>
-  </div>
+      </form>
+    </template>
+  </EditViewLayout>
 </template>
 
 <script setup lang="ts">
@@ -107,6 +112,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { FaIcon } from '@presenze-in-web-frontend/core-lib'
 import PageHeader from '@/components/PageHeader.vue'
+import EditViewLayout from '@/components/EditViewLayout.vue'
 import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import EditableDataGrid, { type GridRow, type LookupValue } from '@/components/EditableDataGrid.vue'

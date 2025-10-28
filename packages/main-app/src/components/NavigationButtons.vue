@@ -54,13 +54,18 @@
         @click="navigateToEntity(entity); drawerVisible = false"
       >
         <div class="flex items-center justify-between">
-          <span class="text-sm font-medium">
-            {{ getEntityLabel(entity) }}
-          </span>
+          <div class="flex-1">
+            <div class="text-sm font-medium">
+              {{ getEntityDescription(entity) }}
+            </div>
+            <div v-if="getEntityCode(entity)" class="text-xs text-base-content/60 mt-1">
+              Codice: {{ getEntityCode(entity) }}
+            </div>
+          </div>
           <FaIcon
             v-if="index === currentIndex"
             icon="check"
-            class="text-primary"
+            class="text-primary ml-2"
           />
         </div>
       </div>
@@ -212,20 +217,29 @@ const navigateToEntity = (entity: EntityItem) => {
   }
 }
 
-const getEntityLabel = (entity: EntityItem): string => {
+const getEntityDescription = (entity: EntityItem): string => {
   if (!props.navigationConfig) return ''
 
-  // Prova a costruire una label leggibile dall'entità
-  const id = props.navigationConfig.getEntityId(entity)
-
   // Cerca campi comuni per descrizione/nome
-  const description = entity.descrizione || entity.description || entity.nome || entity.name || entity.label
+  const description = entity.descrizione || entity.description || entity.nome || entity.name || entity.label || entity.nomecompleto
 
   if (description) {
-    return `${description} (${id})`
+    return description
   }
 
-  return id
+  // Fallback: mostra l'ID se non c'è descrizione
+  return props.navigationConfig.getEntityId(entity)
+}
+
+const getEntityCode = (entity: EntityItem): string => {
+  if (!props.navigationConfig) return ''
+
+  const id = props.navigationConfig.getEntityId(entity)
+
+  // Mostra il codice solo se c'è anche una descrizione
+  const description = entity.descrizione || entity.description || entity.nome || entity.name || entity.label || entity.nomecompleto
+
+  return description ? id : ''
 }
 
 watch(() => route.params.id, loadEntities, { immediate: true })
