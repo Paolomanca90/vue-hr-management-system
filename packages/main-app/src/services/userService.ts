@@ -17,9 +17,8 @@ export interface GruppiUtenti extends CrudEntity {
 }
 
 class UserService extends GenericCrudService<User> {
-  protected config = getApiConfig()
   private gruppiService = new GenericCrudService<GruppiUtenti>({
-    list: this.config.endpoints.gruppiUtente
+    list: getApiConfig().endpoints.gruppiUtente
   })
 
   constructor() {

@@ -27,8 +27,6 @@ export interface AggiornamentoAbilitazioniGruppo {
 }
 
 class GruppiUtenteService extends GenericCrudService<GruppoUtente> {
-  protected config = getApiConfig()
-
   constructor() {
     super({
       list: getApiConfig().endpoints.gruppiUtente,

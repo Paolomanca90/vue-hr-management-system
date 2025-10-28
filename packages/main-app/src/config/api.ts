@@ -7,8 +7,8 @@ export const loadRuntimeConfig = async (): Promise<void> => {
     const response = await fetch('/config.json')
     if (response.ok) {
       const config = await response.json()
-      if (config.apiBaseUrl) {
-        configBaseUrl = config.apiBaseUrl
+      if (config.baseUrl) {
+        configBaseUrl = config.baseUrl
       }
     }
   } catch (error) {
@@ -18,7 +18,10 @@ export const loadRuntimeConfig = async (): Promise<void> => {
 
 export const API_CONFIG = {
   // URL base dell'API
-  baseUrl: configBaseUrl || import.meta.env.VITE_API_BASE_URL || 'https://localhost:7255',
+  get baseUrl() {
+    const url = configBaseUrl || import.meta.env.VITE_API_BASE_URL || 'https://localhost:7255'
+    return url
+  },
 
   // Endpoints
   endpoints: {

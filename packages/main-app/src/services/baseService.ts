@@ -20,7 +20,9 @@ export interface RequestConfig {
 }
 
 class BaseService<T extends BaseEntity> {
-  protected config = getApiConfig()
+  protected get config() {
+    return getApiConfig()
+  }
 
   constructor(protected endpoints: CrudEndpoints) {}
 
