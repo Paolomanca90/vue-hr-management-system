@@ -2,7 +2,7 @@
   <div v-if="showNavigation && hasEntities" class="flex items-center max-md:justify-center space-x-2">
     <button
       type="button"
-      class="btn btn-primary btn-outline btn-sm text-sm"
+      class="btn btn-primary btn-outline btn-sm "
       @click="navigatePrevious"
       :disabled="disabled || !hasPrevious"
       :title="hasPrevious ? `${entityName} precedente` : 'Nessun elemento precedente'"
@@ -13,7 +13,7 @@
     <!-- Bottone per aprire drawer -->
     <button
       type="button"
-      class="btn btn-primary btn-outline btn-sm text-sm"
+      class="btn btn-primary btn-outline btn-sm "
       @click="drawerVisible = true"
       :title="`Vai a ${entityName}`"
     >
@@ -22,7 +22,7 @@
 
     <button
       type="button"
-      class="btn btn-primary btn-outline btn-sm text-sm"
+      class="btn btn-primary btn-outline btn-sm "
       @click="navigateNext"
       :disabled="disabled || !hasNext"
       :title="hasNext ? `${entityName} successivo` : 'Nessun elemento successivo'"
@@ -39,7 +39,7 @@
     class="w-96"
   >
     <div class="space-y-2">
-      <div class="text-sm text-base-content/70 mb-4">
+      <div class=" text-base-content/70 mb-4">
         Totale: {{ allEntities.length }} elementi
       </div>
 
@@ -55,10 +55,10 @@
       >
         <div class="flex items-center justify-between">
           <div class="flex-1">
-            <div class="text-sm font-medium">
+            <div class=" font-medium">
               {{ getEntityDescription(entity) }}
             </div>
-            <div v-if="getEntityCode(entity)" class="text-xs text-base-content/60 mt-1">
+            <div v-if="getEntityCode(entity)" class=" text-base-content/60 mt-1">
               Codice: {{ getEntityCode(entity) }}
             </div>
           </div>
@@ -220,8 +220,13 @@ const navigateToEntity = (entity: EntityItem) => {
 const getEntityDescription = (entity: EntityItem): string => {
   if (!props.navigationConfig) return ''
 
+  // Caso speciale per dipendenti: combina cognome e nome
+  if (entity.cognome && entity.nome) {
+    return `${entity.cognome} ${entity.nome}`
+  }
+
   // Cerca campi comuni per descrizione/nome
-  const description = entity.descrizione || entity.description || entity.nome || entity.name || entity.label || entity.nomecompleto
+  const description = entity.descrizione || entity.description || entity.cognome || entity.nome || entity.name || entity.label || entity.nomecompleto
 
   if (description) {
     return description
@@ -237,7 +242,7 @@ const getEntityCode = (entity: EntityItem): string => {
   const id = props.navigationConfig.getEntityId(entity)
 
   // Mostra il codice solo se c'è anche una descrizione
-  const description = entity.descrizione || entity.description || entity.nome || entity.name || entity.label || entity.nomecompleto
+  const description = entity.descrizione || entity.description || entity.cognome || entity.nome || entity.name || entity.label || entity.nomecompleto
 
   return description ? id : ''
 }

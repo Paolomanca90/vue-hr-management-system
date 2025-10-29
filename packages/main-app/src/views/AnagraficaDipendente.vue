@@ -13,14 +13,14 @@
       <template #actions>
         <button
           v-if="hasSearched"
-          class="max-md:w-full max-md:block btn btn-primary btn-sm text-xs text-white"
+          class="max-md:w-full max-md:block btn btn-primary btn-sm  text-white"
           @click="goToNew"
         >
           <FaIcon icon="plus" class="mr-2"/>
           Nuovo Dipendente
         </button>
         <button
-          class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm text-xs"
+          class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm "
           @click="showFilters = !showFilters"
         >
           <FaIcon icon="filter" class="mr-2"/>
@@ -66,12 +66,12 @@
           <!-- Custom toolbar -->
           <template #toolbar>
             <div class="dropdown dropdown-end">
-              <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm text-xs">
+              <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm ">
                 <FaIcon icon="cog" class="mr-1" />
                 Opzioni
               </div>
               <ul tabindex="0"  class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-60 z-[100]">
-                <li><a @click="bulkActions"><FaIcon icon="check-circle" class="mr-2 text-xs" />Azioni Multiple</a></li>
+                <li><a @click="bulkActions"><FaIcon icon="check-circle" class="mr-2 " />Azioni Multiple</a></li>
                 <li><a @click="dipendentiSettings"><FaIcon icon="cog" class="mr-2" />Impostazioni</a></li>
                 <li><a @click="exportDipendenti"><FaIcon icon="download" class="mr-2" />Esporta Dipendenti</a></li>
               </ul>
@@ -80,17 +80,17 @@
 
           <!-- Slot personalizzato per la colonna codDip -->
           <template #column-codDip="{ value }">
-            <span class="text-sm">{{ value }}</span>
+            <span>{{ value }}</span>
           </template>
 
           <!-- Slot personalizzato per la colonna cognome -->
           <template #column-cognome="{ value }">
-            <span class="text-sm">{{ value }}</span>
+            <span>{{ value }}</span>
           </template>
 
           <!-- Slot personalizzato per la colonna nome -->
           <template #column-nome="{ value }">
-            <span class="text-sm">{{ value }}</span>
+            <span>{{ value }}</span>
           </template>
         </DataTableManager>
       </div>

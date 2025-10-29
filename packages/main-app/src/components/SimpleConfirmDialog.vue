@@ -23,9 +23,9 @@
               <FaIcon :icon="iconType" :class="iconClass" class="text-2xl" />
             </div>
             <div class="flex-1">
-              <p class="text-sm text-gray-700 mb-2">{{ message }}</p>
-              <p v-if="description" class="text-xs text-gray-500 mb-2">{{ description }}</p>
-              <p v-if="warningText" class="text-xs text-orange-600 font-medium">{{ warningText }}</p>
+              <p class=" text-gray-700 mb-2">{{ message }}</p>
+              <p v-if="description" class=" text-gray-500 mb-2">{{ description }}</p>
+              <p v-if="warningText" class=" text-orange-600 font-medium">{{ warningText }}</p>
             </div>
           </div>
         </div>

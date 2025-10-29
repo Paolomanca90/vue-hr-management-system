@@ -56,15 +56,15 @@
                 @click.stop="toggleAvailableSelection(item)"
               />
               <div class="flex-1 min-w-0">
-                <div class="text-sm font-medium truncate dark:text-gray-200">
+                <div class=" font-medium truncate dark:text-gray-200">
                   {{ getItemDisplay(item) }}
                 </div>
-                <div v-if="subtitleField && item[subtitleField]" class="text-xs text-base-content/60 truncate">
+                <div v-if="subtitleField && item[subtitleField]" class=" text-base-content/60 truncate">
                   {{ item[subtitleField] }}
                 </div>
               </div>
             </div>
-            <div v-if="filteredAvailableItems.length === 0" class="p-4 text-center text-base-content/60 text-sm">
+            <div v-if="filteredAvailableItems.length === 0" class="p-4 text-center text-base-content/60 ">
               Nessun elemento disponibile
             </div>
           </div>
@@ -137,15 +137,15 @@
                 @click.stop="toggleSelectedSelection(item)"
               />
               <div class="flex-1 min-w-0">
-                <div class="text-sm font-medium truncate dark:text-gray-200">
+                <div class=" font-medium truncate dark:text-gray-200">
                   {{ getItemDisplay(item) }}
                 </div>
-                <div v-if="subtitleField && item[subtitleField]" class="text-xs text-base-content/60 truncate">
+                <div v-if="subtitleField && item[subtitleField]" class=" text-base-content/60 truncate">
                   {{ item[subtitleField] }}
                 </div>
               </div>
             </div>
-            <div v-if="filteredSelectedItems.length === 0" class="p-4 text-center text-base-content/60 text-sm">
+            <div v-if="filteredSelectedItems.length === 0" class="p-4 text-center text-base-content/60 ">
               Nessun elemento selezionato
             </div>
           </div>
@@ -167,7 +167,7 @@
     </div>
 
     <!-- Contatore totale -->
-    <div class="text-sm text-base-content/70">
+    <div class=" text-base-content/70">
       Totale selezionati: <span class="font-semibold">{{ modelValue.length }}</span>
     </div>
   </div>

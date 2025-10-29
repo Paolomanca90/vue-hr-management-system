@@ -54,7 +54,7 @@
           <div class="grid grid-cols-1 gap-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div class="space-y-2">
-                <label for="codAzi" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="codAzi" class="block  font-medium text-gray-700 dark:text-gray-300">
                   Codice Azienda
                 </label>
                 <input
@@ -63,12 +63,12 @@
                   type="text"
                   placeholder="Inserisci codice azienda"
                   :disabled="saving || isEditMode"
-                  class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
+                  class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm: p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
                 />
               </div>
 
               <div class="space-y-2">
-                <label for="ragSoc" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="ragSoc" class="block  font-medium text-gray-700 dark:text-gray-300">
                   Ragione Sociale
                 </label>
                 <input
@@ -77,7 +77,7 @@
                   type="text"
                   placeholder="Inserisci ragione sociale"
                   :disabled="saving"
-                  class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
+                  class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm: p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
                 />
               </div>
             </div>
@@ -90,7 +90,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div class="space-y-2">
-                <label for="codFisc" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="codFisc" class="block  font-medium text-gray-700 dark:text-gray-300">
                   Codice Fiscale
                 </label>
                 <input
@@ -99,12 +99,12 @@
                   type="text"
                   placeholder="Inserisci codice fiscale"
                   :disabled="saving"
-                  class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
+                  class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm: p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
                 />
               </div>
 
               <div class="space-y-2">
-                <label for="sigla" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="sigla" class="block  font-medium text-gray-700 dark:text-gray-300">
                   Sigla
                 </label>
                 <input
@@ -113,7 +113,7 @@
                   type="text"
                   placeholder="Inserisci sigla azienda"
                   :disabled="saving"
-                  class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
+                  class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm: p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
                 />
               </div>
             </div>
@@ -128,7 +128,7 @@
 
             <!-- Santo Patrono -->
             <div class="space-y-2">
-              <label for="santoPatrono" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label for="santoPatrono" class="block  font-medium text-gray-700 dark:text-gray-300">
                 Giorno Santo Patrono
               </label>
               <input
@@ -138,14 +138,14 @@
                 placeholder="gg/MM (es. 15/08)"
                 :disabled="saving"
                 maxlength="5"
-                class="block w-full lg:w-1/2 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
+                class="block w-full lg:w-1/2 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm: p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
               />
-              <p class="text-xs text-gray-500 dark:text-gray-400">Formato: gg/MM (es. 15/08 per 15 Agosto)</p>
+              <p class=" text-gray-500 dark:text-gray-400">Formato: gg/MM (es. 15/08 per 15 Agosto)</p>
             </div>
 
             <!-- Codice Causale Lavoro -->
             <div class="space-y-2">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label class="block  font-medium text-gray-700 dark:text-gray-300">
                 Codice Causale Lavoro
               </label>
               <GenericLookupInput
@@ -157,7 +157,7 @@
 
             <!-- Codice Causale Riposo -->
             <div class="space-y-2">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label class="block  font-medium text-gray-700 dark:text-gray-300">
                 Codice Causale Riposo
               </label>
               <GenericLookupInput

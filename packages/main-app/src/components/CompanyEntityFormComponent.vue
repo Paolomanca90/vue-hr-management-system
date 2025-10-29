@@ -2,8 +2,8 @@
   <div class="space-y-4">
     <!-- Sezione Azienda -->
     <div class="flex items-center gap-4">
-      <label class="text-sm font-medium dark:text-gray-300 w-32">Azienda:</label>
-      <div v-if="isEditMode" class="text-sm font-medium dark:text-gray-200">
+      <label class=" font-medium dark:text-gray-300 w-32">Azienda:</label>
+      <div v-if="isEditMode" class=" font-medium dark:text-gray-200">
         {{ companyDisplayText }}
       </div>
       <div v-else class="flex-1">
@@ -21,7 +21,7 @@
     <div class="space-y-3">
       <!-- Campo 1 (sempre presente) -->
       <div class="flex items-center gap-4">
-        <label :for="field1Id" class="text-sm font-medium text-gray-700 dark:text-gray-300 w-32 flex-shrink-0">
+        <label :for="field1Id" class=" font-medium text-gray-700 dark:text-gray-300 w-32 flex-shrink-0">
           {{ field1Label }}
         </label>
         <input
@@ -37,7 +37,7 @@
 
       <!-- Campo 2 (condizionale) -->
       <div v-if="showField2" class="flex items-center gap-4">
-        <label :for="field2Id" class="text-sm font-medium text-gray-700 dark:text-gray-300 w-32 flex-shrink-0">
+        <label :for="field2Id" class=" font-medium text-gray-700 dark:text-gray-300 w-32 flex-shrink-0">
           {{ field2Label }}
         </label>
         <input
@@ -53,7 +53,7 @@
 
       <!-- Campo 3 (condizionale) -->
       <div v-if="showField3" class="flex items-center gap-4">
-        <label :for="field3Id" class="text-sm font-medium text-gray-700 dark:text-gray-300 w-32 flex-shrink-0">
+        <label :for="field3Id" class=" font-medium text-gray-700 dark:text-gray-300 w-32 flex-shrink-0">
           {{ field3Label }}
         </label>
         <input
@@ -126,7 +126,7 @@ const props = withDefaults(defineProps<Props>(), {
   field1Type: 'text',
   field1Placeholder: 'Inserisci valore',
   field1Required: true,
-  field1Classes: 'rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-1 dark:bg-gray-700 dark:text-gray-100',
+  field1Classes: 'rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm: p-1 dark:bg-gray-700 dark:text-gray-100',
   field1Id: 'field1',
 
   // Field 2 defaults
@@ -134,7 +134,7 @@ const props = withDefaults(defineProps<Props>(), {
   field2Type: 'text',
   field2Placeholder: 'Inserisci valore',
   field2Required: false,
-  field2Classes: 'rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-1 dark:bg-gray-700 dark:text-gray-100',
+  field2Classes: 'rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm: p-1 dark:bg-gray-700 dark:text-gray-100',
   field2Id: 'field2',
 
   // Field 3 defaults
@@ -142,7 +142,7 @@ const props = withDefaults(defineProps<Props>(), {
   field3Type: 'text',
   field3Placeholder: 'Inserisci valore',
   field3Required: false,
-  field3Classes: 'rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-1 dark:bg-gray-700 dark:text-gray-100',
+  field3Classes: 'rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm: p-1 dark:bg-gray-700 dark:text-gray-100',
   field3Id: 'field3'
 })
 

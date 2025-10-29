@@ -14,14 +14,14 @@
         <!-- Chevron per indicare espandibilità -->
         <FaIcon
           icon="chevron-right"
-          :class="`text-xs mr-2 transition-transform duration-200 ${item.expanded ? 'rotate-90' : ''}`"
+          :class="` mr-2 transition-transform duration-200 ${item.expanded ? 'rotate-90' : ''}`"
         />
         <!-- FaIcon wrapper -->
         <FaIcon
           :icon="menuService.convertCssIconToFontAwesome(item.icon)"
-          class="text-sm mr-3"
+          class=" mr-3"
         />
-        <span class="text-sm flex-1" v-html="highlightSearchTerm(item.label)"></span>
+        <span class=" flex-1" v-html="highlightSearchTerm(item.label)"></span>
       </div>
 
       <!-- Sottomenu (visibile solo quando expanded è true) -->
@@ -52,9 +52,9 @@
       <!-- FaIcon wrapper -->
       <FaIcon
         :icon="menuService.convertCssIconToFontAwesome(item.icon)"
-        class="text-sm mr-3"
+        class=" mr-3"
       />
-      <span class="text-sm flex-1" v-html="highlightSearchTerm(item.label)"></span>
+      <span class=" flex-1" v-html="highlightSearchTerm(item.label)"></span>
 
       <!-- Stellina per preferiti (solo per le foglie) -->
       <button
@@ -75,7 +75,7 @@
             'text-blue-500': item.isFavorite,
             'text-base-content/40': !item.isFavorite
           }"
-          class="text-xs transition-colors duration-200"
+          class=" transition-colors duration-200"
         />
       </button>
     </RouterLink>
@@ -90,9 +90,9 @@
       <!-- FaIcon wrapper -->
       <FaIcon
         :icon="menuService.convertCssIconToFontAwesome(item.icon)"
-        class="text-sm mr-3"
+        class=" mr-3"
       />
-      <span class="text-sm flex-1" v-html="highlightSearchTerm(item.label)"></span>
+      <span class=" flex-1" v-html="highlightSearchTerm(item.label)"></span>
 
       <!-- Stellina per preferiti (anche per foglie senza route) -->
       <button
@@ -113,7 +113,7 @@
             'text-blue-500': item.isFavorite,
             'text-base-content/40': !item.isFavorite
           }"
-          class="text-xs transition-colors duration-200"
+          class=" transition-colors duration-200"
         />
       </button>
     </div>

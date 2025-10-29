@@ -1,5 +1,5 @@
 <template>
-  <div class="data-table-wrapper">
+  <div class="data-table-wrapper" :class="{ 'filters-collapsed': filtersCollapsed }">
 
     <!-- Data Table -->
     <PDataTable 
@@ -43,7 +43,7 @@
           <div class="flex flex-col lg:flex-row lg:items-center gap-2 text-[oklch(var(--bc))]">
             <!-- Column Toggle -->
             <div v-if="showColumnToggle" class="dropdown dropdown-end">
-              <div tabindex="0" role="button" class="max-md:block max-md:w-full btn btn-ghost max-md:p-[0.5em] btn-sm text-xs">
+              <div tabindex="0" role="button" class="max-md:block max-md:w-full btn btn-ghost max-md:p-[0.5em] btn-sm ">
                 <FaIcon icon="columns" class="mr-1" />
                 Colonne
               </div>
@@ -63,7 +63,7 @@
                         class="checkbox checkbox-sm mr-2"
                         v-model="col.visible"
                       />
-                      <span class="label-text text-sm whitespace-nowrap">{{ col.header || col.label }}</span>
+                      <span class="label-text  whitespace-nowrap">{{ col.header || col.label }}</span>
                     </label>
                   </div>
                 </div>
@@ -72,7 +72,7 @@
 
             <!-- Export Dropdown -->
             <div v-if="showExport" class="dropdown dropdown-end">
-              <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm text-xs">
+              <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm ">
                 <FaIcon icon="download" class="mr-1" />
                 Esporta
               </div>
@@ -210,7 +210,7 @@
         <div class="text-center py-8">
           <FaIcon icon="inbox" class="text-4xl text-gray-400 mb-3"/>
           <p class="text-gray-500 text-lg mb-2">Nessun dato disponibile</p>
-          <p class="text-gray-400 text-sm">
+          <p class="text-gray-400 ">
             {{ hasActiveFilters ? 'Prova a modificare i filtri di ricerca' : 'Non ci sono elementi da visualizzare' }}
           </p>
         </div>
@@ -452,8 +452,8 @@ const hasActiveFilters = computed(() => {
 })
 
 const computedTableStyle = computed(() => {
-  // Permette alla tabella di crescere in base al contenuto, ma con limiti
-  return `min-width: 100%; width: 100%; table-layout: auto;`
+  // Larghezza 100% per occupare tutto lo spazio disponibile
+  return `width: 100%; table-layout: auto;`
 })
 
 // Methods
@@ -474,47 +474,12 @@ const getFilterType = (column) => {
 }
 
 const getColumnStyle = (column) => {
-  // Se la colonna ha uno style personalizzato, usalo
   if (column.style) return column.style
-
-  // Altrimenti applica autosize intelligente
-  const styles = []
-
-  // Min width: assicura leggibilità minima
-  const minWidth = column.minWidth || '100px'
-  styles.push(`min-width: ${minWidth}`)
-
-  // Max width: previene colonne troppo larghe
-  if (column.maxWidth) {
-    styles.push(`max-width: ${column.maxWidth}`)
-  } else {
-    // Default max-width per evitare colonne che occupano tutto lo spazio
-    styles.push(`max-width: 400px`)
-  }
-
-  // Width: auto per permettere al contenuto di determinare la larghezza
-  if (!column.width) {
-    styles.push(`width: auto`)
-  } else {
-    styles.push(`width: ${column.width}`)
-  }
-
-  return styles.join('; ')
+  return ''
 }
 
 const getActionColumnStyle = () => {
   return `width: 1px !important; white-space: nowrap !important; min-width: auto !important; max-width: none !important;`
-}
-
-const clearAllFilters = () => {
-  globalSearchValue.value = ''
-  internalFilters.value = {
-    global: { value: null, matchMode: 'contains' }
-  }
-  
-  if (dataTable.value) {
-    dataTable.value.clearFilters()
-  }
 }
 
 const initializeFilters = () => {
@@ -646,379 +611,25 @@ watch(() => toggleableColumns.value, () => {
 </script>
 
 <style scoped>
-.data-table-wrapper {
-  width: 100%;
-  position: relative;
-  overflow: visible; 
+.filters-collapsed :deep(.p-datatable .p-datatable-thead > tr:nth-child(2)) {
+  display: none !important;
 }
 
-:deep(.p-datatable) {
-  font-size: 0.875rem;
-  border-radius: 0.5rem;
-  overflow: visible;
-  width: 100%;
+:deep(.p-datatable .p-datatable-tbody > tr > td),
+:deep(.p-datatable .p-datatable-header-cell),
+:deep(.p-inputtext),
+:deep(.p-datatable-filter-constraint) {
+  padding: 0.3rem 1rem !important;
+  font-size: 12px !important;
 }
 
-:deep(.p-datatable .p-datatable-table) {
-  width: 100% !important;
+:deep(.p-button-icon-only.p-button-rounded) {
+  height: 1.8rem !important;
+  width: 1.8rem !important;
 }
 
-:deep(.p-datatable .p-datatable-wrapper) {
-  width: 100%;
-  overflow-x: auto;
-  overflow-y: visible;
-}
-
-:deep(.p-datatable .p-datatable-header) {
-  background: var(--surface-0);
-  border: 1px solid var(--surface-200);
-  padding: 0;
-}
-
-:deep(.p-datatable .p-datatable-thead > tr > th) {
-  background-color: oklch(var(--b1));
-  color: oklch(var(--bc));
-  font-weight: 600;
-  padding: 0.75rem;
-  white-space: nowrap;
-  overflow: visible;
-  text-overflow: ellipsis;
-  position: relative;
-}
-
-:deep(.p-datatable .p-datatable-thead > tr:first-child > th) {
-  border-bottom: 1px solid var(--surface-300);
-  padding-bottom: 0.5rem;
-}
-
-:deep(.p-datatable .p-datatable-thead > tr:nth-child(2) > th) {
-  padding-top: 0.5rem;
-  padding-bottom: 0.75rem;
-  background-color: oklch(var(--b1));
-  border-top: 1px solid var(--surface-300);
-}
-
-:deep(.p-datatable .p-datatable-thead > tr:nth-child(2) .p-column-filter) {
-  width: 100%;
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr > td) {
-  padding: 0.3rem 0.75rem;
-  white-space: nowrap;
-  overflow: visible;
-  text-overflow: ellipsis;
-  position: relative;
-  color: oklch(var(--bc));
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr) {
-  position: relative;
-}
-
-:deep(.p-datatable .p-datatable-tbody) {
-  overflow: visible;
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr:hover) {
-  background-color: var(--surface-50);
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr > td:first-child) {
-  overflow: visible !important;
-  position: relative !important;
-  z-index: 10 !important;
-}
-
-:deep(.p-column-filter-row .p-column-filter-element) {
-  width: 100%;
-}
-
-:deep(.p-column-filter-row .input) {
-  width: 100%;
-  min-width: 100px;
-}
-
-:deep(.p-column-filter-row .select) {
-  width: 100%;
-  min-width: 120px;
-}
-
-.tooltip:before,
-.tooltip:after {
-  z-index: 9999 !important;
-}
-
-.tooltip:hover:before,
-.tooltip:hover:after {
-  z-index: 10000 !important;
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr > td:first-child .tooltip) {
-  position: relative;
-  z-index: 1000;
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr > td:first-child .tooltip:hover) {
-  z-index: 10001 !important;
-}
-
-.tooltip:hover {
-  z-index: 10002 !important;
-}
-
-.tooltip[data-tip]:hover:before,
-.tooltip[data-tip]:hover:after {
-  z-index: 10003 !important;
-}
-
-:deep(.p-datatable .p-resizable-column .p-column-resizer) {
-  display: block;
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin: 0;
-  width: 2px;
-  height: 100%;
-  padding: 0;
-  cursor: col-resize;
-  border: 1px solid transparent;
-}
-
-:deep(.p-datatable .p-resizable-column .p-column-resizer:hover) {
-  border-color: var(--primary-color);
-}
-
-:deep(.p-inputtext) {
-  border-radius: 0.375rem;
-  border: 1px solid oklch(var(--bc) / 0.3);
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  background-color: oklch(var(--b1));
-  color: oklch(var(--bc)) !important;
-}
-
-:deep(.p-inputtext:focus) {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 1px var(--primary-color);
-}
-
-:deep(.p-select) {
-  border-radius: 0.375rem;
-  border: 1px solid oklch(var(--bc) / 0.3);
-  min-height: 2.5rem;
-  background-color: oklch(var(--b1));
-  color: oklch(var(--bc)) !important;
-}
-
-:deep(.p-multiselect) {
-  border-radius: 0.375rem;
-  border: 1px solid var(--surface-300);
-  min-height: 2.5rem;
-  color: oklch(var(--bc)) !important;
-}
-
-:deep(.p-datatable-wrapper) {
-  overflow-x: auto;
-  overflow-y: visible;
-  position: relative;
-}
-
-:deep(.p-datatable) {
-  position: relative;
-  overflow: visible;
-}
-
-:deep(.p-datatable .p-datatable-table colgroup col) {
-  transition: width 0.2s ease;
-}
-
-:deep(.p-datatable .p-frozen-column) {
-  position: sticky;
-  background: inherit;
-  z-index: 1;
-}
-
-:deep(.p-datatable .p-frozen-column-left) {
-  left: 0;
-}
-
-:deep(.p-datatable .p-frozen-column-right) {
-  right: 0;
-}
-
-.data-table-toolbar {
-  border: 1px solid oklch(var(--bc) / 0.2);
-}
-
-@media (max-width: 1200px) {
-  :deep(.p-datatable .p-datatable-thead > tr > th),
-  :deep(.p-datatable .p-datatable-tbody > tr > td) {
-    padding: 0.5rem;
-    font-size: 0.8rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .data-table-toolbar {
-    padding: 1rem;
-  }
-  
-  .data-table-toolbar .flex {
-    gap: 0.75rem;
-  }
-  
-  :deep(.p-datatable .p-datatable-thead > tr > th),
-  :deep(.p-datatable .p-datatable-tbody > tr > td) {
-    white-space: normal;
-    word-wrap: break-word;
-    min-width: 100px;
-  }
-}
-
-@media (max-width: 640px) {
-  :deep(.p-datatable .p-datatable-thead > tr > th),
-  :deep(.p-datatable .p-datatable-tbody > tr > td) {
-    padding: 0.375rem;
-    font-size: 0.75rem;
-  }
-}
-
-.dropdown-content {
-  border: 1px solid oklch(var(--bc) / 0.2);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.menu-title {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: oklch(var(--bc) / 0.6);
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid oklch(var(--bc) / 0.1);
-  margin-bottom: 0.5em;
-}
-
-:deep(.p-datatable .p-datatable-loading-overlay) {
-  background-color: rgba(255, 255, 255, 0.9);
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr.p-highlight) {
-  background-color: var(--primary-50);
-  color: var(--primary-500) !important;
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr.p-highlight:hover) {
-  background-color: var(--primary-100);
-}
-
-:deep(.p-datatable .p-datatable-emptymessage) {
-  padding: 2rem;
-  text-align: center;
-}
-
-:deep(.p-datatable-wrapper)::-webkit-scrollbar {
-  height: 8px;
-}
-
-:deep(.p-datatable-wrapper)::-webkit-scrollbar-track {
-  background: var(--surface-100);
-  border-radius: 4px;
-}
-
-:deep(.p-datatable-wrapper)::-webkit-scrollbar-thumb {
-  background: var(--surface-300);
-  border-radius: 4px;
-}
-
-:deep(.p-datatable-wrapper)::-webkit-scrollbar-thumb:hover {
-  background: var(--surface-400);
-}
-
-@keyframes columnResize {
-  from {
-    opacity: 0.8;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-:deep(.p-datatable .p-datatable-table.column-resizing) {
-  animation: columnResize 0.2s ease;
-}
-
-:deep(.column-numeric) {
-  text-align: right;
-}
-
-:deep(.column-center) {
-  text-align: center;
-}
-
-:deep(.column-badge) {
-  text-align: center;
-}
-
-:deep(.column-actions) {
-  text-align: center;
-  white-space: nowrap;
-}
-
-:deep(.p-datatable .p-datatable-table) {
-  width: 100%;
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr > td:first-child) {
-  overflow: visible !important;
-  position: relative !important;
-  z-index: 10 !important;
-  white-space: nowrap !important;
-  width: 1px !important;
-}
-
-:deep(.p-datatable .p-datatable-thead > tr > th:first-child) {
-  white-space: nowrap !important;
-  width: 1px !important;
-}
-
-@media print {
-  .data-table-toolbar {
-    display: none;
-  }
-  
-  :deep(.p-datatable) {
-    font-size: 10px;
-  }
-  
-  :deep(.p-datatable .p-datatable-thead > tr > th),
-  :deep(.p-datatable .p-datatable-tbody > tr > td) {
-    padding: 0.25rem;
-    border: 1px solid #000;
-  }
-  
-  :deep(.p-datatable .p-datatable-tbody > tr:hover) {
-    background-color: transparent;
-  }
-}
-
-:deep(.p-select-label):not(.p-placeholder) {
-  color: oklch(var(--bc)) !important;
-}
-
-:deep(.p-multiselect-label):not(.p-placeholder) {
-  color: oklch(var(--bc)) !important;
-}
-
-:deep(.p-select .p-select-label):not(.p-placeholder) {
-  color: oklch(var(--bc)) !important;
-}
-
-:deep(.p-button-text.p-button-secondary):not(:disabled):hover,
-:deep(.p-button-text.p-button-secondary):not(:disabled):active{
-  background: oklch(var(--bc) / 0.1) !important;
-  color: oklch(var(--bc)) !important;
-}
-
-:deep(.p-datatable-column-sorted .p-datatable-sort-icon){
-  color: oklch(var(--bc)) !important;
+:deep(.p-datatable-header) {
+  border: none !important;
+  padding: 0 !important;
 }
 </style>

@@ -33,7 +33,7 @@
             </div>
             <div>
               <div class="text-2xl font-bold text-base-content">€125,000</div>
-              <div class="text-sm text-base-content/70">Totale Mensile</div>
+              <div class=" text-base-content/70">Totale Mensile</div>
             </div>
           </div>
         </div>
@@ -47,7 +47,7 @@
             </div>
             <div>
               <div class="text-2xl font-bold text-base-content">234</div>
-              <div class="text-sm text-base-content/70">Buste Elaborate</div>
+              <div class=" text-base-content/70">Buste Elaborate</div>
             </div>
           </div>
         </div>
@@ -61,7 +61,7 @@
             </div>
             <div>
               <div class="text-2xl font-bold text-base-content">12</div>
-              <div class="text-sm text-base-content/70">In Elaborazione</div>
+              <div class=" text-base-content/70">In Elaborazione</div>
             </div>
           </div>
         </div>
@@ -75,7 +75,7 @@
             </div>
             <div>
               <div class="text-2xl font-bold text-base-content">3</div>
-              <div class="text-sm text-base-content/70">Errori</div>
+              <div class=" text-base-content/70">Errori</div>
             </div>
           </div>
         </div>
@@ -96,7 +96,7 @@
           <i class="fas fa-info-circle"></i>
           <div>
             <h4 class="font-semibold mb-2">Prossime Funzionalità:</h4>
-            <ul class="text-sm space-y-1 text-left">
+            <ul class=" space-y-1 text-left">
               <li>• Calcolo automatico tasse e contributi</li>
               <li>• Integrazione con sistemi bancari</li>
               <li>• Template buste paga personalizzabili</li>

@@ -109,7 +109,7 @@
                   />
                   <div>
                     <span class="label-text font-medium">Notifiche Email</span>
-                    <p class="text-xs text-base-content/60">
+                    <p class=" text-base-content/60">
                       Ricevi notifiche via email per eventi importanti
                     </p>
                   </div>
@@ -124,7 +124,7 @@
                   />
                   <div>
                     <span class="label-text font-medium">Backup Automatico</span>
-                    <p class="text-xs text-base-content/60">
+                    <p class=" text-base-content/60">
                       Esegui backup automatico dei dati ogni settimana
                     </p>
                   </div>
@@ -161,7 +161,7 @@
           <i class="fas fa-info-circle"></i>
           <div>
             <h4 class="font-semibold mb-2">Prossime Funzionalità:</h4>
-            <ul class="text-sm space-y-1 text-left">
+            <ul class=" space-y-1 text-left">
               <li>• Integrazione con sistemi esterni</li>
               <li>• Backup automatico dei dati</li>
               <li>• Personalizzazione temi</li>

@@ -5,7 +5,7 @@
       <div tabindex="0" role="button" class="btn btn-ghost btn-sm gap-2">
         <span class="text-lg">{{ currentLanguage?.flag }}</span>
         <span class="hidden sm:inline">{{ currentLanguage?.name }}</span>
-        <i class="fas fa-chevron-down text-xs"></i>
+        <i class="fas fa-chevron-down "></i>
       </div>
       <ul
         tabindex="0"
@@ -22,7 +22,7 @@
           <a :class="{ active: currentLocale === locale.code }">
             <span class="text-lg">{{ locale.flag }}</span>
             <span>{{ locale.name }}</span>
-            <i v-if="currentLocale === locale.code" class="fas fa-check text-success text-sm ml-auto"></i>
+            <i v-if="currentLocale === locale.code" class="fas fa-check text-success  ml-auto"></i>
           </a>
         </li>
       </ul>
@@ -37,7 +37,7 @@
       >
         <span class="text-lg">{{ currentLanguage?.flag }}</span>
         <span v-if="showLabel">{{ currentLanguage?.name }}</span>
-        <i class="fas fa-globe text-xs ml-auto"></i>
+        <i class="fas fa-globe  ml-auto"></i>
       </button>
     </div>
 

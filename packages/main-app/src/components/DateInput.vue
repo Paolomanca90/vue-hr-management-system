@@ -17,7 +17,7 @@
       :key="componentKey"
       ref="datepickerRef"
     />
-    <div v-if="showError && errorMessage" class="text-red-500 text-xs mt-1">
+    <div v-if="showError && errorMessage" class="text-red-500  mt-1">
       {{ errorMessage }}
     </div>
   </div>

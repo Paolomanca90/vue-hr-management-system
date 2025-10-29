@@ -56,7 +56,7 @@ onMounted(() => {
 .p-dropdown-item {
   background: transparent !important;
   color: oklch(var(--bc)) !important;
-  padding: 0.75rem 1rem !important;
+  padding: 0.3rem 1rem !important;
   margin: 0 !important;
   border: none !important;
   cursor: pointer !important;
@@ -110,7 +110,7 @@ onMounted(() => {
 .p-datatable-filter-constraint {
   background: transparent !important;
   color: oklch(var(--bc)) !important;
-  padding: 0.75rem 1rem !important;
+  padding: 0.3rem 1rem !important;
   margin: 0 !important;
   border: none !important;
   cursor: pointer !important;
@@ -152,7 +152,7 @@ onMounted(() => {
 .p-multiselect-option {
   background: transparent !important;
   color: oklch(var(--bc)) !important;
-  padding: 0.75rem 1rem !important;
+  padding: 0.3rem 1rem !important;
 }
 
 .p-multiselect-option:hover {
@@ -181,7 +181,7 @@ onMounted(() => {
 [data-pc-section="option"] {
   background: transparent !important;
   color: oklch(var(--bc)) !important;
-  padding: 0.75rem 1rem !important;
+  padding: 0.3rem 1rem !important;
 }
 
 [data-pc-section="option"]:hover {

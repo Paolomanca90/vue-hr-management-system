@@ -113,7 +113,7 @@
                     class="checkbox checkbox-primary checkbox-sm"
                     :disabled="saving"
                   />
-                  <span class="label-text text-sm">TM RTP</span>
+                  <span class="label-text ">TM RTP</span>
                 </label>
               </div>
 
@@ -126,7 +126,7 @@
                     class="checkbox checkbox-primary checkbox-sm"
                     :disabled="saving"
                   />
-                  <span class="label-text text-sm">TM Mensa</span>
+                  <span class="label-text ">TM Mensa</span>
                 </label>
               </div>
 
@@ -139,14 +139,14 @@
                     class="checkbox checkbox-primary checkbox-sm"
                     :disabled="saving"
                   />
-                  <span class="label-text text-sm">TM Commesse</span>
+                  <span class="label-text ">TM Commesse</span>
                 </label>
               </div>
             </div>
           </div>
 
           <!-- Nota campi obbligatori -->
-          <div class="mt-6 text-sm text-base-content/70">
+          <div class="mt-6  text-base-content/70">
             <span class="text-black">*</span> Campi obbligatori
           </div>
 

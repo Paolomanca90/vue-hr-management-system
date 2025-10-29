@@ -53,7 +53,7 @@
             field1-type="number"
             field1-placeholder="Inserisci codice"
             :field1-required="true"
-            field1-classes="rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-1"
+            field1-classes="rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm: p-1"
             :show-field2="true"
             field2-key="pat"
             field2-label="P.A.T."
@@ -61,7 +61,7 @@
             field2-placeholder="Inserisci descrizione PAT"
             :field2-required="true"
             :field2-max-length="200"
-            field2-classes="max-w-md rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-1"
+            field2-classes="max-w-md rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm: p-1"
             :show-field3="true"
             field3-key="codCont"
             field3-label="Cod. Controllo"
@@ -69,7 +69,7 @@
             field3-placeholder="Inserisci codice controllo"
             :field3-required="false"
             :field3-max-length="2"
-            field3-classes="rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-1"
+            field3-classes="rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm: p-1"
             @company-change="handleCompanyChange"
           />
 

@@ -11,11 +11,11 @@
       ]"
     >
       <template #actions>
-        <button class="max-md:w-full max-md:block btn btn-primary btn-sm text-xs text-white" @click="addNewAccesso">
+        <button class="max-md:w-full max-md:block btn btn-primary btn-sm  text-white" @click="addNewAccesso">
           <FaIcon icon="plus" class="mr-2"/>
           Nuovo Accesso
         </button>
-        <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm text-xs" @click="refreshAccessi">
+        <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm " @click="refreshAccessi">
           <FaIcon icon="refresh" class="mr-2"/>
           Aggiorna
         </button>
@@ -57,20 +57,20 @@
                 Opzioni
               </div>
               <ul tabindex="0"  class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-60 z-[100]">
-                <li><a @click="bulkActions"><FaIcon icon="check-circle" class="mr-2 text-xs" />Azioni Multiple</a></li>
-                <li><a @click="importAccessi"><FaIcon icon="upload" class="mr-2 text-xs" />Importa Accessi</a></li>
+                <li><a @click="bulkActions"><FaIcon icon="check-circle" class="mr-2 " />Azioni Multiple</a></li>
+                <li><a @click="importAccessi"><FaIcon icon="upload" class="mr-2 " />Importa Accessi</a></li>
               </ul>
             </div>
           </template>
 
           <!-- Slot personalizzato per la colonna codice -->
           <template #column-codice="{ value }">
-            <span class="text-sm">{{ value }}</span>
+            <span>{{ value }}</span>
           </template>
 
           <!-- Slot personalizzato per la colonna descrizione -->
           <template #column-descrizione="{ value }">
-            <span class="text-sm">{{ value }}</span>
+            <span>{{ value }}</span>
           </template>
 
 

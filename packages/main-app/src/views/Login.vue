@@ -106,17 +106,17 @@
           <div class="divider text-base-content/50">Sistema HR</div>
 
           <div class="text-center space-y-2">
-            <p class="text-sm text-base-content/60">Sistema di gestione delle risorse umane</p>
+            <p class=" text-base-content/60">Sistema di gestione delle risorse umane</p>
 
             <!-- Link Password Dimenticata -->
             <div class="text-center">
-              <a href="#" class="link link-primary text-sm" @click.prevent="handleForgotPassword">
+              <a href="#" class="link link-primary " @click.prevent="handleForgotPassword">
                 Password dimenticata?
               </a>
             </div>
 
             <!-- Info Supporto Tecnico -->
-            <div class="text-xs text-base-content/50 mt-4">
+            <div class=" text-base-content/50 mt-4">
               <p>Per supporto tecnico contattare:</p>
               <p>
                 <FaIcon icon="envelope" class="mr-1"/>

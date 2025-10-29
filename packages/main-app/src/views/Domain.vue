@@ -24,7 +24,7 @@
             <i class="fas fa-exclamation-triangle"></i>
             <div>
               <div class="font-bold">Sessione non valida</div>
-              <div class="text-sm">Reindirizzamento al login in corso...</div>
+              <div class="">Reindirizzamento al login in corso...</div>
             </div>
           </div>
 
@@ -82,7 +82,7 @@
               <FaIcon icon="info-circle"/>
               <div>
                 <div class="font-bold">Domini Disponibili</div>
-                <div class="text-sm">
+                <div class="">
                   Trovati {{ authStore.availableDomains.length }} domini per questo utente
                 </div>
               </div>
@@ -91,10 +91,10 @@
             <!-- Dettagli Dominio Selezionato -->
             <div v-if="selectedDomainDetails" class="card bg-base-200 border border-primary/20">
               <div class="card-body p-3">
-                <h4 class="text-sm font-semibold text-base-content mb-2">
+                <h4 class=" font-semibold text-base-content mb-2">
                   Dettagli Dominio Selezionato
                 </h4>
-                <div class="text-xs space-y-1">
+                <div class=" space-y-1">
                   <div class="flex justify-between">
                     <span class="text-base-content/70">ID:</span>
                     <span class="font-medium">{{ selectedDomainDetails.id }}</span>
@@ -137,7 +137,7 @@
             </button>
           </form>
 
-          <div class="text-center text-sm text-base-content/60 mt-4">
+          <div class="text-center  text-base-content/60 mt-4">
             <p>Sistema di gestione delle risorse umane</p>
           </div>
         </div>

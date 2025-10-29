@@ -11,11 +11,11 @@
       ]"
     >
       <template #actions>
-        <button class="max-md:w-full max-md:block btn btn-primary btn-sm text-xs text-white" @click="addNewFiliale">
+        <button class="max-md:w-full max-md:block btn btn-primary btn-sm  text-white" @click="addNewFiliale">
           <FaIcon icon="plus" class="mr-2"/>
           Nuova Filiale
         </button>
-        <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm text-xs" @click="refreshSedi">
+        <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm " @click="refreshSedi">
           <FaIcon icon="refresh" class="mr-2"/>
           Aggiorna
         </button>
@@ -47,24 +47,24 @@
           <!-- Custom toolbar -->
           <template #toolbar>
             <div class="dropdown dropdown-end">
-              <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm text-xs">
+              <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm ">
                 <FaIcon icon="cog" class="mr-1" />
                 Opzioni
               </div>
               <ul tabindex="0"  class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-60 z-[100]">
-                <li><a @click="bulkActions"><FaIcon icon="check-circle" class="mr-2 text-xs" />Azioni Multiple</a></li>
-                <li><a @click="importFiliali"><FaIcon icon="upload" class="mr-2 text-xs" />Importa Sedi</a></li>
+                <li><a @click="bulkActions"><FaIcon icon="check-circle" class="mr-2 " />Azioni Multiple</a></li>
+                <li><a @click="importFiliali"><FaIcon icon="upload" class="mr-2 " />Importa Sedi</a></li>
               </ul>
             </div>
           </template>
           <!-- Slot personalizzato per la colonna codAzi -->
           <template #column-codAzi="{ value }">
-            <span class="text-sm">{{ value }}</span>
+            <span>{{ value }}</span>
           </template>
 
           <!-- Slot personalizzato per la colonna ragSoc -->
           <template #column-descriz="{ value }">
-            <span class="text-sm">{{ value }}</span>
+            <span>{{ value }}</span>
           </template>
 
           <!-- Empty state personalizzato -->

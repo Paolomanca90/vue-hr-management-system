@@ -28,7 +28,7 @@
               <div class="bg-primary/10 rounded-lg p-3 px-4">
                 <i class="fas fa-tachometer-alt text-primary text-2xl"></i>
               </div>
-              <div class="text-sm text-base-content/60">
+              <div class=" text-base-content/60">
                 <div>Ultimo aggiornamento</div>
                 <div class="font-medium">{{ getCurrentDateTime() }}</div>
               </div>
@@ -51,7 +51,7 @@
                   <div class="rounded-lg p-3 mr-4" :class="card.color + '/10'">
                     <i :class="[card.icon + ' text-2xl', card.color.replace('bg-', 'text-')]"></i>
                   </div>
-                  <div class="text-sm text-base-content/60 font-medium uppercase tracking-wide">
+                  <div class=" text-base-content/60 font-medium uppercase tracking-wide">
                     {{ card.title }}
                   </div>
                 </div>
@@ -61,8 +61,8 @@
                   }}</span>
                   <span v-else>{{ card.value }}</span>
                 </div>
-                <div v-if="card.subtitle" class="flex items-center text-sm">
-                  <i class="fas fa-trending-up text-success text-sm mr-1"></i>
+                <div v-if="card.subtitle" class="flex items-center ">
+                  <i class="fas fa-trending-up text-success  mr-1"></i>
                   <span class="text-base-content/70">{{ card.subtitle }}</span>
                 </div>
               </div>
@@ -83,7 +83,7 @@
                   <h3 class="text-lg font-semibold text-base-content">
                     {{ authStore.isCompanyUser ? 'Andamento Presenze' : 'Le Mie Ore' }}
                   </h3>
-                  <p class="text-base-content/60 text-sm">
+                  <p class="text-base-content/60 ">
                     {{ authStore.isCompanyUser ? 'Ultimi 7 giorni' : 'Andamento settimanale' }}
                   </p>
                 </div>
@@ -115,7 +115,7 @@
                   <h4 class="text-lg font-medium text-base-content mb-2">
                     {{ authStore.isCompanyUser ? 'Grafico Presenze' : 'Grafico Ore Lavorate' }}
                   </h4>
-                  <p class="text-base-content/60 text-sm">
+                  <p class="text-base-content/60 ">
                     Integra qui la tua libreria di grafici preferita
                   </p>
                 </div>
@@ -135,21 +135,21 @@
                   class="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg"
                 >
                   <div class="text-2xl font-bold text-blue-600">95%</div>
-                  <div class="text-sm text-base-content/70">Presenza Media</div>
+                  <div class=" text-base-content/70">Presenza Media</div>
                 </div>
                 <div
                   v-if="authStore.isCompanyUser"
                   class="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg"
                 >
                   <div class="text-2xl font-bold text-green-600">18</div>
-                  <div class="text-sm text-base-content/70">Giorni Lavorati</div>
+                  <div class=" text-base-content/70">Giorni Lavorati</div>
                 </div>
                 <div
                   v-if="authStore.isCompanyUser"
                   class="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg"
                 >
                   <div class="text-2xl font-bold text-yellow-600">12</div>
-                  <div class="text-sm text-base-content/70">Ore Straordinari</div>
+                  <div class=" text-base-content/70">Ore Straordinari</div>
                 </div>
 
                 <!-- Statistiche per dipendenti -->
@@ -158,21 +158,21 @@
                   class="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg"
                 >
                   <div class="text-2xl font-bold text-blue-600">160</div>
-                  <div class="text-sm text-base-content/70">Ore Questo Mese</div>
+                  <div class=" text-base-content/70">Ore Questo Mese</div>
                 </div>
                 <div
                   v-if="!authStore.isCompanyUser"
                   class="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg"
                 >
                   <div class="text-2xl font-bold text-green-600">22</div>
-                  <div class="text-sm text-base-content/70">Giorni Lavorati</div>
+                  <div class=" text-base-content/70">Giorni Lavorati</div>
                 </div>
                 <div
                   v-if="!authStore.isCompanyUser"
                   class="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg"
                 >
                   <div class="text-2xl font-bold text-yellow-600">8</div>
-                  <div class="text-sm text-base-content/70">Straordinari</div>
+                  <div class=" text-base-content/70">Straordinari</div>
                 </div>
               </div>
             </div>
@@ -196,13 +196,13 @@
                 >
                   <div class="avatar placeholder">
                     <div class="bg-primary/10 text-primary rounded-full w-8">
-                      <i class="fas fa-bell text-sm"></i>
+                      <i class="fas fa-bell "></i>
                     </div>
                   </div>
                   <div class="flex-1 min-w-0">
-                    <div class="text-sm font-medium text-base-content">{{ activity.action }}</div>
-                    <div class="text-sm text-base-content/70">{{ activity.user }}</div>
-                    <div class="text-xs text-base-content/50">{{ activity.time }}</div>
+                    <div class=" font-medium text-base-content">{{ activity.action }}</div>
+                    <div class=" text-base-content/70">{{ activity.user }}</div>
+                    <div class=" text-base-content/50">{{ activity.time }}</div>
                   </div>
                 </div>
               </div>
@@ -244,28 +244,28 @@
                 <div v-if="authStore.isCompanyUser" class="alert alert-warning">
                   <i class="fas fa-clock"></i>
                   <div>
-                    <div class="text-sm font-medium">Valutazioni Performance</div>
-                    <div class="text-xs">Scadenza: 2 giorni</div>
+                    <div class=" font-medium">Valutazioni Performance</div>
+                    <div class="">Scadenza: 2 giorni</div>
                   </div>
                 </div>
 
                 <div v-if="authStore.isCompanyUser" class="alert alert-error">
                   <i class="fas fa-exclamation-triangle"></i>
                   <div>
-                    <div class="text-sm font-medium">Contratti in Scadenza</div>
-                    <div class="text-xs">Scadenza: domani</div>
+                    <div class=" font-medium">Contratti in Scadenza</div>
+                    <div class="">Scadenza: domani</div>
                   </div>
                 </div>
 
                 <div class="alert alert-info">
                   <i class="fas fa-calendar"></i>
                   <div>
-                    <div class="text-sm font-medium">
+                    <div class=" font-medium">
                       {{
                         authStore.isCompanyUser ? 'Revisione Buste Paga' : 'Richiesta Ferie Estate'
                       }}
                     </div>
-                    <div class="text-xs">
+                    <div class="">
                       {{
                         authStore.isCompanyUser
                           ? 'Scadenza: 1 settimana'
@@ -279,8 +279,8 @@
                 <div v-if="!authStore.isCompanyUser" class="alert alert-warning">
                   <i class="fas fa-file-alt"></i>
                   <div>
-                    <div class="text-sm font-medium">Aggiorna Documenti</div>
-                    <div class="text-xs">Certificato medico in scadenza</div>
+                    <div class=" font-medium">Aggiorna Documenti</div>
+                    <div class="">Certificato medico in scadenza</div>
                   </div>
                 </div>
               </div>

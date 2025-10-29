@@ -33,7 +33,7 @@
             <i :class="`${report.icon} text-${report.color}-600 text-2xl`"></i>
           </div>
           <h3 class="text-lg font-semibold text-base-content mb-2">{{ report.title }}</h3>
-          <p class="text-base-content/70 text-sm mb-4">{{ report.description }}</p>
+          <p class="text-base-content/70  mb-4">{{ report.description }}</p>
           <button
             :class="`btn btn-outline btn-${report.color}`"
             @click="generateReport(report.type)"
@@ -60,7 +60,7 @@
           <i class="fas fa-info-circle"></i>
           <div>
             <h4 class="font-semibold mb-2">Prossime Funzionalità:</h4>
-            <ul class="text-sm space-y-1 text-left">
+            <ul class=" space-y-1 text-left">
               <li>• Grafici interattivi con Chart.js</li>
               <li>• Esportazione in PDF e Excel</li>
               <li>• Report personalizzabili</li>

@@ -107,7 +107,7 @@
               :key="tab.key"
               @click="activeTab = tab.key"
               :class="[
-                'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm focus:outline-none',
+                'whitespace-nowrap py-4 px-1 border-b-2 font-medium  focus:outline-none',
                 activeTab === tab.key
                   ? 'border-primary text-primary'
                   : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
@@ -126,7 +126,7 @@
             <form @submit.prevent="handleSave" class="space-y-6">
               <!-- Sezione Organizzazione Aziendale -->
               <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Organizzazione Aziendale</h4>
+                <h4 class=" font-medium text-gray-900 dark:text-gray-100 mb-4">Organizzazione Aziendale</h4>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <GenericLookupInput
                     v-model="sedeData"
@@ -156,7 +156,7 @@
 
               <!-- Sezione Rapporto di Lavoro -->
               <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Rapporto di Lavoro</h4>
+                <h4 class=" font-medium text-gray-900 dark:text-gray-100 mb-4">Rapporto di Lavoro</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div class="form-control">
                     <label class="label">
@@ -227,7 +227,7 @@
 
               <!-- Sezione Qualifiche e CCNL -->
               <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Qualifiche e CCNL</h4>
+                <h4 class=" font-medium text-gray-900 dark:text-gray-100 mb-4">Qualifiche e CCNL</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <GenericLookupInput
                     v-model="ccnlData"
@@ -257,7 +257,7 @@
             <form @submit.prevent="handleSave" class="space-y-6">
               <!-- Sezione Dati Anagrafici -->
               <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Dati Anagrafici</h4>
+                <h4 class=" font-medium text-gray-900 dark:text-gray-100 mb-4">Dati Anagrafici</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div class="form-control">
                     <label class="label">
@@ -346,7 +346,7 @@
 
               <!-- Sezione Residenza -->
               <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Dati di Residenza</h4>
+                <h4 class=" font-medium text-gray-900 dark:text-gray-100 mb-4">Dati di Residenza</h4>
                 <AddressInput
                   v-model="addressData"
                   :disabled="saving"
@@ -355,7 +355,7 @@
 
               <!-- Sezione Contatti -->
               <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Informazioni di Contatto</h4>
+                <h4 class=" font-medium text-gray-900 dark:text-gray-100 mb-4">Informazioni di Contatto</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div class="form-control">
                     <label class="label">
@@ -407,7 +407,7 @@
                   class="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-base-100 border border-gray-200 dark:border-gray-700 rounded-lg"
                 >
                   <div class="md:col-span-1">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Cod. Azi</label>
+                    <label class="block  font-medium text-gray-700 dark:text-gray-300 label">Cod. Azi</label>
                     <input
                       v-model.number="badge.codAzi"
                       type="number"
@@ -416,7 +416,7 @@
                     />
                   </div>
                   <div class="md:col-span-1">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Cod. Dip</label>
+                    <label class="block  font-medium text-gray-700 dark:text-gray-300 label">Cod. Dip</label>
                     <input
                       v-model.number="badge.codDip"
                       type="number"
@@ -425,7 +425,7 @@
                     />
                   </div>
                   <div class="md:col-span-4">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Numero Badge</label>
+                    <label class="block  font-medium text-gray-700 dark:text-gray-300 label">Numero Badge</label>
                     <input
                       v-model.number="badge.codBadge"
                       type="number"
@@ -434,7 +434,7 @@
                     />
                   </div>
                   <div class="md:col-span-3">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Data Dal</label>
+                    <label class="block  font-medium text-gray-700 dark:text-gray-300 label">Data Dal</label>
                     <DateInput
                       :model-value="badge.dal"
                       @update:model-value="(val) => {
@@ -448,7 +448,7 @@
                     />
                   </div>
                   <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Data Al</label>
+                    <label class="block  font-medium text-gray-700 dark:text-gray-300 label">Data Al</label>
                     <DateInput
                       :model-value="badge.al"
                       @update:model-value="(val) => {
@@ -497,7 +497,7 @@
                   class="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-base-100 border border-gray-200 dark:border-gray-700 rounded-lg"
                 >
                   <div class="md:col-span-1">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Cod. Azi</label>
+                    <label class="block  font-medium text-gray-700 dark:text-gray-300 label">Cod. Azi</label>
                     <input
                       v-model.number="pat.codAzi"
                       type="number"
@@ -506,7 +506,7 @@
                     />
                   </div>
                   <div class="md:col-span-1">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Cod. Dip</label>
+                    <label class="block  font-medium text-gray-700 dark:text-gray-300 label">Cod. Dip</label>
                     <input
                       v-model.number="pat.codDip"
                       type="number"
@@ -531,7 +531,7 @@
                     />
                   </div>
                   <div class="md:col-span-3">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Data Dal</label>
+                    <label class="block  font-medium text-gray-700 dark:text-gray-300 label">Data Dal</label>
                     <DateInput
                       :model-value="pat.dal"
                       @update:model-value="(val) => {
@@ -545,7 +545,7 @@
                     />
                   </div>
                   <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Data Al</label>
+                    <label class="block  font-medium text-gray-700 dark:text-gray-300 label">Data Al</label>
                     <DateInput
                       :model-value="pat.al"
                       @update:model-value="(val) => {
@@ -594,7 +594,7 @@
                   class="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-base-100 border border-gray-200 dark:border-gray-700 rounded-lg"
                 >
                   <div class="md:col-span-1">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Cod. Azi</label>
+                    <label class="block  font-medium text-gray-700 dark:text-gray-300 label">Cod. Azi</label>
                     <input
                       v-model.number="gruppo.codAzi"
                       type="number"
@@ -603,7 +603,7 @@
                     />
                   </div>
                   <div class="md:col-span-1">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Cod. Dip</label>
+                    <label class="block  font-medium text-gray-700 dark:text-gray-300 label">Cod. Dip</label>
                     <input
                       v-model.number="gruppo.codDip"
                       type="number"
@@ -628,7 +628,7 @@
                     />
                   </div>
                   <div class="md:col-span-3">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Data Dal</label>
+                    <label class="block  font-medium text-gray-700 dark:text-gray-300 label">Data Dal</label>
                     <DateInput
                       :model-value="gruppo.dal"
                       @update:model-value="(val) => {
@@ -642,7 +642,7 @@
                     />
                   </div>
                   <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 label">Data Al</label>
+                    <label class="block  font-medium text-gray-700 dark:text-gray-300 label">Data Al</label>
                     <DateInput
                       :model-value="gruppo.al"
                       @update:model-value="(val) => {
@@ -691,7 +691,7 @@
                   class="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-base-100 border border-gray-200 dark:border-gray-700 rounded-lg"
                 >
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Codice</label>
+                    <label class="block  font-medium text-gray-700 dark:text-gray-300">Codice</label>
                     <input
                       v-model.number="familiare.codice"
                       type="number"
@@ -700,7 +700,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cognome</label>
+                    <label class="block  font-medium text-gray-700 dark:text-gray-300">Cognome</label>
                     <input
                       v-model="familiare.cognome"
                       type="text"
@@ -709,7 +709,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome</label>
+                    <label class="block  font-medium text-gray-700 dark:text-gray-300">Nome</label>
                     <input
                       v-model="familiare.nome"
                       type="text"
@@ -718,7 +718,7 @@
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Codice Fiscale</label>
+                    <label class="block  font-medium text-gray-700 dark:text-gray-300">Codice Fiscale</label>
                     <input
                       v-model="familiare.codFisc"
                       type="text"
@@ -755,7 +755,7 @@
           <div v-if="activeTab === 'codiciUtente'" class="space-y-6">
             <form @submit.prevent="handleSave" class="space-y-6">
               <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                <h4 class="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Codici Utente</h4>
+                <h4 class=" font-medium text-gray-900 dark:text-gray-100 mb-4">Codici Utente</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div class="form-control">
                     <label class="label">

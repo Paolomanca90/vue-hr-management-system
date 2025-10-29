@@ -8,7 +8,7 @@
           </div>
           <div>
             <h3 class="text-lg font-semibold text-base-content">{{ title }}</h3>
-            <p class="text-sm text-base-content/70">{{ description }}</p>
+            <p class=" text-base-content/70">{{ description }}</p>
           </div>
         </div>
 
@@ -56,7 +56,7 @@
             />
             <FaIcon
               icon="search"
-              class="absolute right-3 top-1/2 transform -translate-y-1/2 text-base-content/40 text-sm"
+              class="absolute right-3 top-1/2 transform -translate-y-1/2 text-base-content/40 "
             />
           </div>
         </div>
@@ -65,7 +65,7 @@
       <!-- Loading permessi -->
       <div v-if="loading" class="flex justify-center items-center py-8">
         <span class="loading loading-spinner loading-md"></span>
-        <span class="ml-3 text-sm">Caricamento permessi...</span>
+        <span class="ml-3 ">Caricamento permessi...</span>
       </div>
 
       <!-- Errore permessi -->
@@ -73,7 +73,7 @@
         <FaIcon icon="exclamation-triangle" />
         <div>
           <div class="font-bold">Errore nel caricamento dei permessi</div>
-          <div class="text-sm">{{ error }}</div>
+          <div class="">{{ error }}</div>
           <button class="btn btn-xs btn-ghost mt-1" @click="refreshPermissions">
             Riprova
           </button>
@@ -85,7 +85,7 @@
 
         <!-- Colonna 1: Categorie principali -->
         <div class="col-span-12 lg:col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto">
-          <div class="text-sm font-semibold mb-2 text-base-content/70 flex items-center justify-between">
+          <div class=" font-semibold mb-2 text-base-content/70 flex items-center justify-between">
             <span>Categorie</span>
             <span v-if="searchQuery" class="badge badge-primary badge-xs">
               {{ filteredPermissionCategories.length }}
@@ -96,7 +96,7 @@
           <div v-if="searchQuery && filteredPermissionCategories.length === 0"
               class="text-center py-4 text-base-content/60">
             <FaIcon icon="search" class="text-lg mb-2" />
-            <div class="text-xs">Nessun risultato trovato</div>
+            <div class="">Nessun risultato trovato</div>
           </div>
 
           <div v-else class="space-y-1">
@@ -109,9 +109,9 @@
             >
               <div class="flex items-center justify-between">
                 <div class="flex items-center flex-1 min-w-0">
-                  <FaIcon :icon="category.icona || 'folder'" class="mr-2 text-sm flex-shrink-0" />
+                  <FaIcon :icon="category.icona || 'folder'" class="mr-2  flex-shrink-0" />
                   <span
-                    class="text-sm font-medium truncate"
+                    class=" font-medium truncate"
                     v-html="highlightSearchTerm(category.nome, searchQuery)"
                   ></span>
                 </div>
@@ -120,7 +120,7 @@
                   <FaIcon
                     v-if="searchQuery && hasMatchingChildren(category, searchQuery)"
                     icon="search"
-                    class="text-primary text-xs"
+                    class="text-primary "
                     title="Contiene risultati di ricerca"
                   />
                 </div>
@@ -134,7 +134,7 @@
           v-if="selectedCategory && (selectedCategory.figli?.length > 0 || searchQuery)"
           class="col-span-12 lg:col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto"
         >
-          <div class="text-sm font-semibold mb-2 text-base-content/70 flex items-center justify-between">
+          <div class=" font-semibold mb-2 text-base-content/70 flex items-center justify-between">
             <span>Sottocategorie di {{ selectedCategory.nome }}</span>
             <span v-if="searchQuery" class="badge badge-primary badge-xs">
               {{ filteredSubcategories.length }}
@@ -144,7 +144,7 @@
           <!-- Messaggio per sottocategorie filtrate -->
           <div v-if="searchQuery && filteredSubcategories.length === 0"
               class="text-center py-4 text-base-content/60">
-            <div class="text-xs">Nessun risultato in questa sezione</div>
+            <div class="">Nessun risultato in questa sezione</div>
           </div>
 
           <div v-else class="space-y-1">
@@ -157,9 +157,9 @@
             >
               <div class="flex items-center justify-between">
                 <div class="flex items-center flex-1 min-w-0">
-                  <FaIcon :icon="subcategory.icona || 'folder'" class="mr-2 text-sm flex-shrink-0" />
+                  <FaIcon :icon="subcategory.icona || 'folder'" class="mr-2  flex-shrink-0" />
                   <span
-                    class="text-sm font-medium truncate"
+                    class=" font-medium truncate"
                     v-html="highlightSearchTerm(subcategory.nome, searchQuery)"
                   ></span>
                 </div>
@@ -168,7 +168,7 @@
                   <FaIcon
                     v-if="searchQuery && hasMatchingChildren(subcategory, searchQuery)"
                     icon="search"
-                    class="text-primary text-xs"
+                    class="text-primary "
                     title="Contiene risultati di ricerca"
                   />
                 </div>
@@ -182,7 +182,7 @@
           v-if="selectedSubcategory && (selectedSubcategory.figli?.length > 0 || searchQuery)"
           class="col-span-12 lg:col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto"
         >
-          <div class="text-sm font-semibold mb-2 text-base-content/70 flex items-center justify-between">
+          <div class=" font-semibold mb-2 text-base-content/70 flex items-center justify-between">
             <span>Sottosezioni di {{ selectedSubcategory.nome }}</span>
             <span v-if="searchQuery" class="badge badge-primary badge-xs">
               {{ filteredSubSubcategories.length }}
@@ -192,7 +192,7 @@
           <!-- Messaggio per sotto-sottocategorie filtrate -->
           <div v-if="searchQuery && filteredSubSubcategories.length === 0"
               class="text-center py-4 text-base-content/60">
-            <div class="text-xs">Nessun risultato in questa sezione</div>
+            <div class="">Nessun risultato in questa sezione</div>
           </div>
 
           <div v-else class="space-y-1">
@@ -205,9 +205,9 @@
             >
               <div class="flex items-center justify-between">
                 <div class="flex items-center flex-1 min-w-0">
-                  <FaIcon :icon="subsubcategory.icona || 'folder'" class="mr-2 text-sm flex-shrink-0" />
+                  <FaIcon :icon="subsubcategory.icona || 'folder'" class="mr-2  flex-shrink-0" />
                   <span
-                    class="text-sm font-medium truncate"
+                    class=" font-medium truncate"
                     v-html="highlightSearchTerm(subsubcategory.nome, searchQuery)"
                   ></span>
                 </div>
@@ -216,7 +216,7 @@
                   <FaIcon
                     v-if="searchQuery && hasMatchingChildren(subsubcategory, searchQuery)"
                     icon="search"
-                    class="text-primary text-xs"
+                    class="text-primary "
                     title="Contiene risultati di ricerca"
                   />
                 </div>
@@ -227,13 +227,13 @@
 
         <!-- Colonna 4: Permessi finali -->
         <div class="col-span-12 lg:col-span-3 border border-base-300 rounded-lg p-2 overflow-y-auto">
-          <div class="text-sm font-semibold mb-2 text-base-content/70 flex items-center justify-between">
+          <div class=" font-semibold mb-2 text-base-content/70 flex items-center justify-between">
             <span>Permessi</span>
             <div class="flex items-center space-x-2">
               <span v-if="searchQuery" class="badge badge-primary badge-xs">
                 {{ currentPermissionItems.length }}
               </span>
-              <div class="flex items-center space-x-1 text-xs">
+              <div class="flex items-center space-x-1 ">
                 <span>Vis.</span>
                 <span>Mod.</span>
               </div>
@@ -242,7 +242,7 @@
 
           <div v-if="currentPermissionItems.length === 0" class="text-center py-8 text-base-content/60">
             <FaIcon icon="info-circle" class="text-2xl mb-2" />
-            <div class="text-sm">
+            <div class="">
               {{ searchQuery ? 'Nessun permesso trovato' : 'Seleziona una categoria per vedere i permessi' }}
             </div>
           </div>
@@ -251,12 +251,12 @@
             <div
               v-for="item in currentPermissionItems"
               :key="item.id"
-              class="p-2 border border-base-200 rounded text-sm transition-colors hover:bg-base-50"
+              class="p-2 border border-base-200 rounded  transition-colors hover:bg-base-50"
               :class="{ 'ring-2 ring-primary/20': searchQuery && item.nome.toLowerCase().includes(searchQuery.toLowerCase()) }"
             >
               <div class="flex items-center justify-between">
                 <div class="flex items-center flex-1 min-w-0">
-                  <FaIcon :icon="item.icona || 'file'" class="mr-2 text-xs flex-shrink-0" />
+                  <FaIcon :icon="item.icona || 'file'" class="mr-2  flex-shrink-0" />
                   <span
                     class="font-medium truncate"
                     v-html="highlightSearchTerm(item.nome, searchQuery)"
@@ -289,8 +289,8 @@
 
       <!-- Riepilogo permessi -->
       <div class="mt-4 p-3 bg-base-200 rounded-lg">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 text-xs">
-          <div class="text-sm font-medium mb-2">Riepilogo Permessi:</div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 ">
+          <div class=" font-medium mb-2">Riepilogo Permessi:</div>
           <div class="flex items-center">
             <span class="w-3 h-3 bg-success rounded-full mr-2"></span>
             Visualizzazioni: {{ totalViewPermissions }}

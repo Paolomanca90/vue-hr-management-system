@@ -15,13 +15,13 @@
       >
         <!-- Header della sidebar -->
         <div class="p-2 border-b border-base-300">
-          <div class="flex items-center mb-1" :class="sidenavOpened ? '' : 'justify-center'">
+          <div class="flex items-center" :class="sidenavOpened ? '' : 'justify-center my-2'">
             <div :class="sidenavOpened ? 'mr-3' : ''">
               <img src="@/assets/logo.svg" alt="logo" class="w-8 h-8 mx-2" />
             </div>
             <div v-if="sidenavOpened" class="text-base-content">
-              <h2 class="text-md font-bold">HR System</h2>
-              <p v-if="authStore.currentUser" class="text-base-content/70 text-sm">
+              <h2 class=" font-bold">HR System</h2>
+              <p v-if="authStore.currentUser" class="text-base-content/70 ">
                 {{ authStore.currentUser.company }}
               </p>
             </div>
@@ -38,17 +38,17 @@
                 @focus="isSearchFocused = true"
                 @blur="handleSearchBlur"
                 placeholder="Cerca nel menu..."
-                class="input input-bordered input-sm w-full pr-8 text-sm"
+                class="input input-bordered input-sm w-full pr-8 "
                 :class="{ 'input-primary': isSearchActive }"
               />
               <div class="absolute right-2 top-1/2 transform -translate-y-1/2">
-                <FaIcon v-if="!searchQuery" icon="search" class="text-base-content/40 text-xs" />
+                <FaIcon v-if="!searchQuery" icon="search" class="text-base-content/40 " />
                 <button
                   v-else
                   @click="clearSearch"
                   class="btn btn-ghost btn-xs btn-circle hover:bg-base-200"
                 >
-                  <FaIcon icon="times" class="text-xs" />
+                  <FaIcon icon="times" class="" />
                 </button>
               </div>
             </div>
@@ -59,14 +59,14 @@
           <!-- Indicatore di caricamento menu -->
           <div v-if="menuStore.loading" class="p-4 text-center">
             <span class="loading loading-spinner loading-sm"></span>
-            <p class="text-xs mt-2">Caricamento menu...</p>
+            <p class=" mt-2">Caricamento menu...</p>
           </div>
 
           <!-- Errore menu -->
           <div v-else-if="menuStore.error" class="p-2">
             <div class="alert alert-warning alert-sm">
-              <FaIcon icon="exclamation-triangle" class="text-xs" />
-              <div class="text-xs">
+              <FaIcon icon="exclamation-triangle" class="" />
+              <div class="">
                 <div>Errore menu: {{ menuStore.error }}</div>
                 <button class="btn btn-xs btn-ghost mt-1" @click="refreshMenu">
                   Ricarica Menu
@@ -80,11 +80,11 @@
 
             <!-- Breadcrumb per la ricerca -->
             <div v-if="isSearchActive && searchQuery" class="mb-3 p-2 bg-primary/10 rounded-lg">
-              <div class="text-xs text-primary font-medium mb-1">
+              <div class=" text-primary font-medium mb-1">
                 <FaIcon icon="search" class="mr-1" />
                 Risultati ricerca: "{{ searchQuery }}"
               </div>
-              <div class="text-xs text-base-content/60">
+              <div class=" text-base-content/60">
                 Mostrando {{ totalSearchMatches }} elementi trovati
               </div>
             </div>
@@ -125,7 +125,7 @@
                 <!-- Stellina indicatore preferito -->
                 <FaIcon
                   icon="star"
-                  class="absolute -top-2 -right-3 text-yellow-500 text-xs drop-shadow-sm"
+                  class="absolute -top-2 -right-3 text-yellow-500  drop-shadow-sm"
                 />
               </div>
             </RouterLink>
@@ -134,7 +134,7 @@
           <Teleport to="body">
             <div
               v-if="showTooltip && tooltipTarget"
-              class="fixed bg-gray-900 text-white text-sm px-3 py-2 rounded-lg shadow-xl pointer-events-none transition-opacity duration-200 max-w-xs z-[99999]"
+              class="fixed bg-gray-900 text-white  px-3 py-2 rounded-lg shadow-xl pointer-events-none transition-opacity duration-200 max-w-xs z-[99999]"
               :style="{
                 left: (tooltipTarget.getBoundingClientRect().right + 10) + 'px',
                 top: (tooltipTarget.getBoundingClientRect().top + tooltipTarget.getBoundingClientRect().height / 2 - 20) + 'px'
@@ -159,8 +159,8 @@
             class="p-4 text-center"
           >
             <div class="alert alert-info alert-sm">
-              <FaIcon icon="info-circle" class="text-xs" />
-              <div class="text-xs">
+              <FaIcon icon="info-circle" class="" />
+              <div class="">
                 <div>Nessun menu disponibile</div>
                 <button class="btn btn-xs btn-ghost mt-1" @click="refreshMenu">
                   Ricarica Menu
@@ -175,8 +175,8 @@
             class="p-4 text-center"
           >
             <div class="alert alert-warning alert-sm">
-              <FaIcon icon="search" class="text-xs" />
-              <div class="text-xs">
+              <FaIcon icon="search" class="" />
+              <div class="">
                 <div>Nessun risultato per "{{ searchQuery }}"</div>
                 <button class="btn btn-xs btn-ghost mt-1" @click="clearSearch">
                   Pulisci Ricerca
@@ -201,14 +201,14 @@
 
         <div class="flex-none hidden lg:block">
           <button class="btn btn-square btn-ghost" @click="toggleSidenav">
-            <FaIcon icon="bars" class="text-md" />
+            <FaIcon icon="bars" class="" />
           </button>
         </div>
 
         <div class="flex-1">
           <span class="text-lg font-semibold">
             HR Management System
-            <span class="text-sm text-base-content/60">
+            <span class=" text-base-content/60">
               - {{ authStore.isCompanyUser ? 'Pannello Aziendale' : 'Portale Dipendente' }}
             </span>
           </span>
@@ -235,8 +235,8 @@
                     @click="handleMenuNavigation"
                   >
                     <div class="flex items-center flex-1">
-                      <FaIcon :icon="favoriteItem.icon || 'folder'" class="text-sm mr-3 text-yellow-600" />
-                      <span class="text-sm">{{ favoriteItem.label }}</span>
+                      <FaIcon :icon="favoriteItem.icon || 'folder'" class=" mr-3 text-yellow-600" />
+                      <span class="">{{ favoriteItem.label }}</span>
                     </div>
                     <button
                       type="button"
@@ -245,7 +245,7 @@
                       :disabled="menuStore.savingFavorite"
                       title="Rimuovi dai preferiti"
                     >
-                      <FaIcon icon="star" class="text-xs" />
+                      <FaIcon icon="star" class="" />
                     </button>
                   </RouterLink>
                 </li>
@@ -268,9 +268,9 @@
               <div class="card-body">
                 <h3 class="card-title">Notifiche</h3>
                 <div class="space-y-2">
-                  <div class="text-sm">Nuovo dipendente aggiunto</div>
-                  <div class="text-sm">Ferie da approvare</div>
-                  <div class="text-sm">Report mensile pronto</div>
+                  <div class="">Nuovo dipendente aggiunto</div>
+                  <div class="">Ferie da approvare</div>
+                  <div class="">Report mensile pronto</div>
                 </div>
               </div>
             </div>

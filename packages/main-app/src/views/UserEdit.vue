@@ -192,7 +192,7 @@
               </div>
             </div>
           </div>
-          <div class="text-sm text-base-content/60 mt-4">
+          <div class=" text-base-content/60 mt-4">
             * Campi obbligatori
           </div>
         </template>
@@ -218,7 +218,7 @@
             <p class="mb-4">
               Sei sicuro di voler eliminare l'utente <strong>{{ userForm.username }}</strong>?
             </p>
-            <p class="text-sm text-base-content/70 mb-6">
+            <p class=" text-base-content/70 mb-6">
               Questa azione è irreversibile e rimuoverà tutti i dati associati all'utente.
             </p>
             <div class="modal-action">

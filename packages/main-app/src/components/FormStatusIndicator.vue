@@ -3,7 +3,7 @@
     <div class="tooltip tooltip-left" data-tip="Modifiche non salvate">
       <div class="flex items-center gap-1">
         <div class="w-2 h-2 rounded-full bg-warning animate-pulse"></div>
-        <span class="text-xs text-base-content/70">{{ touchedFieldsCount }} modific{{ touchedFieldsCount === 1 ? 'a' : 'he' }}</span>
+        <span class=" text-base-content/70">Modificato</span>
       </div>
     </div>
   </div>
@@ -11,26 +11,22 @@
     <div class="tooltip tooltip-left" data-tip="Tutte le modifiche sono salvate">
       <div class="flex items-center gap-1">
         <div class="w-2 h-2 rounded-full bg-success"></div>
-        <span class="text-xs text-base-content/70">Salvato</span>
+        <span class=" text-base-content/70">Salvato</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-
 interface Props {
   isDirty: boolean
   touchedFields: Set<string>
   showSavedIndicator?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   showSavedIndicator: true
 })
-
-const touchedFieldsCount = computed(() => props.touchedFields.size)
 </script>
 
 <style scoped>

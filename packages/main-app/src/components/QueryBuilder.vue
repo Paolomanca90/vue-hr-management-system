@@ -95,7 +95,7 @@
 
           </div>
 
-          <div class="text-sm text-base-content/60 mt-4">
+          <div class=" text-base-content/60 mt-4">
             * Campi obbligatori
           </div>
       </SectionCard>
@@ -110,13 +110,13 @@
 
           <!-- Singolo Selettore Formula -->
           <div class="bg-base-200 rounded-lg p-4 mb-4">
-            <div class="text-sm font-medium text-base-content/70 mb-3">Costruisci Condizione:</div>
+            <div class=" font-medium text-base-content/70 mb-3">Costruisci Condizione:</div>
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
               <!-- Operatore Logico (AND/OR) -->
               <div class="md:col-span-1">
                 <label class="label">
-                  <span class="label-text text-xs">Logica</span>
+                  <span class="label-text ">Logica</span>
                 </label>
                 <select
                   v-model="currentCondition.logicOperator"
@@ -131,12 +131,12 @@
               <!-- Parentesi -->
               <div class="md:col-span-1">
                 <label class="label">
-                  <span class="label-text text-xs">Parentesi</span>
+                  <span class="label-text ">Parentesi</span>
                 </label>
                 <div class="flex gap-1">
                   <button
                     type="button"
-                    class="btn btn-ghost btn-sm flex-1 text-xs"
+                    class="btn btn-ghost btn-sm flex-1 "
                     @click="addParenthesis('(')"
                     title="Aggiungi parentesi aperta"
                   >
@@ -144,7 +144,7 @@
                   </button>
                   <button
                     type="button"
-                    class="btn btn-ghost btn-sm flex-1 text-xs"
+                    class="btn btn-ghost btn-sm flex-1 "
                     @click="addParenthesis(')')"
                     title="Aggiungi parentesi chiusa"
                   >
@@ -156,7 +156,7 @@
               <!-- Campo -->
               <div class="md:col-span-3">
                 <label class="label">
-                  <span class="label-text text-xs">Campo</span>
+                  <span class="label-text ">Campo</span>
                 </label>
                 <select
                   v-model="currentCondition.field"
@@ -177,7 +177,7 @@
               <!-- Operatore -->
               <div class="md:col-span-2">
                 <label class="label">
-                  <span class="label-text text-xs">Operatore</span>
+                  <span class="label-text ">Operatore</span>
                 </label>
                 <select
                   v-model="currentCondition.operator"
@@ -198,7 +198,7 @@
               <!-- Valori -->
               <div class="md:col-span-3">
                 <label class="label">
-                  <span class="label-text text-xs">
+                  <span class="label-text ">
                     {{ getValueLabel(currentCondition.operator) }}
                   </span>
                 </label>
@@ -316,7 +316,7 @@
             <textarea
               v-model="formData.formula"
               :class="{ 'textarea-error': submitted && !formData.formula }"
-              class="textarea textarea-bordered w-full h-32 resize-none font-mono text-sm"
+              class="textarea textarea-bordered w-full h-32 resize-none font-mono "
               placeholder="Inserisci la formula manualmente o usa il costruttore sopra per generarla automaticamente"
               required
             ></textarea>
@@ -337,7 +337,7 @@
           <p class="mb-4">
             Sei sicuro di voler eliminare {{ entityName.toLowerCase() }} <strong>{{ formData.codice }}</strong>?
           </p>
-          <p class="text-sm text-base-content/70 mb-6">
+          <p class=" text-base-content/70 mb-6">
             Questa azione è irreversibile.
           </p>
           <div class="modal-action">

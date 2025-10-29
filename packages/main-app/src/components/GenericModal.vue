@@ -62,7 +62,7 @@
                 <th
                   v-for="column in config.columns"
                   :key="column.key"
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  class="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider"
                 >
                   {{ column.label }}
                 </th>
@@ -78,7 +78,7 @@
                 <td
                   v-for="column in config.columns"
                   :key="column.key"
-                  class="px-6 py-4 whitespace-nowrap text-sm"
+                  class="px-6 py-4 whitespace-nowrap "
                   :class="column.primary ? 'font-medium text-gray-900' : 'text-gray-500'"
                 >
                   {{ formatColumnValue(item, column) }}
@@ -89,7 +89,7 @@
                   <div class="flex flex-col items-center space-y-2">
                     <FaIcon icon="search" class="w-8 h-8 text-gray-300" />
                     <span>Nessun elemento trovato</span>
-                    <span class="text-xs">Prova con un altro termine di ricerca</span>
+                    <span class="">Prova con un altro termine di ricerca</span>
                   </div>
                 </td>
               </tr>

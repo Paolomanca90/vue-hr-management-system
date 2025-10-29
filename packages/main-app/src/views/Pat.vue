@@ -11,11 +11,11 @@
       ]"
     >
       <template #actions>
-        <button class="max-md:w-full max-md:block btn btn-primary btn-sm text-xs text-white" @click="addNewPat">
+        <button class="max-md:w-full max-md:block btn btn-primary btn-sm  text-white" @click="addNewPat">
           <FaIcon icon="plus" class="mr-2"/>
           Nuova PAT
         </button>
-        <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm text-xs" @click="refreshPat">
+        <button class="max-md:w-full max-md:block btn btn-primary btn-outline btn-sm " @click="refreshPat">
           <FaIcon icon="refresh" class="mr-2"/>
           Aggiorna
         </button>
@@ -47,30 +47,30 @@
           <!-- Custom toolbar -->
           <template #toolbar>
             <div class="dropdown dropdown-end">
-              <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm text-xs">
+              <div tabindex="0" role="button" class="max-md:block max-md:w-full max-md:p-[0.5em] btn btn-ghost btn-sm ">
                 <FaIcon icon="cog" class="mr-1" />
                 Opzioni
               </div>
               <ul tabindex="0"  class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-60 z-[100]">
-                <li><a @click="bulkActions"><FaIcon icon="check-circle" class="mr-2 text-xs" />Azioni Multiple</a></li>
-                <li><a @click="importPat"><FaIcon icon="upload" class="mr-2 text-xs" />Importa PAT</a></li>
+                <li><a @click="bulkActions"><FaIcon icon="check-circle" class="mr-2 " />Azioni Multiple</a></li>
+                <li><a @click="importPat"><FaIcon icon="upload" class="mr-2 " />Importa PAT</a></li>
               </ul>
             </div>
           </template>
 
           <!-- Slot personalizzato per la colonna codAzi -->
           <template #column-codAzi="{ value }">
-            <span class="text-sm">{{ value !== "" ? value : '0' }}</span>
+            <span class="">{{ value !== "" ? value : '0' }}</span>
           </template>
 
           <!-- Slot personalizzato per la colonna codicePat -->
           <template #column-codicePat="{ value }">
-            <span class="text-sm">{{ value !== "" ? value : '0' }}</span>
+            <span class="">{{ value !== "" ? value : '0' }}</span>
           </template>
 
           <!-- Slot personalizzato per la colonna pat -->
           <template #column-pat="{ value }">
-            <span class="text-sm">{{ value }}</span>
+            <span>{{ value }}</span>
           </template>
 
           <!-- Empty state personalizzato -->

@@ -105,7 +105,7 @@
             </div>
           </div>
 
-          <div class="text-sm text-base-content/60 mt-4">
+          <div class=" text-base-content/60 mt-4">
             * Campi obbligatori
           </div>
       </SectionCard>
@@ -132,10 +132,10 @@
         <p class="mb-4">
           Sei sicuro di voler eliminare il gruppo <strong>{{ gruppoForm.codice }}</strong>?
         </p>
-        <p class="text-sm text-base-content/70 mb-2">
+        <p class=" text-base-content/70 mb-2">
           <strong>{{ gruppoForm.descrizione }}</strong>
         </p>
-        <p class="text-sm text-base-content/70 mb-6">
+        <p class=" text-base-content/70 mb-6">
           Questa azione è irreversibile e potrebbe influenzare tutti gli utenti associati a questo gruppo.
         </p>
         <div class="modal-action">

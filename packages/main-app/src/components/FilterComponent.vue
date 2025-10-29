@@ -4,13 +4,13 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
       <!-- Azienda Dropdown -->
       <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label class="block  font-medium text-gray-700 dark:text-gray-300">
           Azienda
         </label>
         <select
           v-model="selectedAzienda"
           @change="onAziendaChange"
-          class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
+          class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm: p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
         >
           <option value="" disabled>Seleziona azienda...</option>
           <option
@@ -25,7 +25,7 @@
 
       <!-- Sede Button -->
       <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label class="block  font-medium text-gray-700 dark:text-gray-300">
           Sede
         </label>
         <button
@@ -33,7 +33,7 @@
           :disabled="!selectedAzienda"
           class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-left focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary disabled:bg-gray-50 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
         >
-          <span class="text-sm text-gray-900 dark:text-gray-100">
+          <span class=" text-gray-900 dark:text-gray-100">
             {{ selectedSede ? `${selectedSede.codSedeAz} - ${selectedSede.descriz}` : 'Seleziona sede...' }}
           </span>
           <FaIcon icon="user" class="w-4 h-4 text-gray-400" />
@@ -42,7 +42,7 @@
 
       <!-- Filiale Button -->
       <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label class="block  font-medium text-gray-700 dark:text-gray-300">
           Filiale
         </label>
         <button
@@ -50,7 +50,7 @@
           :disabled="!selectedAzienda"
           class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-left focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary disabled:bg-gray-50 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
         >
-          <span class="text-sm text-gray-900 dark:text-gray-100">
+          <span class=" text-gray-900 dark:text-gray-100">
             {{ selectedFiliale ? `${selectedFiliale.codCant} - ${selectedFiliale.descriz}` : 'Seleziona filiale...' }}
           </span>
           <FaIcon icon="user" class="w-4 h-4 text-gray-400" />
@@ -62,7 +62,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
       <!-- Reparto Button -->
       <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label class="block  font-medium text-gray-700 dark:text-gray-300">
           Reparto
         </label>
         <button
@@ -70,7 +70,7 @@
           :disabled="!selectedAzienda"
           class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-left focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary disabled:bg-gray-50 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
         >
-          <span class="text-sm text-gray-900 dark:text-gray-100">
+          <span class=" text-gray-900 dark:text-gray-100">
             {{ selectedReparto ? `${selectedReparto.codReparto} - ${selectedReparto.descriz}` : 'Seleziona reparto...' }}
           </span>
           <FaIcon icon="user" class="w-4 h-4 text-gray-400" />
@@ -79,7 +79,7 @@
 
       <!-- Centro di Costo Button -->
       <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label class="block  font-medium text-gray-700 dark:text-gray-300">
           Centro di Costo
         </label>
         <button
@@ -87,7 +87,7 @@
           :disabled="!selectedAzienda"
           class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-left focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary disabled:bg-gray-50 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
         >
-          <span class="text-sm text-gray-900 dark:text-gray-100">
+          <span class=" text-gray-900 dark:text-gray-100">
             {{ selectedCentroCosto ? `${selectedCentroCosto.codCenco} - ${selectedCentroCosto.descriz}` : 'Seleziona centro di costo...' }}
           </span>
           <FaIcon icon="user" class="w-4 h-4 text-gray-400" />
@@ -96,7 +96,7 @@
 
       <!-- Filtro Radio Buttons -->
       <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label class="block  font-medium text-gray-700 dark:text-gray-300">
           Filtro
         </label>
         <div class="space-y-2">
@@ -107,7 +107,7 @@
               value="codice-cognome"
               class="h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600"
             />
-            <span class="ml-2 text-sm text-gray-900 dark:text-gray-100">Filtra per Codice o Cognome</span>
+            <span class="ml-2  text-gray-900 dark:text-gray-100">Filtra per Codice o Cognome</span>
           </label>
           <label class="flex items-center">
             <input
@@ -116,7 +116,7 @@
               value="intervallo"
               class="h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600"
             />
-            <span class="ml-2 text-sm text-gray-900 dark:text-gray-100">Selezione un intervallo di dipendenti</span>
+            <span class="ml-2  text-gray-900 dark:text-gray-100">Selezione un intervallo di dipendenti</span>
           </label>
         </div>
       </div>
@@ -125,24 +125,24 @@
     <!-- Terza riga: Campi filtro condizionali -->
     <div v-if="filtroTipo === 'codice-cognome'" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
       <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label class="block  font-medium text-gray-700 dark:text-gray-300">
           Codice
         </label>
         <input
           v-model="codice"
           type="text"
-          class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
+          class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm: p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
           placeholder="Inserisci codice..."
         />
       </div>
       <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label class="block  font-medium text-gray-700 dark:text-gray-300">
           Cognome
         </label>
         <input
           v-model="cognome"
           type="text"
-          class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
+          class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm: p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
           placeholder="Inserisci cognome..."
         />
       </div>
@@ -150,24 +150,24 @@
 
     <div v-else-if="filtroTipo === 'intervallo'" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
       <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label class="block  font-medium text-gray-700 dark:text-gray-300">
           Dal Dipendente
         </label>
         <input
           v-model="dalDipendente"
           type="text"
-          class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
+          class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm: p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
           placeholder="Codice dipendente..."
         />
       </div>
       <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label class="block  font-medium text-gray-700 dark:text-gray-300">
           Al Dipendente
         </label>
         <input
           v-model="alDipendente"
           type="text"
-          class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
+          class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary focus:ring-primary sm: p-[0.5em] dark:bg-gray-700 dark:text-gray-100"
           placeholder="Codice dipendente..."
         />
       </div>

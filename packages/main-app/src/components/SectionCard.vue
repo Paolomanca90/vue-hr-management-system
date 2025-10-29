@@ -8,7 +8,7 @@
           </div>
           <div>
             <h3 class="text-lg font-semibold text-base-content">{{ title }}</h3>
-            <p class="text-sm text-base-content/70">{{ description }}</p>
+            <p class=" text-base-content/70">{{ description }}</p>
           </div>
         </div>
         <div v-if="$slots.actions">

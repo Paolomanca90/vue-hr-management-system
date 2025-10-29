@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-2">
-    <label v-if="label" :for="inputId" class="block text-sm font-medium text-gray-700">
+    <label v-if="label" :for="inputId" class="block  font-medium text-gray-700">
       {{ label }}
       <span v-if="required" class="text-red-500">*</span>
     </label>
@@ -12,7 +12,7 @@
         @change="handleChange"
         :disabled="disabled || loading"
         :class="[
-          'block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-[0.5em]',
+          'block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm: p-[0.5em]',
           {
             'bg-gray-50 cursor-not-allowed': disabled
           }
@@ -37,7 +37,7 @@
     </div>
 
 
-    <div v-if="helpText" class="text-sm text-gray-500">
+    <div v-if="helpText" class=" text-gray-500">
       {{ helpText }}
     </div>
   </div>

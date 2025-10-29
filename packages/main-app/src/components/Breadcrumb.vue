@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <nav class="text-sm breadcrumbs">
+  <nav class=" breadcrumbs">
     <ul class="flex items-center space-x-2">
       <li v-for="(item, index) in items" :key="index" class="flex items-center">
         <RouterLink

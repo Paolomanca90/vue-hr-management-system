@@ -30,6 +30,14 @@ export function useFormDirtyState<T extends Record<string, unknown>>(
     // Confronta i valori campo per campo per identificare quali sono stati modificati
     const changedFields = new Set<string>()
 
+    const normalizeValue = (val: unknown): unknown => {
+      // Normalizza valori "vuoti" a null per confronto consistente
+      if (val === undefined || val === null || val === '') {
+        return null
+      }
+      return val
+    }
+
     const compareObjects = (obj1: Record<string, unknown>, obj2: Record<string, unknown>, prefix = '') => {
       const keys = new Set([...Object.keys(obj1), ...Object.keys(obj2)])
 
@@ -49,8 +57,12 @@ export function useFormDirtyState<T extends Record<string, unknown>>(
         ) {
           compareObjects(val1 as Record<string, unknown>, val2 as Record<string, unknown>, fullKey)
         } else {
+          // Normalizza i valori prima del confronto
+          const normalizedVal1 = normalizeValue(val1)
+          const normalizedVal2 = normalizeValue(val2)
+
           // Confronta i valori (inclusi array, null, primitivi)
-          if (JSON.stringify(val1) !== JSON.stringify(val2)) {
+          if (JSON.stringify(normalizedVal1) !== JSON.stringify(normalizedVal2)) {
             changedFields.add(fullKey)
           }
         }
