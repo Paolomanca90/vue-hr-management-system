@@ -126,6 +126,7 @@ import {
   faSort,
   faFilter,
   faSliders,
+  faExchangeAlt,
 } from '@fortawesome/free-solid-svg-icons'
 
 import {
@@ -193,6 +194,7 @@ library.add(
   faGlobe,
   faCode,
   faCogs,
+  faExchangeAlt,
   faClipboardList,
   faLayerGroup,
   faSlidersH,

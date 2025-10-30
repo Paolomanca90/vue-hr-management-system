@@ -110,8 +110,13 @@ export const API_CONFIG = {
     getDettaglioGruppoCausale: '/api/grpcausali/getdett', //GET
 
     // Tolleranze
-    tolleranze: '/api/tolleranze', //GET,POST,PUT
-    deleteTolleranza: '/api/tolleranze/by-key?codtoll=', //DELETE
+    tolleranze: '/api/tolleranze', //GET,POST,PUT,DELETE
+    getDettaglioTolleranza: '/api/tolleranze/getdetttoll', //GET
+
+    // Orari
+    orari: '/api/orario', //GET,POST,PUT
+    getDettaglioOrario: '/api/orario/getdett', //GET
+    deleteOrario: '/api/orario', //DELETE
 
     // Cambio Orario
     cambiOrario: '/api/cambioorario', //GET,DELETE

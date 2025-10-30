@@ -272,7 +272,7 @@ import PageHeader from '@/components/PageHeader.vue'
 import LoadingIndicator from '@/components/LoadingIndicator.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 import GenericLookupInput from '@/components/GenericLookupInput.vue'
-import { tolleranzeService, type Tolleranza } from '@/services/tolleranzeService'
+import { tolleranzeService, type Tolleranza, type TolleranzaDettaglio } from '@/services/tolleranzeService'
 import { lookupService } from '@/services/lookupService'
 import { useCrudView } from '@/composables/useCrudView'
 import { useMessageAlerts } from '@/composables/useMessageAlerts'
@@ -304,7 +304,7 @@ interface CausaleData {
 }
 
 // State per il form
-const tolleranzaForm = ref<Tolleranza>({
+const tolleranzaForm = ref<TolleranzaDettaglio>({
   codtoll: 0,
   descrizione: '',
   minentrprima: 0,
@@ -319,7 +319,7 @@ const tolleranzaForm = ref<Tolleranza>({
   obbligousc: ''
 })
 
-const originalData = ref<Tolleranza | null>(null)
+const originalData = ref<TolleranzaDettaglio | null>(null)
 
 const loading = ref(false)
 const saving = ref(false)
@@ -352,7 +352,7 @@ const isFormValid = computed(() => {
 
 // Navigation configuration
 const tolleranzaNavigationConfig = {
-  fetchAll: () => tolleranzeService.getTolleranze(),
+  fetchAll: () => tolleranzeService.getAll(),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getEntityId: (entity: any) => String(entity.codtoll),
   basePath: '/app/tolleranze',
@@ -406,7 +406,7 @@ const loadTolleranza = async () => {
   loading.value = true
 
   try {
-    // Prova a recuperare dai dati del router state
+    // Prova prima a recuperare dai dati del router state
     const routerState = window.history.state?.tolleranzaData
     if (routerState && routerState.codtoll === codtoll) {
       tolleranzaForm.value = {
@@ -434,32 +434,41 @@ const loadTolleranza = async () => {
         descrizione: getCausaleDescrizione(routerState.codcauant)
       }
     } else {
-      // Fallback semplice
+      // Carica dal backend se non presente nel router state
+      const dettaglio = await tolleranzeService.getDettaglioTolleranza(codtoll)
       tolleranzaForm.value = {
-        codtoll: codtoll,
-        descrizione: `Tolleranza ${codtoll}`,
-        minentrprima: 0,
-        minentrdopo: 0,
-        minrit: 0,
-        codcaurit: 0,
-        obbligoent: '',
-        minuscprima: 0,
-        minuscdopo: 0,
-        minant: 0,
-        codcauant: 0,
-        obbligousc: ''
+        codtoll: dettaglio.codtoll,
+        descrizione: dettaglio.descrizione || '',
+        minentrprima: dettaglio.minentrprima ?? 0,
+        minentrdopo: dettaglio.minentrdopo ?? 0,
+        minrit: dettaglio.minrit ?? 0,
+        codcaurit: dettaglio.codcaurit ?? 0,
+        obbligoent: dettaglio.obbligoent || '',
+        minuscprima: dettaglio.minuscprima ?? 0,
+        minuscdopo: dettaglio.minuscdopo ?? 0,
+        minant: dettaglio.minant ?? 0,
+        codcauant: dettaglio.codcauant ?? 0,
+        obbligousc: dettaglio.obbligousc || ''
       }
-      causaleRitardo.value = { codice: '', descrizione: '' }
-      causaleAnticipo.value = { codice: '', descrizione: '' }
+
+      // Inizializza le causali con la descrizione dal lookup
+      causaleRitardo.value = {
+        codice: dettaglio.codcaurit ? String(dettaglio.codcaurit) : '',
+        descrizione: getCausaleDescrizione(dettaglio.codcaurit)
+      }
+      causaleAnticipo.value = {
+        codice: dettaglio.codcauant ? String(dettaglio.codcauant) : '',
+        descrizione: getCausaleDescrizione(dettaglio.codcauant)
+      }
     }
 
     updateOriginalData(tolleranzaForm.value)
   } catch (error) {
     console.error('Errore nel caricamento Tolleranza:', error)
-    errorMessage.value = 'I dati della Tolleranza verranno caricati dalla lista'
+    errorMessage.value = 'Errore nel caricamento della tolleranza dal backend'
     tolleranzaForm.value = {
       codtoll: codtoll,
-      descrizione: `Tolleranza ${codtoll}`,
+      descrizione: '',
       minentrprima: 0,
       minentrdopo: 0,
       minrit: 0,
@@ -523,7 +532,7 @@ const handleSave = async () => {
   clearMessages()
 
   try {
-    const tolleranzaToSave: Tolleranza = {
+    const tolleranzaToSave: TolleranzaDettaglio = {
       codtoll: tolleranzaForm.value.codtoll,
       descrizione: tolleranzaForm.value.descrizione.trim(),
       minentrprima: tolleranzaForm.value.minentrprima ?? 0,
@@ -539,11 +548,11 @@ const handleSave = async () => {
     }
 
     if (isEditMode.value) {
-      await tolleranzeService.editTolleranza(tolleranzaToSave)
+      await tolleranzeService.updateTolleranza(tolleranzaToSave)
       updateOriginalData(tolleranzaForm.value)
       successMessage.value = 'Tolleranza aggiornata con successo'
     } else {
-      await tolleranzeService.addTolleranza(tolleranzaToSave)
+      await tolleranzeService.createTolleranza(tolleranzaToSave)
       successMessage.value = 'Nuova Tolleranza creata con successo'
 
       // Reindirizza alla modalità edit dopo la creazione
@@ -571,7 +580,7 @@ const handleDelete = async () => {
   clearMessages()
 
   try {
-    await tolleranzeService.deleteTolleranza(String(tolleranzaForm.value.codtoll))
+    await tolleranzeService.deleteTolleranza(tolleranzaForm.value.codtoll)
     successMessage.value = 'Tolleranza eliminata con successo'
 
     setTimeout(() => {

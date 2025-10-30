@@ -3,18 +3,23 @@ import { GenericCrudService } from './genericCrudService'
 import { type CrudEntity } from '@/composables/useCrudView'
 
 export interface Tolleranza extends CrudEntity {
-  codtoll: number,
-  descrizione: string,
-  minentrprima?: number,
-  minentrdopo?: number,
-  minrit?: number,
-  codcaurit?: number,
-  obbligoent?: string,
-  minuscprima?: number,
-  minuscdopo?: number,
-  minant?: number,
-  codcauant?: number,
-  obbligousc?: string
+  codtoll: number
+  descrizione: string
+}
+
+export interface TolleranzaDettaglio extends CrudEntity {
+  codtoll: number
+  descrizione: string
+  minentrprima: number
+  minentrdopo: number
+  minrit: number
+  codcaurit: number
+  obbligoent: string
+  minuscprima: number
+  minuscdopo: number
+  minant: number
+  codcauant: number
+  obbligousc: string
 }
 
 const config = getApiConfig()
@@ -25,24 +30,31 @@ class TolleranzeService extends GenericCrudService<Tolleranza> {
       list: config.endpoints.tolleranze,
       create: config.endpoints.tolleranze,
       update: config.endpoints.tolleranze,
-      delete: config.endpoints.deleteTolleranza
+      delete: config.endpoints.tolleranze
     })
   }
 
-  async getTolleranze(): Promise<Tolleranza[]> {
-    return this.getAll()
+  override async getAll(): Promise<Tolleranza[]> {
+    return await super.getAll()
   }
 
-  async addTolleranza(tolleranza: Tolleranza): Promise<Tolleranza> {
-    return this.create(tolleranza)
+  async getDettaglioTolleranza(codToll: number): Promise<TolleranzaDettaglio> {
+    return this.executeRequest<TolleranzaDettaglio>({
+      method: 'GET',
+      customEndpoint: `${config.endpoints.getDettaglioTolleranza}/${codToll}`
+    })
   }
 
-  async editTolleranza(tolleranza: Tolleranza): Promise<Tolleranza> {
-    return this.update(tolleranza)
+  async createTolleranza(tolleranza: TolleranzaDettaglio): Promise<TolleranzaDettaglio> {
+    return this.create(tolleranza as Partial<Tolleranza>) as Promise<TolleranzaDettaglio>
   }
 
-  async deleteTolleranza(codtoll: string): Promise<boolean> {
-    return this.delete(codtoll)
+  async updateTolleranza(tolleranza: TolleranzaDettaglio): Promise<TolleranzaDettaglio> {
+    return this.update(tolleranza as Tolleranza) as Promise<TolleranzaDettaglio>
+  }
+
+  async deleteTolleranza(codToll: number): Promise<boolean> {
+    return this.delete(codToll)
   }
 }
 

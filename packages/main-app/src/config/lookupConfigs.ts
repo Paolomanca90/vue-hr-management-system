@@ -428,6 +428,44 @@ export const orarioLookupConfig: LookupInputConfig = {
   })
 }
 
+// Configurazione per Tolleranze
+export const tolleranzaLookupConfig: LookupInputConfig = {
+  lookupType: 'tolleranza',
+  autoCompleteField: 'codice',
+  keyField: 'codtoll',
+  fields: [
+    {
+      key: 'codice',
+      label: 'Codice',
+      editable: true,
+      colSpan: 3
+    },
+    {
+      key: 'descrizione',
+      label: 'Descrizione',
+      editable: false,
+      hasLookup: true,
+      colSpan: 9
+    }
+  ],
+  modalConfig: {
+    title: 'Seleziona Tolleranza',
+    searchPlaceholder: 'Cerca per codice o descrizione...',
+    columns: [
+      { key: 'codtoll', label: 'Codice', primary: true },
+      { key: 'descrizione', label: 'Descrizione' }
+    ],
+    searchFields: ['codtoll', 'descrizione'],
+    keyField: 'codtoll',
+    loadingMessage: 'Caricamento tolleranze...'
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mapper: (item: any) => ({
+    codice: String(item.codtoll || ''),
+    descrizione: item.descrizione || ''
+  })
+}
+
 // Funzione helper per creare configurazioni personalizzate
 export function createLookupConfig(
   lookupType: string,
