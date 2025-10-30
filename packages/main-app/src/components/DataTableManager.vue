@@ -40,17 +40,17 @@
       <template #actions="{ data }">
         <div class="dropdown dropdown-end">
           <div tabindex="0" role="button" class="btn btn-ghost btn-xs btn-circle">
-            <FaIcon icon="ellipsis-v" class=""/>
+            <FaIcon icon="ellipsis-v" />
           </div>
           <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-[10000]">
             <li v-if="actionsConfig.editAction">
-              <a @click="actionsConfig.editAction(data)" class="">
+              <a @click="actionsConfig.editAction(data)" class="text-black">
                 <FaIcon icon="edit" class="mr-2" />
                 Modifica
               </a>
             </li>
             <li v-if="actionsConfig.duplicateAction">
-              <a @click="actionsConfig.duplicateAction(data)" class="">
+              <a @click="actionsConfig.duplicateAction(data)" class="text-black">
                 <FaIcon icon="copy" class="mr-2" />
                 Duplica
               </a>

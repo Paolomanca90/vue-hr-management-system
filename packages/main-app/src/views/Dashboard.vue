@@ -245,7 +245,7 @@
                   <i class="fas fa-clock"></i>
                   <div>
                     <div class=" font-medium">Valutazioni Performance</div>
-                    <div class="">Scadenza: 2 giorni</div>
+                    <div >Scadenza: 2 giorni</div>
                   </div>
                 </div>
 
@@ -253,7 +253,7 @@
                   <i class="fas fa-exclamation-triangle"></i>
                   <div>
                     <div class=" font-medium">Contratti in Scadenza</div>
-                    <div class="">Scadenza: domani</div>
+                    <div >Scadenza: domani</div>
                   </div>
                 </div>
 
@@ -265,7 +265,7 @@
                         authStore.isCompanyUser ? 'Revisione Buste Paga' : 'Richiesta Ferie Estate'
                       }}
                     </div>
-                    <div class="">
+                    <div >
                       {{
                         authStore.isCompanyUser
                           ? 'Scadenza: 1 settimana'
@@ -280,7 +280,7 @@
                   <i class="fas fa-file-alt"></i>
                   <div>
                     <div class=" font-medium">Aggiorna Documenti</div>
-                    <div class="">Certificato medico in scadenza</div>
+                    <div >Certificato medico in scadenza</div>
                   </div>
                 </div>
               </div>

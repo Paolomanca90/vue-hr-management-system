@@ -89,7 +89,7 @@
                   <div class="flex flex-col items-center space-y-2">
                     <FaIcon icon="search" class="w-8 h-8 text-gray-300" />
                     <span>Nessun elemento trovato</span>
-                    <span class="">Prova con un altro termine di ricerca</span>
+                    <span >Prova con un altro termine di ricerca</span>
                   </div>
                 </td>
               </tr>

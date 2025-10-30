@@ -77,7 +77,7 @@
 
           <!-- Slot personalizzato per provincia -->
           <template #column-provincia="{ value }">
-            <span class="">{{ value || '-' }}</span>
+            <span >{{ value || '-' }}</span>
           </template>
 
           <!-- Empty state personalizzato -->

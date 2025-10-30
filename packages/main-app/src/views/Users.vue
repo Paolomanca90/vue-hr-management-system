@@ -66,21 +66,21 @@
 
           <!-- Slot personalizzato per la colonna username -->
           <template #column-username="{ value }">
-            <span class="">
+            <span >
               {{ value }}
             </span>
           </template>
 
           <!-- Slot personalizzato per la colonna codgruppo -->
           <template #column-codgruppo="{ value }">
-            <span class="">
+            <span >
               {{ value }}
             </span>
           </template>
 
           <!-- Slot personalizzato per la colonna codaccesso -->
           <template #column-codaccesso="{ value }">
-            <span class="">
+            <span >
               {{ value }}
             </span>
           </template>

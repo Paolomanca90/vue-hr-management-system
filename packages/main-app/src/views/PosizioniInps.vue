@@ -60,12 +60,12 @@
 
           <!-- Slot personalizzato per la colonna codAzi -->
           <template #column-codAzi="{ value }">
-            <span class="">{{ value !== "" ? value : '0' }}</span>
+            <span >{{ value !== "" ? value : '0' }}</span>
           </template>
 
           <!-- Slot personalizzato per la colonna posInps -->
           <template #column-posInps="{ value }">
-            <span class="">{{ value !== "" ? value : '0' }}</span>
+            <span >{{ value !== "" ? value : '0' }}</span>
           </template>
 
           <!-- Slot personalizzato per la colonna matrInps -->

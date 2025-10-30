@@ -38,7 +38,7 @@
                 @focus="isSearchFocused = true"
                 @blur="handleSearchBlur"
                 placeholder="Cerca nel menu..."
-                class="input input-bordered input-sm w-full pr-8 "
+                class="input input-bordered input-sm w-full pr-8 text-[12px]"
                 :class="{ 'input-primary': isSearchActive }"
               />
               <div class="absolute right-2 top-1/2 transform -translate-y-1/2">
@@ -46,9 +46,9 @@
                 <button
                   v-else
                   @click="clearSearch"
-                  class="btn btn-ghost btn-xs btn-circle hover:bg-base-200"
+                  class="btn btn-ghost btn-sm btn-circle hover:bg-base-200"
                 >
-                  <FaIcon icon="times" class="" />
+                  <FaIcon icon="times"  />
                 </button>
               </div>
             </div>
@@ -65,8 +65,8 @@
           <!-- Errore menu -->
           <div v-else-if="menuStore.error" class="p-2">
             <div class="alert alert-warning alert-sm">
-              <FaIcon icon="exclamation-triangle" class="" />
-              <div class="">
+              <FaIcon icon="exclamation-triangle"  />
+              <div >
                 <div>Errore menu: {{ menuStore.error }}</div>
                 <button class="btn btn-xs btn-ghost mt-1" @click="refreshMenu">
                   Ricarica Menu
@@ -159,8 +159,8 @@
             class="p-4 text-center"
           >
             <div class="alert alert-info alert-sm">
-              <FaIcon icon="info-circle" class="" />
-              <div class="">
+              <FaIcon icon="info-circle"  />
+              <div >
                 <div>Nessun menu disponibile</div>
                 <button class="btn btn-xs btn-ghost mt-1" @click="refreshMenu">
                   Ricarica Menu
@@ -175,8 +175,8 @@
             class="p-4 text-center"
           >
             <div class="alert alert-warning alert-sm">
-              <FaIcon icon="search" class="" />
-              <div class="">
+              <FaIcon icon="search"  />
+              <div >
                 <div>Nessun risultato per "{{ searchQuery }}"</div>
                 <button class="btn btn-xs btn-ghost mt-1" @click="clearSearch">
                   Pulisci Ricerca
@@ -201,7 +201,7 @@
 
         <div class="flex-none hidden lg:block">
           <button class="btn btn-square btn-ghost" @click="toggleSidenav">
-            <FaIcon icon="bars" class="" />
+            <FaIcon icon="bars"  />
           </button>
         </div>
 
@@ -231,12 +231,12 @@
                 <li v-for="favoriteItem in menuStore.favoriteItems" :key="`fav-${favoriteItem.id}`">
                   <RouterLink
                     :to="{ path: String(favoriteItem.route) }"
-                    class="flex items-center justify-between py-2"
+                    class="flex items-center justify-between py-2 text-[12px]"
                     @click="handleMenuNavigation"
                   >
                     <div class="flex items-center flex-1">
                       <FaIcon :icon="favoriteItem.icon || 'folder'" class=" mr-3 text-yellow-600" />
-                      <span class="">{{ favoriteItem.label }}</span>
+                      <span>{{ favoriteItem.label }}</span>
                     </div>
                     <button
                       type="button"
@@ -245,7 +245,7 @@
                       :disabled="menuStore.savingFavorite"
                       title="Rimuovi dai preferiti"
                     >
-                      <FaIcon icon="star" class="" />
+                      <FaIcon icon="star"  />
                     </button>
                   </RouterLink>
                 </li>
@@ -268,9 +268,9 @@
               <div class="card-body">
                 <h3 class="card-title">Notifiche</h3>
                 <div class="space-y-2">
-                  <div class="">Nuovo dipendente aggiunto</div>
-                  <div class="">Ferie da approvare</div>
-                  <div class="">Report mensile pronto</div>
+                  <div class="text-[12px]">Nuovo dipendente aggiunto</div>
+                  <div class="text-[12px]">Ferie da approvare</div>
+                  <div class="text-[12px]">Report mensile pronto</div>
                 </div>
               </div>
             </div>
@@ -290,20 +290,20 @@
               class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-[1]"
             >
               <li>
-                <a><FaIcon icon="user" class="mr-2"/> Profilo</a>
+                <a class="text-[12px]"><FaIcon icon="user" class="mr-2"/> Profilo</a>
               </li>
               <li>
-                <a><FaIcon icon="cog" class="mr-2"/> Impostazioni</a>
+                <a class="text-[12px]"><FaIcon icon="cog" class="mr-2"/> Impostazioni</a>
               </li>
               <li>
-                <a @click="toggleTheme">
+                <a @click="toggleTheme" class="text-[12px]">
                   <FaIcon :icon="themeStore.themeIcon" class="mr-2"/>
                   {{ themeStore.themeLabel }}
                 </a>
               </li>
               <li class="divider"></li>
               <li>
-                <a @click="authStore.logout" class="text-error"
+                <a @click="authStore.logout" class="text-error text-[12px]"
                   ><FaIcon icon="sign-out-alt" class="mr-2"/> Logout</a
                 >
               </li>

@@ -82,6 +82,7 @@ select:not(.p-dropdown),
 .label-text,
 .label {
   white-space: nowrap !important;
+  font-size: 12px;
 }
 
 textarea {
@@ -94,6 +95,7 @@ textarea {
   height: 2.5rem !important;
   padding-left: 1em;
   padding-right: 1em;
+  font-size: 12px;
 }
 
 input[type="text"].pl-10,

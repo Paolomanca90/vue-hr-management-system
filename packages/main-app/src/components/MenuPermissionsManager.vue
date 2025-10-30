@@ -73,7 +73,7 @@
         <FaIcon icon="exclamation-triangle" />
         <div>
           <div class="font-bold">Errore nel caricamento dei permessi</div>
-          <div class="">{{ error }}</div>
+          <div >{{ error }}</div>
           <button class="btn btn-xs btn-ghost mt-1" @click="refreshPermissions">
             Riprova
           </button>
@@ -96,7 +96,7 @@
           <div v-if="searchQuery && filteredPermissionCategories.length === 0"
               class="text-center py-4 text-base-content/60">
             <FaIcon icon="search" class="text-lg mb-2" />
-            <div class="">Nessun risultato trovato</div>
+            <div >Nessun risultato trovato</div>
           </div>
 
           <div v-else class="space-y-1">
@@ -144,7 +144,7 @@
           <!-- Messaggio per sottocategorie filtrate -->
           <div v-if="searchQuery && filteredSubcategories.length === 0"
               class="text-center py-4 text-base-content/60">
-            <div class="">Nessun risultato in questa sezione</div>
+            <div >Nessun risultato in questa sezione</div>
           </div>
 
           <div v-else class="space-y-1">
@@ -192,7 +192,7 @@
           <!-- Messaggio per sotto-sottocategorie filtrate -->
           <div v-if="searchQuery && filteredSubSubcategories.length === 0"
               class="text-center py-4 text-base-content/60">
-            <div class="">Nessun risultato in questa sezione</div>
+            <div >Nessun risultato in questa sezione</div>
           </div>
 
           <div v-else class="space-y-1">
@@ -242,7 +242,7 @@
 
           <div v-if="currentPermissionItems.length === 0" class="text-center py-8 text-base-content/60">
             <FaIcon icon="info-circle" class="text-2xl mb-2" />
-            <div class="">
+            <div >
               {{ searchQuery ? 'Nessun permesso trovato' : 'Seleziona una categoria per vedere i permessi' }}
             </div>
           </div>

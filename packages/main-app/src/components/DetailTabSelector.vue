@@ -166,7 +166,7 @@
               <div class="text-center text-gray-500 dark:text-gray-400">
                 <FaIcon :icon="tab.icon || 'file'" class="text-4xl mb-4" />
                 <p class="text-lg font-medium">{{ tab.title }}</p>
-                <p class="">Contenuto per {{ tab.title }}</p>
+                <p >Contenuto per {{ tab.title }}</p>
               </div>
             </div>
           </slot>

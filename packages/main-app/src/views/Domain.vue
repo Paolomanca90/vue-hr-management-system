@@ -24,7 +24,7 @@
             <i class="fas fa-exclamation-triangle"></i>
             <div>
               <div class="font-bold">Sessione non valida</div>
-              <div class="">Reindirizzamento al login in corso...</div>
+              <div >Reindirizzamento al login in corso...</div>
             </div>
           </div>
 
@@ -82,7 +82,7 @@
               <FaIcon icon="info-circle"/>
               <div>
                 <div class="font-bold">Domini Disponibili</div>
-                <div class="">
+                <div >
                   Trovati {{ authStore.availableDomains.length }} domini per questo utente
                 </div>
               </div>

@@ -632,4 +632,9 @@ watch(() => toggleableColumns.value, () => {
   border: none !important;
   padding: 0 !important;
 }
+
+:deep(.p-datatable .p-datatable-tbody > tr > td) {
+  overflow: visible;
+  position: relative;
+}
 </style>
