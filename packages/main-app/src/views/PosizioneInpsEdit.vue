@@ -32,6 +32,7 @@
         :show-reset="true"
         :show-navigation="isEditMode"
         :navigation-config="posizioneInpsNavigationConfig"
+        @save="handleSave"
         @duplicate="handleDuplicate"
         @delete="handleDelete"
         @reset="handleReset"

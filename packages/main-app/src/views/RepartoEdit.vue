@@ -27,6 +27,7 @@
         :show-reset="true"
         :show-navigation="isEditMode"
         :navigation-config="repartoNavigationConfig"
+        @save="handleSave"
         @duplicate="handleDuplicate"
         @delete="handleDelete"
         @reset="handleReset"

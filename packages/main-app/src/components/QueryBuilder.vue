@@ -28,6 +28,7 @@
         :show-reset="true"
         :show-navigation="isEditMode"
         :navigation-config="navigationConfig"
+        @save="handleSubmit"
         @duplicate="duplicateCurrent"
         @delete="deleteCurrent"
         @reset="resetForm"

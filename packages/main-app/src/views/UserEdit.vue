@@ -31,6 +31,7 @@
         :show-reset="true"
         :show-navigation="isEditMode"
         :navigation-config="userNavigationConfig"
+        @save="handleSubmit"
         @duplicate="duplicateCurrentUser"
         @delete="deleteCurrentUser"
         @reset="resetForm"

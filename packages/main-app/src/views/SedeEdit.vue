@@ -31,6 +31,7 @@
         :show-reset="true"
         :show-navigation="isEditMode"
         :navigation-config="sedeNavigationConfig"
+        @save="handleSave"
         @duplicate="handleDuplicate"
         @reset="handleReset"
       />

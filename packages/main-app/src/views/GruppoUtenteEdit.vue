@@ -33,6 +33,7 @@
         :show-reset="true"
         :show-navigation="isEditMode"
         :navigation-config="gruppoNavigationConfig"
+        @save="handleSubmit"
         @duplicate="duplicateCurrentGruppo"
         @delete="deleteCurrentGruppo"
         @reset="resetForm"

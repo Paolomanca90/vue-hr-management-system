@@ -37,6 +37,7 @@
         :show-reset="true"
         :show-navigation="isEditMode"
         :navigation-config="orarioNavigationConfig"
+        @save="handleSave"
         @duplicate="handleDuplicate"
         @delete="handleDelete"
         @reset="handleReset"

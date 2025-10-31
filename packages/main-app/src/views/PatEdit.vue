@@ -28,6 +28,7 @@
         :show-reset="true"
         :show-navigation="isEditMode"
         :navigation-config="patNavigationConfig"
+        @save="handleSave"
         @duplicate="handleDuplicate"
         @reset="handleReset"
       />

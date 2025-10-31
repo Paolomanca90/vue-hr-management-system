@@ -32,6 +32,7 @@
         :show-reset="true"
         :show-navigation="isEditMode"
         :navigation-config="filialeNavigationConfig"
+        @save="handleSave"
         @duplicate="handleDuplicate"
         @reset="handleReset"
       />

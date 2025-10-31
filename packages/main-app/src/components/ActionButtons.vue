@@ -12,10 +12,11 @@
 
       <!-- Azioni principali -->
       <button
-        type="submit"
+        type="button"
         class="btn btn-primary btn-sm  text-white"
         :class="{ 'loading': saving }"
         :disabled="saving || !isFormValid"
+        @click="$emit('save')"
       >
         <span v-if="saving" class="loading loading-spinner loading-sm"></span>
         <FaIcon v-if="!saving" icon="save" class="mr-2"/>
@@ -107,6 +108,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
+  'save': []
   'navigate-previous': []
   'navigate-next': []
   'duplicate': []

@@ -32,6 +32,7 @@
         :show-reset="true"
         :show-navigation="isEditMode"
         :navigation-config="gruppiCausaliNavigationConfig"
+        @save="handleSave"
         @delete="handleDelete"
         @reset="handleReset"
         @duplicate="handleDuplicate"

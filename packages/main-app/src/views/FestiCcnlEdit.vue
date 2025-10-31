@@ -37,6 +37,7 @@
         :show-reset="true"
         :show-navigation="isEditMode"
         :navigation-config="festiCcnlNavigationConfig"
+        @save="handleSave"
         @delete="handleDelete"
         @reset="handleReset"
         @duplicate="handleDuplicate"
